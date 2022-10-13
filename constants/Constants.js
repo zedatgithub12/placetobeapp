@@ -1,11 +1,16 @@
+
+
 const Constants = {
   //main colors
   mainText: "#000000",
   mainTwo: "#555555",
+  //background: "#ffffff",
   background: "#ffffff",
   red: "#d21f3c",
   iconColor: "#019267",
-
+  
+  purple: "#422057FF",
+  green: "#04b02c",
   // Box constants
   borderRad: 14,
   mediumbox: 8,
@@ -41,7 +46,7 @@ const Constants = {
   Warning: "#f0ad4e",
   Danger: "#d9534f",
   lightRed: "#FFCCCB",
-  Faded: "#f7f7f7",
+  Faded: "#f9f9f9",
   Inverse: "#292b2c",
   Secondary: "#808080",
   lightGreen: "#90EE90",

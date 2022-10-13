@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-
+    backgroundColor: Constants.background
   },
   profileButton: {
     backgroundColor: Constants.primary,

@@ -46,13 +46,13 @@ const FormOne = () => {
 const [inputs, setInputs] = useState({
   eventName: "",
   eventDesc: "",
-  fieldBorder: Constants.Faded,
-  descFieldBorder: Constants.Faded,
+  fieldBorder: Constants.purple,
+  descFieldBorder: Constants.purple,
   helperText: "",
   descHelperText: "",
   checked: false,
   descCheck: false,
-  imageBoarder: Constants.Faded,
+  imageBoarder: Constants.purple,
   imageLoader: "notLoading",
 });
   // this useeffect hook ask user to grant the app to access Gallery 
@@ -227,7 +227,7 @@ return await fetch(ApiUrl, {
       >
         <Image
           source={{ uri: image }}
-          style={[styles.formOneImage,  { borderWidth: 1, borderColor: inputs.imageBoarder }]}
+          style={[styles.formOneImage,  {  borderColor: inputs.imageBoarder }]}
           onPress={() => selectFeaturedImage()}
           onBlur={() => desHideHelperText()}
         />
@@ -255,13 +255,13 @@ return await fetch(ApiUrl, {
       <View
         style={[
           styles.eventTitleContainer,
-          { borderWidth: 1, borderColor: inputs.fieldBorder }
+          { borderColor: inputs.fieldBorder }
         ]}
       >
         <MaterialCommunityIcons
           name="format-title"
           size={24}
-          color={Constants.primary}
+          color={Constants.purple}
         />
         <TextInput
           // a text field used accept event title
@@ -291,11 +291,11 @@ return await fetch(ApiUrl, {
       </HelperText>
 
 
-      <View style={[styles.eventDescContainer, { borderWidth: 1, borderColor: inputs.descFieldBorder}]} >
+      <View style={[styles.eventDescContainer, {  borderColor: inputs.descFieldBorder}]} >
         <MaterialCommunityIcons
           name="subtitles-outline"
           size={24}
-          color={Constants.primary}
+          color={Constants.purple}
           style={{ paddingLeft: 4 }}
         />
         <TextInput
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   formOne: {
     justifyContent: "center",
     alignItems: "center",
-    marginTop:10
+    marginTop:10,
   },
   uploadImageTitleContainer: {
     width: "90%",
@@ -338,14 +338,14 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   uploadImageIcon: {
-    color: Constants.primary,
+    color: Constants.purple,
   },
   uploadImageTxt: {
     marginLeft: 10,
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingone,
-    color: Constants.mainText,
+    color: Constants.Inverse,
     marginBottom: 10,
   },
   formOneImage: {
@@ -353,6 +353,8 @@ const styles = StyleSheet.create({
     width: 230,
     borderRadius: 10,
     marginTop: 5,
+    backgroundColor:Constants.Faded,
+    borderWidth: 0.4,
   },
   ImageButtons: {
     width: "60%",
@@ -372,7 +374,7 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingtwo,
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
-    color: Constants.Secondary,
+    color: Constants.Inverse,
   },
   eventContentContainer: {
     width: "90%",
@@ -383,10 +385,11 @@ const styles = StyleSheet.create({
   eventTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
     borderRadius: Constants.mediumbox,
     paddingLeft: 10,
-    marginTop: 10,
+    marginTop: 20,
+    borderWidth: 1,
   },
   eventTitle: {
     width: "81%",
@@ -399,16 +402,21 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
+    color: Constants.Inverse,
+ 
+    
   },
   eventDescContainer: {
     width: "90%",
-    backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
     borderRadius: Constants.mediumbox,
     padding: 8,
+    borderWidth: 1,
+    
   },
   eventDescription: {
     width: "90%",
-    maxHeight: 80,
+    maxHeight:85,
     alignSelf: "flex-start",
     paddingLeft: 10,
     padding: 2,
@@ -416,6 +424,9 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
+    color: Constants.Inverse,
+ 
+    
   },
   checkIcon: {
     position:"absolute",
@@ -428,7 +439,8 @@ const styles = StyleSheet.create({
     padding:5,
   },
   loadingText:{
-    marginLeft:6
+    marginLeft:6,
+    color: Constants.Inverse,
   }
 });
 

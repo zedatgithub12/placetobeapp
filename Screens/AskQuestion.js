@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ScrollView
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Constants from "../constants/Constants";
@@ -12,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../constants/connection";
 import { MaterialIcons,MaterialCommunityIcons } from "react-native-vector-icons";
 import { ActivityIndicator } from "react-native-paper";
+
 
 const Questions = () => {
   const [name, setName] = useState(); // user first and middle name
@@ -114,7 +116,7 @@ const Questions = () => {
     return () => {};
   }, []);
   return (
-    <View style={styles.mainContainer}>
+    <ScrollView contentContainerStyle={styles.mainContainer}>
       <View style={styles.topContainer}>
       <View style={styles.headerTitle}>
         <Text style={styles.description}>You can reach us 24/7 via</Text>
@@ -168,7 +170,7 @@ const Questions = () => {
           placeholder="write here..."
           value={message}
           onChangeText={(msg) => setMessage(msg)}
-          numberOfLines={5}
+          numberOfLines={4}
           multiline={true}
         />
         {alertMessage.show ? (
@@ -199,18 +201,18 @@ const Questions = () => {
   ):
   (
     <TouchableOpacity style={[styles.buttonStyle]} onPress={submit}>
-        <Text style={styles.buttonText}>submit </Text>
+        <Text style={styles.buttonText}>Submit </Text>
       </TouchableOpacity>
   )
 }
   
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1,
+   
     alignItems: "center",
 
     backgroundColor: Constants.background,
@@ -270,22 +272,24 @@ const styles = StyleSheet.create({
 
   inputStyle: {
     backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
+    borderRadius: Constants.tinybox,
     padding: Constants.paddTwo,
     fontSize: Constants.headingtwo,
     width: "94%",
     paddingLeft: 20,
     marginTop: 2,
     alignSelf: "center",
+    borderWidth: 0.3,
+    borderColor:Constants.purple
   },
   multiineStyle: {
     paddingVertical: 4,
   },
   buttonStyle: {
-    width: "35%",
+    width: "88%",
     borderRadius: Constants.tiny,
-    backgroundColor: Constants.primary,
-    paddingVertical: 8,
+    backgroundColor: Constants.purple,
+    paddingVertical: 12,
     paddingHorizontal: 10,
     justifyContent: "center",
     alignItems: "center",

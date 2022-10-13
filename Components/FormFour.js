@@ -34,22 +34,22 @@ const FormFour = () => {
 
   const [inputs, setInputs] = React.useState({
     latitude: "",
-    latBorder: Constants.Faded,
+    latBorder: Constants.purple,
     latHelperText: "",
     latCheckIcon: false,
 
     longitude: "",
-    longBorder: Constants.Faded,
+    longBorder: Constants.purple,
     longHelperText: "",
     longCheckIcon: false,
 
     contactPhone: "",
-    phoneBorder: Constants.Faded,
+    phoneBorder: Constants.purple,
     phoneHelperText: "",
     phoneCheckIcon: false,
 
     links: "",
-    linkBorder: Constants.Faded,
+    linkBorder: Constants.purple,
     linkHelperText: "",
     linkCheckIcon: false,
   });
@@ -175,7 +175,7 @@ const FormFour = () => {
           { borderWidth: 1, borderColor: inputs.latBorder },
         ]}
       >
-        <MaterialIcons name="south" size={24} color={Constants.primary} />
+        <MaterialIcons name="south" size={24} color={Constants.purple} />
         <TextInput
           placeholder="Event Location Latitude"
           style={styles.selectDateBtn}
@@ -209,7 +209,7 @@ const FormFour = () => {
           { borderWidth: 1, borderColor: inputs.longBorder },
         ]}
       >
-        <MaterialIcons name="north" size={24} color={Constants.primary} />
+        <MaterialIcons name="north" size={24} color={Constants.purple} />
         <TextInput
           placeholder="Event Location Longitude"
           style={styles.selectDateBtn}
@@ -243,7 +243,7 @@ const FormFour = () => {
           { borderWidth: 1, borderColor: inputs.phoneBorder },
         ]}
       >
-        <Ionicons name="call-outline" size={24} color={Constants.primary} />
+        <Ionicons name="call-outline" size={24} color={Constants.purple} />
         <TextInput
           placeholder="Contact Phone No "
           style={styles.selectDateBtn}
@@ -278,7 +278,7 @@ const FormFour = () => {
           { borderWidth: 1, borderColor: inputs.linkBorder },
         ]}
       >
-        <AntDesign name="link" size={24} color={Constants.primary} />
+        <AntDesign name="link" size={24} color={Constants.purple} />
 
         <TextInput
           placeholder="Links"

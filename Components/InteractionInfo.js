@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import Constants from "../constants/Constants";
-
+import { LinearGradient } from "expo-linear-gradient";
 const userInfo = ({ ...props }) => {
   return (
     <View
@@ -9,31 +9,48 @@ const userInfo = ({ ...props }) => {
       //followers ,following, event posted
       style={styles.infoContainer}
     >
+      <LinearGradient 
+       colors={[Constants.purple, Constants.purple, ]}
+       style={styles.containerWithIcon} 
+      >
       <TouchableOpacity
         activeOpacity={0.8}
-        style={styles.containerWithIcon}
+        style={{alignItems:"center"}}
         onPress={props.getData}
       >
+        
         <Text style={styles.txts}>{props.Events}</Text>
         <Text style={styles.describingtxt}>Events</Text>
       </TouchableOpacity>
+      </LinearGradient>
+
+      <LinearGradient 
+       colors={[ Constants.primary, Constants.primaryTwo, ]}
+       style={styles.containerWithIcon} 
+      >
       <TouchableOpacity
         activeOpacity={0.8}
-        style={styles.containerWithIcon}
+        style={{alignItems:"center"}}
         onPress={props.followerCountPressed}
       >
         <Text style={styles.txts}>{props.Followers}</Text>
         <Text style={styles.describingtxt}>Followers</Text>
       </TouchableOpacity>
+      </LinearGradient>
 
+      <LinearGradient 
+       colors={[ Constants.primary, Constants.primaryTwo,  ]}
+       style={styles.containerWithIcon} 
+      >
       <TouchableOpacity
-        style={styles.containerWithIcon}
+         style={{alignItems:"center"}}
         onPress={props.followingCountPressed}
         activeOpacity={0.8}
       >
         <Text style={styles.txts}>{props.Following}</Text>
         <Text style={styles.describingtxt}>Following</Text>
       </TouchableOpacity>
+      </LinearGradient>
     </View>
   );
 };
@@ -49,22 +66,23 @@ const styles = StyleSheet.create({
   containerWithIcon: {
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Constants.background,
-
     padding: 5,
-    borderRadius: Constants.mediumbox,
+    borderWidth: 0.4,
+    borderColor:Constants.background,
+    borderRadius: Constants.tinybox,
     width: "30%",
+    elevation:3,
+    shadowColor:Constants.primary
 
   },
-
   describingtxt: {
-    color: Constants.Secondary,
+    color: Constants.Faded,
     fontWeight: Constants.Bold,
   },
   txts: {
     fontWeight: Constants.Boldtwo,
     fontSize: Constants.headingtwo,
-    color: Constants.Inverse,
+    color: Constants.Faded,
   },
 });
 

@@ -21,6 +21,7 @@ function Home({ navigation, ...props }) {
   const logged = userStatus.logged;
   return (
     <SafeAreaView style={styles.container}>
+      
       <View
         //to component container
         // profile avatar, App name and serach is included inside the component
@@ -69,11 +70,11 @@ function Home({ navigation, ...props }) {
     onPress={() => navigation.navigate("SignIn")}
     style={styles.profileContainer}
   >
-    <FontAwesome5
-      name="user"
-      size={19}
+    <Ionicons
+      name="person"
+      size={22}
       style={styles.profileIcon}
-      color={Constants.Secondary}
+      color={Constants.primary}
     />
   </TouchableOpacity>
 }
@@ -83,7 +84,7 @@ function Home({ navigation, ...props }) {
       <Divider style={{ color: Constants.primary}}/>
       <LinearGradient
         // Button Linear Gradient
-        colors={[Constants.primaryTwo, Constants.primary, Constants.transparentPrimary]}
+        colors={[Constants.primary, Constants.primary, Constants.primary]}
         
        style={styles.PrimaryTitle}>
         <Text style={styles.PrimaryTitleText}>Featured Events</Text><Ionicons name="star" size={24} color={Constants.background} />

@@ -35,22 +35,22 @@ const FormThree = () => {
 
   const [inputs, setInputs] = React.useState({
     organizer: "",
-    orgBorder: Constants.Faded,
+    orgBorder: Constants.purple,
     orgCheckIcon: false,
     orgHelperText: "",
 
     category: "",
-    catBorder: Constants.Faded,
+    catBorder: Constants.purple,
     catCheckIcon: false,
     catHelperText: "",
 
     eventAddress: "",
-    eventAddressBorder: Constants.Faded,
+    eventAddressBorder: Constants.purple,
     eventAddressCheckIcon: false,
     eventAddressHelperText: "",
 
     entranceFee: "",
-    feeBorder: Constants.Faded,
+    feeBorder: Constants.purple,
     feeCheckIcon: false,
     feeHelperText: "",
   });
@@ -58,12 +58,12 @@ const FormThree = () => {
   // function for to be called when organizer name updated
 
   const updateOrganizer = (org) => {
-    if (org.length <= 4) {
+    if (org.length <= 2) {
       setInputs({
         ...inputs,
         organizer: org,
         orgBorder: Constants.Danger,
-        orgHelperText: " Organizer name cannot be less than 5 letter",
+        orgHelperText: " Organizer name cannot be less than 2 letter",
         orgCheckIcon: false,
       });
     } else if (org.length >= 30) {
@@ -178,17 +178,21 @@ const FormThree = () => {
   const [catCheck, setCatCheck] = useState(false);
 
 
-  
-
   const OnSelectCategory = (itemName) => {
     setCategory(itemName);
     setCatCheck(true);
     setModalVisible(false);
+    setInputs({
+      ...inputs,
+
+      catBorder: Constants.Success,
+   
+    });
   };
   //render category list
   const renderCategory = ({ item }) => (
     <TouchableOpacity
-      style={styles.CategoryList}
+      style={[styles.CategoryList, {backgroundColor:item.background}]}
       onPress={() => OnSelectCategory(item.name)}
     >
       <Text style={styles.catName}>{item.name}</Text>
@@ -206,7 +210,7 @@ const FormThree = () => {
         <MaterialCommunityIcons
           name="account-group-outline"
           size={24}
-          color={Constants.primary}
+          color={Constants.purple}
         />
         <TextInput
           placeholder="Organizer"
@@ -244,7 +248,7 @@ const FormThree = () => {
         <MaterialCommunityIcons
           name="folder-star-multiple-outline"
           size={24}
-          color={Constants.primary}
+          color={Constants.purple}
         />
         {
           //select category section
@@ -268,7 +272,7 @@ const FormThree = () => {
                 <AntDesign
                   name="closecircle"
                   size={24}
-                  color={Constants.Inverse}
+                  color={Constants.purple}
                   style={styles.closeBtn}
                 />
               </Pressable>
@@ -290,7 +294,7 @@ const FormThree = () => {
             onPress={() => setModalVisible(true)}
           >
             <Text style={styles.selectedCategory}>{category}</Text>
-            <Ionicons name="chevron-down-outline" size={22} color={Constants.primary} />
+            <Ionicons name="chevron-down-outline" size={22} color={Constants.purple} />
           </Pressable>
         </View>
 
@@ -332,7 +336,7 @@ const FormThree = () => {
         <MaterialCommunityIcons
           name="map-marker-radius-outline"
           size={24}
-          color={Constants.primary}
+          color={Constants.purple}
         />
         <TextInput
           placeholder="Event Address"
@@ -370,7 +374,7 @@ const FormThree = () => {
         <MaterialCommunityIcons
           name="ticket-confirmation-outline"
           size={24}
-          color={Constants.primary}
+          color={Constants.purple}
         />
         <TextInput
           placeholder="Entrance fee"
@@ -529,11 +533,12 @@ const styles = StyleSheet.create({
   CategoryList: {
     padding: 10,
     margin: 3,
-    backgroundColor: Constants.background,
+   
     borderRadius: Constants.tiny,
   },
   catName: {
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
+    color: Constants.background
   },
 });
 

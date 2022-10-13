@@ -311,23 +311,9 @@ function Profile({ navigation, props }) {
                 Constants.primary,
                 Constants.primary,
                 Constants.transparentPrimary,
-              
               ]}
               style={styles.coverImageContainer}
-            >
-               <Ionicons name="star" size={24} color={Constants.background} />
-              <Text
-                style={{
-                  fontWeight: Constants.Bold,
-                  fontSize: Constants.headingone,
-                  fontFamily: Constants.fontFam,
-                  color: Constants.Inverse,
-                }}
-              >
-                Home of Events
-              </Text>
-             
-            </LinearGradient>
+            ></LinearGradient>
 
             <TouchableOpacity
               //button which trigger the select Image functionality to chane profile picture
@@ -341,15 +327,25 @@ function Profile({ navigation, props }) {
                 style={styles.profileImage}
                 onPress={() => selectFeaturedImage()}
               />
+              <View style={styles.cameraIcon}>
+              <MaterialCommunityIcons
+                name="camera"
+                size={20}
+                color="#636363"
+                
+              />
+              </View>
+            
             </TouchableOpacity>
 
             <View
               //username and user email address container
               style={styles.txtContent}
             >
-              <Title>{userData.userName}</Title>
-              <Paragraph>{userData.userEmail}</Paragraph>
-
+              <View style={{ alignSelf: "center", alignItems:"center" }}>
+                <Title>{userData.userName}</Title>
+                <Paragraph>{userData.userEmail}</Paragraph>
+              </View>
               <InteractionInfo
                 Events={userInfo.eventPosted}
                 getData={() => navigation.navigate("yourEvents", { count })}
@@ -368,7 +364,7 @@ function Profile({ navigation, props }) {
               }
             >
               <View style={styles.iconbackground}>
-                <MaterialCommunityIcons name="account-edit-outline" size={25} />
+                <MaterialCommunityIcons name="account-cog" size={20} style={styles.optionIcon}/>
               </View>
               <Text style={styles.settingtxt}>Account Settings</Text>
             </TouchableOpacity>
@@ -379,7 +375,7 @@ function Profile({ navigation, props }) {
               onPress={() => navigation.navigate("Bookmarks")}
             >
               <View style={styles.iconbackground}>
-                <Ionicons name="bookmark-outline" size={25} />
+                <Ionicons name="bookmark" size={20} style={styles.optionIcon} />
               </View>
               <Text style={styles.settingtxt}>Bookmarks</Text>
               {items.length !== 0 ? (
@@ -393,7 +389,7 @@ function Profile({ navigation, props }) {
               style={styles.Settings} //share app with your friends
             >
               <View style={styles.iconbackground}>
-                <Ionicons name="ios-person-add-outline" size={25} />
+                <Ionicons name="share-social-sharp" size={20} style={styles.optionIcon}/>
               </View>
               <Text style={styles.settingtxt}>Invite Friends</Text>
             </TouchableOpacity>
@@ -405,8 +401,9 @@ function Profile({ navigation, props }) {
             >
               <View style={styles.iconbackground}>
                 <MaterialCommunityIcons
-                  name="comment-question-outline"
-                  size={25}
+                  name="message-question"
+                  size={20}
+                  style={styles.optionIcon}
                 />
               </View>
               <Text style={styles.settingtxt}>Ask Question</Text>
@@ -418,7 +415,7 @@ function Profile({ navigation, props }) {
               onPress={() => navigation.navigate("About")}
             >
               <View style={styles.iconbackground}>
-                <MaterialCommunityIcons name="information-variant" size={25} />
+                <MaterialCommunityIcons name="information" size={25} style={styles.optionIcon}/>
               </View>
               <Text style={styles.settingtxt}>About</Text>
             </TouchableOpacity>
@@ -429,7 +426,7 @@ function Profile({ navigation, props }) {
               onPress={() => panelRef.current.togglePanel()}
             >
               <View style={styles.iconbackground}>
-                <Ionicons name="log-out-outline" size={25} />
+                <Ionicons name="log-out" size={20} style={styles.optionIcon}/>
               </View>
               <Text style={styles.settingtxt}>Log-out</Text>
             </TouchableOpacity>
@@ -558,19 +555,26 @@ const styles = StyleSheet.create({
   },
   setContainer: {
     flex: 2,
+    marginTop: -30,
   },
   iconbackground: {
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Constants.Faded,
-    padding: Constants.padd,
+    padding:8,
     borderRadius: 10,
+    elevation:2,
+    shadowColor:Constants.Secondary,
+    marginLeft:5,
   },
   Settings: {
     flexDirection: "row",
     alignItems: "center",
     margin: 5,
     marginLeft: 20,
+  },
+  optionIcon:{
+  color:Constants.purple,
   },
   bookmark: {
     flexDirection: "row",
@@ -583,7 +587,7 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingtwo,
     marginLeft: 15,
     fontWeight: Constants.Boldtwo,
-    
+    fontFamily: Constants.fontFam
   },
   horizontalline: {
     backgroundColor: Constants.background,
@@ -614,15 +618,23 @@ const styles = StyleSheet.create({
   },
   coverImageContainer: {
     width: "100%",
-    height: 180,
+    height: 110,
     backgroundColor: Constants.primary,
     justifyContent: "center",
     alignItems: "center",
   },
-  CoverImage: {
-    height: 180,
-  },
+  cameraIcon:{
+  justifyContent:"center",
+  alignItems:"center",
+    position:"absolute",
+    bottom:2,
+    right:0,
+    backgroundColor: Constants.background,
+    padding:6,
+    borderRadius: 50,
+    elevation:3
 
+  },
   coverTxt: {
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
@@ -635,7 +647,7 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.Faded,
     width: 88,
     height: 88,
-    marginLeft: 15,
+    alignSelf: "center",
     borderRadius: 43,
     padding: 3.8,
     elevation: 2,
@@ -644,7 +656,7 @@ const styles = StyleSheet.create({
   txtContent: {
     top: -55,
     marginTop: 5,
-    margin: 15,
+    margin: 4,
     padding: 5,
   },
   profileImage: {
@@ -661,17 +673,19 @@ const styles = StyleSheet.create({
     top: -48,
     margin: 15,
     padding: 10,
+    alignSelf: "center",
   },
   userEmailshimmer: {
     top: -68,
     margin: 15,
     padding: 8,
+    alignSelf: "center",
   },
   logoutbtn: {
     flexDirection: "row",
     alignItems: "center",
     margin: 5,
-    marginLeft: 20,
+    marginLeft: 22,
     marginBottom: 70,
     // backgroundColor: Constants.primary
   },

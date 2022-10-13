@@ -122,14 +122,17 @@ const UserDetails = ({ route, navigation }) => {
   /**************************************************** */
   //rendered category list which i shown in the modal when user click on slect catory button
   /**************************************************** */
-  const OnSelectCategory = (itemName) => {
+  const [catback, setCatBack] = useState(Constants.purple);
+
+  const OnSelectCategory = (itemName, background) => {
     setCategory(itemName);
+    setCatBack(background);
     setModalVisible(false);
   };
   const renderCategory = ({ item }) => (
     <TouchableOpacity
-      style={styles.CategoryList}
-      onPress={() => OnSelectCategory(item.name)}
+      style={[styles.CategoryList, {backgroundColor: item.background}]}
+      onPress={() => OnSelectCategory(item.name, item.background)}
     >
       <Text style={styles.catName}>{item.name}</Text>
     </TouchableOpacity>
@@ -428,11 +431,12 @@ const UserDetails = ({ route, navigation }) => {
             />
           </View>
         </View>
-        {
+       
+ {
           //update username
         }
         <View style={styles.usernameUpdate}>
-          <Caption>Organizing Name</Caption>
+          <Caption>Organizer Name</Caption>
           <TextInput
             placeholder="ex: Shega Events"
             style={styles.username}
@@ -481,12 +485,12 @@ const UserDetails = ({ route, navigation }) => {
 
           <Pressable
             //Button which open the category modal
-            style={styles.catSelector}
+            style={[styles.catSelector,{backgroundColor:catback}]}
             onPress={() => setModalVisible(true)}
           >
           
-            <Text style={styles.selectedCategory}>{category}</Text>
-            <Ionicons name="list-outline" size={22} color={Constants.primary} />
+            <Text style={[styles.selectedCategory]}>{category}</Text>
+            <Ionicons name="list-outline" size={22} color={Constants.background} />
           </Pressable>
         </View>
 
@@ -568,22 +572,22 @@ const styles = StyleSheet.create({
     width: "96%",
     marginTop: 10,
     backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
+    borderRadius: Constants.tinybox,
     backgroundColor: Constants.background,
   },
   inpuFields: {
     width: "46%",
     backgroundColor: Constants.Faded,
     margin: 8,
-    borderRadius: Constants.tiny,
+    borderRadius: Constants.tinybox,
     paddingLeft: 15,
     padding: 5,
+    borderWidth: 0.4,
+    borderColor: Constants.purple
   },
   subContainerTwo: {
     width: "96%",
     marginTop: 10,
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
     backgroundColor: Constants.background,
   },
   subContainerThree: {
@@ -594,12 +598,15 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingLeft: 5,
     backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
+    borderRadius: Constants.tinybox,
+    borderWidth: 0.4,
+    borderColor: Constants.purple
   },
   birthDate: {
     flexDirection: "row",
     margin: 10,
     alignItems: "center",
+ 
   },
   dateIcon: {
     marginHorizontal: 15,
@@ -656,15 +663,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "50%",
     backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
+
     padding: 10,
     margin: 10,
+    borderRadius: Constants.tinybox,
+    borderWidth: 0.4,
+    borderColor: Constants.purple
   },
   selectedCategory: {
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
-    color: Constants.Inverse,
+    color: Constants.background,
     paddingLeft: 4,
   },
   catModal: {
@@ -707,37 +717,39 @@ const styles = StyleSheet.create({
   },
   catName: {
     fontSize: Constants.headingtwo,
+    color:Constants.background
   },
   userPhoneNumber: {
-    width: "94%",
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
-    padding: 8,
-    paddingHorizontal: 15,
+    width: "91.5%",
+
+   // paddingHorizontal: 5,
   },
   phone: {
-    backgroundColor: Constants.background,
-    borderRadius: Constants.mediumbox,
+    backgroundColor: Constants.Faded,
+    borderRadius: Constants.tinybox,
     padding: 8,
     paddingHorizontal: 20,
     fontSize: Constants.headingtwo,
+    borderWidth:0.4,
+    borderColor:Constants.purple
   },
 
   // username related styling
   usernameUpdate: {
-    width: "94%",
-    backgroundColor: Constants.Faded,
+    width: "91.5%",
     borderRadius: Constants.mediumbox,
-    padding: 8,
-    paddingHorizontal: 15,
+    //paddingHorizontal: 5,
     marginTop: 10,
+
   },
   username: {
-    backgroundColor: Constants.background,
-    borderRadius: Constants.mediumbox,
+    backgroundColor: Constants.Faded,
+    borderRadius: Constants.tinybox,
     padding: 8,
     paddingHorizontal: 20,
     fontSize: Constants.headingtwo,
+    borderWidth:0.4,
+    borderColor:Constants.purple
   },
   saveBtn: {
     flexDirection: "row",
@@ -745,11 +757,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "flex-end",
     marginVertical: 20,
-    padding: 6,
+    padding: 8,
     paddingHorizontal: 30,
-    backgroundColor: Constants.PrimaryBlue,
+    backgroundColor: Constants.purple,
     borderRadius: Constants.tiny,
-    marginRight: 20,
+    marginRight: 18,
   },
   saveText: {
     fontWeight: Constants.Bold,
@@ -765,20 +777,23 @@ const styles = StyleSheet.create({
     padding: 8,
     paddingHorizontal: 15,
     marginTop: 5,
+    
+    
   },
   pass: {
     backgroundColor: Constants.background,
-    borderRadius: Constants.mediumbox,
-    padding: 10,
+    borderRadius: Constants.tinybox,
+    padding: 8,
     paddingHorizontal: 20,
-    fontSize: Constants.headingtwo,
-    marginTop: 5,
+    fontSize: Constants.headingthree,
+    marginTop: 8,
+    borderWidth:0.4,
+    borderColor:Constants.purple
   },
   updatePrompt: {
     position: "absolute",
     top: 10,
     zIndex: 1000,
-
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

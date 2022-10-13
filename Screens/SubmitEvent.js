@@ -5,16 +5,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+
 } from "react-native";
 import { Paragraph, Title, HelperText } from "react-native-paper";
 import Constants from "../constants/Constants";
-import { FontAwesome5, Ionicons } from "react-native-vector-icons";
+import { FontAwesome5, Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
 import Forms from "../src/FormArray";
 import Carousel from "react-native-snap-carousel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext } from "../Components/context";
 import Connection from "../constants/connection";
 import * as Animatable from "react-native-animatable";
+import { ScrollView } from "react-native-gesture-handler";
 
 class EventSubmission extends Component {
   static contextType = AuthContext;
@@ -110,7 +112,7 @@ class EventSubmission extends Component {
       var longitude = (this.state.locationLongitude = InputForm.mLong);
       var organizerPhone = (this.state.contactPhone = InputForm.cPhone);
       var redirectUrl = (this.state.redirectLink = InputForm.url);
-
+       
       // event field validation
       if (
         name.length == 0 ||
@@ -168,12 +170,13 @@ class EventSubmission extends Component {
             } else {
               errorPanel(message);
             }
-          });
+          })
+          .catch((err)=>{console.log(err)});
       }
     };
 
     return (
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container} >
         {this.state.added ? (
           <Animatable.View animation="fadeInUp" style={styles.successPrompt}>
             <TouchableOpacity
@@ -192,7 +195,7 @@ class EventSubmission extends Component {
               onPress={() => closeError()}
               style={styles.closePrompt}
             >
-              <Ionicons name="close" size={25} color={Constants.Inverse} />
+              <Ionicons name="close" size={25} color={Constants.background} />
             </TouchableOpacity>
             <Text style={styles.promptText}>{this.state.responseMessage}</Text>
           </Animatable.View>
@@ -208,6 +211,7 @@ class EventSubmission extends Component {
               itemWidth={windowWidth}
               directionalLockEnabled={false}
               onSnapToItem={(index) => this.setState({ ActiveIndex: index })}
+             
             />
 
             <View style={styles.SliderActionBtns}>
@@ -219,7 +223,9 @@ class EventSubmission extends Component {
                   activeOpacity={0.7}
                   style={styles.backButton}
                 >
-                  <Text style={styles.nextBtnTxt}>Back</Text>
+                  <MaterialCommunityIcons name="arrow-left" size={26} color={Constants.Inverse}/>
+                 
+               
                 </TouchableOpacity>
               ) : null}
 
@@ -231,7 +237,8 @@ class EventSubmission extends Component {
                   activeOpacity={0.7}
                   style={styles.nextButton}
                 >
-                  <Text style={styles.nextBtnTxt}>Next</Text>
+                  <MaterialCommunityIcons name="arrow-right" size={26} color={Constants.background}/>
+                 
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
@@ -240,7 +247,8 @@ class EventSubmission extends Component {
                   activeOpacity={0.7}
                   style={styles.submitButton}
                 >
-                  <Text style={styles.nextBtnTxt}> Submit</Text>
+                  <Ionicons name="md-checkmark-sharp" size={26} color={Constants.background}/>
+   
                 </TouchableOpacity>
               )}
             </View>
@@ -279,44 +287,66 @@ class EventSubmission extends Component {
           </View>
           </View>
         )}
-      </View>
+      </ScrollView>
     );
   }
 }
 const styles = StyleSheet.create({
-  formOne: {
+  container: {
+     minHeight: "100%",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: Constants.background,
+  
   },
   SliderActionBtns: {
     flexDirection: "row",
     justifyContent: "space-around",
+    position: "relative",
+    marginBottom:180,
   },
   backButton: {
-    width: "30%",
-    padding: 10,
-    backgroundColor: Constants.Secondary,
-    borderRadius: Constants.mediumbox,
+    position: "absolute",
+    top:0,
+    left:40,
+    width: 50,
+    height:50,
+    borderRadius: 25,
+    backgroundColor: Constants.Faded,
+    justifyContent:"center",
     alignItems: "center",
-    borderWidth: 0.5,
-    borderColor: Constants.Secondary,
     marginTop: 6,
+    borderWidth:1,
+    borderColor: Constants.purple,
+    elevation:2,
   },
   nextButton: {
-    width: "30%",
-    padding: 10,
-    backgroundColor: Constants.primary,
-    borderRadius: Constants.mediumbox,
+    position: "absolute",
+    top:0,
+    right:40,
+    width: 50,
+    height:50,
+    borderRadius: 25,
+    backgroundColor: Constants.purple,
+    justifyContent:"center",
     alignItems: "center",
     marginTop: 6,
+    borderWidth:4,
+    borderColor: Constants.purple
   },
   submitButton: {
-    width: "30%",
-    padding: 10,
-    backgroundColor: Constants.Success,
-    borderRadius: Constants.mediumbox,
+    position: "absolute",
+    top:0,
+    right:40,
+    width: 50,
+    height:50,
+    borderRadius:25,
+    backgroundColor: Constants.green,
     alignItems: "center",
-    marginTop: 15,
+   justifyContent:"center",
+    borderWidth:3,
+    borderColor: Constants.green,
+    marginTop: 6,
   },
   nextBtnTxt: {
     fontFamily: Constants.fontFam,
@@ -395,11 +425,12 @@ const styles = StyleSheet.create({
     top: 5,
   },
   promptText: {
-    color: Constants.Inverse,
+    color: Constants.background,
+    fontWeight:Constants.Bold,
   },
   errorPrompt: {
     position: "absolute",
-    bottom: 50,
+    bottom: 190,
     zIndex: 100,
     width: "85%",
     backgroundColor: Constants.Danger,

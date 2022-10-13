@@ -12,6 +12,7 @@ import Constants from "../constants/Constants";
 import { Ionicons } from "react-native-vector-icons";
 import call from "react-native-phone-call";
 import * as Linking from "expo-linking";
+import { ScrollView } from "react-native-gesture-handler";
 
 // create a component
 const About = () => {
@@ -27,7 +28,7 @@ const About = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.logobackground}>
         <Image
           source={require("../assets/logo.png")}
@@ -37,9 +38,7 @@ const About = () => {
       </View>
 
       <Text style={styles.description}>
-        p2b-Ethiopia integrated a self-service components needed to seamlessly
-        plan, promote and produce live events, while reducing friction and
-        costs, increasing reach and driving ticket sales, among others.
+      Our mission is To be Ethiopia's leading event promoter and event-related information provider by leveraging world-class technologies and advance the sector to the next level.
       </Text>
 
       <Text style={styles.contactTitle}>Contact us</Text>
@@ -51,10 +50,10 @@ const About = () => {
           <Ionicons
             name="call"
             size={20}
-            color={Constants.primary}
+            color={Constants.Success}
             style={styles.callIcon}
           />
-          <Text>+251949390840</Text>
+          <Text style={{fontFamily: Constants.fontFam}}>+251949390840</Text>
         </Pressable>
         <Pressable
           onPress={() => MakeCall("+251911314175")}
@@ -63,10 +62,10 @@ const About = () => {
           <Ionicons
             name="call"
             size={20}
-            color={Constants.primary}
+            color={Constants.Success}
             style={styles.callIcon}
           />
-          <Text>+251911314175</Text>
+          <Text style={{fontFamily: Constants.fontFam}}>+251911314175</Text>
         </Pressable>
       </View>
 
@@ -74,39 +73,37 @@ const About = () => {
         <Ionicons
           name="mail"
           size={20}
-          color={Constants.primary}
+          color={Constants.purple}
           style={styles.callIcon}
         />
-        <Text>contact@p2b-ethiopia.com</Text>
+        <Text style={{fontFamily: Constants.fontFam}}>contact@p2b-ethiopia.com</Text>
       </View>
 
       <View style={styles.bottomSection}>
         <Text>Beta Version</Text>
         <View style={styles.developer}>
-          <Text>Developed By </Text>
+          <Text style={styles.developedBy}>Developed By </Text>
           <TouchableOpacity
             onPress={() => Linking.openURL("https://afromina-digitals.com/")}
           >
-            <Text style={styles.afromina}>AfroMiNA Digitals</Text>
+            <Text style={styles.afromina}>AfroMiNA Digital Technologies PLC</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 // define your styles
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-
     alignItems: "center",
     backgroundColor: Constants.background,
   },
   logobackground: {
     backgroundColor: Constants.background,
     borderRadius: Constants.borderRad,
-    marginTop: 30,
+    marginTop: 18,
   },
   p2bLogo: {
     width: 180,
@@ -114,11 +111,11 @@ const styles = StyleSheet.create({
   },
 
   description: {
-    width: "85%",
+    width: "88%",
     alignSelf: "center",
-    padding: 10,
+    padding: 8,
     textTransform: "capitalize",
-    textAlign: "center",
+    textAlign:"center",
     lineHeight: 18,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingthree,
@@ -128,23 +125,26 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingone,
-    color: Constants.Secondary,
+    color: Constants.purple,
     paddingTop: 20,
   },
   phoneContainer: {
-    flexDirection: "row",
+    width: "90%",
+    flexDirection: "column",
     padding: 10,
     marginTop: 10,
   },
   phone: {
+    margin: 5,
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: Constants.Faded,
     marginHorizontal: 10,
     padding: 5,
     paddingRight: 20,
-    borderRadius: Constants.medium,
+    borderRadius: Constants.tinybox,
+    borderColor: Constants.Success,
+    borderWidth:0.4,
   },
   callIcon: {
     // backgroundColor: Constants.background,
@@ -153,17 +153,19 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   email: {
+    width: "80%",
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
-    //  backgroundColor: Constants.Faded,
     marginHorizontal: 5,
     padding: 5,
-    borderRadius: Constants.medium,
+    borderRadius: Constants.tinybox,
+    backgroundColor: Constants.Faded,
+    borderColor: Constants.purple,
+    borderWidth:0.4,
   },
   bottomSection: {
-    position: "absolute",
-    bottom: 50,
+    marginTop: 40,
+ margin:20,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -171,8 +173,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 10,
   },
+  developedBy:{
+   fontFamily: Constants.fontFam,
+   fontWeight: Constants.Bold,
+   fontSize: Constants.headingtwo
+  },
   afromina: {
-    color: Constants.primaryTwo,
+    color: "#1264A4",
     fontWeight: Constants.Boldtwo,
     textDecorationLine: "underline",
   },

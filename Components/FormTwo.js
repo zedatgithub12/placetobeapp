@@ -37,16 +37,16 @@ const FormTwo = () => {
   const [endTime, setEndTime] = useState("End time");
 
   const [inputs, setInputs] = React.useState({
-    startDateBorder: Constants.Faded,
+    startDateBorder: Constants.purple,
     startDateCheckIcon: false,
 
-    startTimeborder: Constants.Faded,
+    startTimeborder: Constants.purple,
     startTimeCheckIcon: false,
 
-    endDateBorder: Constants.Faded,
+    endDateBorder: Constants.purple,
     endDateCheckIcon: false,
 
-    endTimeBoarder: Constants.Faded,
+    endTimeBoarder: Constants.purple,
     endTimeCheckIcon: false,
   });
 
@@ -149,7 +149,7 @@ const FormTwo = () => {
           { borderWidth: 1, borderColor: inputs.startDateBorder },
         ]}
       >
-        <Fontisto name="date" size={24} color={Constants.primary} />
+        <Fontisto name="date" size={24} color={Constants.purple} />
         <TouchableOpacity
           onPress={() => showMode("date")}
           style={styles.selectDateBtn}
@@ -178,7 +178,7 @@ const FormTwo = () => {
         <MaterialCommunityIcons
           name="clock-time-eleven-outline"
           size={24}
-          color={Constants.primary}
+          color={Constants.purple}
         />
         <TouchableOpacity
           onPress={() => showMode("time")}
@@ -205,7 +205,7 @@ const FormTwo = () => {
           { borderWidth: 1, borderColor: inputs.endDateBorder },
         ]}
       >
-        <Fontisto name="date" size={24} color={Constants.primary} />
+        <Fontisto name="date" size={24} color={Constants.purple} />
         <TouchableOpacity
           onPress={() => endDateShowMode("date")}
           style={styles.selectDateBtn}
@@ -234,7 +234,7 @@ const FormTwo = () => {
         <MaterialCommunityIcons
           name="timer-outline"
           size={24}
-          color={Constants.primary}
+          color={Constants.purple}
         />
         <TouchableOpacity
           onPress={() => endDateShowMode("time")}
@@ -268,6 +268,8 @@ const FormTwo = () => {
           display="default"
           collapsable={true}
           onChange={onChange}
+          maximumDate={new Date(2050, 12, 31)}
+          minimumDate={new Date(2000, 0, 1)}
         />
       )}
       {showit && (
@@ -278,6 +280,10 @@ const FormTwo = () => {
           is24Hour={true}
           display="default"
           onChange={onChangeEndDate}
+          maximumDate={new Date(2050, 12, 31)}
+          minimumDate={new Date(2000, 0, 1)}
+         
+       
         />
       )}
     </View>

@@ -12,7 +12,6 @@ import Bookmarks from "./Screens/Bookmarks";
 import Setting from "./Screens/Setting";
 import Profile from "./Screens/ProfileScreen";
 import EventDetails from "./Screens/eventDetails";
-import VenueDetail from "./Screens/VenueDetail";
 import { ActivityIndicator } from "react-native-paper";
 import Constants from "./constants/Constants";
 import { AuthContext } from "./Components/context";
@@ -197,6 +196,7 @@ export default function App() {
           endingDay: endDate,
           endingTime: endTime,
         });
+     
       }
     },
     formThree: async (
@@ -218,6 +218,7 @@ export default function App() {
           eventAddr: eventAddress,
           entranceFee: eventEntrance,
         });
+      
       }
     },
     formFour: async (
@@ -446,13 +447,7 @@ export default function App() {
               component={EventDetails}
               options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="VenueDetail"
-              component={VenueDetail}
-              options={{
-                headerShown: false,
-              }}
-            />
+       
             <Stack.Screen
               name="GalleryDetail"
               component={GallerDetail}

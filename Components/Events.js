@@ -115,6 +115,8 @@ const styles = StyleSheet.create({
   EventName: {
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
+    fontFamily: Constants.fontFam,
+    color: Constants.Inverse
   },
   eventIcons: {
     padding: 3,
