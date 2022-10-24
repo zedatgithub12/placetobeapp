@@ -6,23 +6,23 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  LogBox
+  LogBox,
+  ScrollView,
 } from "react-native";
 import Constants from "../constants/Constants";
-import { Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
+import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../Components/context";
 import Connection from "../constants/connection";
 import { ActivityIndicator, Caption } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 WebBrowser.maybeCompleteAuthSession();
 LogBox.ignoreLogs(["EventEmitter.removeListener"]);
 
 export default function Signin({ navigation }) {
-  //userInput login
+  // login userInput
   const { SignIn } = React.useContext(AuthContext);
   const loginState = (userId, userToken, userEmail, password) => {
     SignIn(userId, userToken, userEmail, password);
@@ -172,7 +172,7 @@ export default function Signin({ navigation }) {
 
   const [accessToken, setAccessToken] = useState(); //access token state initialisation
   //const [userInfoState, setUserInfoState] = useState(); // userInfo state initialisation
-const [googleLoader, setGoogleLoader] = useState(false);
+  const [googleLoader, setGoogleLoader] = useState(false);
   const [request, response, promptAsync] = Google.useAuthRequest({
     expoClientId:
       "799616009286-ck594ue3589h93vq4hlqcsmrg71uuekd.apps.googleusercontent.com",
@@ -209,7 +209,7 @@ const [googleLoader, setGoogleLoader] = useState(false);
 
       // default category place holder
 
-      var category = "Select Category";
+      var category = "Entertainment";
       //dat to be sent to server
       var Data = {
         id: data.id,
@@ -229,7 +229,7 @@ const [googleLoader, setGoogleLoader] = useState(false);
         .then((response) => response.json()) //check response type of the API
         .then((response) => {
           let resp = response[0];
-          
+
           if (resp.message === "succeed") {
             var userInfo = response[0].user[0];
             googleSignUp(
@@ -239,8 +239,7 @@ const [googleLoader, setGoogleLoader] = useState(false);
               userInfo.google_Id
             );
             navigation.navigate("TabNav");
-          } 
-          else if (resp.message === "successfully Registered") {
+          } else if (resp.message === "successfully Registered") {
             var userInfo = response[0].user[0];
             googleSignUp(
               userInfo.userId,
@@ -249,24 +248,18 @@ const [googleLoader, setGoogleLoader] = useState(false);
               userInfo.google_Id
             );
             navigation.navigate("TabNav");
-          }
-          
-          else {
+          } else {
             setData({
               ...data,
               check_textInputChange: false,
               isFieldEmpty: false,
               emptyField: response[0].message,
-             
             });
             setGoogleLoader(false);
           }
         })
         .catch((error) => {});
-
-       
     });
-
   };
 
   //handle response message
@@ -282,35 +275,61 @@ const [googleLoader, setGoogleLoader] = useState(false);
     if (response?.type === "success") {
       setAccessToken(response.authentication.accessToken);
       GoogleSignInBtn();
-     
     }
 
     return () => {};
-  
   });
 
   return (
-    <View style={styles.container}>
-      <Image style={styles.loginimage} source={require("../src/login.png")} />
-      <Text style={styles.title}>p2b-Ethiopia</Text>
-      <Caption style={styles.subTitle}>Sign In with your email address</Caption>
+    
+    <ScrollView contentContainerStyle={styles.container} >
+     
+        <TouchableOpacity
+            style={styles.backArrow} // back arrow button style
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons
+              name="arrow-back-sharp"
+              size={25}
+              //back arrow icon
+              color= {Constants.Inverse}
+            />
+          </TouchableOpacity>
+      <Image style={styles.loginimage} source={require("../assets/logo.png")} />
+      
+      <Caption style={styles.subTitle}>Sign in with your email address</Caption>
 
       {data.isValidEmail ? null : (
         <View style={styles.error_Message}>
           <Text style={styles.errorTxt}>{data.email_error}</Text>
         </View>
       )}
+      <View style={styles.emailContainer}>
+      <MaterialIcons
+          name="alternate-email"
+          size={24}
+          color={Constants.primary}
+        />
+
       <TextInput
         style={styles.emailAddress}
-        placeholder="Enter Your Email Address"
+        placeholder="Email"
         onChangeText={(val) => textInputChange(val)}
       />
+      </View>
+
+      
 
       <View style={styles.viewPassword}>
+      <MaterialIcons
+          name="security"
+          size={24}
+          color={Constants.primary}
+        />
+
         <TextInput
           style={styles.password}
-          placeholder="Enter Your Password"
-          keyboardType="numeric"
+          placeholder="Password"
           secureTextEntry={data.secureTextEntry ? true : false}
           onChangeText={(val) => handlePasswordChange(val)}
         />
@@ -322,14 +341,14 @@ const [googleLoader, setGoogleLoader] = useState(false);
             <Ionicons
               name="eye-off-outline"
               size={22}
-              color={Constants.mainText}
+              color={Constants.purple}
               style={styles.showpassword}
             />
           ) : (
             <Ionicons
               name="eye-outline"
               size={22}
-              color={Constants.mainText}
+              color={Constants.purple}
               style={styles.showpassword}
             />
           )}
@@ -337,14 +356,6 @@ const [googleLoader, setGoogleLoader] = useState(false);
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          activeOpacity={0.5}
-          onPress={() => navigation.goBack()}
-          style={styles.gobackBtn}
-        >
-          <Text style={styles.signbtntxt}>Back</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity
           activeOpacity={0.5}
           onPress={() => validate()}
@@ -370,17 +381,12 @@ const [googleLoader, setGoogleLoader] = useState(false);
             source={require("../assets/google.png")}
             style={{ width: 25, height: 25 }}
           />
-          {
-            googleLoader ?
-            (
-              <ActivityIndicator size="small" color={Constants.primary}/>
-            )
-            :
-            <Text style={styles.signbtntxt}>
-            Continue With Google
-          </Text>
-          }
-          
+          {googleLoader ? (
+            <ActivityIndicator size="small" color={Constants.primary} />
+          ) : (
+            <Text style={styles.signbtntxt}>Continue With Google</Text>
+          )}
+
           {/*accessToken ?(<MaterialCommunityIcons name="check-circle" size={18} style={styles.ContinueIcon} color={Constants.Success}/>): null*/}
         </TouchableOpacity>
       )}
@@ -395,10 +401,10 @@ const [googleLoader, setGoogleLoader] = useState(false);
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity 
-       activeOpacity={0.5}
-       onPress={()=> navigation.navigate("ForgotPass")}
-       >
+      <TouchableOpacity
+        activeOpacity={0.5}
+        onPress={() => navigation.navigate("ForgotPass")}
+      >
         <Text style={styles.forgotpass}>Forgot Password?</Text>
       </TouchableOpacity>
 
@@ -408,37 +414,69 @@ const [googleLoader, setGoogleLoader] = useState(false);
           <Text style={styles.signuplnk}>Register</Text>
         </TouchableOpacity>
       </View>
-    </View>
+
+    </ScrollView>
+   
   );
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
+    minHeight:"100%",
+    backgroundColor: Constants.background,
     alignItems: "center",
-    paddingTop: 100,
+    paddingBottom:"40%",
+    paddingTop:40,
+  },
+  backArrow: {
+    position: "absolute",
+    left:5,
+    top: 30,
+    zIndex: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 20,
+    marginTop: 8,
+    marginBottom: 8,
+    backgroundColor: Constants.background,
+    height: 40,
+    width: 40,
+    borderRadius: 50,
+    elevation: 2,
   },
   loginimage: {
     resizeMode: "contain",
-    height: "28%",
+    height: "30%",
+    marginTop:"17%"
   },
   title: {
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingone,
     color: Constants.primary,
     fontWeight: Constants.Bold,
+    marginTop:-30,
   },
-  emailAddress: {
+  emailContainer:{
+    flexDirection: "row",
+    justifyContent:"space-between",
+    alignItems:"center",
+    width: "80%",
+    marginTop: 10,
     backgroundColor: Constants.Faded,
-    borderRadius: Constants.borderRad,
+    borderRadius: Constants.medium,
+    paddingLeft:6,
+    borderWidth: 0.5,
+    borderColor: Constants.primary,
+  },
+
+  emailAddress: {
     padding: Constants.paddTwo,
     fontSize: Constants.headingtwo,
+    paddingLeft: 10,
+
     width: "90%",
-    paddingLeft: 30,
-    marginTop: 10,
   },
   error_Message: {
-    marginTop: 20,
+    marginTop: 10,
     flexDirection: "row",
   },
   errorTxt: {
@@ -447,41 +485,43 @@ const styles = StyleSheet.create({
   subTitle: {
     color: Constants.Secondary,
   },
+  viewPassword: {
+   flexDirection: "row",
+    justifyContent:"space-between",
+    alignItems:"center",
+    width: "80%",
+    marginTop: 15,
+    backgroundColor: Constants.Faded,
+    borderRadius: Constants.medium,
+    paddingLeft:6,
+    borderWidth: 0.5,
+    borderColor: Constants.primary,
+  },
   password: {
+    padding: Constants.paddTwo,
     fontSize: Constants.headingtwo,
-    width: "75%",
-    paddingLeft: 20,
+    paddingLeft: 10,
+    width: "78%",
+  },
+  showpassword:{
+    paddingRight:12,
   },
   buttonContainer: {
-    width: "70%",
-    flexDirection: "row",
-    justifyContent: "space-around",
+    width: "80%",
     alignItems: "center",
-    margin:10,
+    margin: 10,
   },
-  gobackBtn: {
-   
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
-    fontSize: Constants.headingtwo,
-    alignItems: "center",
-    justifyContent: "center",
-
-    shadowColor:Constants.Secondary,
-    marginTop: 20,
-    padding: 8,
-    minWidth:100,
-  },
+ 
   signinbtn: {
-   
     backgroundColor: Constants.primary,
     borderRadius: Constants.tiny,
     fontSize: Constants.headingtwo,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 20,
-    padding: 8,
-    minWidth:100,
+    padding: 10,
+   minWidth: 100,
+   width: "100%",
   },
   signbtntxt: {
     color: Constants.Inverse,
@@ -493,19 +533,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     backgroundColor: Constants.Faded,
-    borderRadius: Constants.borderRad,
+    borderRadius: Constants.tiny,
     fontSize: Constants.headingtwo,
     alignItems: "center",
-    width: "60%",
-    padding: 12,
+    width: "80%",
+    padding: 10,
     marginTop: 5,
+    elevation: 4,
+    shadowColor: Constants.Secondary,
+  
   },
 
   forgotpass: {
     marginTop: 10,
   },
   bottomtxt: {
-    top: 65,
+    top: 20,
     flexDirection: "row",
     justifyContent: "space-around",
     width: "70%",
@@ -515,22 +558,6 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
     color: Constants.primary,
   },
-  viewPassword: {
-    width: "90%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.borderRad,
-    marginTop: 15,
-    padding: 0,
-    padding: Constants.paddTwo,
-  },
-  eyeIcon: {
-    marginRight: 15,
-  },
+ 
 
-  ContinueIcon:{
-    
-  }
 });

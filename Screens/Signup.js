@@ -8,15 +8,20 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
-  LogBox
+  LogBox,
+  ScrollView
+
 } from "react-native";
 import Constants from "../constants/Constants";
-import { Ionicons } from "react-native-vector-icons";
+import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import Connection from "../constants/connection";
 import * as Animatable from "react-native-animatable";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { AuthContext } from "../Components/context";
+import { Caption, } from "react-native-paper";
+
+
 
 WebBrowser.maybeCompleteAuthSession();
 LogBox.ignoreLogs(["EventEmitter.removeListener"]);
@@ -87,7 +92,7 @@ export default function SignUp({ navigation }) {
         mail: val,
         check_textInputChange: false,
         isValidEmail: false,
-        email_error: "Email address must contain @ and . signs",
+        email_error: "Enter your email address",
       });
     }
   };
@@ -286,7 +291,7 @@ export default function SignUp({ navigation }) {
 
       // default category place holder
 
-      var category = "Select Category";
+      var category = "Entertainment";
 
       //dat to be sent to server
       var Data = {
@@ -340,7 +345,7 @@ export default function SignUp({ navigation }) {
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} nestedScrollEnabled>
       <SuccessModal visible={visible}>
         <TouchableOpacity
           onPress={() => setVisible(false)}
@@ -366,40 +371,75 @@ export default function SignUp({ navigation }) {
           </View>
         </View>
       </SuccessModal>
-      <Image style={styles.loginimage} source={require("../assets/icon.png")} />
-      <Text style={styles.title}>p2b-Ethiopia</Text>
+      <TouchableOpacity
+            style={styles.backArrow} // back arrow button style
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons
+              name="arrow-back-sharp"
+              size={25}
+              //back arrow icon
+              color= {Constants.Inverse}
+            />
+          </TouchableOpacity>
+      <Image style={styles.loginimage} source={require("../assets/logo.png")} />
+
+      <Caption style={styles.subTitle}>Register and be our valued family</Caption>
       {data.isFieldEmpty ? null : (
         <View style={styles.mainErrorIndicator}>
           <Text style={styles.errorTxt}>{data.emptyField}</Text>
         </View>
       )}
 
+
+   <View style={styles.emailContainer}>
+   <MaterialIcons
+          name="alternate-email"
+          size={24}
+          color={Constants.primary}
+        />
       <TextInput
         style={styles.emailAddress}
-        placeholder="Enter Your Email Address"
+        placeholder="Email"
         onChangeText={(val) => emailAddress(val)}
       />
-      {data.isValidEmail ? null : (
+     
+ </View>
+ {data.isValidEmail ? null : (
         <View style={styles.errormsg}>
           <Text style={styles.errorTxt}>{data.email_error}</Text>
         </View>
       )}
 
+ <View style={styles.emailContainer}>
+   <MaterialIcons
+          name="person"
+          size={24}
+          color={Constants.primary}
+        />
       <TextInput
         style={styles.emailAddress}
         placeholder="Username Or Organizer name"
         onChangeText={(val) => username(val)}
       />
 
-      {data.isValidUser ? null : (
+   
+       </View>
+       {data.isValidUser ? null : (
         <View style={styles.errormsg}>
           <Text style={styles.errorTxt}>{data.user_error}</Text>
         </View>
       )}
+
       <View style={styles.passwordField}>
+      <MaterialIcons
+          name="security"
+          size={24}
+          color={Constants.primary}
+        />
         <TextInput
           style={styles.password}
-          placeholder="Enter Your Password"
+          placeholder="Password"
           secureTextEntry={data.setPassword ? true : false}
           onChangeText={(val) => passwordChange(val)}
         />
@@ -431,6 +471,11 @@ export default function SignUp({ navigation }) {
         </View>
       )}
       <View style={styles.passwordField}>
+      <MaterialIcons
+          name="security"
+          size={24}
+          color={Constants.primary}
+        />
         <TextInput
           style={styles.password}
           placeholder="Confirm Password"
@@ -506,60 +551,111 @@ export default function SignUp({ navigation }) {
           <Text style={styles.signuplnk}>Sign In</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    paddingTop: 20,
+    
+    minHeight:"100%",
+    paddingBottom:"45%"
+  },
+  backArrow: {
+    position: "absolute",
+    left:5,
+    top: 30,
+    zIndex: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 20,
+    marginTop: 8,
+    marginBottom: 8,
+    backgroundColor: Constants.background,
+    height: 40,
+    width: 40,
+    borderRadius: 50,
+    elevation: 2,
   },
   loginimage: {
     resizeMode: "contain",
-    height: "16%",
+    height: "30%",
+    width: "80%",
+    marginTop:"17%"
   },
   title: {
-    marginBottom: 25,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingone,
-    color: Constants.mainText,
+    color: Constants.primary,
     fontWeight: Constants.Bold,
   },
-  emailAddress: {
+  emailContainer:{
+    flexDirection: "row",
+    justifyContent:"space-between",
+    alignItems:"center",
+    width: "80%",
+    marginTop: 10,
     backgroundColor: Constants.Faded,
-    borderRadius: Constants.borderRad,
+    borderRadius: Constants.medium,
+    paddingLeft:6,
+    borderWidth: 0.5,
+    borderColor: Constants.primary,
+  },
+  emailAddress: {
     padding: Constants.paddTwo,
     fontSize: Constants.headingtwo,
+    paddingLeft: 10,
     width: "90%",
-    paddingLeft: 20,
-    marginTop: 15,
   },
-  password: {
-    fontSize: Constants.headingtwo,
-    width: "75%",
-    paddingLeft: 20,
-  },
+  passwordField: {
+    flexDirection: "row",
+     justifyContent:"space-between",
+     alignItems:"center",
+     width: "80%",
+     marginTop: 15,
+     backgroundColor: Constants.Faded,
+     borderRadius: Constants.medium,
+     paddingLeft:6,
+     borderWidth: 0.5,
+     borderColor: Constants.primary,
+     
+   },
+   password: {
+     padding: Constants.paddTwo,
+     fontSize: Constants.headingtwo,
+     paddingLeft: 10,
+     width: "78%",
+ 
+   },
+   eyeIcon: {
+     marginRight: 12,
+   },
+  
   signupbtn: {
-    backgroundColor: Constants.primary,
-    borderRadius: Constants.mediumbox,
+ backgroundColor: Constants.primary,
+    borderRadius: Constants.tiny,
     fontSize: Constants.headingtwo,
     alignItems: "center",
     justifyContent: "center",
-    width: "60%",
     marginTop: 20,
-    padding: 12,
+    padding: 10,
+   minWidth: 100,
+   width: "80%",
   },
   google: {
     flexDirection: "row",
     justifyContent: "center",
     backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
+    borderRadius: Constants.tiny,
     fontSize: Constants.headingtwo,
-    alignItems: "space-between",
-    width: "60%",
+    alignItems: "center",
+    width: "80%",
     padding: 10,
+    marginTop: 5,
+    elevation: 4,
+    shadowColor: Constants.Secondary,
+  
   },
   signbtntxt: {
     color: Constants.Inverse,
@@ -585,23 +681,11 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingTop: 0,
   },
-  passwordField: {
-    width: "90%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.borderRad,
-    marginTop: 15,
-    padding: Constants.paddTwo,
-  },
-  eyeIcon: {
-    marginRight: 12,
-  },
+ 
   errormsg: {
     flexDirection: "row",
     alignSelf: "flex-start",
-    marginLeft: 30,
+    marginLeft: 40,
   },
   errorTxt: {
     color: "red",

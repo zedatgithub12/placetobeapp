@@ -9,48 +9,38 @@ const userInfo = ({ ...props }) => {
       //followers ,following, event posted
       style={styles.infoContainer}
     >
-      <LinearGradient 
-       colors={[Constants.purple, Constants.purple, ]}
-       style={styles.containerWithIcon} 
-      >
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={{alignItems:"center"}}
-        onPress={props.getData}
-      >
-        
-        <Text style={styles.txts}>{props.Events}</Text>
-        <Text style={styles.describingtxt}>Events</Text>
-      </TouchableOpacity>
-      </LinearGradient>
+      <View style={styles.containerWithIcon}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={{ alignItems: "center" }}
+          onPress={props.getData}
+        >
+          <Text style={styles.txts}>{props.Events}</Text>
+          <Text style={styles.describingtxt}>Your Events</Text>
+        </TouchableOpacity>
+      </View>
 
-      <LinearGradient 
-       colors={[ Constants.primary, Constants.primaryTwo, ]}
-       style={styles.containerWithIcon} 
-      >
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={{alignItems:"center"}}
-        onPress={props.followerCountPressed}
-      >
-        <Text style={styles.txts}>{props.Followers}</Text>
-        <Text style={styles.describingtxt}>Followers</Text>
-      </TouchableOpacity>
-      </LinearGradient>
+      <View style={styles.containerWithIcon}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={{ alignItems: "center" }}
+          onPress={props.followerCountPressed}
+        >
+          <Text style={styles.txts}>{props.Followers}</Text>
+          <Text style={styles.describingtxt}>Followers</Text>
+        </TouchableOpacity>
+      </View>
 
-      <LinearGradient 
-       colors={[ Constants.primary, Constants.primaryTwo,  ]}
-       style={styles.containerWithIcon} 
-      >
-      <TouchableOpacity
-         style={{alignItems:"center"}}
-        onPress={props.followingCountPressed}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.txts}>{props.Following}</Text>
-        <Text style={styles.describingtxt}>Following</Text>
-      </TouchableOpacity>
-      </LinearGradient>
+      <View style={styles.containerWithIcon}>
+        <TouchableOpacity
+          style={{ alignItems: "center" }}
+          onPress={props.followingCountPressed}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.txts}>{props.Following}</Text>
+          <Text style={styles.describingtxt}>Following</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -67,22 +57,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 5,
-    borderWidth: 0.4,
-    borderColor:Constants.background,
+    elevation: 3,
+    shadowColor: Constants.Secondary,
     borderRadius: Constants.tinybox,
     width: "30%",
-    elevation:3,
-    shadowColor:Constants.primary
+    backgroundColor: Constants.background,
 
   },
   describingtxt: {
-    color: Constants.Faded,
-    fontWeight: Constants.Bold,
+    color: Constants.Secondary,
+    fontFamily:Constants.fontFam,
+    //fontWeight: Constants.Boldtwo,
   },
   txts: {
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
-    color: Constants.Faded,
+    color: Constants.purple,
   },
 });
 

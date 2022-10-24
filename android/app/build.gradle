@@ -139,7 +139,7 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
-
+    buildToolsVersion '31.0.0'
     defaultConfig {
         applicationId 'com.afromina.placetobe'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -265,8 +265,12 @@ android {
 
         }
     }
-    
+     buildFeatures {
+        viewBinding true
+    }
+
 }
+
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
 // Accepts values in comma delimited lists, example:

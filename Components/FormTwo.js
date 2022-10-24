@@ -27,14 +27,14 @@ const FormTwo = () => {
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState("date");
   const [show, setShow] = useState(false);
-  const [startDate, setStartDate] = useState("start date");
-  const [startTime, setStartTime] = useState("start time");
+  const [startDate, setStartDate] = useState("Start Date");
+  const [startTime, setStartTime] = useState("Start Time");
 
   const [endingDate, setEndingDate] = useState(new Date());
   const [endMode, setEndMode] = useState("date");
   const [showit, setShowit] = useState(false);
-  const [endDate, setEndDate] = useState("End date");
-  const [endTime, setEndTime] = useState("End time");
+  const [endDate, setEndDate] = useState("End Date");
+  const [endTime, setEndTime] = useState("End Time");
 
   const [inputs, setInputs] = React.useState({
     startDateBorder: Constants.purple,
@@ -68,6 +68,7 @@ const FormTwo = () => {
 
     setStartDate(startDate);
     setStartTime(startTime);
+  
 
     if (startDate) {
       setInputs({
@@ -142,7 +143,7 @@ const FormTwo = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.eventSession}>Provide event sessions</Text>
+      <Text style={styles.eventSession}>Provide Event Sessions</Text>
       <View
         style={[
           styles.eventContentContainer,
@@ -265,7 +266,7 @@ const FormTwo = () => {
           value={date}
           mode={mode}
           is24Hour={true}
-          display="default"
+          display="spinner"
           collapsable={true}
           onChange={onChange}
           maximumDate={new Date(2050, 12, 31)}
@@ -278,7 +279,7 @@ const FormTwo = () => {
           value={endingDate}
           mode={endMode}
           is24Hour={true}
-          display="default"
+          display="spinner"
           onChange={onChangeEndDate}
           maximumDate={new Date(2050, 12, 31)}
           minimumDate={new Date(2000, 0, 1)}

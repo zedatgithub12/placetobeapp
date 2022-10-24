@@ -1,48 +1,72 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, Text, TouchableOpacity,Image } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
 import { Ionicons, FontAwesome5 } from "react-native-vector-icons";
 import MyTabs from "./TopTab";
-import { Divider, Title } from "react-native-paper";
+import { Caption, Divider, Title } from "react-native-paper";
 import { AuthContext } from "../Components/context";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
+import TodaysEvents from "./TodaysEvent";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Connection from "../constants/connection";
+import { SliderBox } from "react-native-image-slider-box";
 
 function Home({ navigation, ...props }) {
-
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
 
   const profile = () => {
     navigation.navigate("Profile");
   };
-  useEffect(()=>{
+ 
+  let ScreenWidth = Dimensions.get('screen').width;
+  let ScreenHeight = Dimensions.get('screen').height;
+  let path = "assets/featured(4).jpg";
+
+
+  const Images = [
+    Connection.url+"assets/placetobe.jpg",
+    Connection.url+"assets/Streamer.jpg",
+    Connection.url+"assets/Green.jpg",
+    Connection.url+"assets/Travel.jpg",
+  ];
+ 
+
+  useEffect(() => {
     userInfoFunction();
-  }, [])
+    return () => {};
+  }, []);
+
   const logged = userStatus.logged;
   return (
     <SafeAreaView style={styles.container}>
-      
       <View
         //to component container
         // profile avatar, App name and serach is included inside the component
         style={styles.headers}
       >
-  
-               <View style={styles.brands}>
-                 <Image source={require("../assets/icon.png")} 
-                 resizeMode="cover"
-                 style={{width:52, height:52}}
-                 />
-              <Title style={styles.SearchField}> place to be </Title>
-              </View>
-        
+        <View style={styles.brands}>
+          <Image
+            source={require("../assets/primary.png")}
+            resizeMode="cover"
+            style={{ width: 152, height: 82 }}
+          />
+        </View>
 
         <TouchableOpacity
-        activeOpacity={0.8}
+          activeOpacity={0.8}
           style={styles.searchBtn}
           onPress={() => navigation.push("Eventcat")}
         >
-             <Ionicons
+          <Ionicons
             name="search-outline"
             size={20}
             color={Constants.primary}
@@ -50,50 +74,59 @@ function Home({ navigation, ...props }) {
           />
         </TouchableOpacity>
 
-        {logged ?
-  
-  <TouchableOpacity
-    activeOpacity={0.9}
-    onPress={() => profile()}
-    style={styles.profileContainer}
-  >
-    <Ionicons
-      name="person"
-      size={22}
-      style={styles.profileIcon}
-      color={Constants.primary}
-    />
-  </TouchableOpacity>
-  :
-  <TouchableOpacity
-    activeOpacity={0.9}
-    onPress={() => navigation.navigate("SignIn")}
-    style={styles.profileContainer}
-  >
-    <Ionicons
-      name="person"
-      size={22}
-      style={styles.profileIcon}
-      color={Constants.primary}
-    />
-  </TouchableOpacity>
-}
+        {logged ? (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => profile()}
+            style={styles.profileContainer}
+          >
+            <Ionicons
+              name="person"
+              size={22}
+              style={styles.profileIcon}
+              color={Constants.primary}
+            />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("SignIn")}
+            style={styles.profileContainer}
+          >
+            <Ionicons
+              name="person"
+              size={22}
+              style={styles.profileIcon}
+              color={Constants.primary}
+            />
+          </TouchableOpacity>
+        )}
       </View>
+      <Divider style={{ color: Constants.primary }} />
 
+      
 
-      <Divider style={{ color: Constants.primary}}/>
-      <LinearGradient
-        // Button Linear Gradient
-        colors={[Constants.primary, Constants.primary, Constants.primary]}
-        
-       style={styles.PrimaryTitle}>
-        <Text style={styles.PrimaryTitleText}>Featured Events</Text><Ionicons name="star" size={24} color={Constants.background} />
-     
-</LinearGradient>
-      <MyTabs
-      // This component contain the tabs of Event which is filtered by status of
-      // Today, This Week, Upcoming events
+      <SliderBox
+        images={Images}
+        dotColor={Constants.primary}
+        inactiveDotColor={Constants.background}
+        dotStyle={{
+          height: 9,
+          width: 9,
+          borderRadius: 8,
+        }}
+        firstItem={0}
+        imageLoadingColor={Constants.Secondary}
+        autoplay={true}
+        autoplayInterval={5000}
+        circleLoop={true}
+        paginationBoxVerticalPadding={10}
+        resizeMode="contain"
+        activeOpacity={0.9}
       />
+  
+
+      <MyTabs />
     </SafeAreaView>
   );
 }
@@ -120,67 +153,68 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     paddingLeft: 10,
   },
-  brands:{
-      flexDirection:"row",
-      alignItems:"center",
-    
+  brands: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "76%",
   },
   SearchField: {
-    width: "64%",
-    fontWeight:Constants.Bold,
-    fontFamily:Constants.fontFam,
-    fontSize:Constants.headingone,
+ 
+    fontWeight: Constants.Bold,
+    fontFamily: Constants.fontFam,
+    fontSize: Constants.headingone,
+    alignSelf: "center",
   },
   profileContainer: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 15,
-    backgroundColor: Constants.Faded,
-    padding: 4,
+    borderRadius: 16,
+    backgroundColor: Constants.transparentPrimary,
+    padding: 5,
     elevation: 2,
     shadowColor: Constants.Faded,
-    marginRight:8,
-  
+    marginRight: 8,
   },
   profileImage: {
     alignSelf: "center",
   },
 
   PrimaryTitle: {
-    flexDirection:"row",
-    justifyContent:"space-between",
-    alignItems:"center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     alignSelf: "center",
-   
     padding: 20,
-    backgroundColor: Constants.Faded,
-    width:"90%",
-    margin:10,
-    marginTop:12,
-    borderRadius:Constants.tinybox,
-    
+    backgroundColor: Constants.purple,
+    width: "90%",
+    margin: 10,
+    marginTop: 12,
+    borderRadius: Constants.tinybox,
+    elevation: 12,
+    shadowColor: Constants.Secondary,
   },
   PrimaryTitleText: {
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
-    marginLeft: 10,
-    color: Constants.Inverse
+
+    color: Constants.background,
   },
   searchBtn: {
+    width: 32,
+    height: 32,
     justifyContent: "center",
     alignItems: "center",
-    padding: 4,
-    backgroundColor:Constants.Faded,
-    borderRadius:50,
-    marginRight:8
+    padding: 6,
+    backgroundColor: Constants.transparentPrimary,
+    borderRadius: 16,
+    marginRight: 8,
   },
   statusFilter: {
     flexDirection: "row",
     justifyContent: "space-around",
     padding: Constants.padd,
-    marginTop: 5,
   },
   statusFilterBtn: {
     width: "23%",

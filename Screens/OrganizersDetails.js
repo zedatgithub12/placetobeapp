@@ -11,17 +11,19 @@ import {
   Modal,
   Pressable,
   Alert,
+  ActivityIndicator
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
-import { Ionicons } from "react-native-vector-icons";
+import { Ionicons,MaterialCommunityIcons } from "react-native-vector-icons";
 import Connection from "../constants/connection";
 import OrganizerEvents from "../Components/OrganizerEvents";
-import { Caption } from "react-native-paper";
+import { Caption,HelperText } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import call from "react-native-phone-call";
 import { AuthContext } from "../Components/context";
 import OrganizersShimmer from "../Components/organizerShimmer";
+
 
 // create a component
 const OrganizersDetail = ({ route, navigation }) => {
@@ -80,8 +82,12 @@ const OrganizersDetail = ({ route, navigation }) => {
 
   //follow organizer if user is not following
   //unfollow organizer if user is following
+  
+const [subscription, setSubscription] = useState(false); // follow unfollow activity indicator
 
   const followOrganizer = async () => {
+
+    setSubscription(true);
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -116,7 +122,10 @@ const OrganizersDetail = ({ route, navigation }) => {
               subscription: responseMessage,
               btnDisabled: true,
               ButtonColor: Constants.transparentPrimary,
+              
             });
+            followCounter();
+            setSubscription(false);
           } else {
             setFollow({
               ...follow,
@@ -124,15 +133,17 @@ const OrganizersDetail = ({ route, navigation }) => {
               btnDisabled: false,
               ButtonColor: Constants.primary,
             });
+            followCounter();
+            setSubscription(false);
           }
         }
       })
       .catch((err) => {
         if (err.name === "AbortError") {
-          console.log("successfully aborted");
+          //console.log("successfully aborted");
         } else {
           // handle error
-          console.log("error abortion");
+          //console.log("error abortion");
         }
       });
     return () => {
@@ -345,6 +356,7 @@ const OrganizersDetail = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+     
       <Modal
         animationType="slide"
         transparent={true}
@@ -360,12 +372,13 @@ const OrganizersDetail = ({ route, navigation }) => {
               resizeMode="contain"
               style={styles.modalImage} //featured image styles
             />
-            <Pressable
+            <TouchableOpacity
+            activeOpacity={0.7}
               style={[styles.button, styles.buttonClose]}
               onPress={() => setModalVisible(!modalVisible)}
             >
-              <Text style={styles.textStyle}>Close</Text>
-            </Pressable>
+              <MaterialCommunityIcons name="close" size={20} color={Constants.Inverse}/>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -385,10 +398,10 @@ const OrganizersDetail = ({ route, navigation }) => {
   </TouchableOpacity>
   <Image
     //Featured Image of the event
-    source={{ uri: coverpage }} //featured image source
+    source={{  uri: featuredImageUri + organizerInfo.profile }} //featured image source
     resizeMode="cover"
     style={styles.image} //featured image styles
-    blurRadius={8}
+    blurRadius={4}
   />
 </View>
 
@@ -436,9 +449,19 @@ const OrganizersDetail = ({ route, navigation }) => {
         activeOpacity={0.7}
         style={styles.followBtn}
       >
+      {subscription ?
+      (
+        <ActivityIndicator size="small" color={Constants.background}/>
+      )
+      :
+      (
         <Text numberOfLines={1} style={styles.btnText}>
-          {follow.subscription}
-        </Text>
+        {follow.subscription}
+      </Text>
+      )
+      }
+       
+
       </TouchableOpacity>
     ) : null}
   </View>
@@ -519,7 +542,7 @@ const styles = StyleSheet.create({
   //View container of profile Image and organizer name and category
   sectionOne: {
     flexDirection: "row",
-    justifyContent: "space-between",
+   
     alignItems: "center",
     width: "100%",
     alignSelf: "center",
@@ -547,7 +570,7 @@ const styles = StyleSheet.create({
     borderRadius: 35,
   },
   contentContainer: {
-    marginLeft: 25,
+    marginLeft: 15,
     width: "40%",
   },
   organizerName: {
@@ -571,11 +594,11 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   followBtn: {
-    width: 110,
+    width: 105,
     alignItems: "center",
-    backgroundColor: Constants.PrimaryBlue,
+    backgroundColor: Constants.primary,
     padding: 5,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     borderRadius: Constants.tinybox,
     margin: 10,
   },
@@ -587,7 +610,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: Constants.tinybox,
     borderWidth: 0.5,
-    borderColor: Constants.PrimaryBlue,
+    borderColor: Constants.primary,
   },
   btnText: {
     fontSize: Constants.headingtwo,
@@ -599,7 +622,7 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
-    color: Constants.PrimaryBlue,
+    color: Constants.primary,
   },
   notFound: {
     width: "85%",
@@ -629,10 +652,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   modalView: {
-    margin: 20,
+    margin: 15,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 10,
+    padding: 9,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -645,14 +668,16 @@ const styles = StyleSheet.create({
   },
   modalImage: {
     width: "100%",
-    height: 350,
+    height: 330,
     borderRadius: 10,
   },
   button: {
+    position:"absolute",
+    top:2,
+    right:2,
     alignSelf: "flex-end",
-    borderRadius: Constants.borderRad,
-    padding: 6,
-    paddingHorizontal: 20,
+    borderRadius: 50,
+    padding: 7,
     margin: 10,
     elevation: 2,
   },

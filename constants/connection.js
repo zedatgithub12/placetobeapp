@@ -1,6 +1,7 @@
 const Connection = 
     {
-        url: "http://app.p2b-ethiopia.com/",
+      //url: "http://app.p2b-ethiopia.com/placetobe/",
+        url: "http://192.168.100.3/p2b-app/",
         signUp: "Signup.php",
         signIn: "Signin.php",
         googleSignUp: "GoogleSignUp.php",
@@ -8,6 +9,8 @@ const Connection =
         AddEvent: "AddEvent.php",
         TodayEvents: "TodayEvents.php",
         follow: "follow.php",
+        followers: "followers.php",
+        following: "following.php",
         upload: "uploadimage.php",
         assets: "assets/",
         organizer: "organizer.php",

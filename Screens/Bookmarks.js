@@ -112,8 +112,8 @@ function Bookmarks({ navigation }){
             style={styles.noBookmarkImage}
             resizeMode="contain"
           />
-          <Title style={styles.prompttxt}>Not bookmarked an event !</Title>
-          <Paragraph>your bookmarked event will appear here.</Paragraph>
+          <Title style={styles.prompttxt}>No Bookmarks</Title>
+          <Paragraph>Your bookmarked event will appear here.</Paragraph>
           <TouchableOpacity
             //this is a button which redirect user to today event listing in the home page
             style={styles.eventsBtn}

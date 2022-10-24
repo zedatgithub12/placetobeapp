@@ -159,8 +159,8 @@ function Profile({ navigation, props }) {
   };
 
   // variables and functions for invite friends button inside profile screen
-  var msg = "you are invited to install p2b-app";
-  var links = "https://www.p2b-ethiopia.com/";
+  var msg = "you are invited to install p2b-app  ";
+  var links = "  https://www.p2b-ethiopia.com/";
   // share the app to friends
   const onShare = async () => {
     try {
@@ -279,7 +279,7 @@ function Profile({ navigation, props }) {
           });
           setImage(Connection.url + Connection.assets + userInfo.profile);
         } else {
-          console.log(resp.message);
+         // console.log(resp.message);
         }
       });
 
@@ -310,7 +310,7 @@ function Profile({ navigation, props }) {
               colors={[
                 Constants.primary,
                 Constants.primary,
-                Constants.transparentPrimary,
+                Constants.primary,
               ]}
               style={styles.coverImageContainer}
             ></LinearGradient>
@@ -349,6 +349,8 @@ function Profile({ navigation, props }) {
               <InteractionInfo
                 Events={userInfo.eventPosted}
                 getData={() => navigation.navigate("yourEvents", { count })}
+                followerCountPressed={()=> navigation.navigate("Followers")}
+                followingCountPressed={()=>navigation.navigate("Following")}
                 Followers={userInfo.followers}
                 Following={userInfo.following}
               />
@@ -574,7 +576,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   optionIcon:{
-  color:Constants.purple,
+  color:Constants.primary,
   },
   bookmark: {
     flexDirection: "row",

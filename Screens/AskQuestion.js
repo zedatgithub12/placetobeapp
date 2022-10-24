@@ -5,15 +5,18 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Constants from "../constants/Constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../constants/connection";
-import { MaterialIcons,MaterialCommunityIcons } from "react-native-vector-icons";
+import {
+  MaterialIcons,
+  MaterialCommunityIcons,
+} from "react-native-vector-icons";
 import { ActivityIndicator } from "react-native-paper";
-
+import * as Linking from "expo-linking";
 
 const Questions = () => {
   const [name, setName] = useState(); // user first and middle name
@@ -28,7 +31,6 @@ const Questions = () => {
     show: false,
     Icon: false,
   });
-
 
   //get user information from database
   const getUserInfo = async () => {
@@ -95,7 +97,7 @@ const Questions = () => {
         .then((response) => response.json())
         .then((response) => {
           var message = response[0].message;
-      
+
           if (message === "succeed") {
             setAlertMessage({
               ...alertMessage,
@@ -103,7 +105,7 @@ const Questions = () => {
               textColor: Constants.background,
               background: Constants.Success,
               show: true,
-              Icon:true
+              Icon: true,
             });
             setLoader(false);
           }
@@ -118,23 +120,26 @@ const Questions = () => {
   return (
     <ScrollView contentContainerStyle={styles.mainContainer}>
       <View style={styles.topContainer}>
-      <View style={styles.headerTitle}>
-        <Text style={styles.description}>You can reach us 24/7 via</Text>
-        <Text style={styles.emailAddress}>contact@p2b-ethiopia.com</Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => Linking.openURL("mailto:contact@p2b-ethiopia.com")}
+        >
+          <View style={styles.headerTitle}>
+            <Text style={styles.description}>You can reach us 24/7 via</Text>
+            <Text style={styles.emailAddress}>contact@p2b-ethiopia.com</Text>
+          </View>
+        </TouchableOpacity>
+        <View style={styles.alternateEmail}>
+          <MaterialIcons
+            name="alternate-email"
+            size={24}
+            color={Constants.primary}
+          />
+        </View>
       </View>
-      <View style={styles.alternateEmail}>
-      <MaterialIcons
-          name="alternate-email"
-          size={24}
-          color={Constants.primary}
-        />
-      </View>
-      </View>
-     
 
-      
       <View style={styles.inputContainer}>
-        <Text style={styles.labels}> Enter your name </Text>
+        <Text style={styles.labels}> Enter Your Name </Text>
         <TextInput
           style={styles.inputStyle}
           placeholder="Your name"
@@ -144,7 +149,7 @@ const Questions = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.labels}> Enter your Email </Text>
+        <Text style={styles.labels}> Enter Your Email </Text>
         <TextInput
           style={styles.inputStyle}
           placeholder="Email address"
@@ -154,7 +159,7 @@ const Questions = () => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.labels}> Enter your mobile (optional) </Text>
+        <Text style={styles.labels}> Enter Your Mobile (optional) </Text>
         <TextInput
           style={styles.inputStyle}
           placeholder="+2519********"
@@ -166,71 +171,76 @@ const Questions = () => {
       <View style={styles.inputContainer}>
         <Text style={styles.labels}> How can we help you? </Text>
         <TextInput
-          style={[styles.inputStyle, styles.multilineStyle]}
+          style={styles.multilineStyle}
           placeholder="write here..."
           value={message}
           onChangeText={(msg) => setMessage(msg)}
-          numberOfLines={4}
+          numberOfLines={3}
           multiline={true}
         />
         {alertMessage.show ? (
-          <View style={[styles.errorContainer,{ backgroundColor: alertMessage.background}]}>
-          <Text
+          <View
             style={[
-              styles.error,
-              {
-              
-                color: alertMessage.textColor,
-              },
+              styles.errorContainer,
+              { backgroundColor: alertMessage.background },
             ]}
           >
-            {alertMessage.text}
-          </Text>
-          {alertMessage.Icon ? (
-            <MaterialCommunityIcons name="checkbox-marked-circle" size={24} color={Constants.background}/>
-          ):
-          <MaterialIcons name="error" size={24} color={Constants.Danger}/>
-          }
+            <Text
+              style={[
+                styles.error,
+                {
+                  color: alertMessage.textColor,
+                },
+              ]}
+            >
+              {alertMessage.text}
+            </Text>
+            {alertMessage.Icon ? (
+              <MaterialCommunityIcons
+                name="checkbox-marked-circle"
+                size={24}
+                color={Constants.background}
+              />
+            ) : (
+              <MaterialIcons name="error" size={24} color={Constants.Danger} />
+            )}
           </View>
         ) : null}
       </View>
 
-{
-  loader ? (
-    <ActivityIndicator style={[styles.buttonStyle]} size="small" color={Constants.background}/>
-  ):
-  (
-    <TouchableOpacity style={[styles.buttonStyle]} onPress={submit}>
-        <Text style={styles.buttonText}>Submit </Text>
-      </TouchableOpacity>
-  )
-}
-  
+      {loader ? (
+        <ActivityIndicator
+          style={[styles.buttonStyle]}
+          size="small"
+          color={Constants.background}
+        />
+      ) : (
+        <TouchableOpacity style={[styles.buttonStyle]} onPress={submit}>
+          <Text style={styles.buttonText}>Submit </Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   mainContainer: {
-   
     alignItems: "center",
-
     backgroundColor: Constants.background,
   },
-  topContainer:{
+  topContainer: {
     width: "84%",
-  flexDirection:"row",
-  justifyContent:"space-evenly",
-  backgroundColor: Constants.transparentPrimary,
-  marginTop: 40,
-  marginBottom: 10,
-  paddingVertical: 15,
-  borderRadius: Constants.medium,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    backgroundColor: Constants.transparentPrimary,
+    marginTop: 40,
+    marginBottom: 10,
+    paddingVertical: 15,
+    borderRadius: Constants.medium,
   },
   headerTitle: {
     justifyContent: "center",
     alignItems: "center",
-   
   },
   description: {
     fontSize: Constants.headingtwo,
@@ -250,11 +260,11 @@ const styles = StyleSheet.create({
   alternateEmail: {
     backgroundColor: Constants.background,
     padding: 6,
-    height:50,
-    width:50,
+    height: 50,
+    width: 50,
     borderRadius: 25,
-    justifyContent:"center",
-    alignItems:"center",
+    justifyContent: "center",
+    alignItems: "center",
   },
   inputContainer: {
     justifyContent: "center",
@@ -275,15 +285,26 @@ const styles = StyleSheet.create({
     borderRadius: Constants.tinybox,
     padding: Constants.paddTwo,
     fontSize: Constants.headingtwo,
+    fontFamily: Constants.fontFam,
     width: "94%",
     paddingLeft: 20,
     marginTop: 2,
     alignSelf: "center",
     borderWidth: 0.3,
-    borderColor:Constants.purple
+    borderColor: Constants.purple,
   },
-  multiineStyle: {
-    paddingVertical: 4,
+  multilineStyle: {
+    backgroundColor: Constants.Faded,
+    borderRadius: Constants.tinybox,
+    padding: Constants.paddTwo,
+    fontSize: Constants.headingtwo,
+    fontFamily: Constants.fontFam,
+    width: "94%",
+    paddingLeft: 20,
+    marginTop: 2,
+    borderWidth: 0.3,
+    borderColor: Constants.purple,
+    alignItems: "flex-start"
   },
   buttonStyle: {
     width: "88%",
@@ -299,11 +320,10 @@ const styles = StyleSheet.create({
     color: Constants.background,
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
- 
   },
-  errorContainer:{
-    flexDirection:"row",
-    justifyContent:"space-between",
+  errorContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     width: "94%",
     paddingHorizontal: 15,
     marginTop: 10,
@@ -315,10 +335,13 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
     color: Constants.Danger,
     fontFamily: Constants.fontFam,
-    fontSize:Constants.headingtwo,
+    fontSize: Constants.headingtwo,
     lineHeight: 25,
     marginLeft: 5,
   },
+  multiineStyle:{
+    alignSelf: "flex-start",
+  }
 });
 
 export default Questions;

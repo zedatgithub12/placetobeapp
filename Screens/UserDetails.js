@@ -314,11 +314,12 @@ const UserDetails = ({ route, navigation }) => {
   };
 
   useEffect(() => {
+    console.log(detailInfo.google_Id);
     return () => {};
   });
 
   return (
-    <View style={styles.container}>
+
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {showMessage ? (
           <Animatable.View
@@ -376,7 +377,7 @@ const UserDetails = ({ route, navigation }) => {
         }
         <View style={styles.subContainerThree}>
           <View>
-            <HelperText>Your birthDate</HelperText>
+            <HelperText>Your Birth Date</HelperText>
           </View>
           <View style={styles.birthDate}>
             <Fontisto
@@ -438,7 +439,7 @@ const UserDetails = ({ route, navigation }) => {
         <View style={styles.usernameUpdate}>
           <Caption>Organizer Name</Caption>
           <TextInput
-            placeholder="ex: Shega Events"
+            placeholder="Ex: Afromina Events"
             style={styles.username}
             value={MetaInfo.userName}
             onChangeText={(val) => updateUsername(val)}
@@ -471,7 +472,7 @@ const UserDetails = ({ route, navigation }) => {
                   style={styles.closeBtn}
                 />
               </Pressable>
-              <Text style={styles.modalTitle}>Your prefered Category</Text>
+              <Text style={styles.modalTitle}>Category list</Text>
 
               <FlatList
                 data={Category}
@@ -483,6 +484,7 @@ const UserDetails = ({ route, navigation }) => {
             </View>
           </Modal>
 
+          <Caption style={{marginLeft:15, marginTop:10,marginBottom:-5, padding:0}}>Select Your Prefered Category</Caption>
           <Pressable
             //Button which open the category modal
             style={[styles.catSelector,{backgroundColor:catback}]}
@@ -511,45 +513,52 @@ const UserDetails = ({ route, navigation }) => {
           {updating ? (
             <ActivityIndicator size="small" color={Constants.background} />
           ) : (
-            <Text style={styles.saveText}>Update</Text>
+            <Text style={styles.saveText}>Save</Text>
           )}
         </Pressable>
+{
+  detailInfo.google_Id ? null
+  :
+  (
+    
+    <View style={styles.updatePasswords}>
+    <Text style={styles.changePasswordTitle}>Change Password</Text>
+    <HelperText
+      style={[styles.errorMessageStyle, { color: error.messageColor }]}
+    >
+      {error.errorMessage}
+    </HelperText>
 
-        <View style={styles.updatePasswords}>
-          <Text style={styles.changePasswordTitle}>Change Password</Text>
-          <HelperText
-            style={[styles.errorMessageStyle, { color: error.messageColor }]}
-          >
-            {error.errorMessage}
-          </HelperText>
+    <TextInput
+      placeholder="Old Password"
+      value={MetaInfo.oldPassword}
+      onChangeText={(pass) => updateOldPassword(pass)}
+      style={styles.pass}
+    />
+    <TextInput
+      placeholder="New Password"
+      value={MetaInfo.password}
+      onChangeText={(pass) => updateNewPassword(pass)}
+      style={styles.pass}
+    />
+    <TextInput
+      placeholder="Confirm New Password"
+      value={MetaInfo.confirmPassword}
+      onChangeText={(pass) => updateConfirmedPassword(pass)}
+      style={styles.pass}
+    />
+    <Pressable onPress={() => ChangePassword()} style={styles.updatepassword}>
+   
+   {updatePassword ? (
+     <ActivityIndicator size="small" color={Constants.background} />
+   ) :  <Text style={styles.saveText}>Change Password</Text>}
+ </Pressable>
+  </View>
 
-          <TextInput
-            placeholder="Old Password"
-            value={MetaInfo.oldPassword}
-            onChangeText={(pass) => updateOldPassword(pass)}
-            style={styles.pass}
-          />
-          <TextInput
-            placeholder="New Password"
-            value={MetaInfo.password}
-            onChangeText={(pass) => updateNewPassword(pass)}
-            style={styles.pass}
-          />
-          <TextInput
-            placeholder="Confirm New Password"
-            value={MetaInfo.confirmPassword}
-            onChangeText={(pass) => updateConfirmedPassword(pass)}
-            style={styles.pass}
-          />
-        </View>
-        <Pressable onPress={() => ChangePassword()} style={styles.saveBtn}>
-         
-          {updatePassword ? (
-            <ActivityIndicator size="small" color={Constants.background} />
-          ) :  <Text style={styles.saveText}>Change Password</Text>}
-        </Pressable>
+  )
+}
       </ScrollView>
-    </View>
+
   );
 };
 
@@ -560,6 +569,8 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     alignItems: "center",
+    backgroundColor: Constants.background,
+    minHeight:"100%"
   },
   accountSettingHead: {
     color: Constants.Secondary,
@@ -663,12 +674,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "50%",
     backgroundColor: Constants.Faded,
-
     padding: 10,
     margin: 10,
     borderRadius: Constants.tinybox,
-    borderWidth: 0.4,
-    borderColor: Constants.purple
+   
   },
   selectedCategory: {
     fontFamily: Constants.fontFam,
@@ -759,9 +768,21 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     padding: 8,
     paddingHorizontal: 30,
-    backgroundColor: Constants.purple,
+    backgroundColor: Constants.primary,
     borderRadius: Constants.tiny,
     marginRight: 18,
+  },
+  updatepassword:{
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    alignSelf: "flex-end",
+    marginVertical: 20,
+    padding: 8,
+    paddingHorizontal: 30,
+    backgroundColor: Constants.primary,
+    borderRadius: Constants.tiny,
+    marginRight: 1,
   },
   saveText: {
     fontWeight: Constants.Bold,

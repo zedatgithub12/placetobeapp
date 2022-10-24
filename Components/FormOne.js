@@ -219,7 +219,7 @@ return await fetch(ApiUrl, {
     <View style={styles.formOne}>
       <View style={styles.uploadImageTitleContainer}>
         <Feather name="image" size={24} style={styles.uploadImageIcon} />
-        <Text style={styles.uploadImageTxt}>Upload Featured Image</Text>
+        <Text style={styles.uploadImageTxt}>Upload Event Poster</Text>
       </View>
       <TouchableOpacity
         activeOpacity={0.7}
@@ -265,7 +265,7 @@ return await fetch(ApiUrl, {
         />
         <TextInput
           // a text field used accept event title
-          placeholder="Enter Event name"
+          placeholder="Enter Event Name"
           numberOfLines={1}
           style={styles.eventTitle}
           value={inputs.eventName}
@@ -300,7 +300,7 @@ return await fetch(ApiUrl, {
         />
         <TextInput
           // a text field used accept event description
-          placeholder="Enter Event Description"
+          placeholder="Write Your Event Description"
           multiline
           numberOfLines={2}
           style={styles.eventDescription}

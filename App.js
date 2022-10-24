@@ -1,39 +1,43 @@
 import React, { useContext, useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image  } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Signin from "./Screens/Signin";
 import SignUp from "./Screens/Signup";
 import TabNav from "./Screens/Tabs";
 import Notifications from "./Screens/Notifications";
-import Organizers from "./Screens/Organizers";
+//import Organizers from "./Screens/Organizers";
 import Bookmarks from "./Screens/Bookmarks";
 import Setting from "./Screens/Setting";
 import Profile from "./Screens/ProfileScreen";
 import EventDetails from "./Screens/eventDetails";
-import { ActivityIndicator } from "react-native-paper";
+import { ActivityIndicator, Caption } from "react-native-paper";
 import Constants from "./constants/Constants";
 import { AuthContext } from "./Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import GallerDetail from "./Screens/GalleryDetail";
 import CategorizedEvent from "./Screens/CategorizedEvent";
 import UserDetails from "./Screens/UserDetails";
-import store  from "./store/store";
+import store from "./store/store";
+import notices from "./store/noticestore";
 import { Provider } from "react-redux";
-import { PersistGate } from 'redux-persist/integration/react';
-import {persistStore } from 'redux-persist';
+import { PersistGate } from "redux-persist/integration/react";
+import { persistStore } from "redux-persist";
 import YourEvents from "./Screens/YourEvents";
 import OrganizersDetail from "./Screens/OrganizersDetails";
 import Questions from "./Screens/AskQuestion";
 import About from "./Screens/About";
-import * as Linking from 'expo-linking';
+import * as Linking from "expo-linking";
 import ForgotPass from "./Screens/ForgotPassword";
-//import NetInfo from '@react-native-community/netinfo';
+import NetInfo from "@react-native-community/netinfo";
+import Followers from "./Screens/Followers";
+import Following from "./Screens/Following";
+
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
-const prefix = Linking.createURL('com.afromina.placetobe/');
+const prefix = Linking.createURL("com.afromina.placetobe/");
 
 export default function App() {
   // const [isLoading, setIsLoading] = React.useState(true);
@@ -117,6 +121,9 @@ export default function App() {
     loginReducer,
     initialLoginState
   );
+
+  // notification bagde context state
+
   // a useContext hook values which going to be used through the app component
   // the context value is named authContext
   const authContext = React.useMemo(() => ({
@@ -126,6 +133,7 @@ export default function App() {
     userStatus: {
       logged: user.logged,
     },
+    
     userInfoFunction: async () => {
       var id = await AsyncStorage.getItem("userId");
       var token = await AsyncStorage.getItem("userToken");
@@ -196,7 +204,6 @@ export default function App() {
           endingDay: endDate,
           endingTime: endTime,
         });
-     
       }
     },
     formThree: async (
@@ -218,7 +225,6 @@ export default function App() {
           eventAddr: eventAddress,
           entranceFee: eventEntrance,
         });
-      
       }
     },
     formFour: async (
@@ -314,8 +320,9 @@ export default function App() {
     },
 
     Signout: async () => {
-      // setUserToken(null);
-      // setIsLoading(false);
+      
+     
+
       setUser({
         ...user,
         logged: false,
@@ -336,16 +343,20 @@ export default function App() {
       ];
       try {
         await AsyncStorage.multiRemove(keys);
-      } catch (e) {
-       
-      }
+      } catch (e) {}
 
       dispatch({ type: "LOGOUT" });
     },
   }));
 
+  const [connectionState, setConnectionState] = useState(false);
+  const [retry, setRetry] = useState();
+
+  const Referesh = () => {
+    setRetry(!retry);
+  };
+
   useEffect(() => {
-   
     setTimeout(async () => {
       try {
         var userToken = await AsyncStorage.getItem("userToken");
@@ -356,20 +367,21 @@ export default function App() {
           });
         }
       } catch (e) {
-       //
+        //
       }
 
       dispatch({ type: "REGISTER", token: userToken });
-    }, 1000);
+    }, 2000);
+    NetInfo.fetch().then((state) => {
+      if (state.isConnected) {
+        setConnectionState(true);
+      }
+    });
 
-   
+    return () => {};
+  }, [retry]);
 
-
-  }, []);
-
-
-
-  // activity indicator which is going to be shown and the opening of app
+  /* activity indicator which is going to be shown and the opening of app
   if (loginState.isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor:Constants.primary }}>
@@ -378,141 +390,168 @@ export default function App() {
       </View>
     );
   }
+  */
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-      <AuthContext.Provider value={authContext}>
-        <NavigationContainer linking={p2blinking} >
-        <StatusBar style="black" />
+        <AuthContext.Provider value={authContext}>
+          <NavigationContainer linking={p2blinking}>
+            <StatusBar style="black" />
+            {connectionState ? (
+              <Stack.Navigator headerMode="none" initialRouteName="TabNav">
+                <Stack.Screen
+                  name="TabNav"
+                  component={TabNav}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="SignIn"
+                  component={Signin}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="SignUp"
+                  component={SignUp}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen name="Notifications" component={Notifications} />
 
-          <Stack.Navigator headerMode="none" initialRouteName="TabNav">
-            <Stack.Screen
-              name="TabNav"
-              component={TabNav}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="SignIn"
-              component={Signin}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name="SignUp" component={SignUp} />
-            <Stack.Screen name="Notifications" component={Notifications} />
-            <Stack.Screen name="Organizers" component={Organizers} />
+                <Stack.Screen
+                  name="Settings"
+                  component={Setting}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                  }}
+                />
+                <Stack.Screen
+                  name="Account Settings"
+                  component={UserDetails}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                  }}
+                />
+                <Stack.Screen
+                  name="Bookmarks"
+                  component={Bookmarks}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                  }}
+                />
+                <Stack.Screen
+                  name="Profile"
+                  component={Profile}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="EventDetail"
+                  component={EventDetails}
+                  options={{ headerShown: false }}
+                />
 
-            <Stack.Screen
-              name="Settings"
-              component={Setting}
-              options={{
-                headerStyle: {
-                  backgroundColor: Constants.primary,
-                },
-                headerTintColor: Constants.background,
-              }}
-            />
-            <Stack.Screen
-              name="Account Settings"
-              component={UserDetails}
-              options={{
-                headerStyle: {
-                  backgroundColor: Constants.primary,
-                },
-                headerTintColor: Constants.background,
-              }}
-            />
-            <Stack.Screen
-              name="Bookmarks"
-              component={Bookmarks}
-              options={{
-                headerStyle: {
-                  backgroundColor: Constants.primary,
-                },
-                headerTintColor: Constants.background,
-              }}
-            />
-            <Stack.Screen
-              name="Profile"
-              component={Profile}
-              options={{
-                headerStyle: {
-                  backgroundColor: Constants.primary,
-                  
-                },
-                headerTintColor: Constants.background,
-                headerShadowVisible: false,
-              }}
-            />
-            <Stack.Screen
-              name="EventDetail"
-              component={EventDetails}
-              options={{ headerShown: false }}
-            />
-       
-            <Stack.Screen
-              name="GalleryDetail"
-              component={GallerDetail}
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="Eventcat"
-              component={CategorizedEvent}
-              options={{
-                headerShown: false,
-              }}
-            />
+                <Stack.Screen
+                  name="GalleryDetail"
+                  component={GallerDetail}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Eventcat"
+                  component={CategorizedEvent}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
 
-            <Stack.Screen
-              name="yourEvents"
-              component={YourEvents}
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="Organizer Detail"
-              component={OrganizersDetail}
-              options={{
-                headerShown: false,
-              }}
-            />
-             <Stack.Screen
-              name="Questions"
-              component={Questions}
-              options={{
-                headerStyle: {
-                  backgroundColor: Constants.primary,
-                },
-                headerTintColor: Constants.background,
-                headerTitle: "Questions and Feedback"
-              }}
-            />
-              <Stack.Screen
-              name="About"
-              component={About}
-              options={{
-                headerStyle: {
-                  backgroundColor: Constants.primary,
-                },
-                headerTintColor: Constants.background,
-                headerTitle: "About us"
-              }}
-            />
+                <Stack.Screen
+                  name="yourEvents"
+                  component={YourEvents}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Organizer Detail"
+                  component={OrganizersDetail}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Questions"
+                  component={Questions}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerTitle: "Questions and Feedback",
+                  }}
+                />
+                <Stack.Screen
+                  name="About"
+                  component={About}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerTitle: "About us",
+                  }}
+                />
 
-           <Stack.Screen
-              name="ForgotPass"
-              component={ForgotPass}
-              options={{
-               headerShown: false
-              }}
-            />
-
-          </Stack.Navigator>
-
-
-        </NavigationContainer>
-      </AuthContext.Provider>
+                <Stack.Screen
+                  name="ForgotPass"
+                  component={ForgotPass}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Followers"
+                  component={Followers}
+                 
+                />
+                 <Stack.Screen
+                  name="Following"
+                  component={Following}
+                 
+                />
+              </Stack.Navigator>
+            ) : (
+              <View style={styles.noConnection}>
+                <Image
+                  source={require("./assets/connect.png")}
+                  style={styles.connImage}
+                  resizeMode="contain"
+                />
+                <Text>No Connection</Text>
+                <Caption>Please Check your internet connection</Caption>
+                <TouchableOpacity
+                  onPress={() => Referesh()}
+                  style={styles.eventsBtn}
+                >
+                  <Text style={styles.eventstxt}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </NavigationContainer>
+        </AuthContext.Provider>
       </PersistGate>
     </Provider>
   );
@@ -524,5 +563,29 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  noConnection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  connImage: {
+    height: "60%",
+    width: "90%",
+  },
+  eventsBtn: {
+    width: "60%",
+    padding: 8,
+    paddingHorizontal: 35,
+    borderRadius: Constants.mediumbox,
+    backgroundColor: Constants.primary,
+    margin: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  eventstxt: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Bold,
+    color: Constants.background,
   },
 });

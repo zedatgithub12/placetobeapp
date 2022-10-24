@@ -1,11 +1,12 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import Constants from "../constants/Constants";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./HomeScreen";
 import { Feather,Ionicons} from "react-native-vector-icons";
 import EventSubmission from "./SubmitEvent";
 import Notifications from "./Notifications";
+
 
 const Tab = createBottomTabNavigator();
 const AddEvent = ({ children, onPress }) => (
@@ -31,6 +32,8 @@ const AddEvent = ({ children, onPress }) => (
 );
 
 function TabNav({ navigation }) {
+ 
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -99,6 +102,9 @@ function TabNav({ navigation }) {
           ),
           tabBarActiveTintColor: Constants.primary,
           tabBarInactiveTintColor: Constants.Secondary,
+          
+   
+          
         }}
       />
     </Tab.Navigator>
@@ -129,6 +135,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.5,
     elevation: 5,
     padding: 8,
+
   },
 });
 

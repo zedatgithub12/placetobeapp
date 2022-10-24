@@ -6,6 +6,7 @@ import {
   View,
   Image,
   ToastAndroid,
+  TouchableOpacity
 } from "react-native";
 
 import Events from "../Components/Events";
@@ -193,10 +194,10 @@ const ThisWeekEvent = ({ navigation }) => {
 
   useEffect(() => {
     mountFunction();
-  },[]);
+  },[WEvents]);
 
   return (
-    <View>
+    <View style={{minHeight: "100%", backgroundColor: Constants.background}}>
       {loading ? (
         <FlatList
           // List of events in extracted from database in the form JSON data
@@ -221,13 +222,7 @@ const ThisWeekEvent = ({ navigation }) => {
               </View>
             ) : null
           }
-          ListFooterComponent={() => (
-            <View style={styles.listEnd}>
-              <HelperText>
-                If you are looking for specific event try to search for it.
-              </HelperText>
-            </View>
-          )}
+         
         />
       ) : (
         <View>
@@ -250,7 +245,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "80%",
     borderRadius: 10,
-    marginTop: 70,
+ 
     padding: 28,
   },
   notFound: {

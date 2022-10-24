@@ -18,25 +18,24 @@ import NoticeShimmer from "../Components/NoticeShimmer";
 const Notifications = ({ navigation }) => {
   // state from context from Context Hook
 
+  // function to be called when server respond with notice count
+
   const [notification, setNotification] = React.useState();
   const [notFound, setNotFound] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
 
-  // after list refreshed we call toast to tell user that the list is updated
-  const refreshed = () => ToastAndroid.show("Refreshed!", ToastAndroid.SHORT);
   // refresh the list of notifications
-  const RefreshList = async() => {
+
+  const RefreshList = async () => {
     setLoading(false);
     let id = await AsyncStorage.getItem("userId");
-  
 
     let isApiSubscribed = true;
     var ApiUrl = Connection.url + Connection.notification;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    
-    
+
     var userIdentity = {
       userId: id,
     };
@@ -44,7 +43,7 @@ const Notifications = ({ navigation }) => {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-   
+
     fetch(ApiUrl, {
       method: "POST",
       body: JSON.stringify(userIdentity),
@@ -53,38 +52,35 @@ const Notifications = ({ navigation }) => {
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
         var message = response[0].message;
-        
+
         if (isApiSubscribed) {
           // handle success
-          const filter=(data)=>{
-         return data !== null;
-          }
+
           if (message === "succeed") {
             var result = response[0].Notification;
-            var notice = result.filter(filter);
-            
-            setNotification(notice);
+
+            setNotification(result);
+
             setNotFound(false);
-           setLoading(true);
+            setLoading(true);
           } else if (message === "no event") {
-            setNotification(notice);
-           setLoading(true);
+            var result = response[0].Notification;
+
+            setNotification(result);
+            setLoading(true);
             setNotFound(true);
-          } 
-          else if(message = "follow organizers"){
-            setNotification(notice);
-          setLoading(true);
+          } else if ((message = "follow organizers")) {
+            setLoading(true);
             setNotFound(true);
-          }
-            else {
-              setLoading(false);
+          } else {
+            setLoading(false);
           }
         }
       })
-      .catch((err)=>{
+      .catch((err) => {
         setLoading(false);
       });
-   
+
     return () => {
       // cancel the subscription
       isApiSubscribed = false;
@@ -145,86 +141,74 @@ const Notifications = ({ navigation }) => {
   };
   // render flatlist item
   const renderNotice = ({ item }) => (
-  
     <Notice
-    Event_Id={item.event_id}
+      Event_Id={item.event_id}
       organizerName={item.event_organizer}
       noticeTitle={item.event_name}
-      date={DateFun(item.start_date)}
-      time={TimeFun(item.start_time)}
+      date={item.addedDate}
+     
       onPressNotice={() => navigation.navigate("EventDetail", { item })}
     />
   );
 
   useEffect(() => {
     RefreshList();
-   
     return () => {};
-  },[]);
+  }, []);
 
   return (
     <View>
-      {loading ? 
-      (
+      {loading ? (
         <FlatList
-        data={notification}
-        renderItem={renderNotice}
-        keyExtractor={(item) => item.event_id}
-        onRefresh={RefreshList}
-        refreshing={refreshing}
-        ListHeaderComponent={() =>
-          notFound ? (
-            <View style={styles.noNoticeContainer}>
-              <Image
-                source={require("../assets/noNotification.png")}
-                style={styles.noNoticeImage}
-                resizeMode="contain"
-              />
-              <Title style={styles.prompttxt}>
-                You have no Notification Yet!
-              </Title>
-              <Paragraph>you will receive one soon</Paragraph>
-            </View>
-          ) : null
-        }
-        ListFooterComponent={() => (
-          notFound ? null
-          :
-          (
-            <View style={styles.listEnd}>
-            <HelperText>
-              Events from organizers you followed.
-            </HelperText>
-           
-          </View>
-          )
-        )}
-      />
-      ): (
+          data={notification}
+          renderItem={renderNotice}
+          keyExtractor={(item) => item.event_id}
+          onRefresh={RefreshList}
+          refreshing={refreshing}
+          ListHeaderComponent={() =>
+            notFound ? (
+              <View style={styles.noNoticeContainer}>
+                <Image
+                  source={require("../assets/noNotification.png")}
+                  style={styles.noNoticeImage}
+                  resizeMode="contain"
+                />
+                <Title style={styles.prompttxt}>
+                  You have no notification yet!
+                </Title>
+                
+              </View>
+            ) : null
+          }
+          ListFooterComponent={() =>
+            notFound ? null : (
+              <View style={styles.listEnd}>
+                <HelperText>Notifications from organizers you followed.</HelperText>
+              </View>
+            )
+          }
+        />
+      ) : (
         <View>
-  <View>
-    <NoticeShimmer/>
-    <NoticeShimmer/>
-    <NoticeShimmer/>
-    <NoticeShimmer/>
-    <NoticeShimmer/>
-    </View>
+          <View>
+            <NoticeShimmer />
+            <NoticeShimmer />
+            <NoticeShimmer />
+            <NoticeShimmer />
+            <NoticeShimmer />
+          </View>
 
-    <View>
-    <NoticeShimmer/>
-    <NoticeShimmer/>
-    <NoticeShimmer/>
-   
+          <View>
+            <NoticeShimmer />
+            <NoticeShimmer />
+            <NoticeShimmer />
+          </View>
+        </View>
+      )}
     </View>
-    </View>
-      )
-      }
-    </View>
-   
   );
 };
 const styles = StyleSheet.create({
-
   noNoticeContainer: {
     flex: 1,
     justifyContent: "center",
@@ -243,14 +227,14 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
     marginTop: 10,
   },
-  listEnd:{
-    padding:20,
-    backgroundColor:Constants.transparentPrimary,
-    marginTop:5,
-    margin:5,
-    borderRadius:Constants.tinybox,
-    marginBottom:62,
-  }
+  listEnd: {
+    padding: 20,
+    backgroundColor: Constants.transparentPrimary,
+    marginTop: 5,
+    margin: 5,
+    borderRadius: Constants.tinybox,
+    marginBottom: 62,
+  },
 });
 
 export default Notifications;

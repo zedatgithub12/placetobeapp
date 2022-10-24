@@ -14,6 +14,13 @@ const Notice = ({
   onPressNotice,
 
 }) => {
+  const events= new Date();
+  let year = events.getFullYear();
+  let month = events.getMonth();
+  let day = events.getDate();
+   var currentMonth = month+1;
+  var today = year+"-"+currentMonth+"-"+day;
+
   return (
     <TouchableNativeFeedback
      
@@ -22,7 +29,7 @@ const Notice = ({
     >
       <View style={styles.noticeContainer}>
         <View style={styles.notbellContainer}>
-          <Entypo name="bell" size={24} color={Constants.Secondary} />
+          <Entypo name="bell" size={20} color={Constants.primary} />
         </View>
 
         <View style={styles.contentContainer}>
@@ -32,14 +39,15 @@ const Notice = ({
           <Text numberOfLines={1} style={styles.eventNames}>
             {noticeTitle}
           </Text>
-
-          <View style={styles.helperInfo}>
-            <Text style={styles.noticeTimestamp}>Start on </Text>
-            <Text style={styles.noticeTimestamp}> {date}</Text>
-            <Text style={styles.noticeTimestamp}> {time}</Text>
-          </View>
+           
+         
         </View>
-       
+        {date === today ? (
+              <Text style={styles.noticeStatus}>New</Text>
+            )
+            :
+            null
+            }
       </View>
     </TouchableNativeFeedback>
   );
@@ -55,7 +63,7 @@ const styles = StyleSheet.create({
     width: "96%",
     paddingHorizontal: 10,
     padding: 5,
-    marginTop: 8,
+    marginTop: 2,
     borderRadius: Constants.tinybox,
     alignSelf: "center",
     justifyContent: "flex-start",
@@ -67,7 +75,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: Constants.Faded,
+    backgroundColor: Constants.transparentPrimary,
     borderRadius: 50,
   },
   contentContainer: {
@@ -83,14 +91,15 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Boldtwo,
     color: Constants.Inverse,
     margin: 2,
+    textTransform: "capitalize"
   },
   eventNames: {
     width: "98%",
     margin: 2,
     fontFamily: Constants.fontFam,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     fontSize: Constants.headingtwo,
-    color: Constants.primaryTwo,
+    color: Constants.primary,
   },
   noticeTimestamp: {
     margin: 3,
@@ -106,6 +115,15 @@ const styles = StyleSheet.create({
     position:"absolute",
     top:10,
     right:10
+  },
+  noticeStatus:{
+    color:Constants.lightPurple,
+    fontWeight: Constants.Bold,
+    fontStyle: "italic",
+    backgroundColor: Constants.Faded,
+    height:"45%",
+    paddingHorizontal:10,
+    borderRadius:Constants.borderRad
   }
 });
 

@@ -200,7 +200,7 @@ const FormThree = () => {
   );
   return (
     <View style={styles.container}>
-      <Text style={styles.eventSession}>Event details</Text>
+      <Text style={styles.eventSession}>Event Details</Text>
       <View
         style={[
           styles.eventContentContainer,
@@ -213,7 +213,7 @@ const FormThree = () => {
           color={Constants.purple}
         />
         <TextInput
-          placeholder="Organizer"
+          placeholder="Organizer Name"
           style={styles.selectDateBtn}
           value={inputs.organizer}
           onChangeText={(org) => updateOrganizer(org)}
@@ -276,7 +276,7 @@ const FormThree = () => {
                   style={styles.closeBtn}
                 />
               </Pressable>
-              <Text style={styles.modalTitle}>Category</Text>
+              <Text style={styles.modalTitle}>Category List</Text>
 
               <FlatList
                 data={Category}
@@ -377,7 +377,7 @@ const FormThree = () => {
           color={Constants.purple}
         />
         <TextInput
-          placeholder="Entrance fee"
+          placeholder="Entrance Fee"
           style={styles.enterEventPrice}
           value={inputs.entranceFee}
           onChangeText={(price) => updateEntranceFee(price)}

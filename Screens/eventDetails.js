@@ -7,6 +7,8 @@ import {
   Image,
   Alert,
   Pressable,
+  ActivityIndicator,
+  ToastAndroid
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,9 +20,10 @@ import Connection from "../constants/connection";
 import { AuthContext } from "../Components/context";
 import * as FileSystem from "expo-file-system";
 import { useSelector, useDispatch } from "react-redux";
-import { bookmarkItem } from "../Reducer/saveSlice";
+import { bookmarkItem,remove } from "../Reducer/saveSlice";
 import Share from "react-native-share";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
+
 
 //import {writeJsonFile} from 'write-json-file';
 
@@ -36,27 +39,35 @@ const {items} = useSelector((state) => state.cart);
   /********************* */
   // event bookmarking related code is writen below
   /********************* */
+  const showToast = (message) => {
+    ToastAndroid.show(message, ToastAndroid.SHORT); //message to be toasted after user clicked the bookmark button
+  };
+
    const [bookmarkBtn, setBookmarkBtn] = useState(false);
    const [bookmarkBtnColor, setBookmarkBtnColor] = useState(Constants.Inverse);
 
   const bookmarkEvent = () => {
     const find = items.find((event) => event.event_id === item.event_id);
     if(find){
-      setBookmarkBtn(true);
-      setBookmarkBtnColor(Constants.primary);
+      //setBookmarkBtn(true);
+      setBookmarkBtnColor(Constants.Secondary);
+      dispatch(remove(item.event_id));
+      showToast("Unsaved!");
     }
     else {
       dispatch(bookmarkItem(item));
-      setBookmarkBtn(true);
+     // setBookmarkBtn(true);
       setBookmarkBtnColor(Constants.primary);
+      showToast("Saved!");
     }
   };
 //check bookmarked button state 
+
 const bookmarked = ()=>{
   var yesItis = false;
   const find = items.find((event) => event.event_id === item.event_id);
     if(find){
-      setBookmarkBtn(true);
+      //setBookmarkBtn(true);
       setBookmarkBtnColor(Constants.primary);
       yesItis = true;
       return yesItis;
@@ -187,12 +198,17 @@ Alert.alert(
     }
   }, []);
 
+
+  const [descLength, setDescLength] = useState("Read More");
   const showmore = () => {
     if (textLength > read) {
       setRead(textLength);
       setReadMorebtn(false);
+      setDescLength("Read Less")
     } else {
-      setRead(read);
+      setRead(5);
+      setReadMorebtn(false);
+      setDescLength("Read More")
     }
   };
 
@@ -292,10 +308,15 @@ Alert.alert(
     ButtonColor: Constants.primary,
   });
 
+const [followProgress, setFollowProgress] = useState(false);
+
   const followOrganizer = async () => {
+
+  setFollowProgress(true);
+
     const controller = new AbortController();
     const signal = controller.signal;
-
+   
     let checkFollowing = true;
     var organizerId = item.userId;
     var followerId = await AsyncStorage.getItem("userId");
@@ -325,7 +346,9 @@ Alert.alert(
               subscription: responseMessage,
               btnDisabled: true,
               ButtonColor: Constants.transparentPrimary,
+              
             });
+            setFollowProgress(false);
             setFollowStatus(responseMessage);
           } else {
             setFollow({
@@ -335,6 +358,7 @@ Alert.alert(
               ButtonColor: Constants.primary,
             });
             setFollowStatus(responseMessage);
+            setFollowProgress(false);
           }
         }
       });
@@ -356,7 +380,7 @@ Alert.alert(
   }, []);
 
   return (
-    <SafeAreaView style={{ backgroundColor: Constants.background }}>
+    <SafeAreaView style={{flex:1, backgroundColor: Constants.background }}>
       <ScrollView
         scrollEventThrottle={16}
         style={{ backgroundColor: Constants.background }}
@@ -448,7 +472,7 @@ Alert.alert(
           </Text>
           {readMorebtn ? (
             <TouchableOpacity activeOpacity={0.7} onPress={() => showmore()}>
-              <Text style={styles.ReadMore}>Read More</Text>
+              <Text style={styles.ReadMore}>{descLength}</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -467,6 +491,7 @@ Alert.alert(
        followStatus,
      })
    }
+  
  >
    <Image
      source={{ uri: featuredImageUri + eventOrg.featuredImage }}
@@ -502,7 +527,17 @@ Alert.alert(
      ]}
      onPress={() => followOrganizer()}
    >
-     <Text style={styles.orgFollowTxt}>{follow.subscription}</Text>
+     {followProgress ? 
+     (
+       <ActivityIndicator size="small" color={Constants.background}/>
+     )
+     
+    :
+    (
+      <Text style={styles.orgFollowTxt}>{follow.subscription}</Text>
+    )
+  }
+    
    </TouchableOpacity>
  ) : null}
 </View>
@@ -561,6 +596,7 @@ const styles = StyleSheet.create({
 
   // organizers section styling
   organizersSection: {
+    
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 10,
@@ -570,6 +606,9 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+    borderWidth: 0.5,
+    borderColor: Constants.primary,
+
   },
   //organizer information section style
   orgInfoContainer: {
@@ -591,16 +630,19 @@ const styles = StyleSheet.create({
   },
   // follow button style
   orgFollowBtn: {
+    width: 130,
     borderRadius: Constants.tiny,
     padding: Constants.padd,
     paddingHorizontal: 20,
     margin: 10,
+    
   },
   // follow button text style
   orgFollowTxt: {
     color: Constants.textColor,
     fontWeight: Constants.Boldtwo,
     fontSize: Constants.headingtwo,
+    textAlign: "center",
   },
   EventTitle: {
     flex: 1,
@@ -657,6 +699,9 @@ const styles = StyleSheet.create({
   desctext: {
     margin: 5,
     marginLeft: 10,
+    fontSize:14,
+    fontWeight: Constants.Boldtwo,
+    color:Constants.Secondary,
   },
   mapContainer: {
     alignItems: "center",
@@ -713,9 +758,11 @@ const styles = StyleSheet.create({
   },
   ReadMore: {
     fontWeight: Constants.Bold,
-    color: Constants.primary,
+    color: Constants.purple,
     padding: 6,
     marginLeft: 6,
+    fontStyle: "italic",
+
   },
   orgConatinerShimmer:{
      justifyContent: "center",

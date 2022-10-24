@@ -57,6 +57,7 @@ const CategorizedEvent = ({ navigation }) => {
   // search event
   const searchEvent = () => {
     setLoading(false);
+    setSearching(true);
      // after the search button get pressed the state set to true
     const controller = new AbortController();
     const signal = controller.signal;
@@ -89,11 +90,14 @@ const CategorizedEvent = ({ navigation }) => {
             setSearch(searchResult);
             setFilterData(true);
             setLoading(true);
+            setSearching(false);
           } else if (message === "no event") {
             setFilterData(false);
             setLoading(true);
+            setSearching(false);
           } else {
             setLoading(false);
+            setSearching(false);
           }
         }
       })
@@ -257,7 +261,7 @@ const CategorizedEvent = ({ navigation }) => {
      <Ionicons
             name="search-outline"
             size={40}
-            color={Constants.PrimaryBlue}
+            color={Constants.primary}
             style={styles.submitIcon}
           />
       <Title style={styles.prompttxt}>Search Events!</Title>
@@ -269,7 +273,7 @@ const CategorizedEvent = ({ navigation }) => {
   useEffect(() => {
     searchEvent();
     return () => {};
-  },[searchInput]);
+  },[]);
   return (
     <SafeAreaView style={styles.container}>
 
@@ -295,7 +299,7 @@ const CategorizedEvent = ({ navigation }) => {
         >
           <TextInput
             //a text input which enables user to search for specific data they are looking for
-            placeholder="Find Awesome Events"
+            placeholder="Search..."
             style={styles.SearchField}
             value={searchInput}
             onChangeText={(text) => updateSearchKey(text)}
@@ -317,12 +321,12 @@ const CategorizedEvent = ({ navigation }) => {
           onPress={() => searchEvent()}
         >
           {searching ? 
-          <ActivityIndicator size= "small" color={Constants.PrimaryBlue}/>
+          <ActivityIndicator size= "small" color={Constants.primary} style={styles.submitIcon}/>
           :
           <Ionicons
             name="search-outline"
             size={20}
-            color={Constants.PrimaryBlue}
+            color={Constants.primary}
             style={styles.submitIcon}
           />
         }
@@ -357,13 +361,14 @@ const CategorizedEvent = ({ navigation }) => {
         />
       ) : (
         <View style={styles.noResultContainer}>
-          <Image
-            source={require("../assets/blank.png")}
-            style={styles.noResultImage}
-            resizeMode="contain"
+           <Ionicons
+            name="search-outline"
+            size={50}
+            color={Constants.primary}
+            style={styles.submitIcon}
           />
-          <Title style={styles.prompttxt}>No Match Found!</Title>
-          <Paragraph></Paragraph>
+          <Title style={styles.prompttxt}>No result found!</Title>
+          <Paragraph>Your search result appear here.</Paragraph>
         </View>
       )
     ) :
@@ -427,12 +432,13 @@ const styles = StyleSheet.create({
   },
   submitSearch: {
     borderRadius: Constants.mediumbox,
-    backgroundColor: Constants.Faded,
+    backgroundColor: Constants.transparentPrimary,
     borderRadius: 20,
     padding: 4,
   },
   submitIcon: {
     margin: 3,
+ 
   },
   categoryList: {
     flexDirection:"row",

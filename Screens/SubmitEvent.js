@@ -113,8 +113,11 @@ class EventSubmission extends Component {
       var organizerPhone = (this.state.contactPhone = InputForm.cPhone);
       var redirectUrl = (this.state.redirectLink = InputForm.url);
        
+
+     
       // event field validation
       if (
+        picture.length == 0 ||
         name.length == 0 ||
         about.length == 0 ||
         startD.length == 0 ||
@@ -171,7 +174,9 @@ class EventSubmission extends Component {
               errorPanel(message);
             }
           })
-          .catch((err)=>{console.log(err)});
+          .catch((err)=>console.log(err));
+        
+        
       }
     };
 
@@ -183,7 +188,7 @@ class EventSubmission extends Component {
               onPress={() => closePrompt()}
               style={styles.closePrompt}
             >
-              <Ionicons name="close" size={25} color={Constants.Inverse} />
+              <Ionicons name="close" size={25} color={Constants.background} />
             </TouchableOpacity>
             <Text style={styles.promptText}>{this.state.responseMessage}</Text>
           </Animatable.View>
@@ -254,17 +259,17 @@ class EventSubmission extends Component {
             </View>
           </View>
         ) : (
-          <View style={{flex:1}}>
+          <View style={{flex:1, alignItems:"center", justifyContent:"center"}}>
           <View style={styles.notLogedPrompt}>
             <FontAwesome5
               name="exclamation-circle"
               size={66}
-              color={Constants.Secondary}
+              color={Constants.background}
             />
 
             <Title style={styles.prompttxt}>Please Login First!</Title>
             <Paragraph style={styles.helperText}>
-              To post event on p2b-ethiopia you must have a user account.
+              To post event on Place to be Ethiopia you must have a user account.
             </Paragraph>
 
             <View style={styles.actionBtns}>
@@ -273,7 +278,7 @@ class EventSubmission extends Component {
                 style={styles.createAccountBtn}
                 onPress={() => this.props.navigation.navigate("SignUp")}
               >
-                <Text>Create Account</Text>
+                <Text style={styles.btnTxt}>Create Account</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -360,17 +365,19 @@ const styles = StyleSheet.create({
     width: 300,
     alignItems: "center",
     alignSelf:"center",
-    marginTop: "30%",
-    backgroundColor: Constants.background,
+  
+    backgroundColor: Constants.purple,
     borderRadius: Constants.borderRad,
-    elevation: 1,
+    elevation: 10,
     padding: 15,
-    paddingTop: 30,
+    shadowColor:Constants.Secondary
+   
   },
   prompttxt: {
     fontSize: Constants.primaryHeading,
     fontWeight: Constants.Bold,
     marginTop: 10,
+    color:Constants.background
   },
   actionBtns: {
     position: "absolute",
@@ -381,28 +388,35 @@ const styles = StyleSheet.create({
   },
   createAccountBtn: {
     width: "50%",
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
+    backgroundColor: Constants.background,
+    borderRadius: Constants.tiny,
     padding: 10,
     alignItems: "center",
     elevation: 1,
+   
   },
   LoginBtn: {
     width: "38%",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Constants.primary,
-    borderRadius: Constants.mediumbox,
-    padding: 10,
+    borderRadius: Constants.tiny,
+    padding: 6,
+  },
+  btnTxt:{
+ fontSize:Constants.headingthree,
+ fontWeight: Constants.Bold,
+ color:Constants.Inverse
   },
   helperText: {
     width: "90%",
     textAlign: "center",
     marginTop: 10,
+    color:Constants.background
   },
   successPrompt: {
     position: "absolute",
-    bottom: 50,
+    bottom: 190,
     zIndex: 100,
     width: "85%",
     backgroundColor: Constants.Success,

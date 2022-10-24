@@ -40,8 +40,9 @@ const DetailContent = ({ ...props }) => {
          // style={styles.priceContainer}
           // Event price detail
         >
+          
           <Text style={styles.prices}>{props.Price == 0 ? free  : props.Price+currency } </Text>
-   
+          <Text style={styles.time}>Entrance fee</Text>
         </View>
       </View>
 
@@ -52,7 +53,9 @@ const DetailContent = ({ ...props }) => {
           style={styles.iconContainer}
         />
         <View style={styles.eventDate}>
+       
           <Text style={styles.venues}>{props.Venues}</Text>
+          <Text style={styles.time}>Event Address</Text>
         </View>
       </View>
     </View>

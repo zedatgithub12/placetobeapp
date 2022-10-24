@@ -8,7 +8,7 @@ const Category = [
     {
         id:'11',
         name: "Travelling",
-        background: "#CA955C",
+        background: "#422057",
         icon:"hiking",
     },
     {
@@ -36,7 +36,7 @@ const Category = [
    
     {
         id:'6',
-        name: "Trade fairs & Expo",
+        name: "Trade Fairs & Expo",
         background: "#E38B29",
         icon: "hexagram-outline",
     },

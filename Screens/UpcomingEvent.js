@@ -6,6 +6,7 @@ import {
   View,
   Image,
   ToastAndroid,
+  TouchableOpacity
 } from "react-native";
 import Events from "../Components/Events";
 import Connection from "../constants/connection";
@@ -196,7 +197,7 @@ const UpcomingEvents = ({ navigation }) => {
 
   return (
 
-    <View>
+    <View style={{minHeight: "100%", backgroundColor: Constants.background}}>
       {loading ? (
         <FlatList
       // List of events in extracted from database in the form JSON data
@@ -222,14 +223,7 @@ const UpcomingEvents = ({ navigation }) => {
         ) : null
       }
     
-      ListFooterComponent={() => (
-        <View style={styles.listEnd}>
-       
-          <HelperText>
-            If you are looking for specific event try to search for it.
-          </HelperText>
-        </View>
-      )}
+      
     />
       )
 
@@ -253,18 +247,20 @@ const UpcomingEvents = ({ navigation }) => {
 };
 const styles = StyleSheet.create({
   container: {
+    flex:1,
     backgroundColor: Constants.background,
+    alignItems: "center",
     alignSelf: "center",
     justifyContent: "center",
     width: "80%",
     borderRadius: 10,
-    marginTop: 70,
     padding: 28,
   },
   notFound: {
     width: "85%",
     height: 200,
     borderRadius: 10,
+    alignSelf:"center"
   },
   emptyMessageStyle: {
     fontSize: Constants.headingone,

@@ -57,7 +57,7 @@ const FormFour = () => {
   //event location map latitude onchangeText() functions
 
   const updateLatitude = (lat) => {
-    if (lat.length <= 4) {
+    if (lat.length <= 2) {
       setInputs({
         ...inputs,
         latitude: lat,
@@ -70,7 +70,7 @@ const FormFour = () => {
         ...inputs,
         latitude: lat,
         latBorder: Constants.Danger,
-        latHelperText: "map latitude cannot be this long!",
+        latHelperText: "Map latitude cannot be this long!",
         latCheckIcon: false,
       });
     } else {
@@ -87,7 +87,7 @@ const FormFour = () => {
   //event location map longitude onChangeText Functionality
 
   const updateLongitude = (long) => {
-    if (long.length <= 4) {
+    if (long.length <= 2) {
       setInputs({
         ...inputs,
         longitude: long,
@@ -100,7 +100,7 @@ const FormFour = () => {
         ...inputs,
         longitude: lat,
         longBorder: Constants.Danger,
-        longHelperText: "map longitude cannot be this long ",
+        longHelperText: "Map longitude cannot be this long ",
         longCheckIcon: false,
       });
     } else {
@@ -117,12 +117,12 @@ const FormFour = () => {
   //event Contact phone onchangeText functionality
 
   const updateContactPhone = (phone) => {
-    if (phone.length <= 9) {
+    if (phone.length <= 3) {
       setInputs({
         ...inputs,
         contactPhone: phone,
         phoneBorder: Constants.Danger,
-        phoneHelperText: "phone number must be more than 10 digits",
+        phoneHelperText: "To short to be phone number",
         phoneCheckIcon: false,
       });
     } else {
@@ -168,7 +168,7 @@ const FormFour = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.eventSession}>Additional Information (optional)</Text>
+      <Text style={styles.eventSession}>Additional Information (Optional)</Text>
       <View
         style={[
           styles.eventContentContainer,
@@ -285,7 +285,7 @@ const FormFour = () => {
           style={styles.selectDateBtn}
           value={inputs.links}
           onChangeText={(link) => updateLinks(link)}
-       
+          onBlur={() => fieldBlured()}
         />
 
         {

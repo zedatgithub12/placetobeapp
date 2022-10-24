@@ -38,7 +38,7 @@ const About = () => {
       </View>
 
       <Text style={styles.description}>
-      Our mission is To be Ethiopia's leading event promoter and event-related information provider by leveraging world-class technologies and advance the sector to the next level.
+     Event promoter and event-related information provider by leveraging world-class technologies.
       </Text>
 
       <Text style={styles.contactTitle}>Contact us</Text>
@@ -65,7 +65,7 @@ const About = () => {
             color={Constants.Success}
             style={styles.callIcon}
           />
-          <Text style={{fontFamily: Constants.fontFam}}>+251911314175</Text>
+          <Text style={{fontFamily: Constants.fontFam}}>+251911287645</Text>
         </Pressable>
       </View>
 
@@ -82,7 +82,7 @@ const About = () => {
       <View style={styles.bottomSection}>
         <Text>Beta Version</Text>
         <View style={styles.developer}>
-          <Text style={styles.developedBy}>Developed By </Text>
+          <Text style={styles.developedBy}>Powered By - </Text>
           <TouchableOpacity
             onPress={() => Linking.openURL("https://afromina-digitals.com/")}
           >
@@ -97,6 +97,7 @@ const About = () => {
 // define your styles
 const styles = StyleSheet.create({
   container: {
+    
     alignItems: "center",
     backgroundColor: Constants.background,
   },
@@ -114,12 +115,12 @@ const styles = StyleSheet.create({
     width: "88%",
     alignSelf: "center",
     padding: 8,
-    textTransform: "capitalize",
     textAlign:"center",
     lineHeight: 18,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingthree,
     color: Constants.Secondary,
+    
   },
   contactTitle: {
     fontFamily: Constants.fontFam,
@@ -175,8 +176,8 @@ const styles = StyleSheet.create({
   },
   developedBy:{
    fontFamily: Constants.fontFam,
-   fontWeight: Constants.Bold,
-   fontSize: Constants.headingtwo
+   fontWeight: Constants.Boldtwo,
+   fontSize: Constants.headingthree
   },
   afromina: {
     color: "#1264A4",

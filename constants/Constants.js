@@ -9,7 +9,8 @@ const Constants = {
   red: "#d21f3c",
   iconColor: "#019267",
   
-  purple: "#422057FF",
+  purple: "#422057",
+  lightPurple: "#a721fc",
   green: "#04b02c",
   // Box constants
   borderRad: 14,
@@ -37,7 +38,7 @@ const Constants = {
 
   bottomTabIcon: "#909090",
   // buttons color
-  primary: "#f0ad4e",
+  primary: "#ffbb00",
   transparentPrimary: "#ffedba",
   iconBack: "#fff7e0",
   primaryTwo: "#EC9000",
