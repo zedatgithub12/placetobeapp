@@ -208,10 +208,24 @@ export default function SignUp({ navigation }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       };
+       //generate random Text to be stored alongside with user info
+       const rand = () => {
+        return Math.random().toString(36).substring(2);
+      };
+      const token = () => {
+        return rand() + rand();
+      };
+
+      // default category place holder
+
+      var category = "Entertainment";
+
       var Data = {
         Email: Email,
         User: User,
         passwords: passwords,
+        category: category,
+        token: token(),
       };
       // featch function
       fetch(InserAPIURL, {

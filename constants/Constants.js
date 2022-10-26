@@ -47,7 +47,7 @@ const Constants = {
   Warning: "#f0ad4e",
   Danger: "#d9534f",
   lightRed: "#FFCCCB",
-  Faded: "#f9f9f9",
+  Faded: "#f6f6f6",
   Inverse: "#292b2c",
   Secondary: "#808080",
   lightGreen: "#90EE90",

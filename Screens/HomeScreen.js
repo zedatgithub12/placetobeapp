@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -10,15 +10,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
-import { Ionicons, FontAwesome5 } from "react-native-vector-icons";
+import { Ionicons } from "react-native-vector-icons";
 import MyTabs from "./TopTab";
 import { Caption, Divider, Title } from "react-native-paper";
 import { AuthContext } from "../Components/context";
-import { LinearGradient } from "expo-linear-gradient";
-import TodaysEvents from "./TodaysEvent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../constants/connection";
 import { SliderBox } from "react-native-image-slider-box";
+import Categories from "../Components/CategoryListing";
+import Category from "../src/Category";
 
 function Home({ navigation, ...props }) {
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
@@ -26,26 +26,143 @@ function Home({ navigation, ...props }) {
   const profile = () => {
     navigation.navigate("Profile");
   };
- 
-  let ScreenWidth = Dimensions.get('screen').width;
-  let ScreenHeight = Dimensions.get('screen').height;
-  let path = "assets/featured(4).jpg";
 
+  var placeHoldersImage = "placeholders.jpg";
+
+  const PlaceholderImages = [
+    {
+      id: "1",
+      image: placeHoldersImage,
+    },
+    {
+      id: "2",
+      image: placeHoldersImage,
+    },
+    {
+      id: "3",
+      image: placeHoldersImage,
+    },
+    {
+      id: "4",
+      image: placeHoldersImage,
+    },
+    {
+      id: "5",
+      image: placeHoldersImage,
+    },
+    {
+      id: "6",
+      image: placeHoldersImage,
+    },
+    {
+      id: "7",
+      image: placeHoldersImage,
+    },
+    {
+      id: "8",
+      image: placeHoldersImage,
+    },
+  ];
+  // state of featured image
+  const [featured, setImage] = useState(PlaceholderImages);
+  //a function which featches featured-image on the top of home screen from database
+  // then the function will be called on the component mounting
+
+  const featchImage = () => {
+    var ApiUrl = Connection.url + Connection.Images;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "appliction/json",
+    };
+
+    fetch(ApiUrl, {
+      method: "post",
+      headers: headers,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var message = response[0].message;
+
+        if (message === "succeed") {
+          var featuredImages = response[0].images;
+          setImage(featuredImages);
+        } else {
+          setImage(Images);
+        }
+      })
+      .catch((error) => {
+        setImage(Images);
+      });
+  };
+
+  //list of image to be added on the top crousel
+  var firstImage = featured[0].image;
+  var secondImage = featured[1].image;
+  var thirdImage = featured[2].image;
+  var fourthImage = featured[3].image;
+  var fifthImage = featured[4].image;
+  var sixthImage = featured[5].image;
+  var seventhImage = featured[6].image;
+  var eightImage = featured[7].image;
 
   const Images = [
-    Connection.url+"assets/placetobe.jpg",
-    Connection.url+"assets/Streamer.jpg",
-    Connection.url+"assets/Green.jpg",
-    Connection.url+"assets/Travel.jpg",
+    Connection.url + Connection.assets + firstImage,
+    Connection.url + Connection.assets + secondImage,
+    Connection.url + Connection.assets + thirdImage,
+    Connection.url + Connection.assets + fourthImage,
+    Connection.url + Connection.assets + fifthImage,
+    Connection.url + Connection.assets + sixthImage,
+    Connection.url + Connection.assets + seventhImage,
+    Connection.url + Connection.assets + eightImage,
   ];
- 
+
+  // function to set user profile while user is logged in
+  const [userPhoto, setUserphoto] = useState("maleProfile.jpg");
+
+  const userProfile = async () => {
+    var userId = await AsyncStorage.getItem("userId");
+    var ApiUrl = Connection.url + Connection.MetaData;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    var data = {
+      userId: userId,
+    };
+    //save user info into database
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var resp = response[0];
+
+        if (resp.message === "succeed") {
+          var userInfo = response[0].user[0];
+          setUserphoto(userInfo.profile);
+        } else {
+          setUserphoto(userPhoto);
+        }
+      })
+      .catch(() => {
+        setUserphoto(userPhoto);
+      });
+  };
+
+  //scroll View con
+  const [shown, setShown] = useState(true);
 
   useEffect(() => {
     userInfoFunction();
+    featchImage();
+    userProfile();
     return () => {};
   }, []);
 
   const logged = userStatus.logged;
+
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -80,11 +197,9 @@ function Home({ navigation, ...props }) {
             onPress={() => profile()}
             style={styles.profileContainer}
           >
-            <Ionicons
-              name="person"
-              size={22}
+            <Image
+              source={{ uri: Connection.url + Connection.assets + userPhoto }}
               style={styles.profileIcon}
-              color={Constants.primary}
             />
           </TouchableOpacity>
         ) : (
@@ -96,35 +211,55 @@ function Home({ navigation, ...props }) {
             <Ionicons
               name="person"
               size={22}
-              style={styles.profileIcon}
+              //style={styles.profileIcon}
               color={Constants.primary}
             />
           </TouchableOpacity>
         )}
       </View>
-      <Divider style={{ color: Constants.primary }} />
+      <Divider style={{ color: Constants.transparentPrimary }} />
 
-      
-
-      <SliderBox
-        images={Images}
-        dotColor={Constants.primary}
-        inactiveDotColor={Constants.background}
-        dotStyle={{
-          height: 9,
-          width: 9,
-          borderRadius: 8,
-        }}
-        firstItem={0}
-        imageLoadingColor={Constants.Secondary}
-        autoplay={true}
-        autoplayInterval={5000}
-        circleLoop={true}
-        paginationBoxVerticalPadding={10}
-        resizeMode="contain"
-        activeOpacity={0.9}
-      />
-  
+      <View>
+        {shown ? (
+          <ScrollView contentContainerStyle={{ minHeight: 180 }}>
+            <SliderBox
+              images={Images}
+              dotColor={Constants.primary}
+              inactiveDotColor={Constants.transparentPrimary}
+              dotStyle={{
+                height: 9,
+                width: 9,
+                borderRadius: 8,
+              }}
+              firstItem={0}
+              imageLoadingColor={Constants.Secondary}
+              autoplay={true}
+              autoplayInterval={5000}
+              circleLoop={true}
+              paginationBoxVerticalPadding={10}
+              resizeMode="contain"
+              activeOpacity={0.9}
+            />
+            <View>
+              <ScrollView
+                horizontal
+                contentContainerStyle={styles.categories}
+                showsHorizontalScrollIndicator={false}
+              >
+                {Category.map((item) => (
+                  <Categories
+                    key={item.id}
+                    icon={item.icon}
+                    category={item.name}
+                    color={item.background}
+                    onPress={() => navigation.push("Filter", { item })}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          </ScrollView>
+        ) : null}
+      </View>
 
       <MyTabs />
     </SafeAreaView>
@@ -159,7 +294,6 @@ const styles = StyleSheet.create({
     width: "76%",
   },
   SearchField: {
- 
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingone,
@@ -180,7 +314,11 @@ const styles = StyleSheet.create({
   profileImage: {
     alignSelf: "center",
   },
-
+  profileIcon: {
+    width: 31,
+    height: 31,
+    borderRadius: 18,
+  },
   PrimaryTitle: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -232,6 +370,9 @@ const styles = StyleSheet.create({
     borderRadius: Constants.mediumbox,
     justifyContent: "center",
     alignItems: "center",
+  },
+  categories: {
+    paddingHorizontal: 6,
   },
 });
 

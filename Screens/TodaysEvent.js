@@ -6,23 +6,22 @@ import {
   View,
   Image,
   ToastAndroid,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import Events from "../Components/Events";
 import Connection from "../constants/connection";
 import Constants from "../constants/Constants";
 import { HelperText } from "react-native-paper";
 import Listing from "../Components/ListShimmer";
-
+import { color } from "react-native-reanimated";
 
 const TodaysEvents = ({ navigation }) => {
   const [events, setEvents] = useState();
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
-//  const [refStatus, setRefStatus] = React.useState("Refreshed"); //toast message to be shown when user pull to refresh the page
+  //  const [refStatus, setRefStatus] = React.useState("Refreshed"); //toast message to be shown when user pull to refresh the page
   const [loading, setLoading] = useState(false);
-
 
   useEffect(() => {
     const controller = new AbortController();
@@ -60,13 +59,13 @@ const TodaysEvents = ({ navigation }) => {
       isApiSubscribed = false;
       controller.abort();
     };
-  },[events]);
+  }, [events]);
 
   /********************************************************** */
   //date function which perform date format conversion and return the suitable format for frontend
   /********************************************************** */
-  const DateFun = (startingTime) => {
-    var date = new Date(startingTime);
+  const DateFun = (startingDate) => {
+    var date = new Date(startingDate);
     let day = date.getDay();
     let month = date.getMonth();
     let happeningDay = date.getDate();
@@ -126,6 +125,51 @@ const TodaysEvents = ({ navigation }) => {
     }
     return eventPrice;
   };
+  // events category color
+  const CategoryColor = (category) => {
+    var color;
+    switch (category) {
+      case "Entertainment":
+        color = "#E38B29";
+        break;
+      case "Travelling":
+        color = "#422057";
+        break;
+      case "Business":
+        color = "#61481C";
+        break;
+      case "Cinema & Theater":
+        color = "#5ca803";
+        break;
+      case 4:
+        day = "Thursday";
+        break;
+      case "Community":
+        color = "#F96666";
+        break;
+      case "Trade Fairs & Expo":
+        color = "#E38B29";
+        break;
+      case "Nightlife":
+        color = "#472D2D";
+        break;
+      case "Professional":
+        color = "#002B5B";
+        break;
+      case "Shopping":
+        color = "#9306c2";
+        break;
+      case "Sport":
+        color = "#576F72";
+        break;
+      case "Others":
+        color = "#967E76";
+        break;
+        default:
+          color = "#ffbb00";
+    }
+    return color;
+  };
   // render item in flatlist format
   const renderItem = ({ item }) => (
     <Events
@@ -136,18 +180,19 @@ const TodaysEvents = ({ navigation }) => {
       date={DateFun(item.start_date)}
       time={TimeFun(item.start_time)}
       venue={item.event_address}
+      category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
       onPress={() => navigation.navigate("EventDetail", { item })}
     />
   );
   //after the flatlist is refreshed we call this funtion
- // const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);
+  // const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);
   // refresh the flatlist item
   const RefreshList = () => {
     // set refreshing state to true
     setLoading(false);
     setRefreshing(true);
-  
+
     // featching abort controller
     // after featching events the fetching function will be aborted
 
@@ -167,7 +212,7 @@ const TodaysEvents = ({ navigation }) => {
             setNotFound(false);
             setRefreshing(false);
             setRefStatus("Refreshed");
-         
+
             setLoading(true);
           } else if (message === "no event") {
             setEvents(todayEvents);
@@ -191,12 +236,8 @@ const TodaysEvents = ({ navigation }) => {
     };
   };
 
-
-
   return (
-    <View style={{minHeight: "100%",backgroundColor: Constants.background}}>
-
-
+    <View style={{ minHeight: "100%", backgroundColor: Constants.background }}>
       {loading ? (
         <FlatList
           // List of events in extracted from database in the form JSON data
@@ -205,7 +246,7 @@ const TodaysEvents = ({ navigation }) => {
           keyExtractor={(item) => item.event_id}
           onRefresh={RefreshList}
           refreshing={refreshing}
-          nestedScrollEnabled 
+          nestedScrollEnabled
           // when ithere is no item to be listed in flatlist
           ListHeaderComponent={() =>
             notFound ? (
@@ -222,17 +263,16 @@ const TodaysEvents = ({ navigation }) => {
               </View>
             ) : null
           }
-         
         />
       ) : (
         <View>
-        <Listing/>
-        <Listing/>
-        <Listing/>
-        <Listing/>
-        <Listing/>
-        <Listing/>
-        <Listing/>
+          <Listing />
+          <Listing />
+          <Listing />
+          <Listing />
+          <Listing />
+          <Listing />
+          <Listing />
         </View>
       )}
     </View>
@@ -245,7 +285,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "80%",
     borderRadius: 10,
-   
+
     padding: 28,
   },
   notFound: {
@@ -269,6 +309,5 @@ const styles = StyleSheet.create({
     borderRadius: Constants.tinybox,
     marginBottom: 62,
   },
-
 });
 export default TodaysEvents;

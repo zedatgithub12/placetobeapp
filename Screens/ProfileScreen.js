@@ -152,6 +152,7 @@ function Profile({ navigation, props }) {
 
         if (message === "successfully uploaded") {
           updateProfile(filename);
+       
         } else {
           setProfileUpdate("couldn't update profile");
         }
@@ -245,7 +246,6 @@ function Profile({ navigation, props }) {
   /****************************************************** */
   const getUserInfo = async () => {
     var userId = await AsyncStorage.getItem("userId");
-
     var ApiUrl = Connection.url + Connection.MetaData;
     var headers = {
       Accept: "application/json",

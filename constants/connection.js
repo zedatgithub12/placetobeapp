@@ -31,6 +31,7 @@ const Connection =
         FeedBacks: "FeedBacks.php",
         forgotPassword: "forgotPassword.php",
         status: "status.php",
+        Images: "Images.php",
     }
 
 export default Connection;

@@ -129,6 +129,50 @@ const UpcomingEvents = ({ navigation }) => {
     }
     return eventPrice;
   };
+  const CategoryColor = (category) => {
+    var color;
+    switch (category) {
+      case "Entertainment":
+        color = "#E38B29";
+        break;
+      case "Travelling":
+        color = "#422057";
+        break;
+      case "Business":
+        color = "#61481C";
+        break;
+      case "Cinema & Theater":
+        color = "#5ca803";
+        break;
+      case 4:
+        day = "Thursday";
+        break;
+      case "Community":
+        color = "#F96666";
+        break;
+      case "Trade Fairs & Expo":
+        color = "#E38B29";
+        break;
+      case "Nightlife":
+        color = "#472D2D";
+        break;
+      case "Professional":
+        color = "#002B5B";
+        break;
+      case "Shopping":
+        color = "#9306c2";
+        break;
+      case "Sport":
+        color = "#576F72";
+        break;
+      case "Others":
+        color = "#967E76";
+        break;
+        default:
+          color = "#ffbb00";
+    }
+    return color;
+  };
   // render item in flatlist format
   const renderItem = ({ item }) => (
     <Events
@@ -139,6 +183,7 @@ const UpcomingEvents = ({ navigation }) => {
       date={DateFun(item.start_date)}
       time={TimeFun(item.start_time)}
       venue={item.event_address}
+      category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
       onPress={() => navigation.navigate("EventDetail", { item })}
     />

@@ -21,13 +21,14 @@ const Events = ({
   time,
   Price,
   FeaturedImage,
+  category,
   onPress,
 }) => {
   
   const featuredImageUri = Connection.url+Connection.assets;
   return (
     <TouchableNativeFeedback onPress={onPress} style={styles.lists}>
-      <View style={styles.EventContainer}>
+      <View style={[styles.EventContainer,{borderRightColor: category}]}>
         <View style={styles.ImageContainer}>
           <Image source={{uri:featuredImageUri+FeaturedImage}} style={styles.FeaturedImagestyle} />
         </View>
@@ -86,9 +87,11 @@ const styles = StyleSheet.create({
     width: "94%",
     padding: 3,
     marginTop: 2,
-    borderRadius: Constants.mediumbox,
+    borderRadius:4,
     alignSelf: "center",
     backgroundColor:Constants.Faded,
+    borderRightWidth: 6,
+    
   },
   ImageContainer: {
     padding: 2,

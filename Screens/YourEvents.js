@@ -8,6 +8,7 @@ import {
   Image,
   ToastAndroid,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
@@ -186,7 +187,14 @@ const YourEvents = ({ route, navigation }) => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+    
+      style={styles.container}>
+      <ScrollView 
+       stickyHeaderIndices={[0]}
+       
+      >
+        <View style={{backgroundColor: Constants.primary}}>
       <TouchableOpacity
         style={styles.backArrow} // back arrow button style
         onPress={() => navigation.goBack()}
@@ -211,33 +219,28 @@ const YourEvents = ({ route, navigation }) => {
         }
         
       </View>
+      </View>
 {
   loading ?
   (
-<FlatList
-        // List of events in extracted from database in the form JSON data
-        data={events}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.event_id}
-        onRefresh={RefreshList}
-        refreshing={refreshing}
-        // when ithere is no item to be listed in flatlist
-        ListHeaderComponent={() =>
-          notFound ? (
-            <View style={styles.container}>
-              <Image
-                source={require("../assets/NotFound.png")}
-                resizeMode="contain"
-                style={styles.notFound}
-              />
-              <Text style={styles.emptyMessageStyle}>{message}</Text>
-              <HelperText style={{ alignSelf: "center" }}>
-                You can add events using plus icon in the home page
-              </HelperText>
-            </View>
-          ) : null
-        }
-      />
+ <View >
+    {
+      events.map((item)=> <YourE
+      key={item.event_id}
+      Event_Id={item.event_id}
+      status={renderStatus(item.event_status)}
+      org_id={item.userId}
+      FeaturedImage={item.event_image}
+      title={item.event_name}
+      date={DateFun(item.start_date)}
+      time={TimeFun(item.start_time)}
+      venue={item.event_address}
+      Price={EntranceFee(item.event_entrance_fee)}
+      onPress={() => navigation.navigate("EventDetail", { item })}
+    />)
+    }
+</View>
+
   
   )
   :
@@ -253,6 +256,7 @@ const YourEvents = ({ route, navigation }) => {
    </View>
   )
 }
+</ScrollView>
         </SafeAreaView>
   );
 };
@@ -261,17 +265,17 @@ const YourEvents = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.background,
+    //backgroundColor: Constants.background,
   },
   backArrow: {
     position: "absolute",
-    top: 30,
+    top: 10,
     zIndex: 2,
     justifyContent: "center",
     alignItems: "center",
     margin: 20,
     marginTop: 4,
-    marginBottom: 8,
+    
     backgroundColor: Constants.background,
     height: 40,
     width: 40,
@@ -294,9 +298,9 @@ const styles = StyleSheet.create({
     
   },
   eventCount: {
-      backgroundColor:Constants.Faded,
+      backgroundColor:Constants.transparentPrimary,
       padding:5,
-      paddingHorizontal:20,
+      paddingHorizontal:15,
       borderRadius:Constants.tiny,
       fontFamily: Constants.fontFam,
       fontWeight: Constants.Bold,

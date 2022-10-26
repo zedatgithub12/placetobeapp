@@ -26,7 +26,9 @@ import Events from "../Components/Events";
 import Connection from "../constants/connection";
 import Listing from "../Components/ListShimmer";
 
-const CategorizedEvent = ({ navigation }) => {
+const Filter = ({ navigation, route }) => {
+  const { item } = route.params;
+
   const [filterData, setFilterData] = React.useState(true);
   const [searchInput, setSearchInput] = React.useState("");
   const [inputs, setInputs] = React.useState({
@@ -236,22 +238,7 @@ const CategorizedEvent = ({ navigation }) => {
     }
     return eventPrice;
   };
-  //rendered category list
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      activeOpacity={0.6}
-      style={[styles.categoryList, { backgroundColor: item.background }]}
-      onPress={() => EventCategory(item.name)}
-    >
-      <MaterialCommunityIcons
-        name={item.icon}
-        size={18}
-        color={Constants.background}
-        style={{ marginRight: 8 }}
-      />
-      <Text style={styles.catName}>{item.name}</Text>
-    </TouchableOpacity>
-  );
+  
   const CategoryColor = (category) => {
     var color;
     switch (category) {
@@ -328,8 +315,7 @@ const CategorizedEvent = ({ navigation }) => {
 
   //run component did mount and component unmounted
   useEffect(() => {
-    searchEvent();
-
+    EventCategory(item.name);
     return () => {};
   }, []);
   return (
@@ -395,25 +381,13 @@ const CategorizedEvent = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <View style={{ padding: 5 }}>
-        <FlatList
-          data={Category}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          style={styles.catFlatlist}
-          showsHorizontalScrollIndicator={false}
-        />
-      </View>
-      <Divider color={Constants.PrimaryBlue} />
-
       {loading ? (
         filterData ? (
           <FlatList
             // List of events in extracted from database in the form JSON data
             data={search}
             renderItem={renderedItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.event_id}
             ListEmptyComponent={() => listEmptyComponent()}
             style={styles.filteredEventList}
           />
@@ -458,7 +432,7 @@ const styles = StyleSheet.create({
     paddingTop: Constants.paddTwo,
     alignSelf: "center",
     marginTop: 6,
-    marginBottom: 8,
+    marginBottom: 15,
   },
   SearchFieldContainer: {
     flexDirection: "row",
@@ -544,4 +518,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CategorizedEvent;
+export default Filter;

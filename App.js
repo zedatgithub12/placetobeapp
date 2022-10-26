@@ -33,7 +33,7 @@ import ForgotPass from "./Screens/ForgotPassword";
 import NetInfo from "@react-native-community/netinfo";
 import Followers from "./Screens/Followers";
 import Following from "./Screens/Following";
-
+import Filter from "./Screens/Filter";
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
@@ -133,7 +133,7 @@ export default function App() {
     userStatus: {
       logged: user.logged,
     },
-    
+
     userInfoFunction: async () => {
       var id = await AsyncStorage.getItem("userId");
       var token = await AsyncStorage.getItem("userToken");
@@ -270,7 +270,7 @@ export default function App() {
       url: eventInfo.redirectLink,
     },
 
-    SignIn: async (userId, userToken, email, password) => {
+    SignIn: async (userId, userToken, email, password, profile) => {
       if (email == email && password == password) {
         setUser({
           ...user,
@@ -283,6 +283,7 @@ export default function App() {
             [
               ["userId", userId],
               ["userToken", userToken],
+              ["profile", profile],
             ],
             store
           );
@@ -297,7 +298,7 @@ export default function App() {
       //setUserToken('eromayet01');
       // setIsLoading(false);
     },
-    GoogleSignIn: async (userId, userToken, email, id) => {
+    GoogleSignIn: async (userId, userToken, email, id, profile) => {
       if (email == email && id == id) {
         setUser({
           ...user,
@@ -310,6 +311,7 @@ export default function App() {
             [
               ["userId", userId],
               ["userToken", userToken],
+              ["profile", profile],
             ],
             store
           );
@@ -320,9 +322,6 @@ export default function App() {
     },
 
     Signout: async () => {
-      
-     
-
       setUser({
         ...user,
         logged: false,
@@ -396,7 +395,7 @@ export default function App() {
       <PersistGate loading={null} persistor={persistor}>
         <AuthContext.Provider value={authContext}>
           <NavigationContainer linking={p2blinking}>
-            <StatusBar style="black" />
+            <StatusBar style={Constants.Inverse} />
             {connectionState ? (
               <Stack.Navigator headerMode="none" initialRouteName="TabNav">
                 <Stack.Screen
@@ -477,7 +476,13 @@ export default function App() {
                     headerShown: false,
                   }}
                 />
-
+                <Stack.Screen
+                  name="Filter"
+                  component={Filter}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
                 <Stack.Screen
                   name="yourEvents"
                   component={YourEvents}
@@ -525,12 +530,24 @@ export default function App() {
                 <Stack.Screen
                   name="Followers"
                   component={Followers}
-                 
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                  }}
                 />
-                 <Stack.Screen
+                <Stack.Screen
                   name="Following"
                   component={Following}
-                 
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                  }}
                 />
               </Stack.Navigator>
             ) : (

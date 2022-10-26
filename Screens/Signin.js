@@ -24,8 +24,8 @@ LogBox.ignoreLogs(["EventEmitter.removeListener"]);
 export default function Signin({ navigation }) {
   // login userInput
   const { SignIn } = React.useContext(AuthContext);
-  const loginState = (userId, userToken, userEmail, password) => {
-    SignIn(userId, userToken, userEmail, password);
+  const loginState = (userId, userToken, userEmail, password, profile) => {
+    SignIn(userId, userToken, userEmail, password, profile);
   };
 
   const [data, setData] = React.useState({
@@ -166,8 +166,8 @@ export default function Signin({ navigation }) {
 
   const { GoogleSignIn } = React.useContext(AuthContext);
 
-  const googleSignUp = (id, token, email, googleId) => {
-    GoogleSignIn(id, token, email, googleId);
+  const googleSignUp = (id, token, email, googleId, profile) => {
+    GoogleSignIn(id, token, email, googleId, profile);
   };
 
   const [accessToken, setAccessToken] = useState(); //access token state initialisation
@@ -236,7 +236,8 @@ export default function Signin({ navigation }) {
               userInfo.userId,
               userInfo.authentication_key,
               userInfo.email,
-              userInfo.google_Id
+              userInfo.google_Id,
+              userInfo.profile,
             );
             navigation.navigate("TabNav");
           } else if (resp.message === "successfully Registered") {
@@ -245,7 +246,8 @@ export default function Signin({ navigation }) {
               userInfo.userId,
               userInfo.authentication_key,
               userInfo.email,
-              userInfo.google_Id
+              userInfo.google_Id,
+              userInfo.profile,
             );
             navigation.navigate("TabNav");
           } else {

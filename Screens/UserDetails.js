@@ -36,6 +36,7 @@ const UserDetails = ({ route, navigation }) => {
     confirmPassword: "",
   });
 
+  const [googleId, setGoogleId] = useState(detailInfo.google_Id);
   //Message from server
   const [message, setMessage] = useState("Success");
   const [showMessage, setShowMesssage] = useState(false);
@@ -314,7 +315,7 @@ const UserDetails = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    console.log(detailInfo.google_Id);
+ 
     return () => {};
   });
 
@@ -517,7 +518,7 @@ const UserDetails = ({ route, navigation }) => {
           )}
         </Pressable>
 {
-  detailInfo.google_Id ? null
+  googleId.length == 0  ? null
   :
   (
     
