@@ -256,20 +256,16 @@ const CategorizedEvent = ({ navigation }) => {
     var color;
     switch (category) {
       case "Entertainment":
-        color = "#E38B29";
+        color = "#a11295";
         break;
       case "Travelling":
-        color = "#422057";
+        color = "#129ca1";
         break;
-      case "Business":
-        color = "#61481C";
-        break;
+    
       case "Cinema & Theater":
         color = "#5ca803";
         break;
-      case 4:
-        day = "Thursday";
-        break;
+
       case "Community":
         color = "#F96666";
         break;
@@ -413,7 +409,7 @@ const CategorizedEvent = ({ navigation }) => {
             // List of events in extracted from database in the form JSON data
             data={search}
             renderItem={renderedItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.event_id}
             ListEmptyComponent={() => listEmptyComponent()}
             style={styles.filteredEventList}
           />

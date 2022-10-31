@@ -121,7 +121,7 @@ Alert.alert(
     const shareOptions = {
     url:localPath,
     title: item.event_name,
-    message: "Check out this event on p2b-Ethiopia"+ " "+applink,
+    message: "Check out this event on Place to be Ethiopia"+ " "+applink,
   };
 
     await Share.open(shareOptions)

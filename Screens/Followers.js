@@ -106,37 +106,33 @@ const Followers = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-          <View style={styles.topContent}>
-            <Text style={styles.followersCount}>{count}</Text>
-            <Text style={styles.allfollowers}>Followers</Text>
-          </View>
+      <View style={styles.topContent}>
+        <Text style={styles.followersCount}>{count}</Text>
+        <Text style={styles.allfollowers}>Followers</Text>
+      </View>
 
-          <FlatList
-            data={followers}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.userId}
-            onRefresh={featchFollowers}
-            refreshing={refreshing}
-
-            ListHeaderComponent={() =>
-              notFound ? (
-                <View style={styles.container}>
-                  <Image
-                    source={require("../assets/NotFound.png")}
-                    resizeMode="contain"
-                    style={styles.notFound}
-                  />
-                  <Text style={styles.emptyMessageStyle}>
-                    No Followers yet!
-                  </Text>
-                  <HelperText style={{ alignSelf: "center" }}>
-                     To get notified follow some organizer!
-                  </HelperText>
-                </View>
-              ) : null
-            }
-          />
-       
+      <FlatList
+        data={followers}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.userId}
+        onRefresh={featchFollowers}
+        refreshing={refreshing}
+        ListHeaderComponent={() =>
+          notFound ? (
+            <View style={styles.noContainer}>
+              <Image
+                source={require("../assets/followers.png")}
+                resizeMode="contain"
+                style={styles.notFound}
+              />
+              <Text style={styles.emptyMessageStyle}>No Followers yet!</Text>
+              <HelperText style={{ alignSelf: "center" }}>
+                To get notification of event follow some organizer!
+              </HelperText>
+            </View>
+          ) : null
+        }
+      />
     </View>
   );
 };
@@ -147,6 +143,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Constants.background,
   },
+
+  noContainer: {
+    flex: 1,
+    backgroundColor: Constants.background,
+    alignItems: "center",
+  },
+
   topContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -192,8 +195,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 3,
     marginTop: 17,
-    
-  }
+  },
 });
 
 //make this component available to the app

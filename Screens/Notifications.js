@@ -18,6 +18,14 @@ import NoticeShimmer from "../Components/NoticeShimmer";
 const Notifications = ({ navigation }) => {
   // state from context from Context Hook
 
+  const SignInPrompt = () => {
+    return (
+      <View>
+        <Text>SignIN pLEASE</Text>
+      </View>
+    );
+  };
+
   // function to be called when server respond with notice count
 
   const [notification, setNotification] = React.useState();
@@ -25,13 +33,13 @@ const Notifications = ({ navigation }) => {
   const [refreshing, setRefreshing] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-
   // refresh the list of notifications
 
   const RefreshList = async () => {
-    setLoading(false);
     let id = await AsyncStorage.getItem("userId");
 
+    setRefreshing(true);
+    setLoading(false);
     let isApiSubscribed = true;
     var ApiUrl = Connection.url + Connection.notification;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
@@ -55,38 +63,41 @@ const Notifications = ({ navigation }) => {
 
         if (isApiSubscribed) {
           // handle success
-
+          const filter = (data) => {
+            return data !== null;
+          };
           if (message === "succeed") {
             var result = response[0].Notification;
+            var notice = result.filter(filter);
+            var sorted = notice.sort(notice.event_id);
 
-            setNotification(result);
-
+            setNotification(sorted);
             setNotFound(false);
+            setRefreshing(false);
             setLoading(true);
           } else if (message === "no event") {
-            var result = response[0].Notification;
-
-            setNotification(result);
-            setLoading(true);
+            setNotification(notice);
+            setRefreshing(false);
             setNotFound(true);
+            setLoading(true);
           } else if ((message = "follow organizers")) {
-            setLoading(true);
+            setNotification(notice);
+            setRefreshing(false);
             setNotFound(true);
+            setLoading(true);
           } else {
-            setLoading(false);
+            setNotification(notification);
           }
         }
       })
-      .catch((err) => {
-        setLoading(false);
+      .catch((error) => {
+        setNotification(notification);
       });
-
     return () => {
       // cancel the subscription
       isApiSubscribed = false;
     };
   };
-
   // convert date to suitable format for app
   const DateFun = (startingTime) => {
     var date = new Date(startingTime);
@@ -146,7 +157,6 @@ const Notifications = ({ navigation }) => {
       organizerName={item.event_organizer}
       noticeTitle={item.event_name}
       date={item.addedDate}
-     
       onPressNotice={() => navigation.navigate("EventDetail", { item })}
     />
   );
@@ -176,14 +186,15 @@ const Notifications = ({ navigation }) => {
                 <Title style={styles.prompttxt}>
                   You have no notification yet!
                 </Title>
-                
               </View>
             ) : null
           }
           ListFooterComponent={() =>
             notFound ? null : (
               <View style={styles.listEnd}>
-                <HelperText>Notifications from organizers you followed.</HelperText>
+                <HelperText>
+                  Notifications from organizers you followed.
+                </HelperText>
               </View>
             )
           }
@@ -202,6 +213,7 @@ const Notifications = ({ navigation }) => {
             <NoticeShimmer />
             <NoticeShimmer />
             <NoticeShimmer />
+            <NoticeShimmer />
           </View>
         </View>
       )}
@@ -214,7 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Constants.background,
-    paddingTop: 200,
+    paddingTop: 150,
     paddingBottom: 280,
   },
   noNoticeImage: {
@@ -223,9 +235,12 @@ const styles = StyleSheet.create({
     borderRadius: Constants.mediumbox,
   },
   prompttxt: {
-    fontSize: Constants.primaryHeading,
+    fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
-    marginTop: 10,
+    color: Constants.Secondary,
+
+    alignSelf: "center",
+    justifyContent: "center",
   },
   listEnd: {
     padding: 20,

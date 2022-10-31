@@ -1,17 +1,16 @@
-
-
 const Constants = {
   //main colors
   mainText: "#000000",
   mainTwo: "#555555",
+
   //background: "#ffffff",
   background: "#ffffff",
   red: "#d21f3c",
   iconColor: "#019267",
-  
   purple: "#422057",
   lightPurple: "#a721fc",
   green: "#04b02c",
+
   // Box constants
   borderRad: 14,
   mediumbox: 8,
@@ -53,7 +52,7 @@ const Constants = {
   lightGreen: "#90EE90",
   PrimaryBlue: "#0fa7ff",
 
-  //application link 
-  appLink: "https://www.p2b-ethiopia.com/",
+  //application link
+  appLink: "https://play.google.com/store/apps/details?id=com.facebook.lite",
 };
 export default Constants;

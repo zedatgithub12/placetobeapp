@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import CartReducer from "../Reducer/saveSlice";
+import CartReducer from "../Reducer/notificationSlice";
 import {
   persistReducer,
   FLUSH,
@@ -13,19 +13,19 @@ import { combineReducers } from "redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const persistConfig = {
-  key: "notice",
+  key: "root",
   version: 1,
   storage: AsyncStorage,
 };
 
 const reducer = combineReducers({
-  cart: CartReducer,
+  notice: CartReducer,
   
 });
 
 const persistedReducer = persistReducer(persistConfig, reducer);
 
-const notices = configureStore({
+const notice = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -38,4 +38,4 @@ const notices = configureStore({
   // },
 });
 
-export default notices;
+export default notice;

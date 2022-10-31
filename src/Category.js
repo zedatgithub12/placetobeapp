@@ -2,13 +2,13 @@ const Category = [
   {
     id: "5",
     name: "Entertainment",
-    background: "#E38B29",
+    background: "#a11295",
     icon: "emoticon-happy-outline",
   },
   {
     id: "11",
     name: "Travelling",
-    background: "#422057",
+    background: "#129ca1",
     icon: "hiking",
   },
 
@@ -20,12 +20,6 @@ const Category = [
   },
 
   {
-    id: "1",
-    name: "Business",
-    background: "#61481C",
-    icon: "briefcase-variant-outline",
-  },
-  {
     id: "2",
     name: "Cinema & Theater",
     background: "#5ca803",
@@ -34,7 +28,7 @@ const Category = [
   {
     id: "7",
     name: "Nightlife",
-    background: "#472D2D",
+    background: "#5e3d08",
     icon: "moon-waning-crescent",
   },
   {

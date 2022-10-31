@@ -47,15 +47,17 @@ const ThisWeekEvent = ({ navigation }) => {
           } else if (message === "no event") {
             setWEvents(WeekEvents);
             setNotFound(true);
-            setMessage("There is no happening this week!");
+            setMessage("No event this week!");
             setLoading(true);
           } else {
-            setLoading(false);
+            setLoading(true);
+            setWEvents(WEvents);
           }
         }
       })
       .catch((err) => {
-        setLoading(false);
+        setLoading(true);
+        setWEvents(WEvents);
       });
     return () => {
       // cancel the subscription
@@ -128,6 +130,51 @@ const ThisWeekEvent = ({ navigation }) => {
     }
     return eventPrice;
   };
+
+  const CategoryColor = (category) => {
+    var color;
+    switch (category) {
+      case "Entertainment":
+        color = "#a11295";
+        break;
+      case "Travelling":
+        color = "#129ca1";
+        break;
+    
+      case "Cinema & Theater":
+        color = "#5ca803";
+        break;
+
+      case "Community":
+        color = "#F96666";
+        break;
+      case "Trade Fairs & Expo":
+        color = "#E38B29";
+        break;
+      case "Nightlife":
+        color = "#472D2D";
+        break;
+      case "Professional":
+        color = "#002B5B";
+        break;
+      case "Shopping":
+        color = "#9306c2";
+        break;
+      case "Sport":
+        color = "#576F72";
+        break;
+      case "Others":
+        color = "#967E76";
+        break;
+      default:
+        color = "#ffbb00";
+    }
+    return color;
+  };
+
+
+
+
   const renderItem = ({ item }) => (
     <Events
       Event_Id={item.event_id}
@@ -137,6 +184,7 @@ const ThisWeekEvent = ({ navigation }) => {
       date={DateFun(item.start_date)}
       time={TimeFun(item.start_time)}
       venue={item.event_address}
+      category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
       onPress={() => navigation.navigate("EventDetail", { item })}
     />
@@ -173,17 +221,19 @@ const ThisWeekEvent = ({ navigation }) => {
           } else if (message === "no event") {
             setWEvents(WeekEvents);
             setNotFound(true);
-            setMessage("No happening this week!");
+            setMessage("No event this week!");
 
             setRefreshing(false);
             setLoading(true);
           } else {
-            setLoading(false);
+            setLoading(true);
+            setWEvents(WEvents);
           }
         }
       })
       .catch((err) => {
-        setLoading(false);
+        setLoading(true);
+        setWEvents(WEvents);
       });
 
     return () => {
@@ -194,6 +244,8 @@ const ThisWeekEvent = ({ navigation }) => {
 
   useEffect(() => {
     mountFunction();
+
+    return ()=>{};
   },[WEvents]);
 
   return (

@@ -159,7 +159,7 @@ const YourEvents = ({ route, navigation }) => {
             var todayEvents = response[0].Events;
             setEvents(todayEvents);
             setNotFound(false);
-           setLoading(true);
+            setLoading(true);
           } else if (message === "no event") {
             setEvents(todayEvents);
             setNotFound(true);
@@ -170,7 +170,7 @@ const YourEvents = ({ route, navigation }) => {
           }
         }
       })
-      .catch((err)=>{
+      .catch((err) => {
         setLoading(false);
       });
 
@@ -180,84 +180,68 @@ const YourEvents = ({ route, navigation }) => {
     };
   };
 
-  
   useEffect(() => {
     RefreshList();
     return () => {};
   }, []);
 
   return (
-    <SafeAreaView
-    
-      style={styles.container}>
-      <ScrollView 
-       stickyHeaderIndices={[0]}
-       
-      >
-        <View style={{backgroundColor: Constants.primary}}>
-      <TouchableOpacity
-        style={styles.backArrow} // back arrow button style
-        onPress={() => navigation.goBack()}
-      >
-        <Ionicons
-          name="arrow-back-sharp"
-          size={25}
-          //back arrow icon
-        />
-      </TouchableOpacity>
-      <View style={styles.headerContainer}>
-        <Text style={styles.Title}>Your Events</Text>
-        {loading ?
-        (
-<Text style={styles.eventCount}>{count}</Text>
-        ):(
- <SkeletonPlaceholder>
-   <View style={{width:45, height:30, borderRadius:3, padding:7}}/>
- </SkeletonPlaceholder>
-        )
-
-        }
-        
-      </View>
-      </View>
-{
-  loading ?
-  (
- <View >
-    {
-      events.map((item)=> <YourE
-      key={item.event_id}
-      Event_Id={item.event_id}
-      status={renderStatus(item.event_status)}
-      org_id={item.userId}
-      FeaturedImage={item.event_image}
-      title={item.event_name}
-      date={DateFun(item.start_date)}
-      time={TimeFun(item.start_time)}
-      venue={item.event_address}
-      Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { item })}
-    />)
-    }
-</View>
-
-  
-  )
-  :
-  (
- <View>
-   <OrgShimmer/>
-   <OrgShimmer/>
-   <OrgShimmer/>
-   <OrgShimmer/>
-   <OrgShimmer/>
-   <OrgShimmer/>
-
-   </View>
-  )
-}
-</ScrollView>
-        </SafeAreaView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        <View>
+          <TouchableOpacity
+            style={styles.backArrow} // back arrow button style
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons
+              name="arrow-back-sharp"
+              size={25}
+              //back arrow icon
+            />
+          </TouchableOpacity>
+          <View style={styles.headerContainer}>
+            <Text style={styles.Title}>Your Events</Text>
+            {loading ? (
+              <Text style={styles.eventCount}>{count}</Text>
+            ) : (
+              <SkeletonPlaceholder>
+                <View
+                  style={{ width: 45, height: 30, borderRadius: 3, padding: 7 }}
+                />
+              </SkeletonPlaceholder>
+            )}
+          </View>
+        </View>
+        {loading ? (
+          <View>
+            {events.map((item) => (
+              <YourE
+                key={item.event_id}
+                Event_Id={item.event_id}
+                status={renderStatus(item.event_status)}
+                org_id={item.userId}
+                FeaturedImage={item.event_image}
+                title={item.event_name}
+                date={DateFun(item.start_date)}
+                time={TimeFun(item.start_time)}
+                venue={item.event_address}
+                Price={EntranceFee(item.event_entrance_fee)}
+                onPress={() => navigation.navigate("EventDetail", { item })}
+              />
+            ))}
+          </View>
+        ) : (
+          <View>
+            <OrgShimmer />
+            <OrgShimmer />
+            <OrgShimmer />
+            <OrgShimmer />
+            <OrgShimmer />
+            <OrgShimmer />
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -265,7 +249,7 @@ const YourEvents = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
   },
   backArrow: {
     position: "absolute",
@@ -275,36 +259,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 20,
     marginTop: 4,
-    
+
     backgroundColor: Constants.background,
     height: 40,
     width: 40,
     borderRadius: 50,
     elevation: 2,
   },
-  headerContainer:{
-   flexDirection:"row",
-   justifyContent:"space-between",
-   alignItems:"center",
-   marginTop: 70,
-   marginBottom: 25,
-   paddingHorizontal:20,
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 70,
+    marginBottom: 25,
+    paddingHorizontal: 20,
   },
   Title: {
-
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
     fontSize: 36,
-    
   },
   eventCount: {
-      backgroundColor:Constants.transparentPrimary,
-      padding:5,
-      paddingHorizontal:15,
-      borderRadius:Constants.tiny,
-      fontFamily: Constants.fontFam,
-      fontWeight: Constants.Bold,
-      fontSize: Constants.headingone,
+    backgroundColor: Constants.transparentPrimary,
+    padding: 5,
+    paddingHorizontal: 15,
+    borderRadius: Constants.tiny,
+    fontFamily: Constants.fontFam,
+    fontWeight: Constants.Bold,
+    fontSize: Constants.headingone,
   },
   notFound: {
     width: "85%",
@@ -319,14 +301,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "center",
   },
-  listEnd:{
-    padding:20,
-    backgroundColor:Constants.transparentPrimary,
-    marginTop:5,
-    margin:5,
-    borderRadius:Constants.tinybox,
-    marginBottom:62,
-  }
+  listEnd: {
+    padding: 20,
+    backgroundColor: Constants.transparentPrimary,
+    marginTop: 5,
+    margin: 5,
+    borderRadius: Constants.tinybox,
+    marginBottom: 62,
+  },
 });
 
 //make this component available to the app

@@ -14,7 +14,7 @@ function MyTabs() {
       screenOptions={{
         tabBarActiveTintColor:Constants.primary,
         tabBarInactiveTintColor: Constants.purple,
-
+  
         tabBarLabelStyle: {
           borderRadius: Constants.borderRad,
           padding: 3,
@@ -28,7 +28,7 @@ function MyTabs() {
         swipeEnabled: true,
 
         tabBarStyle:{
-        shadowColor: Constants.primary
+        shadowColor: Constants.lightPurple
          
         }
       }}

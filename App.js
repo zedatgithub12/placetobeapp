@@ -1,6 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Signin from "./Screens/Signin";
@@ -12,7 +19,7 @@ import Bookmarks from "./Screens/Bookmarks";
 import Setting from "./Screens/Setting";
 import Profile from "./Screens/ProfileScreen";
 import EventDetails from "./Screens/eventDetails";
-import { ActivityIndicator, Caption } from "react-native-paper";
+import { Caption } from "react-native-paper";
 import Constants from "./constants/Constants";
 import { AuthContext } from "./Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,7 +27,7 @@ import GallerDetail from "./Screens/GalleryDetail";
 import CategorizedEvent from "./Screens/CategorizedEvent";
 import UserDetails from "./Screens/UserDetails";
 import store from "./store/store";
-import notices from "./store/noticestore";
+//import notices from "./store/noticestore";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
@@ -34,6 +41,7 @@ import NetInfo from "@react-native-community/netinfo";
 import Followers from "./Screens/Followers";
 import Following from "./Screens/Following";
 import Filter from "./Screens/Filter";
+import * as Animatable from "react-native-animatable";
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
@@ -370,7 +378,7 @@ export default function App() {
       }
 
       dispatch({ type: "REGISTER", token: userToken });
-    }, 2000);
+    }, 6000);
     NetInfo.fetch().then((state) => {
       if (state.isConnected) {
         setConnectionState(true);
@@ -380,16 +388,27 @@ export default function App() {
     return () => {};
   }, [retry]);
 
-  /* activity indicator which is going to be shown and the opening of app
+  //activity indicator which is going to be shown and the opening of app
   if (loginState.isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor:Constants.primary }}>
-       
-        <Image source={require("./assets/splash.png")} style={{height:400, width: 400}}/>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#292b2c",
+        }}
+      >
+        <Animatable.Image
+          animation="zoomIn"
+          source={require("./assets/splash.png")}
+          style={{ height: 300, width: 300 }}
+        />
+        <ActivityIndicator size="small" color={Constants.primary} />
       </View>
     );
   }
-  */
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
@@ -557,6 +576,11 @@ export default function App() {
                   style={styles.connImage}
                   resizeMode="contain"
                 />
+                <Image
+                  source={require("./assets/icon.png")}
+                  style={styles.icon}
+                  resizeMode="contain"
+                />
                 <Text>No Connection</Text>
                 <Caption>Please Check your internet connection</Caption>
                 <TouchableOpacity
@@ -587,7 +611,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   connImage: {
-    height: "60%",
+    height: "50%",
     width: "90%",
   },
   eventsBtn: {
@@ -604,5 +628,9 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
     color: Constants.background,
+  },
+  icon: {
+    width: 80,
+    height: 80,
   },
 });

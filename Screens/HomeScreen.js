@@ -159,7 +159,7 @@ function Home({ navigation, ...props }) {
     featchImage();
     userProfile();
     return () => {};
-  }, []);
+  }, [logged]);
 
   const logged = userStatus.logged;
 
@@ -172,9 +172,9 @@ function Home({ navigation, ...props }) {
       >
         <View style={styles.brands}>
           <Image
-            source={require("../assets/primary.png")}
+            source={require("../assets/header.png")}
             resizeMode="cover"
-            style={{ width: 152, height: 82 }}
+            style={{ width: 152, height: 70 }}
           />
         </View>
 
@@ -238,7 +238,7 @@ function Home({ navigation, ...props }) {
               circleLoop={true}
               paginationBoxVerticalPadding={10}
               resizeMode="contain"
-              activeOpacity={0.9}
+              activeOpacity={1.0}
             />
             <View>
               <ScrollView
@@ -291,6 +291,7 @@ const styles = StyleSheet.create({
   brands: {
     flexDirection: "row",
     alignItems: "center",
+    
     width: "76%",
   },
   SearchField: {

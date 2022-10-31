@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     color: Constants.Secondary,
     fontFamily: Constants.fontFam,
     lineHeight: 25,
-    marginLeft: 25,
+    marginLeft: 15,
   },
 
   inputStyle: {
@@ -304,7 +304,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
     borderWidth: 0.3,
     borderColor: Constants.purple,
-    alignItems: "flex-start"
+    alignItems: "flex-start",
+    marginHorizontal:10,
   },
   buttonStyle: {
     width: "88%",

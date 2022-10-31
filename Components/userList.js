@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   profileImage: {
     width: "14%",
-    backgroundColor: Constants.purple,
+    backgroundColor: Constants.transparentPrimary,
     height: 50,
     width: 50,
     borderRadius: 35,

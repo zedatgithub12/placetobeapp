@@ -9,15 +9,13 @@ import {
   ToastAndroid,
   Image,
   Pressable,
+  TouchableNativeFeedback,
+  ActivityIndicator,
 } from "react-native";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
 import Constants from "../constants/Constants";
-import {
-  Ionicons,
-  MaterialCommunityIcons,
-  AntDesign,
-} from "react-native-vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
 import { AuthContext } from "../Components/context";
 import { Avatar, Badge, Caption, Paragraph, Title } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
@@ -26,13 +24,14 @@ import Connection from "../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSelector, useDispatch } from "react-redux";
 import BottomSheet from "react-native-simple-bottom-sheet";
+import * as Animatable from "react-native-animatable";
+import * as Linking from "expo-linking";
 
 function Profile({ navigation, props }) {
   const [load, setLoad] = React.useState(false);
   const { Signout } = React.useContext(AuthContext);
 
   //bookmarked item count state
-
   const { items } = useSelector((state) => state.cart);
 
   /*************************************************** */
@@ -112,6 +111,11 @@ function Profile({ navigation, props }) {
   /********************************************* */
   // we select user profile here
   /******************************************* */
+
+const [updatingProfile, setupdatingProfile] = useState ("loaded");
+
+
+
   const selectFeaturedImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -124,6 +128,8 @@ function Profile({ navigation, props }) {
     let filename = localUri.split("/").pop(); // the filename is stored in filename variable
     if (!result.cancelled) {
       setImage(result.uri);
+      setupdatingProfile("loading");
+    
     }
 
     // Infer the type of the image
@@ -152,16 +158,20 @@ function Profile({ navigation, props }) {
 
         if (message === "successfully uploaded") {
           updateProfile(filename);
-       
+          setupdatingProfile(message);
+     
         } else {
           setProfileUpdate("couldn't update profile");
+          setupdatingProfile(message);
         }
-      });
+      }).catch((error)=>{
+        setupdatingProfile("coundn't update");
+      })
   };
 
   // variables and functions for invite friends button inside profile screen
-  var msg = "you are invited to install p2b-app  ";
-  var links = "  https://www.p2b-ethiopia.com/";
+  var msg = "you are invited to install Place to be mobile app  ";
+  var links = Constants.appLink;
   // share the app to friends
   const onShare = async () => {
     try {
@@ -229,6 +239,7 @@ function Profile({ navigation, props }) {
             setCount(eventPostedCount);
             setLoad(true);
           } else {
+            setLoad(false);
           }
         }
       })
@@ -279,7 +290,7 @@ function Profile({ navigation, props }) {
           });
           setImage(Connection.url + Connection.assets + userInfo.profile);
         } else {
-         // console.log(resp.message);
+          // console.log(resp.message);
         }
       });
 
@@ -287,6 +298,46 @@ function Profile({ navigation, props }) {
   };
   // bottom sheet reference
   const panelRef = useRef(null);
+
+  //check for update button function
+  const [buttonShown, setButtonShown] = useState(false);
+
+  const updateButton = () => {
+    var appVersion = require("../package.json");
+    var localAppVersion = appVersion.version;
+
+    var ApiUrl = Connection.url + Connection.appInfo;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var message = response[0].message;
+
+        if (message === "succeed") {
+          var databaseAppVersion = response[0].version.version;
+
+          if (databaseAppVersion > localAppVersion) {
+            setButtonShown(true);
+          } else {
+            setButtonShown(false);
+          }
+        } else if (message === "not featched") {
+          setButtonShown(false);
+        } else {
+          setButtonShown(false);
+        }
+      })
+      .catch((error) => {
+        setButtonShown(false);
+      });
+  };
 
   // useffect perform componentdidmount and componentwillUnmounted function here
   useEffect(() => {
@@ -297,6 +348,9 @@ function Profile({ navigation, props }) {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       setHasGalleryPermission(gallerStatus.status === "granted");
     })();
+
+    updateButton();
+
     return () => {};
   }, []);
 
@@ -304,14 +358,29 @@ function Profile({ navigation, props }) {
     <ScrollView style={styles.container}>
       {load ? (
         <View>
+          {buttonShown ? (
+            <TouchableNativeFeedback
+              onPress={() => Linking.openURL(Constants.appLink)}
+              style={{ alignItems: "center" }}
+            >
+              <Animatable.View
+                animation="slideInRight"
+                style={styles.updateButton}
+              >
+                <MaterialCommunityIcons
+                  name="arrow-up-bold-circle"
+                  size={20}
+                  style={styles.updateIcon}
+                />
+                <Text style={styles.updateText}>Update Available</Text>
+              </Animatable.View>
+            </TouchableNativeFeedback>
+          ) : null}
+
           <View style={styles.profileContainer}>
             <LinearGradient
               // Button Linear Gradient
-              colors={[
-                Constants.primary,
-                Constants.primary,
-                Constants.primary,
-              ]}
+              colors={[Constants.primary, Constants.primary, Constants.primary]}
               style={styles.coverImageContainer}
             ></LinearGradient>
 
@@ -328,29 +397,49 @@ function Profile({ navigation, props }) {
                 onPress={() => selectFeaturedImage()}
               />
               <View style={styles.cameraIcon}>
-              <MaterialCommunityIcons
-                name="camera"
-                size={20}
-                color="#636363"
+                {updatingProfile === "loaded" ?
+                (
+                  <MaterialCommunityIcons
+                  name="camera"
+                  size={20}
+                  color="#636363"
+                />
+                ) : updatingProfile === "loading" ? 
+                ( 
+                  <ActivityIndicator size="small" color={Constants.Success}/>
+
+                ): updatingProfile === "successfully uploaded" ? (
+                  <MaterialCommunityIcons
+                  name="check-circle"
+                  size={20}
+                  color={Constants.Success}
+                />
+                ) :
+                (
+                  <MaterialCommunityIcons
+                  name="information"
+                  size={20}
+                  color={Constants.Danger}
+                />
+                )
                 
-              />
+}
               </View>
-            
             </TouchableOpacity>
 
             <View
               //username and user email address container
               style={styles.txtContent}
             >
-              <View style={{ alignSelf: "center", alignItems:"center" }}>
+              <View style={{ alignSelf: "center", alignItems: "center" }}>
                 <Title>{userData.userName}</Title>
                 <Paragraph>{userData.userEmail}</Paragraph>
               </View>
               <InteractionInfo
                 Events={userInfo.eventPosted}
                 getData={() => navigation.navigate("yourEvents", { count })}
-                followerCountPressed={()=> navigation.navigate("Followers")}
-                followingCountPressed={()=>navigation.navigate("Following")}
+                followerCountPressed={() => navigation.navigate("Followers")}
+                followingCountPressed={() => navigation.navigate("Following")}
                 Followers={userInfo.followers}
                 Following={userInfo.following}
               />
@@ -366,7 +455,11 @@ function Profile({ navigation, props }) {
               }
             >
               <View style={styles.iconbackground}>
-                <MaterialCommunityIcons name="account-cog" size={20} style={styles.optionIcon}/>
+                <MaterialCommunityIcons
+                  name="account-cog"
+                  size={22}
+                  style={styles.optionIcon}
+                />
               </View>
               <Text style={styles.settingtxt}>Account Settings</Text>
             </TouchableOpacity>
@@ -391,10 +484,32 @@ function Profile({ navigation, props }) {
               style={styles.Settings} //share app with your friends
             >
               <View style={styles.iconbackground}>
-                <Ionicons name="share-social-sharp" size={20} style={styles.optionIcon}/>
+                <Ionicons
+                  name="share-social-sharp"
+                  size={20}
+                  style={styles.optionIcon}
+                />
               </View>
               <Text style={styles.settingtxt}>Invite Friends</Text>
             </TouchableOpacity>
+
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.Settings}
+              onPress={() => Linking.openURL("https://docs.google.com/document/d/166mWVyx8Q6Cj9-a-HFWbXRl77yC-hwDb7TtcBBIIo00/edit?usp=sharing")}
+            >
+              
+              <View style={styles.iconbackground}>
+                <MaterialCommunityIcons
+                  name="security"
+                  size={23}
+                  style={styles.optionIcon}
+                />
+              </View>
+              <Text style={styles.settingtxt}>Privacy Policy</Text>
+            </TouchableOpacity>
+
 
             <TouchableOpacity
               activeOpacity={0.7}
@@ -416,8 +531,13 @@ function Profile({ navigation, props }) {
               style={styles.Settings}
               onPress={() => navigation.navigate("About")}
             >
+
               <View style={styles.iconbackground}>
-                <MaterialCommunityIcons name="information" size={25} style={styles.optionIcon}/>
+                <MaterialCommunityIcons
+                  name="information"
+                  size={25}
+                  style={styles.optionIcon}
+                />
               </View>
               <Text style={styles.settingtxt}>About</Text>
             </TouchableOpacity>
@@ -428,11 +548,12 @@ function Profile({ navigation, props }) {
               onPress={() => panelRef.current.togglePanel()}
             >
               <View style={styles.iconbackground}>
-                <Ionicons name="log-out" size={20} style={styles.optionIcon}/>
+                <Ionicons name="log-out" size={20} style={styles.optionIcon} />
               </View>
               <Text style={styles.settingtxt}>Log-out</Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.versioning}><Caption> Version 1.0.0</Caption></View>
         </View>
       ) : (
         <SkeletonPlaceholder>
@@ -511,6 +632,15 @@ function Profile({ navigation, props }) {
                 borderRadius: 3,
               }}
             />
+             <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
             <View
               style={{
                 marginLeft: 3,
@@ -528,7 +658,7 @@ function Profile({ navigation, props }) {
         sliderMinHeight={0}
         ref={(ref) => (panelRef.current = ref)}
         isOpen={false}
-        innerContentStyle={styles.bottomsheetstyl}
+        innerContentStyle={styles.bottomsheetstyle}
       >
         <Text style={styles.sheetTitle}>You are logging Out!</Text>
         <Caption>Are you sure?</Caption>
@@ -563,20 +693,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Constants.Faded,
-    padding:8,
+    padding: 8,
     borderRadius: 10,
-    elevation:2,
-    shadowColor:Constants.Secondary,
-    marginLeft:5,
+
+    marginLeft: 5,
   },
   Settings: {
     flexDirection: "row",
     alignItems: "center",
-    margin: 5,
-    marginLeft: 20,
+    margin: 3,
+    marginLeft: 18,
   },
-  optionIcon:{
-  color:Constants.primary,
+  optionIcon: {
+    color: Constants.Secondary,
   },
   bookmark: {
     flexDirection: "row",
@@ -589,7 +718,7 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingtwo,
     marginLeft: 15,
     fontWeight: Constants.Boldtwo,
-    fontFamily: Constants.fontFam
+    fontFamily: Constants.fontFam,
   },
   horizontalline: {
     backgroundColor: Constants.background,
@@ -625,17 +754,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  cameraIcon:{
-  justifyContent:"center",
-  alignItems:"center",
-    position:"absolute",
-    bottom:2,
-    right:0,
+  cameraIcon: {
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    bottom: 2,
+    right: 0,
     backgroundColor: Constants.background,
-    padding:6,
+    padding: 6,
     borderRadius: 50,
-    elevation:3
-
+    elevation: 3,
   },
   coverTxt: {
     fontSize: Constants.headingone,
@@ -692,7 +820,7 @@ const styles = StyleSheet.create({
     // backgroundColor: Constants.primary
   },
 
-  bottomsheetstyl: {
+  bottomsheetstyle: {
     padding: 10,
     alignItems: "center",
     justifyContent: "center",
@@ -724,6 +852,34 @@ const styles = StyleSheet.create({
     borderRadius: Constants.tiny,
     alignItems: "center",
   },
+  updateButton: {
+    position: "absolute",
+    bottom: 10,
+    zIndex: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    alignSelf: "flex-end",
+    paddingHorizontal: 15,
+    backgroundColor: Constants.Success,
+    paddingVertical: 7,
+    borderRadius: Constants.tiny,
+  },
+  updateIcon: {
+    color: Constants.Inverse,
+  },
+  updateText: {
+    fontFamily: Constants.fontFam,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.Faded,
+    marginLeft: 6,
+  },
+  versioning:{
+    marginTop:-20,
+    marginBottom:30,
+    marginLeft:28,
+  }
 });
 
 export default Profile;

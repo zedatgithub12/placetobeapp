@@ -3,8 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { Component, useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image } from "react-native";
 import { HelperText } from "react-native-paper";
-import SkeletonPlaceholder from "react-native-skeleton-placeholder";
-import NoticeShimmer from "../Components/NoticeShimmer";
 import Listing from "../Components/userList";
 import Connection from "../constants/connection";
 import Constants from "../constants/Constants";
@@ -124,9 +122,9 @@ const Following = ({ navigation }) => {
             refreshing={refreshing}
             ListHeaderComponent={() =>
               notFound ? (
-                <View style={styles.container}>
+                <View style={styles.noContainer}>
                   <Image
-                    source={require("../assets/NotFound.png")}
+                    source={require("../assets/followers.png")}
                     resizeMode="contain"
                     style={styles.notFound}
                   />
@@ -150,6 +148,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Constants.background,
+  },
+  noContainer:{
+    flex: 1,
+    backgroundColor: Constants.background,
+    alignItems:"center",
   },
   topContent: {
     flexDirection: "row",

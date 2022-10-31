@@ -221,6 +221,7 @@ return await fetch(ApiUrl, {
         <Feather name="image" size={24} style={styles.uploadImageIcon} />
         <Text style={styles.uploadImageTxt}>Upload Event Poster</Text>
       </View>
+     
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={() => selectFeaturedImage()}

@@ -51,12 +51,14 @@ const UpcomingEvents = ({ navigation }) => {
             setMessage("No upcoming events!");
             setLoading(true);
           } else {
-            setLoading(false);
+            setLoading(true);
+            setUEvents(UEvents);
           }
         }
       })
       .catch((err) => {
-        setLoading(false);
+        setLoading(true);
+        setUEvents(UEvents);
       });
     return () => {
       // cancel the subscription
@@ -133,20 +135,16 @@ const UpcomingEvents = ({ navigation }) => {
     var color;
     switch (category) {
       case "Entertainment":
-        color = "#E38B29";
+        color = "#a11295";
         break;
       case "Travelling":
-        color = "#422057";
+        color = "#129ca1";
         break;
-      case "Business":
-        color = "#61481C";
-        break;
+    
       case "Cinema & Theater":
         color = "#5ca803";
         break;
-      case 4:
-        day = "Thursday";
-        break;
+
       case "Community":
         color = "#F96666";
         break;
@@ -168,8 +166,8 @@ const UpcomingEvents = ({ navigation }) => {
       case "Others":
         color = "#967E76";
         break;
-        default:
-          color = "#ffbb00";
+      default:
+        color = "#ffbb00";
     }
     return color;
   };
@@ -226,12 +224,14 @@ const UpcomingEvents = ({ navigation }) => {
             setRefreshing(false);
             setLoading(true);
           } else {
-            setLoading(false);
+            setLoading(true);
+            setUEvents(UEvents);
           }
         }
       })
       .catch((err) =>{
-        setLoading(false);
+        setLoading(true);
+        setUEvents(UEvents);
       })
       
     return () => {

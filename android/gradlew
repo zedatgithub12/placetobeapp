@@ -232,3 +232,5 @@ eval "set -- $(
     )" '"$@"'
 
 exec "$JAVACMD" "$@"
+android.useAndroidX=true
+android.enableJetifier=true
