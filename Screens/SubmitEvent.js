@@ -5,9 +5,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-
+  ActivityIndicator
 } from "react-native";
-import { Paragraph, Title, HelperText } from "react-native-paper";
+import { Paragraph, Title,  } from "react-native-paper";
 import Constants from "../constants/Constants";
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
 import Forms from "../src/FormArray";
@@ -49,6 +49,7 @@ class EventSubmission extends Component {
       added: false,
       error: false,
       responseMessage: "",
+      posting: false,
     };
   }
   getData = async () => {
@@ -87,13 +88,17 @@ class EventSubmission extends Component {
         added: false, error: true, responseMessage: returnedResponse,
       });
     };
-
+     
     // closer error modal
     const closeError = () => {
       this.setState({ error: false });
     };
-    // we retrived usertoken from async storage and store it in global scope
+// state of event posting icon
+
+
     const PostEvent = async () => {
+this.setState({posting:true});
+          // we retrived usertoken from async storage and store it in global scope
       let id = await AsyncStorage.getItem("userId");
      
       var userId = id;
@@ -130,6 +135,7 @@ class EventSubmission extends Component {
       ) {
         let blankField = "There is a field left blank";
         errorPanel(blankField);
+        this.setState({posting:false});
       } else {
         // After this we initiate featch method to send user data to database
         var InsertAPIUrl = Connection.url + Connection.AddEvent;
@@ -170,13 +176,15 @@ class EventSubmission extends Component {
             let message = returnedResponse.message;
             if (message === "successfully Added") {
               successModal(message);
+              this.setState({posting:false});
             } else {
               errorPanel(message);
+              this.setState({posting:false});
             }
           })
-          .catch((err)=>console.log(err));
-        
-        
+          .catch((err)=>{
+           
+          });
       }
     };
 
@@ -216,7 +224,6 @@ class EventSubmission extends Component {
               itemWidth={windowWidth}
               directionalLockEnabled={false}
               onSnapToItem={(index) => this.setState({ ActiveIndex: index })}
-             
             />
 
             <View style={styles.SliderActionBtns}>
@@ -229,8 +236,6 @@ class EventSubmission extends Component {
                   style={styles.backButton}
                 >
                   <MaterialCommunityIcons name="arrow-left" size={26} color={Constants.Inverse}/>
-                 
-               
                 </TouchableOpacity>
               ) : null}
 
@@ -243,7 +248,6 @@ class EventSubmission extends Component {
                   style={styles.nextButton}
                 >
                   <MaterialCommunityIcons name="arrow-right" size={26} color={Constants.background}/>
-                 
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
@@ -252,8 +256,18 @@ class EventSubmission extends Component {
                   activeOpacity={0.7}
                   style={styles.submitButton}
                 >
-                  <Ionicons name="md-checkmark-sharp" size={26} color={Constants.background}/>
-   
+                  {
+                    this.state.posting ? (
+                      <ActivityIndicator
+                      size="small"
+                      color={Constants.Faded}
+                      />
+                    )
+                    :(
+                      <Ionicons name="md-checkmark-sharp" size={26} color={Constants.background}/>
+                    )
+                  }
+                 
                 </TouchableOpacity>
               )}
             </View>

@@ -256,12 +256,12 @@ const CategorizedEvent = ({ navigation }) => {
     var color;
     switch (category) {
       case "Entertainment":
-        color = "#a11295";
+        color = "#007bc2";
         break;
       case "Travelling":
-        color = "#129ca1";
+        color = "#0c790c";
         break;
-    
+
       case "Cinema & Theater":
         color = "#5ca803";
         break;
@@ -276,16 +276,16 @@ const CategorizedEvent = ({ navigation }) => {
         color = "#472D2D";
         break;
       case "Professional":
-        color = "#002B5B";
+        color = "#2c2e27";
         break;
       case "Shopping":
         color = "#9306c2";
         break;
       case "Sport":
-        color = "#576F72";
+        color = "#ff0571";
         break;
       case "Others":
-        color = "#967E76";
+        color = "#6cab00";
         break;
       default:
         color = "#ffbb00";
@@ -412,6 +412,10 @@ const CategorizedEvent = ({ navigation }) => {
             keyExtractor={(item) => item.event_id}
             ListEmptyComponent={() => listEmptyComponent()}
             style={styles.filteredEventList}
+            initialNumToRender={2} // Reduce initial render amount
+            maxToRenderPerBatch={1} // Reduce number in each render batch
+            updateCellsBatchingPeriod={100} // Increase time between renders
+            windowSize={7} // Reduce the window size
           />
         ) : (
           <View style={styles.noResultContainer}>

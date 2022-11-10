@@ -322,7 +322,7 @@ const [subscription, setSubscription] = useState(false); // follow unfollow acti
           } else if (message === "no event") {
             setEvents(todayEvents);
             setNotFound(true);
-            setMessage("Your event will be listed here.");
+            setMessage("Event will be listed here.");
             setLoading(true);
           } else {
             setLoading(false);
@@ -475,6 +475,10 @@ const [subscription, setSubscription] = useState(false); // follow unfollow acti
   onRefresh={RefreshList}
   refreshing={refreshing}
   style={styles.eventList}
+  initialNumToRender={2} // Reduce initial render amount
+  maxToRenderPerBatch={1} // Reduce number in each render batch
+  updateCellsBatchingPeriod={100} // Increase time between renders
+  windowSize={7} // Reduce the window size
   // when ithere is no item to be listed in flatlist
   ListHeaderComponent={() =>
     notFound ? (
@@ -485,9 +489,7 @@ const [subscription, setSubscription] = useState(false); // follow unfollow acti
           style={styles.notFound}
         />
         <Text style={styles.emptyMessageStyle}>{message}</Text>
-        <HelperText style={{ alignSelf: "center" }}>
-          You can add events using plus icon in the home page
-        </HelperText>
+       
       </View>
     ) : null
   }

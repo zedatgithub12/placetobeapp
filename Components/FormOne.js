@@ -142,12 +142,12 @@ return await fetch(ApiUrl, {
         checked: false,
         helperText: "Make sure event name is more than 3 letters",
       });
-    } else if (text.length >= 50) {
+    } else if (text.length >= 80) {
       setInputs({
         ...inputs,
         eventName: text,
         fieldBorder: Constants.Danger,
-        helperText: "Even name cannot exceed 50 letters",
+        helperText: "Even name cannot exceed 80 letters",
         checked: false,
       });
     } else if (text.length >= 2 && text.length <= 50) {
@@ -179,16 +179,16 @@ return await fetch(ApiUrl, {
         descHelperText: "Make sure event Description is more than 15 letters",
         descCheck: false,
       });
-    } else if(desc.length >= 500){
+    } else if(desc.length >= 5000){
       setInputs({
         ...inputs,
         eventDesc: desc,
         descFieldBorder: Constants.Danger,
-        descHelperText: "Event Description cannot be more than 500 letters",
+        descHelperText: "Event Description cannot be more than 5000 letters",
         descCheck: false,
       })
     }
-    else if(desc.length >= 2 && desc.length <= 500){
+    else if(desc.length >= 2 && desc.length <= 5000){
       setInputs({
         ...inputs,
         eventDesc: desc,

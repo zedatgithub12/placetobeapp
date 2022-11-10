@@ -27,7 +27,7 @@ import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 
 //import {writeJsonFile} from 'write-json-file';
 
-const EventDetails = ({ route, navigation }) => {
+const YoursDetail = ({ route, navigation }) => {
   const { item } = route.params; // an event item received from homepage flatlist will passed to this screen through route params
   const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
   const logged = userStatus.logged;
@@ -404,6 +404,9 @@ const [followProgress, setFollowProgress] = useState(false);
             style={styles.image} //featured image styles
           />
         </View>
+
+
+
 
         <View style={styles.EventTitle}>
           <Text
@@ -805,4 +808,4 @@ const styles = StyleSheet.create({
     margin: 10,
   }
 });
-export default EventDetails;
+export default YoursDetail;

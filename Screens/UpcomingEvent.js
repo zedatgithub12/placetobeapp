@@ -6,7 +6,7 @@ import {
   View,
   Image,
   ToastAndroid,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import Events from "../Components/Events";
 import Connection from "../constants/connection";
@@ -15,11 +15,11 @@ import { HelperText } from "react-native-paper";
 import Listing from "../Components/ListShimmer";
 
 const UpcomingEvents = ({ navigation }) => {
-   const [UEvents, setUEvents] = useState();
+  const [UEvents, setUEvents] = useState();
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
-  const [refStatus, setRefStatus] =React.useState("Refreshed"); //toast message to be shown when user pull to refresh the page 
+  const [refStatus, setRefStatus] = React.useState("Refreshed"); //toast message to be shown when user pull to refresh the page
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -37,11 +37,10 @@ const UpcomingEvents = ({ navigation }) => {
         var message = response[0].message;
 
         if (isApiSubscribed) {
-         
           var UpcomingEvents = response[0].Events;
-          
+
           if (message === "succeed") {
-             // handle success
+            // handle success
             setUEvents(UpcomingEvents);
             setNotFound(false);
             setLoading(true);
@@ -65,7 +64,7 @@ const UpcomingEvents = ({ navigation }) => {
       isApiSubscribed = false;
       controller.abort();
     };
-  },[]);
+  }, []);
 
   /********************************************************** */
   //date function which perform date format conversion and return the suitable format for frontend
@@ -135,12 +134,12 @@ const UpcomingEvents = ({ navigation }) => {
     var color;
     switch (category) {
       case "Entertainment":
-        color = "#a11295";
+        color = "#007bc2";
         break;
       case "Travelling":
-        color = "#129ca1";
+        color = "#0c790c";
         break;
-    
+
       case "Cinema & Theater":
         color = "#5ca803";
         break;
@@ -155,16 +154,16 @@ const UpcomingEvents = ({ navigation }) => {
         color = "#472D2D";
         break;
       case "Professional":
-        color = "#002B5B";
+        color = "#2c2e27";
         break;
       case "Shopping":
         color = "#9306c2";
         break;
       case "Sport":
-        color = "#576F72";
+        color = "#ff0571";
         break;
       case "Others":
-        color = "#967E76";
+        color = "#6cab00";
         break;
       default:
         color = "#ffbb00";
@@ -187,13 +186,13 @@ const UpcomingEvents = ({ navigation }) => {
     />
   );
   //after the flatlist is refreshed we call this funtion
- // const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);
+  // const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);
   // refresh the flatlist item
 
   const RefreshList = () => {
     // set refreshing state to true
     setRefreshing(true);
-    
+
     //set Shimmer effect apperance to true
     setLoading(false);
     // featching abort controller
@@ -229,11 +228,11 @@ const UpcomingEvents = ({ navigation }) => {
           }
         }
       })
-      .catch((err) =>{
+      .catch((err) => {
         setLoading(true);
         setUEvents(UEvents);
-      })
-      
+      });
+
     return () => {
       // cancel the subscription
       isApiSubscribed = false;
@@ -241,58 +240,57 @@ const UpcomingEvents = ({ navigation }) => {
   };
 
   return (
-
-    <View style={{minHeight: "100%", backgroundColor: Constants.background}}>
+    <View
+      style={{
+        minHeight: "100%",
+        paddingBottom: 60,
+        backgroundColor: Constants.background,
+      }}
+    >
       {loading ? (
         <FlatList
-      // List of events in extracted from database in the form JSON data
-      data={UEvents}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.event_id}
-      onRefresh={RefreshList}
-      refreshing={refreshing}
-      // when ithere is no item to be listed in flatlist
-      ListHeaderComponent={() =>
-        notFound ? (
-          <View style={styles.container}>
-            <Image
-              source={require("../assets/NotFound.png")}
-              resizeMode="contain"
-              style={styles.notFound}
-            />
-            <Text style={styles.emptyMessageStyle}>{message}</Text>
-            <HelperText style={{ alignSelf: "center" }}>
-              
-            </HelperText>
-          </View>
-        ) : null
-      }
-    
-      
-    />
-      )
-
-      :
-      (
+          // List of events in extracted from database in the form JSON data
+          data={UEvents}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.event_id}
+          onRefresh={RefreshList}
+          refreshing={refreshing}
+          initialNumToRender={2} // Reduce initial render amount
+          maxToRenderPerBatch={1} // Reduce number in each render batch
+          updateCellsBatchingPeriod={100} // Increase time between renders
+          windowSize={7} // Reduce the window size
+          // when ithere is no item to be listed in flatlist
+          ListHeaderComponent={() =>
+            notFound ? (
+              <View style={styles.container}>
+                <Image
+                  source={require("../assets/NotFound.png")}
+                  resizeMode="contain"
+                  style={styles.notFound}
+                />
+                <Text style={styles.emptyMessageStyle}>{message}</Text>
+                <HelperText style={{ alignSelf: "center" }}></HelperText>
+              </View>
+            ) : null
+          }
+        />
+      ) : (
         <View>
-        <Listing/>
-        <Listing/>
-        <Listing/>
-        <Listing/>
-        <Listing/>
-        <Listing/>
-        <Listing/>
+          <Listing />
+          <Listing />
+          <Listing />
+          <Listing />
+          <Listing />
+          <Listing />
+          <Listing />
         </View>
-      )
-
-      }
+      )}
     </View>
-    
   );
 };
 const styles = StyleSheet.create({
   container: {
-    flex:1,
+    flex: 1,
     backgroundColor: Constants.background,
     alignItems: "center",
     alignSelf: "center",
@@ -305,7 +303,7 @@ const styles = StyleSheet.create({
     width: "85%",
     height: 200,
     borderRadius: 10,
-    alignSelf:"center"
+    alignSelf: "center",
   },
   emptyMessageStyle: {
     fontSize: Constants.headingone,
@@ -315,13 +313,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "center",
   },
-  listEnd:{
-    padding:20,
-    backgroundColor:Constants.transparentPrimary,
-    marginTop:5,
-    margin:5,
-    borderRadius:Constants.tinybox,
-    marginBottom:62,
-  }
+  listEnd: {
+    padding: 20,
+    backgroundColor: Constants.transparentPrimary,
+    marginTop: 5,
+    margin: 5,
+    borderRadius: Constants.tinybox,
+    marginBottom: 62,
+  },
 });
 export default UpcomingEvents;

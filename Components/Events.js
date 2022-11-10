@@ -70,6 +70,7 @@ const Events = ({
               />
               <Text style={styles.EventPrice}>{Price}</Text>
             </View>
+            
           </View>
         </View>
       </View>

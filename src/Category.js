@@ -2,20 +2,20 @@ const Category = [
   {
     id: "5",
     name: "Entertainment",
-    background: "#a11295",
+    background: "#007bc2",
     icon: "emoticon-happy-outline",
   },
   {
     id: "11",
     name: "Travelling",
-    background: "#129ca1",
+    background: "#0c790c",
     icon: "hiking",
   },
 
   {
     id: "3",
     name: "Community",
-    background: "#F96666",
+    background: "#ff3700",
     icon: "charity",
   },
 
@@ -41,7 +41,7 @@ const Category = [
   {
     id: "8",
     name: "Professional",
-    background: "#002B5B",
+    background: "#2c2e27",
     icon: "medal-outline",
   },
 
@@ -49,19 +49,19 @@ const Category = [
     id: "9",
     name: "Shopping",
     background: "#9306c2",
-    icon: "shopping-outline",
+    icon: "cart-outline",
   },
   {
     id: "10",
     name: "Sport",
-    background: "#576F72",
+    background: "#ff0571",
     icon: "whistle-outline",
   },
 
   {
     id: "12",
     name: "Others",
-    background: "#967E76",
+    background: "#6cab00",
     icon: "widgets-outline",
   },
 ];

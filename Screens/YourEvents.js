@@ -226,7 +226,7 @@ const YourEvents = ({ route, navigation }) => {
                 time={TimeFun(item.start_time)}
                 venue={item.event_address}
                 Price={EntranceFee(item.event_entrance_fee)}
-                onPress={() => navigation.navigate("EventDetail", { item })}
+                onPress={() => navigation.navigate("YoursDetail", { item })}
               />
             ))}
           </View>

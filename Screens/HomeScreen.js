@@ -85,6 +85,16 @@ function Home({ navigation, ...props }) {
 
         if (message === "succeed") {
           var featuredImages = response[0].images;
+          // // console.log(featuredImages);
+          // const featureImages = [];
+          // const lastArray = [];
+          // for (var i = 0; i <= featuredImages.length; i++) {
+          //   var networkaddress = Connection.url + Connection.assets;
+          //   featureImages.push(networkaddress + featuredImages[i].image);
+          //   lastArray = featureImages[featureImages.length -1];
+          //   console.log(featuredImages);
+          // }
+
           setImage(featuredImages);
         } else {
           setImage(Images);
@@ -291,7 +301,7 @@ const styles = StyleSheet.create({
   brands: {
     flexDirection: "row",
     alignItems: "center",
-    
+
     width: "76%",
   },
   SearchField: {

@@ -45,7 +45,7 @@ const UserDetails = ({ route, navigation }) => {
   const [mode, setMode] = useState("date");
   const [show, setShow] = useState(false); // date modal state
   const [startDate, setStartDate] = useState(detailInfo.birthdate); //birthDate state
-  const [checked, setChecked] = useState("Male"); //gender state
+  const [checked, setChecked] = useState(detailInfo.gender); //gender state
 
   const [category, setCategory] = useState(detailInfo.category);
   const [modalVisible, setModalVisible] = useState(false); // category modal state
@@ -518,9 +518,7 @@ const UserDetails = ({ route, navigation }) => {
           )}
         </Pressable>
 {
-  googleId.length == 0  ? null
-  :
-  (
+  googleId.length == 0  ?  (
     
     <View style={styles.updatePasswords}>
     <Text style={styles.changePasswordTitle}>Change Password</Text>
@@ -557,6 +555,8 @@ const UserDetails = ({ route, navigation }) => {
   </View>
 
   )
+  :
+ null
 }
       </ScrollView>
 

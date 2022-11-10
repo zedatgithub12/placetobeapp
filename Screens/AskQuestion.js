@@ -80,6 +80,7 @@ const Questions = () => {
       var headers = {
         Accept: "application/json",
         "Content-Type": "application/json",
+        
       };
 
       const data = {
@@ -93,6 +94,7 @@ const Questions = () => {
         method: "POST",
         headers: headers,
         body: JSON.stringify(data),
+        
       })
         .then((response) => response.json())
         .then((response) => {

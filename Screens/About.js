@@ -7,12 +7,13 @@ import {
   Image,
   Pressable,
   TouchableOpacity,
+  ScrollView
 } from "react-native";
 import Constants from "../constants/Constants";
 import { Ionicons } from "react-native-vector-icons";
 import call from "react-native-phone-call";
 import * as Linking from "expo-linking";
-import { ScrollView } from "react-native-gesture-handler";
+
 import { Caption } from "react-native-paper";
 
 // create a component
@@ -109,8 +110,9 @@ const About = () => {
 // define your styles
 const styles = StyleSheet.create({
   container: {
+ 
     alignItems: "center",
-    backgroundColor: Constants.background,
+   
   },
   logobackground: {
     backgroundColor: Constants.background,
@@ -118,32 +120,35 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   p2bLogo: {
-    width: 180,
-    height: 180,
+    width: 160,
+    height: 160,
+  
   },
 
   description: {
-    width: "88%",
+    width: "86%",
     alignSelf: "center",
     padding: 8,
     textAlign: "center",
     lineHeight: 18,
     fontFamily: Constants.fontFam,
-    fontSize: Constants.headingthree,
+    fontSize: Constants.headingtwo,
     color: Constants.Secondary,
+    marginTop:22,
   },
   contactTitle: {
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingone,
     color: Constants.purple,
-    paddingTop: 20,
+    paddingTop: 15,
+    
   },
   phoneContainer: {
     width: "90%",
     flexDirection: "column",
     padding: 10,
-    marginTop: 10,
+    marginTop: 3,
   },
   phone: {
     margin: 5,
@@ -171,7 +176,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Constants.Faded,
+ 
     borderWidth: 0.5,
     borderColor: Constants.lightPurple
   },
@@ -181,13 +186,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Constants.Faded,
+
     borderWidth: 0.5,
     borderColor: Constants.Success
   },
 
   bottomSection: {
-    marginTop: 40,
+    marginTop: 50,
     margin: 20,
     justifyContent: "center",
     alignItems: "center",

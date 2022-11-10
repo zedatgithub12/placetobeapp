@@ -32,6 +32,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import YourEvents from "./Screens/YourEvents";
+import YoursDetail from "./Screens/YourEventDetails";
 import OrganizersDetail from "./Screens/OrganizersDetails";
 import Questions from "./Screens/AskQuestion";
 import About from "./Screens/About";
@@ -505,6 +506,13 @@ export default function App() {
                 <Stack.Screen
                   name="yourEvents"
                   component={YourEvents}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                 <Stack.Screen
+                  name="YoursDetail"
+                  component={YoursDetail}
                   options={{
                     headerShown: false,
                   }}

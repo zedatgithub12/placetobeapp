@@ -49,10 +49,11 @@ const Constants = {
   Faded: "#f6f6f6",
   Inverse: "#292b2c",
   Secondary: "#808080",
-  lightGreen: "#90EE90",
+  lightGreen: "#e6ffe8",
   PrimaryBlue: "#0fa7ff",
 
   //application link
-  appLink: "https://play.google.com/store/apps/details?id=com.facebook.lite",
+  appLink: "app.p2b-ethiopia.com/playstore",
+  webLink: "https://www.p2b-ethiopia.com/",
 };
 export default Constants;

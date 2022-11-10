@@ -497,7 +497,7 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.Settings}
-              onPress={() => Linking.openURL("https://docs.google.com/document/d/166mWVyx8Q6Cj9-a-HFWbXRl77yC-hwDb7TtcBBIIo00/edit?usp=sharing")}
+              onPress={() => Linking.openURL("https://www.p2b-ethiopia.com/privacy-policy-2/")}
             >
               
               <View style={styles.iconbackground}>
