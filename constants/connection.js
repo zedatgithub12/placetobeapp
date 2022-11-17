@@ -1,6 +1,8 @@
+import AddTicket from "../Screens/AddTicket";
+
 const Connection = {
-  url: "http://app.p2b-ethiopia.com/placetobe/",
-  //url: "http://192.168.100.3/p2b-app/",
+  //url: "http://app.p2b-ethiopia.com/placetobe/",
+  url: "http://192.168.100.3/p2b-app/",
   signUp: "Signup.php",
   signIn: "Signin.php",
   googleSignUp: "GoogleSignUp.php",
@@ -32,6 +34,11 @@ const Connection = {
   status: "status.php",
   Images: "Images.php",
   appInfo: "appInfo.php",
+
+
+
+  // second version connnections
+  AddTicket: "AddTicket.php",
 };
 
 export default Connection;

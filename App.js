@@ -42,11 +42,15 @@ import NetInfo from "@react-native-community/netinfo";
 import Followers from "./Screens/Followers";
 import Following from "./Screens/Following";
 import Filter from "./Screens/Filter";
+import AddTicket from "./Screens/AddTicket";
+import AddingTicketSucceed from "./Screens/AddingTicketSucceed";
+import TicketDetail from "./Screens/TicketDetail";
 import * as Animatable from "react-native-animatable";
+import Tickets from "./Screens/TicketScreen";
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
-const prefix = Linking.createURL("com.afromina.placetobe/");
+const prefix = Linking.createURL("com.afromina.placetobe://");
 
 export default function App() {
   // const [isLoading, setIsLoading] = React.useState(true);
@@ -398,6 +402,7 @@ export default function App() {
           justifyContent: "center",
           alignItems: "center",
           backgroundColor: "#292b2c",
+          paddingBottom:30,
         }}
       >
         <Animatable.Image
@@ -568,6 +573,52 @@ export default function App() {
                 <Stack.Screen
                   name="Following"
                   component={Following}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Add Ticket"
+                  component={AddTicket}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                  }}
+                />
+
+                 <Stack.Screen
+                  name="Ticket Added"
+                  component={AddingTicketSucceed}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                  }}
+                />
+               <Stack.Screen
+                  name="Ticket Detail"
+                  component={TicketDetail}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                  }}
+                />
+
+                  <Stack.Screen
+                  name="My Tickets"
+                  component={Tickets}
                   options={{
                     headerStyle: {
                       backgroundColor: Constants.primary,

@@ -22,7 +22,7 @@ const Category = [
   {
     id: "2",
     name: "Cinema & Theater",
-    background: "#5ca803",
+    background: "#00e8e0",
     icon: "movie-roll",
   },
   {
@@ -34,7 +34,7 @@ const Category = [
   {
     id: "6",
     name: "Trade Fairs & Expo",
-    background: "#E38B29",
+    background: "#f57a00",
     icon: "hexagram-outline",
   },
 
@@ -61,7 +61,7 @@ const Category = [
   {
     id: "12",
     name: "Others",
-    background: "#6cab00",
+    background: "#e8b200",
     icon: "widgets-outline",
   },
 ];

@@ -250,14 +250,14 @@ const Filter = ({ navigation, route }) => {
         break;
 
       case "Cinema & Theater":
-        color = "#5ca803";
+        color = "#00e8e0";
         break;
 
       case "Community":
         color = "#F96666";
         break;
       case "Trade Fairs & Expo":
-        color = "#E38B29";
+        color = "#f57a00";
         break;
       case "Nightlife":
         color = "#472D2D";
@@ -272,7 +272,7 @@ const Filter = ({ navigation, route }) => {
         color = "#ff0571";
         break;
       case "Others":
-        color = "#6cab00";
+        color = "#e8b200";
         break;
       default:
         color = "#ffbb00";

@@ -447,6 +447,22 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
           </View>
 
           <View style={styles.setContainer}>
+          <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={()=>navigation.navigate("My Tickets")}
+              style={styles.Settings} //share app with your friends
+            >
+              <View style={styles.iconbackground}>
+                <MaterialCommunityIcons
+                name="ticket"
+                  size={20}
+                  style={styles.optionIcon}
+                />
+              </View>
+              <Text style={styles.settingtxt}>My Tickets</Text>
+            </TouchableOpacity>
+
+
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.Settings}

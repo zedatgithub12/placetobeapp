@@ -28,7 +28,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="com.afromina.placetobe"/>
-        <data android:scheme="com.afromina.placetobe"/>
+        <!-- <data android:scheme="com.afromina.placetobe"/> -->
         <data android:scheme="exp+placetobe"/>
       </intent-filter>
     </activity>

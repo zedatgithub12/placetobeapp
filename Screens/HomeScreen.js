@@ -25,6 +25,7 @@ function Home({ navigation, ...props }) {
 
   const profile = () => {
     navigation.navigate("Profile");
+    userProfile();
   };
 
   var placeHoldersImage = "placeholders.jpg";
@@ -182,7 +183,7 @@ function Home({ navigation, ...props }) {
       >
         <View style={styles.brands}>
           <Image
-            source={require("../assets/header.png")}
+            source={require("../assets/homebranding.png")}
             resizeMode="cover"
             style={{ width: 152, height: 70 }}
           />

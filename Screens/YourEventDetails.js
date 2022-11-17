@@ -8,7 +8,8 @@ import {
   Alert,
   Pressable,
   ActivityIndicator,
-  ToastAndroid
+  ToastAndroid,
+  TouchableNativeFeedback,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,10 +21,10 @@ import Connection from "../constants/connection";
 import { AuthContext } from "../Components/context";
 import * as FileSystem from "expo-file-system";
 import { useSelector, useDispatch } from "react-redux";
-import { bookmarkItem,remove } from "../Reducer/saveSlice";
+import { bookmarkItem, remove } from "../Reducer/saveSlice";
 import Share from "react-native-share";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
-
+import { Divider } from "react-native-paper";
 
 //import {writeJsonFile} from 'write-json-file';
 
@@ -31,9 +32,9 @@ const YoursDetail = ({ route, navigation }) => {
   const { item } = route.params; // an event item received from homepage flatlist will passed to this screen through route params
   const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
   const logged = userStatus.logged;
-//dispatch bookmarking item
-const dispatch = useDispatch();
-const {items} = useSelector((state) => state.cart);
+  //dispatch bookmarking item
+  const dispatch = useDispatch();
+  const { items } = useSelector((state) => state.cart);
   // featuredImage asset location on the server
   var featuredImageUri = Connection.url + Connection.assets;
   /********************* */
@@ -43,67 +44,64 @@ const {items} = useSelector((state) => state.cart);
     ToastAndroid.show(message, ToastAndroid.SHORT); //message to be toasted after user clicked the bookmark button
   };
 
-   const [bookmarkBtn, setBookmarkBtn] = useState(false);
-   const [bookmarkBtnColor, setBookmarkBtnColor] = useState(Constants.Inverse);
+  const [bookmarkBtn, setBookmarkBtn] = useState(false);
+  const [bookmarkBtnColor, setBookmarkBtnColor] = useState(Constants.Inverse);
 
   const bookmarkEvent = () => {
     const find = items.find((event) => event.event_id === item.event_id);
-    if(find){
+    if (find) {
       //setBookmarkBtn(true);
       setBookmarkBtnColor(Constants.Secondary);
       dispatch(remove(item.event_id));
       showToast("Unsaved!");
-    }
-    else {
+    } else {
       dispatch(bookmarkItem(item));
-     // setBookmarkBtn(true);
+      // setBookmarkBtn(true);
       setBookmarkBtnColor(Constants.primary);
       showToast("Saved!");
     }
   };
-//check bookmarked button state 
+  //check bookmarked button state
 
-const bookmarked = ()=>{
-  var yesItis = false;
-  const find = items.find((event) => event.event_id === item.event_id);
-    if(find){
+  const bookmarked = () => {
+    var yesItis = false;
+    const find = items.find((event) => event.event_id === item.event_id);
+    if (find) {
       //setBookmarkBtn(true);
       setBookmarkBtnColor(Constants.primary);
       yesItis = true;
       return yesItis;
     }
     return yesItis;
-}
+  };
 
-// alert when user doesn't logged into the system
-const SignInAlert = () =>
-Alert.alert(
-      "Bookmark",
-      "SignIn first to bookmark the event!",
-  [
-    {
-      text: "Cancel",
-     
-      style: "cancel"
-    },
-    { text: "SignIn", onPress: () => navigation.navigate("SignIn"),
-    style: styles.signInBtn,
-   }
-  ]
-);
+  // alert when user doesn't logged into the system
+  const SignInAlert = () =>
+    Alert.alert("Bookmark", "SignIn first to bookmark the event!", [
+      {
+        text: "Cancel",
+
+        style: "cancel",
+      },
+      {
+        text: "SignIn",
+        onPress: () => navigation.navigate("SignIn"),
+        style: styles.signInBtn,
+      },
+    ]);
 
   /******************************************* */
   //event Sharing functionality related code is writen below
   /******************************************* */
   const ShareEvent = async () => {
- let remoteUrl = featuredImageUri + item.event_image; //file path on the server
+    let remoteUrl = featuredImageUri + item.event_image; //file path on the server
     let event_image = item.event_image; //name of image to be shared
-    
+
     let localPath = `${FileSystem.cacheDirectory}${event_image}`; //cached file url
     FileSystem.downloadAsync(remoteUrl, localPath); //download file to cached directory
 
     const doesExist = await FileSystem.getInfoAsync(localPath);
-   /*
+    /*
     if (doesExist.exists) {
 
       const options = {
@@ -115,17 +113,16 @@ Alert.alert(
       await Sharing.shareAsync(localPath, options);
     }
     */
-  
-    var weblink = Constants.webLink;
-    
-    const shareOptions = {
-    url:localPath,
-    title: item.event_name,
-    message: "Check out this event on Place to be Ethiopia"+ " "+weblink,
-  };
 
-    await Share.open(shareOptions)
-    .catch(err => {});
+    var weblink = Constants.webLink;
+
+    const shareOptions = {
+      url: localPath,
+      title: item.event_name,
+      message: "Check out this event on Place to be Ethiopia" + " " + weblink,
+    };
+
+    await Share.open(shareOptions).catch((err) => {});
   };
   /********************************************* */
   //event start date time and end date related code is writen below
@@ -198,17 +195,16 @@ Alert.alert(
     }
   }, []);
 
-
   const [descLength, setDescLength] = useState("Read More");
   const showmore = () => {
     if (textLength > read) {
       setRead(textLength);
       setReadMorebtn(false);
-      setDescLength("Read Less")
+      setDescLength("Read Less");
     } else {
       setRead(5);
       setReadMorebtn(false);
-      setDescLength("Read More")
+      setDescLength("Read More");
     }
   };
 
@@ -308,15 +304,14 @@ Alert.alert(
     ButtonColor: Constants.primary,
   });
 
-const [followProgress, setFollowProgress] = useState(false);
+  const [followProgress, setFollowProgress] = useState(false);
 
   const followOrganizer = async () => {
-
-  setFollowProgress(true);
+    setFollowProgress(true);
 
     const controller = new AbortController();
     const signal = controller.signal;
-   
+
     let checkFollowing = true;
     var organizerId = item.userId;
     var followerId = await AsyncStorage.getItem("userId");
@@ -346,7 +341,6 @@ const [followProgress, setFollowProgress] = useState(false);
               subscription: responseMessage,
               btnDisabled: true,
               ButtonColor: Constants.transparentPrimary,
-              
             });
             setFollowProgress(false);
             setFollowStatus(responseMessage);
@@ -380,7 +374,7 @@ const [followProgress, setFollowProgress] = useState(false);
   }, []);
 
   return (
-    <SafeAreaView style={{flex:1, backgroundColor: Constants.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Constants.background }}>
       <ScrollView
         scrollEventThrottle={16}
         style={{ backgroundColor: Constants.background }}
@@ -406,8 +400,6 @@ const [followProgress, setFollowProgress] = useState(false);
         </View>
 
 
-
-
         <View style={styles.EventTitle}>
           <Text
             numberOfLines={1}
@@ -416,33 +408,37 @@ const [followProgress, setFollowProgress] = useState(false);
             {item.event_name}
           </Text>
           <View style={styles.actionButton}>
-          
-            { logged && bookmarked ?
-            (
+            {logged && bookmarked ? (
               <TouchableOpacity
-              //bookmark button beside event title
-              disabled={bookmarkBtn}
-              activeOpacity={0.7}
-              style={styles.bookmarkButton}
-              onPress={() => bookmarkEvent()}
-            >
-              <Ionicons name="bookmark" size={18} color={bookmarkBtnColor} style={styles.bookmarkIcon}  />
-            </TouchableOpacity>
-            )
-            :(
+                //bookmark button beside event title
+                disabled={bookmarkBtn}
+                activeOpacity={0.7}
+                style={styles.bookmarkButton}
+                onPress={() => bookmarkEvent()}
+              >
+                <Ionicons
+                  name="bookmark"
+                  size={18}
+                  color={bookmarkBtnColor}
+                  style={styles.bookmarkIcon}
+                />
+              </TouchableOpacity>
+            ) : (
               <TouchableOpacity
-              //bookmark button beside event title
-              activeOpacity={0.7}
-              style={styles.bookmarkButton}
-              onPress={()=> SignInAlert()}
-            >
-              <Ionicons name="bookmark" size={18} color={bookmarkBtnColor} style={styles.bookmarkIcon}  />
+                //bookmark button beside event title
+                activeOpacity={0.7}
+                style={styles.bookmarkButton}
+                onPress={() => SignInAlert()}
+              >
+                <Ionicons
+                  name="bookmark"
+                  size={18}
+                  color={bookmarkBtnColor}
+                  style={styles.bookmarkIcon}
+                />
+              </TouchableOpacity>
+            )}
 
-            </TouchableOpacity>
-            )
-
-            }
-            
             <TouchableOpacity
               style={styles.sharekButton}
               activeOpacity={0.7}
@@ -464,6 +460,24 @@ const [followProgress, setFollowProgress] = useState(false);
           Venues={item.event_address}
           phone={item.contact_phone}
         />
+        
+        <View style={styles.TopButtons}>
+          <TouchableNativeFeedback 
+           onPress={()=>navigation.navigate("Add Ticket", { item })}
+          >
+            <View style={styles.AddTicket}>
+              <Text style={styles.addTicketText}>Add Ticket</Text>
+            </View>
+          </TouchableNativeFeedback>
+
+          <TouchableNativeFeedback >
+            <View style={styles.UpdateEvent}>
+              <Text style={styles.UpdateEventText}>Update</Text>
+            </View>
+          </TouchableNativeFeedback>
+        </View>
+      
+
         <View style={styles.descDescription}>
           <Text style={styles.descTitle}> Description</Text>
 
@@ -481,85 +495,7 @@ const [followProgress, setFollowProgress] = useState(false);
           ) : null}
         </View>
 
-
-{featching ? (
- <View
- style={styles.organizersSection}
- //organizers section container, which contains
- // Organizers profile, name, Category and subscription button
->
- <Pressable
-   onPress={() =>
-     navigation.navigate("Organizer Detail", {
-       organizerInfo,
-       followStatus,
-     })
-   }
-  
- >
-   <Image
-     source={{ uri: featuredImageUri + eventOrg.featuredImage }}
-     style={styles.organizerProfile}
-     resizeMode="contain"
-   />
- </Pressable>
- <Pressable
-   // organizers name and operation category will be listed inside this component
-   style={styles.orgInfoContainer}
-   onPress={() =>
-     navigation.navigate("Organizer Detail", {
-       organizerInfo,
-       followStatus,
-     })
-   }
- >
-   <Text style={styles.orgName}>{eventOrg.organizerName}</Text>
-   <Text
-     style={styles.orgCategory} //organizers operation field or category
-   >
-     {eventOrg.category}
-   </Text>
- </Pressable>
- {logged ? (
-   <TouchableOpacity
-     // follow organizers button
-
-     activeOpacity={0.6}
-     style={[
-       styles.orgFollowBtn,
-       { backgroundColor: follow.ButtonColor },
-     ]}
-     onPress={() => followOrganizer()}
-   >
-     {followProgress ? 
-     (
-       <ActivityIndicator size="small" color={Constants.background}/>
-     )
-     
-    :
-    (
-      <Text style={styles.orgFollowTxt}>{follow.subscription}</Text>
-    )
-  }
     
-   </TouchableOpacity>
- ) : null}
-</View>
-
-) : (
- <SkeletonPlaceholder>
- <View style={styles.orgConatinerShimmer}>
-
-<View style={styles.orgProfileShimmer} />
-<View style={styles.orgNameShimmer} />
-<View style={styles.orgCategoryShimmer} />
-<View style={styles.orgButtonShimmer} />
-</View>
- </SkeletonPlaceholder>
- 
-)
-}
-      
       </ScrollView>
     </SafeAreaView>
   );
@@ -597,10 +533,56 @@ const styles = StyleSheet.create({
     width: "96%",
     height: "90%",
   },
+  // add ticket and update Event container
+  TopButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
 
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: Constants.icon,
+    marginHorizontal: 20,
+  },
+
+  //addticket button
+  AddTicket: {
+    padding: 6,
+    paddingHorizontal: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Constants.primary,
+    borderRadius: Constants.tinybox,
+    margin: 2,
+  },
+
+  //add ticket text styling
+  addTicketText: {
+    fontFamily: Constants.fontFam,
+    fontWeight: Constants.Bold,
+    fontSize: Constants.headingtwo,
+    color: Constants.Inverse,
+  },
+   //Update event button
+   UpdateEvent: {
+    padding: 6,
+    paddingHorizontal: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Constants.Faded,
+    borderRadius: Constants.tinybox,
+    margin: 2,
+  },
+
+  //Update event text styling
+  UpdateEventText: {
+    fontFamily: Constants.fontFam,
+    fontWeight: Constants.Bold,
+    fontSize: Constants.headingtwo,
+    color: Constants.Inverse,
+  },
   // organizers section styling
   organizersSection: {
-    
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 10,
@@ -612,7 +594,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderWidth: 0.5,
     borderColor: Constants.primary,
-
   },
   //organizer information section style
   orgInfoContainer: {
@@ -639,7 +620,6 @@ const styles = StyleSheet.create({
     padding: Constants.padd,
     paddingHorizontal: 20,
     margin: 10,
-    
   },
   // follow button text style
   orgFollowTxt: {
@@ -654,6 +634,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     margin: 10,
+    marginTop: 2,
     paddingLeft: 10,
   },
   actionButton: {
@@ -678,17 +659,13 @@ const styles = StyleSheet.create({
     padding: 8,
     margin: 5,
     backgroundColor: Constants.Faded,
- 
   },
-  bookmarkIcon: {
-    
-  },
+  bookmarkIcon: {},
   sharekButton: {
     borderRadius: 50,
     padding: 8,
     margin: 5,
     backgroundColor: Constants.Faded,
- 
   },
   descDescription: {
     flex: 2,
@@ -703,9 +680,9 @@ const styles = StyleSheet.create({
   desctext: {
     margin: 5,
     marginLeft: 10,
-    fontSize:14,
+    fontSize: 14,
     fontWeight: Constants.Boldtwo,
-    color:Constants.Secondary,
+    color: Constants.Secondary,
   },
   mapContainer: {
     alignItems: "center",
@@ -766,46 +743,45 @@ const styles = StyleSheet.create({
     padding: 6,
     marginLeft: 6,
     fontStyle: "italic",
-
   },
-  orgConatinerShimmer:{
-     justifyContent: "center",
+  orgConatinerShimmer: {
+    justifyContent: "center",
     alignItems: "center",
     paddingVertical: 10,
   },
-  orgProfileShimmer:{
+  orgProfileShimmer: {
     backgroundColor: Constants.Faded,
     height: 50,
-    width:50,
-    borderRadius:25,
+    width: 50,
+    borderRadius: 25,
   },
-  orgNameShimmer:{
+  orgNameShimmer: {
     backgroundColor: Constants.Faded,
     padding: 10,
-    width:140,
+    width: 140,
     borderRadius: Constants.tiny,
-    marginTop:8,
+    marginTop: 8,
   },
-  orgCategoryShimmer:{
+  orgCategoryShimmer: {
     backgroundColor: Constants.Faded,
     padding: 6,
-    width:100,
+    width: 100,
     borderRadius: Constants.tiny,
-    marginTop:7,
+    marginTop: 7,
   },
-  orgButtonShimmer:{
+  orgButtonShimmer: {
     backgroundColor: Constants.Faded,
     padding: 12,
-    width:100,
+    width: 100,
     borderRadius: Constants.tinybox,
-    marginTop:12,
-    marginBottom:15,
+    marginTop: 12,
+    marginBottom: 15,
   },
-  signInBtn:{
+  signInBtn: {
     borderRadius: Constants.tiny,
     padding: Constants.padd,
     paddingHorizontal: 20,
     margin: 10,
-  }
+  },
 });
 export default YoursDetail;
