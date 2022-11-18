@@ -39,6 +39,7 @@ const Connection = {
 
   // second version connnections
   AddTicket: "AddTicket.php",
+  myTickets: "MyTickets.php",
 };
 
 export default Connection;

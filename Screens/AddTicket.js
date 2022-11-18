@@ -23,6 +23,7 @@ import {
 } from "react-native-vector-icons";
 import { Caption } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // create a component
 const AddTicket = ({ route, navigation }) => {
@@ -109,7 +110,7 @@ const AddTicket = ({ route, navigation }) => {
     var numbers = /^[0-9,]+$/;
     if (fees.match(numbers)) {
       setPrice(fees);
-      console.log(fees);
+      
     } else {
       setErrorMessage("Ticket price cannot be other than number and comma");
     }
@@ -120,16 +121,18 @@ const AddTicket = ({ route, navigation }) => {
     var numbers = /^[0-9,]+$/;
     if (count.match(numbers)) {
       setNumberofTicket(count);
-      console.log(count);
+    
     } else {
       setErrorMessage("Number of ticket cannot be other than number and comma");
     }
   };
 
   //main function in the screen to executed when user press add to event button
-  const AddingTicket = () => {
+  const AddingTicket = async() => {
+    let id = await AsyncStorage.getItem("userId");
+
     if (price === 0 || numberofTicket === 0 || expireDate === "Date") {
-      setErrorMessage("There is a field left empty!");
+      setErrorMessage("Please fill all fields!");
     } else {
       setErrorMessage("");
 
@@ -140,7 +143,9 @@ const AddTicket = ({ route, navigation }) => {
       };
        
       var Data = {
+        userId: id,
         eventId: item.event_id,
+        eventName: item.event_name,
         type: category,
         price: price,
         Amount: numberofTicket,
