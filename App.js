@@ -609,7 +609,7 @@ export default function App() {
                   component={TicketDetail}
                   options={{
                     headerStyle: {
-                      backgroundColor: Constants.primary,
+                      backgroundColor: Constants.Secondary,
                     },
                     headerTintColor: Constants.background,
                     headerShadowVisible: false,

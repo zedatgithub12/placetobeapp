@@ -1,113 +1,269 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect } from "react";
-import { View, StyleSheet, Text, Image, TouchableOpacity, FlatList } from "react-native";
-import { Button, Paragraph, Title } from "react-native-paper";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Image,
+  FlatList,
+  Modal,
+  TouchableNativeFeedback,
+} from "react-native";
+import { Paragraph, Title } from "react-native-paper";
 import Connection from "../constants/connection";
 import Constants from "../constants/Constants";
 import TicketListing from "../Components/TicketsListing";
+import { Button, Menu, Divider, Provider } from 'react-native-paper';
+
+
+// item status menu
+
+
+
 
 
 // ticket functional component
-
 function Tickets({ navigation }) {
   const [loading, setLoading] = React.useState(true);
   const [tickets, setTickets] = React.useState();
 
-const myTickets = async()=>{
-  let id = await AsyncStorage.getItem("userId");
+  const myTickets = async () => {
+    let id = await AsyncStorage.getItem("userId");
 
-var ApiUrl = Connection.url+Connection.myTickets;
-var headers = {
-  accept: 'application/json',
-  'Content-Type': 'application/json',
-};
+    var ApiUrl = Connection.url + Connection.myTickets;
+    var headers = {
+      accept: "application/json",
+      "Content-Type": "application/json",
+    };
 
-var Data = {
-  id: id
-};
+    var Data = {
+      id: id,
+    };
 
-fetch(ApiUrl,{
-  method: "POST",
-  headers: headers,
-  body: JSON.stringify(Data),
-})
-.then((response)=> response.json())
-.then((response)=>{ 
-  var message = response[0].message;
-  var ticket = response[0].Tickets;
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var message = response[0].message;
+        var ticket = response[0].Tickets;
 
-  if(message==="succeed"){
-    setLoading(true);
-    setTickets(ticket);
-    
-  }
-  else{
-    setLoading(false);
-    console.log(ticket);
-  }
-})
-.catch((error)=> {
-  setLoading(false);
+        if (message === "succeed") {
+          setLoading(true);
+          setTickets(ticket);
+          // console.log(ticket);
+        } else {
+          setLoading(false);
+          // console.log(ticket);
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+      });
+  };
 
-});
+  //ticket type icon
+  const TicketName = (iconname) => {
+    var name;
+    switch (iconname) {
+      case "Early Bird":
+        name = "bird";
+        break;
 
-}
+      case "Regular":
+        name = "ticket";
+        break;
 
-// render ticket listing 
-const renderItem=({item})=>(
-<TicketListing
-event= {item.event_name}
-type= {item.tickettype}
-price={item.currentprice}
+      case "VIP":
+        name = "star-outline";
+        break;
 
-/>
-);
+      case "VVIP":
+        name = "star-shooting-outline";
+        break;
 
+      case "Student":
+        name = "book-education-outline";
+        break;
 
+      case "Kids":
+        name = "baby-face-outline";
+        break;
 
-useEffect(()=>{
+      case "Adult":
+        name = "face-man";
+        break;
 
-  myTickets();
+      case "Member":
+        name = "account-group-outline";
+        break;
 
-  return ()=>{}
-});
+      default:
+        name = "ticket";
+    }
+    return name;
+  };
+
+  //ticket icon color
+  const TicketColor = (iconname) => {
+    var Color;
+
+    switch (iconname) {
+      case "Early Bird":
+        Color = "#ff24da";
+        break;
+
+      case "Regular":
+        Color = "#00a2ff";
+
+        break;
+
+      case "VIP":
+        Color = "#ffc800";
+
+        break;
+
+      case "VVIP":
+        Color = "#ffb300";
+
+        break;
+
+      case "Student":
+        Color = "#00c4de";
+
+        break;
+
+      case "Kids":
+        Color = "#ff3686";
+
+        break;
+
+      case "Adult":
+        Color = "#ff551c";
+
+        break;
+
+      case "Member":
+        Color = "#5fcc41";
+
+        break;
+
+      default:
+        Color = "#ffbb00";
+    }
+    return Color;
+  };
+  // ticket status
+  const Status = (Tstatus) => {
+    var ticketStatus;
+
+    switch (Tstatus) {
+      case "0":
+        ticketStatus = "Pending";
+        break;
+
+      case "1":
+        ticketStatus = "In-Stock";
+        break;
+
+      case "2":
+        ticketStatus = "Declined";
+        break;
+
+      case "3":
+        ticketStatus = "Sold-out";
+        break;
+
+      default:
+        ticketStatus = "Pending";
+    }
+    return ticketStatus;
+  };
+
+  //status text color
+  const StatusText = (textColor) => {
+    var StatusColor;
+
+    switch (textColor) {
+      case "0":
+        StatusColor = "#787878";
+        break;
+
+      case "1":
+        StatusColor = "#0bb321";
+        break;
+
+      case "2":
+        StatusColor = "#ff3d4d";
+        break;
+
+      case "3":
+        StatusColor = "#787878";
+        break;
+
+      default:
+        StatusColor = "#787878";
+    }
+    return StatusColor;
+  };
+
+  // render ticket listing
+  const renderItem = ({ item }) => (
+    <TicketListing
+      event={item.event_name}
+      type={item.tickettype}
+      price={item.currentprice}
+      iconName={TicketName(item.tickettype)}
+      iconColor={TicketColor(item.tickettype)}
+      status={Status(item.status)}
+      textColor={StatusText(item.status)}
+      onPress={() => navigation.navigate("Ticket Detail", { item })}
+      longPress={() => openMenu}
+    />
+  );
+
+  useEffect(() => {
+    myTickets();
+
+    return () => {};
+  },[]);
 
   return (
     <View style={styles.container}>
       {loading ? (
-       
         <FlatList
-        data={tickets}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
- 
-  
-        // onRefresh={RefreshList}
-        // refreshing={refreshing}
-        // ListHeaderComponent={() =>
-        //   notFound ? (
-        //     <View style={styles.noNoticeContainer}>
-        //       <Image
-        //         source={require("../assets/noNotification.png")}
-        //         style={styles.noNoticeImage}
-        //         resizeMode="contain"
-        //       />
-        //       <Title style={styles.prompttxt}>
-        //         You have no notification yet!
-        //       </Title>
-        //     </View>
-        //   ) : null
-        // }
-        // ListFooterComponent={() =>
-        //   notFound ? null : (
-        //     <View style={styles.listEnd}>
-        //       <HelperText>
-        //         Notifications from organizers you followed.
-        //       </HelperText>
-        //     </View>
-        //   )
-        // }
-      />
+          data={tickets}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+
+          // onRefresh={RefreshList}
+          // refreshing={refreshing}
+          // ListHeaderComponent={() =>
+          //   notFound ? (
+          //     <View style={styles.noNoticeContainer}>
+          //       <Image
+          //         source={require("../assets/noNotification.png")}
+          //         style={styles.noNoticeImage}
+          //         resizeMode="contain"
+          //       />
+          //       <Title style={styles.prompttxt}>
+          //         You have no notification yet!
+          //       </Title>
+          //     </View>
+          //   ) : null
+          // }
+          // ListFooterComponent={() =>
+          //   notFound ? null : (
+          //     <View style={styles.listEnd}>
+          //       <HelperText>
+          //         Notifications from organizers you followed.
+          //       </HelperText>
+          //     </View>
+          //   )
+          // }
+        />
       ) : (
         <View style={styles.noTicketContainer}>
           <Image
@@ -117,7 +273,6 @@ useEffect(()=>{
           />
           <Title style={styles.prompttxt}>You have no ticket Yet!</Title>
           <Paragraph>Ticket you added to event is listed here.</Paragraph>
-         
         </View>
       )}
     </View>
@@ -126,11 +281,9 @@ useEffect(()=>{
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Constants.background,
-    paddingVertical:10,
 
+    backgroundColor: Constants.background,
+    paddingVertical: 6,
   },
   noTicketContainer: {
     width: "80%",

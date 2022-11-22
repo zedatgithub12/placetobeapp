@@ -1,4 +1,4 @@
-import AddTicket from "../Screens/AddTicket";
+
 
 const Connection = {
   //url: "http://app.p2b-ethiopia.com/placetobe/",
@@ -40,6 +40,7 @@ const Connection = {
   // second version connnections
   AddTicket: "AddTicket.php",
   myTickets: "MyTickets.php",
+  Soldout: "SoldOut.php",
 };
 
 export default Connection;

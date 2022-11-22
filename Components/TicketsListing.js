@@ -2,27 +2,38 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, TouchableNativeFeedback } from "react-native";
 import Constants from "../constants/Constants";
-import { MaterialCommunityIcons } from "react-native-vector-icons";
+import { MaterialCommunityIcons, EvilIcons } from "react-native-vector-icons";
 // create a component
-const TicketListing = ({ event, type, price }) => {
+const TicketListing = ({
+  onPress,
+  event,
+  type,
+  iconName,
+  iconColor,
+  price,
+  status,
+  textColor,
+  longPress,
+}) => {
   return (
-    <TouchableNativeFeedback>
+    <TouchableNativeFeedback onPress={onPress} onLongPress={longPress}>
       <View style={styles.container}>
-        <View style={styles.iconStyle}>
-          <MaterialCommunityIcons
-            name="ticket"
-            size={24}
-            color={Constants.primary}
-          />
+        <View style={[styles.iconStyle]}>
+          <MaterialCommunityIcons name={iconName} size={24} color={iconColor} />
         </View>
 
         <View style={styles.ticketContent}>
-          <Text numberOfLines={2}>{event}</Text>
-          <Text>{type}</Text>
+          <Text numberOfLines={2} style={styles.title}>
+            {event}
+          </Text>
+          <Text style={styles.ticketType}>{type}</Text>
         </View>
 
         <View style={styles.priceContainer}>
           <Text style={styles.priceText}>{price} ETB</Text>
+          <Text style={[styles.statusstyl, { color: textColor }]}>
+            {status}
+          </Text>
         </View>
       </View>
     </TouchableNativeFeedback>
@@ -32,37 +43,46 @@ const TicketListing = ({ event, type, price }) => {
 // define your styles
 const styles = StyleSheet.create({
   container: {
-    width: "96%",
-    backgroundColor: Constants.Faded,
-   // elevation: 2,
+    width: "94%",
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "center",
-    justifyContent: "flex-start",
-    padding: 6,
-    // paddingHorizontal:15,
-    margin: 6,
-    marginTop: 2,
-    marginBottom: 2,
     borderRadius: Constants.tinybox,
+    margin: 2,
+    padding: 6,
+    backgroundColor: Constants.transparentPrimary,
   },
   iconStyle: {
-    width:"13%",
-    backgroundColor: Constants.transparentPrimary,
-    padding: 10,
+    backgroundColor: Constants.background,
+    padding: 8,
     borderRadius: 50,
     marginRight: 15,
   },
   ticketContent: {
-    width:"60%",
+    width: "60%",
     marginRight: 10,
   },
+  title: {
+    fontFamily: Constants.fontFam,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Bold,
+  },
   priceContainer: {
-    width:"19%",
-    justifyContent:"flex-end",
-    alignItems:"center"
-    
-    
+    width: "19%",
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  priceText: {
+    fontWeight: Constants.Boldtwo,
+    color: Constants.Inverse,
+  },
+  ticketType: {
+    color: Constants.Secondary,
+    fontWeight: Constants.Boldtwo,
+  },
+  statusstyl: {
+    fontStyle: "italic",
+    justifyContent: "flex-end",
   },
 });
 

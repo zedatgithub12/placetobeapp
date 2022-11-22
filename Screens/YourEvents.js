@@ -121,7 +121,7 @@ const YourEvents = ({ route, navigation }) => {
       time={TimeFun(item.start_time)}
       venue={item.event_address}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { item })}
+      onPress={() => navigation.navigate("YoursDetail", { item })}
     />
   );
   const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);
@@ -187,7 +187,7 @@ const YourEvents = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      
         <View>
           <TouchableOpacity
             style={styles.backArrow} // back arrow button style
@@ -212,35 +212,49 @@ const YourEvents = ({ route, navigation }) => {
             )}
           </View>
         </View>
-        {loading ? (
-          <View>
-            {events.map((item) => (
-              <YourE
-                key={item.event_id}
-                Event_Id={item.event_id}
-                status={renderStatus(item.event_status)}
-                org_id={item.userId}
-                FeaturedImage={item.event_image}
-                title={item.event_name}
-                date={DateFun(item.start_date)}
-                time={TimeFun(item.start_time)}
-                venue={item.event_address}
-                Price={EntranceFee(item.event_entrance_fee)}
-                onPress={() => navigation.navigate("YoursDetail", { item })}
+        {
+  loading ?
+  (
+<FlatList
+        // List of events in extracted from database in the form JSON data
+        data={events}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.event_id}
+        onRefresh={RefreshList}
+        refreshing={refreshing}
+        // when ithere is no item to be listed in flatlist
+        ListHeaderComponent={() =>
+          notFound ? (
+            <View style={styles.container}>
+              <Image
+                source={require("../assets/NotFound.png")}
+                resizeMode="contain"
+                style={styles.notFound}
               />
-            ))}
-          </View>
-        ) : (
-          <View>
-            <OrgShimmer />
-            <OrgShimmer />
-            <OrgShimmer />
-            <OrgShimmer />
-            <OrgShimmer />
-            <OrgShimmer />
-          </View>
-        )}
-      </ScrollView>
+              <Text style={styles.emptyMessageStyle}>{message}</Text>
+              <HelperText style={{ alignSelf: "center" }}>
+                You can add events using plus icon in the home page
+              </HelperText>
+            </View>
+          ) : null
+        }
+      />
+  
+  )
+  :
+  (
+ <View>
+   <OrgShimmer/>
+   <OrgShimmer/>
+   <OrgShimmer/>
+   <OrgShimmer/>
+   <OrgShimmer/>
+   <OrgShimmer/>
+
+   </View>
+  )
+}
+     
     </SafeAreaView>
   );
 };
