@@ -193,12 +193,11 @@ const TodaysEvents = ({ navigation }) => {
     setLoading(false);
     setRefreshing(true);
 
-    // featching abort controller
     // after featching events the fetching function will be aborted
 
     let isApiSubscribed = true;
     var ApiUrl = Connection.url + Connection.TodayEvents;
-    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
+   
     fetch(ApiUrl)
       .then((response) => response.json()) //check response type of the API
       .then((response) => {

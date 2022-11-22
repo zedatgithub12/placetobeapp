@@ -1,13 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect } from "react";
+import React, { useEffect,useState } from "react";
 import {
   View,
   StyleSheet,
   Text,
   Image,
   FlatList,
-  Modal,
-  TouchableNativeFeedback,
+  Alert
 } from "react-native";
 import { Paragraph, Title } from "react-native-paper";
 import Connection from "../constants/connection";
@@ -15,18 +14,13 @@ import Constants from "../constants/Constants";
 import TicketListing from "../Components/TicketsListing";
 import { Button, Menu, Divider, Provider } from 'react-native-paper';
 
-
-// item status menu
-
-
-
-
-
 // ticket functional component
 function Tickets({ navigation }) {
-  const [loading, setLoading] = React.useState(true);
-  const [tickets, setTickets] = React.useState();
-
+  const [loading, setLoading] = React.useState(true); 
+  const [tickets, setTickets] = React.useState();  //tickets
+  const [refreshing, setRefreshing] = React.useState(false); //flalist refreshing state
+  const [shimmer, setShimmer] = useState(false); //shimmer effect state
+  
   const myTickets = async () => {
     let id = await AsyncStorage.getItem("userId");
 
@@ -208,6 +202,51 @@ function Tickets({ navigation }) {
     }
     return StatusColor;
   };
+// refresh ticket listing
+const RefreshList = async() => {
+
+setRefreshing(true);
+
+
+let id = await AsyncStorage.getItem("userId");
+
+var ApiUrl = Connection.url + Connection.myTickets;
+var headers = {
+  accept: "application/json",
+  "Content-Type": "application/json",
+};
+
+var Data = {
+  id: id,
+};
+
+fetch(ApiUrl, {
+  method: "POST",
+  headers: headers,
+  body: JSON.stringify(Data),
+})
+  .then((response) => response.json())
+  .then((response) => {
+    var message = response[0].message;
+    var ticket = response[0].Tickets;
+
+    if (message === "succeed") {
+      setLoading(true);
+      setTickets(ticket);
+      setRefreshing(false);
+    } else {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  })
+  .catch((error) => {
+    setLoading(false);
+    setRefreshing(false);
+  });
+}
+
+
+
 
   // render ticket listing
   const renderItem = ({ item }) => (
@@ -220,7 +259,7 @@ function Tickets({ navigation }) {
       status={Status(item.status)}
       textColor={StatusText(item.status)}
       onPress={() => navigation.navigate("Ticket Detail", { item })}
-      longPress={() => openMenu}
+      longPress={()=>navigation.navigate("Update Ticket", { item })}
     />
   );
 
@@ -228,7 +267,7 @@ function Tickets({ navigation }) {
     myTickets();
 
     return () => {};
-  },[]);
+  });
 
   return (
     <View style={styles.container}>
@@ -237,9 +276,8 @@ function Tickets({ navigation }) {
           data={tickets}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-
-          // onRefresh={RefreshList}
-          // refreshing={refreshing}
+          onRefresh={RefreshList}
+          refreshing={refreshing}
           // ListHeaderComponent={() =>
           //   notFound ? (
           //     <View style={styles.noNoticeContainer}>
@@ -254,15 +292,7 @@ function Tickets({ navigation }) {
           //     </View>
           //   ) : null
           // }
-          // ListFooterComponent={() =>
-          //   notFound ? null : (
-          //     <View style={styles.listEnd}>
-          //       <HelperText>
-          //         Notifications from organizers you followed.
-          //       </HelperText>
-          //     </View>
-          //   )
-          // }
+        
         />
       ) : (
         <View style={styles.noTicketContainer}>
@@ -271,8 +301,8 @@ function Tickets({ navigation }) {
             style={styles.noTicketImage}
             resizeMode="contain"
           />
-          <Title style={styles.prompttxt}>You have no ticket Yet!</Title>
-          <Paragraph>Ticket you added to event is listed here.</Paragraph>
+          <Title style={styles.prompttxt}>No ticket yet!</Title>
+          <Paragraph>Ticket you added to event will be listed here.</Paragraph>
         </View>
       )}
     </View>
@@ -286,8 +316,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   noTicketContainer: {
+    flex:1,
     width: "80%",
     alignItems: "center",
+    alignSelf:"center",
     justifyContent: "center",
   },
   noTicketImage: {

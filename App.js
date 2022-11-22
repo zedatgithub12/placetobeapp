@@ -47,6 +47,8 @@ import AddingTicketSucceed from "./Screens/AddingTicketSucceed";
 import TicketDetail from "./Screens/TicketDetail";
 import * as Animatable from "react-native-animatable";
 import Tickets from "./Screens/TicketScreen";
+import UpdateTicket from "./Screens/UpdateTicket";
+
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
@@ -609,7 +611,7 @@ export default function App() {
                   component={TicketDetail}
                   options={{
                     headerStyle: {
-                      backgroundColor: Constants.Secondary,
+                      backgroundColor: Constants.primary,
                     },
                     headerTintColor: Constants.background,
                     headerShadowVisible: false,
@@ -627,6 +629,19 @@ export default function App() {
                     headerShadowVisible: false,
                   }}
                 />
+               <Stack.Screen
+               name="Update Ticket"
+               component={UpdateTicket}
+               options={{
+                headerStyle: {
+                  backgroundColor: Constants.primary,
+                },
+                headerTintColor: Constants.background,
+                headerShadowVisible: false,
+              }}
+               />
+
+
               </Stack.Navigator>
             ) : (
               <View style={styles.noConnection}>

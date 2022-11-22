@@ -41,6 +41,8 @@ const Connection = {
   AddTicket: "AddTicket.php",
   myTickets: "MyTickets.php",
   Soldout: "SoldOut.php",
+  EventPoster: "EventPoster.php",
+  UpdateTicket: "UpdateTicket.php"
 };
 
 export default Connection;

@@ -1,5 +1,5 @@
 //import liraries
-import React, { Component, useEffect } from "react";
+import React, { Component, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,14 +8,19 @@ import {
   TouchableNativeFeedback,
   Modal,
   ActivityIndicator,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Image,
 } from "react-native";
 import Constants from "../constants/Constants";
-import { Feather, MaterialCommunityIcons } from "react-native-vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
 import Connection from "../constants/connection";
+import { Badge } from "react-native-paper";
+
 // create a component
 const TicketDetail = ({ route, navigation }) => {
   const { item } = route.params;
-
+  const [textc, setTextC] = useState(item.status);
   // total sales
   const TotalSales = () => {
     var total;
@@ -34,6 +39,7 @@ const TicketDetail = ({ route, navigation }) => {
     var sold = item.origionalamount - item.currentamount;
     return sold;
   };
+
   // ticket status
   const Status = () => {
     var ticketStatus;
@@ -65,7 +71,7 @@ const TicketDetail = ({ route, navigation }) => {
   const StatusText = () => {
     var StatusColor;
 
-    switch (item.status) {
+    switch (textc) {
       case "0":
         StatusColor = "#787878";
         break;
@@ -89,13 +95,15 @@ const TicketDetail = ({ route, navigation }) => {
   };
   const [visible, setVisible] = React.useState(false);
   const toggleModal = () => {
-    if (visible == true) {
-      setVisible(false);
-    } else {
+    if (visible == false && Status() == "In-Stock") {
       setVisible(true);
+    } else {
+      setVisible(false);
     }
   };
-
+  //sold out ticket icon
+  const [checkIcon, setCheckIcon] = useState(false);
+  const [btn, setBtn] = useState(false);
   // update status of ticket
   const [TicketStatus, setTicketStatus] = React.useState(Status());
   const [indicator, setIndicator] = React.useState(false);
@@ -123,21 +131,18 @@ const TicketDetail = ({ route, navigation }) => {
 
         if (message === "succeed") {
           setTicketStatus("Sold-out");
+          setTextC(3);
           setIndicator(false);
-    
-       
+          setCheckIcon(true);
+          setBtn(true);
         } else {
           setTicketStatus(Status());
           setIndicator(false);
-    
-         
         }
       })
       .catch((error) => {
         setTicketStatus(Status());
         setIndicator(false);
-  
-  
       });
   };
 
@@ -180,48 +185,58 @@ const TicketDetail = ({ route, navigation }) => {
               transparent={true}
               visible={visible}
               style={styles.modal}
-              onPress={() => setVisible(false)}
+              onRequestClose={() => setVisible(false)}
             >
               <View style={styles.modalContainer}>
+                <TouchableWithoutFeedback onPress={() => setVisible(false)}>
+                  <View style={styles.closebtn}>
+                    <MaterialCommunityIcons
+                      name="close"
+                      size={20}
+                      color={Constants.red}
+                    />
+                  </View>
+                </TouchableWithoutFeedback>
 
-                  <TouchableNativeFeedback
-                onPress={()=>setVisible(false)}
-                  >
-                      <View style={styles.closebtn}>
-                      <MaterialCommunityIcons
-                        name="close"
-                        size={20}
-                        color={Constants.red}
-                      />
-                      </View>
-                  
-                  </TouchableNativeFeedback>
-                <TouchableNativeFeedback onPress={() => UpdateStatus()}>
+                <TouchableWithoutFeedback
+                  disabled={btn}
+                  onPress={() => UpdateStatus()}
+                >
                   {indicator ? (
                     <ActivityIndicator size="small" color={Constants.primary} />
                   ) : (
-                    <View style={[styles.itemStatus]}>
-                      <Text style={styles.statusTexts}>Sold Out</Text>
-                      <Feather
-                        name="check-circle"
-                        size={20}
-                        color={Constants.green}
-                      />
+                    <View style={styles.modalCont}>
+                      <Text style={styles.modalDesc}>
+                        To make it unavailable, press the button!
+                      </Text>
+                      <View style={[styles.itemStatus]}>
+                        <Text style={styles.statusTexts}>Sold Out</Text>
+                        {checkIcon ? (
+                          <Ionicons
+                            name="ios-checkmark-circle-sharp"
+                            size={20}
+                            color={Constants.green}
+                          />
+                        ) : null}
+                      </View>
                     </View>
                   )}
-                </TouchableNativeFeedback>
+                </TouchableWithoutFeedback>
               </View>
             </Modal>
-            <TouchableNativeFeedback onPress={() => toggleModal()}>
-              <Text
-                style={[
-                  styles.statusContainer,
-                  { backgroundColor: StatusText() },
-                ]}
-              >
+            <TouchableWithoutFeedback onPress={() => toggleModal()}>
+              <Text style={[styles.statusContainer, { color: StatusText() }]}>
+                {Status() == "Sold-out" ? (
+                  <Ionicons
+                    name="ios-checkmark-circle-outline"
+                    size={14}
+                    color={StatusText()}
+                  />
+                ) : null}
+
                 {TicketStatus}
               </Text>
-            </TouchableNativeFeedback>
+            </TouchableWithoutFeedback>
           </View>
         </View>
 
@@ -233,9 +248,61 @@ const TicketDetail = ({ route, navigation }) => {
 
       {/* section four */}
       <View>
-        <View></View>
+        <View style={styles.PGContainer}>
+          <TouchableWithoutFeedback>
+            <View>
+              <Image
+                source={require("../assets/telebirr.jpg")}
+                resizeMode="contain"
+                style={styles.pgateway}
+              />
+              <Badge size={24} style={styles.countBadge}>
+                24
+              </Badge>
+            </View>
+          </TouchableWithoutFeedback>
 
-        <View></View>
+          <TouchableWithoutFeedback>
+            <View>
+              <Image
+                source={require("../assets/chapa.png")}
+                resizeMode="contain"
+                style={styles.pgateway}
+              />
+              <Badge size={24} style={styles.countBadge}>
+                9
+              </Badge>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+
+        <View style={styles.PGContainer}>
+          <TouchableWithoutFeedback>
+            <View>
+              <Image
+                source={require("../assets/cbe.jpg")}
+                resizeMode="contain"
+                style={styles.pgateway}
+              />
+              <Badge size={24} style={styles.countBadge}>
+                3
+              </Badge>
+            </View>
+          </TouchableWithoutFeedback>
+
+          <TouchableWithoutFeedback>
+            <View>
+              <Image
+                source={require("../assets/Amole.png")}
+                resizeMode="contain"
+                style={styles.pgateway}
+              />
+              <Badge size={24} style={styles.countBadge}>
+                8
+              </Badge>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
       </View>
     </ScrollView>
   );
@@ -256,15 +323,15 @@ const styles = StyleSheet.create({
     padding: 4,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Constants.Secondary,
+    backgroundColor: Constants.primary,
   },
   totaltext: {
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     fontSize: 32,
     color: Constants.background,
   },
   currency: {
-    color: Constants.primary,
+    color: Constants.Inverse,
     fontWeight: Constants.Bold,
     marginLeft: 6,
   },
@@ -276,7 +343,7 @@ const styles = StyleSheet.create({
     marginTop: -58,
   },
   itemProgress: {
-    backgroundColor: Constants.Faded,
+    backgroundColor: Constants.background,
     padding: 24,
     alignItems: "center",
     borderRadius: Constants.medium,
@@ -291,7 +358,7 @@ const styles = StyleSheet.create({
   leftCount: {
     fontWeight: Constants.Bold,
     fontSize: Constants.headingone,
-    color: Constants.Secondary,
+    color: Constants.Inverse,
   },
   itemNaming: {
     fontWeight: Constants.Boldtwo,
@@ -329,34 +396,35 @@ const styles = StyleSheet.create({
     borderRadius: Constants.tinybox,
     padding: 4,
     paddingHorizontal: 16,
-    color: Constants.background,
+    fontStyle: "italic",
+    fontWeight: Constants.Bold,
+  },
+  modal: {
+    //backgroundColor:Constants.icon
   },
   modalContainer: {
     position: "absolute",
     bottom: 0,
     backgroundColor: Constants.background,
     width: "98%",
-    height: 130,
+    height: 220,
     alignSelf: "center",
     alignItems: "center",
     justifyContent: "center",
     padding: 10,
-    elevation: 2,
+    elevation: 4,
     borderTopEndRadius: Constants.borderRad,
     borderTopLeftRadius: Constants.borderRad,
   },
-
-  instockStatus: {
-    width: "80%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-
-    padding: 10,
-    paddingHorizontal: 20,
-
-    margin: 6,
-    borderRadius: 50,
+  modalCont: {
+    width: "90%",
     alignItems: "center",
+  },
+  modalDesc: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.green,
+    marginBottom: 20,
   },
   itemStatus: {
     flexDirection: "row",
@@ -383,15 +451,36 @@ const styles = StyleSheet.create({
   touchable: {
     borderRadius: 50,
   },
-  closebtn:{
-     position: "absolute",
-     right: 15,
-     top:-15,
-     backgroundColor: Constants.Faded,
-     padding:6,
-     borderRadius:50,
-     elevation:2,
-  }
+  closebtn: {
+    position: "absolute",
+    right: 15,
+    top: -15,
+    backgroundColor: Constants.background,
+    padding: 6,
+    borderRadius: 50,
+    elevation: 2,
+  },
+  PGContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pgateway: {
+    height: 80,
+    width: 80,
+    borderRadius: Constants.medium,
+    margin: 26,
+    padding: 16,
+  },
+  countBadge: {
+    position: "absolute",
+    top: 18,
+    right: 18,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Boldtwo,
+    backgroundColor: Constants.Secondary,
+    color: Constants.background,
+  },
 });
 
 //make this component available to the app

@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, TouchableNativeFeedback } from "react-native";
 import Constants from "../constants/Constants";
-import { MaterialCommunityIcons, EvilIcons } from "react-native-vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "react-native-vector-icons";
 // create a component
 const TicketListing = ({
   onPress,
@@ -32,6 +32,14 @@ const TicketListing = ({
         <View style={styles.priceContainer}>
           <Text style={styles.priceText}>{price} ETB</Text>
           <Text style={[styles.statusstyl, { color: textColor }]}>
+          {status === "Sold-out" ? (
+                  <Ionicons
+                    name="ios-checkmark-circle-outline"
+                    size={13}
+                    color={Constants.Secondary}
+                  />
+                ) : null}
+
             {status}
           </Text>
         </View>

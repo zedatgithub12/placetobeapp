@@ -103,18 +103,7 @@ Alert.alert(
     FileSystem.downloadAsync(remoteUrl, localPath); //download file to cached directory
 
     const doesExist = await FileSystem.getInfoAsync(localPath);
-   /*
-    if (doesExist.exists) {
 
-      const options = {
-          mimeType: 'image/jpeg',
-        dialogTitle: item.event_name,
-      };
-
-     
-      await Sharing.shareAsync(localPath, options);
-    }
-    */
   
     var weblink = Constants.webLink;
     
