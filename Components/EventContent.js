@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   topContent: {
     marginHorizontal: 20,
     paddingBottom: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: Constants.icon,
   },
   subContainer: {

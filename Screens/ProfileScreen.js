@@ -77,6 +77,10 @@ function Profile({ navigation, props }) {
   };
   //update profile Function
   const updateProfile = (pictureName) => {
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     var userIdentity = userData.userId; //variable containing user id
     var profileName = pictureName; //profile name to be stored in the database
 
@@ -93,6 +97,7 @@ function Profile({ navigation, props }) {
       method: "POST",
       headers: headers,
       body: JSON.stringify(data),
+      signal:signal
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
@@ -106,15 +111,17 @@ function Profile({ navigation, props }) {
           setProfileUpdate(responseMessage);
         }
       });
+      return () => {
+        // cancel the request before component unmounts
+        controller.abort();
+    };
   };
 
   /********************************************* */
   // we select user profile here
   /******************************************* */
 
-const [updatingProfile, setupdatingProfile] = useState ("loaded");
-
-
+  const [updatingProfile, setupdatingProfile] = useState("loaded");
 
   const selectFeaturedImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -129,7 +136,6 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
     if (!result.cancelled) {
       setImage(result.uri);
       setupdatingProfile("loading");
-    
     }
 
     // Infer the type of the image
@@ -159,14 +165,14 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
         if (message === "successfully uploaded") {
           updateProfile(filename);
           setupdatingProfile(message);
-     
         } else {
           setProfileUpdate("couldn't update profile");
           setupdatingProfile(message);
         }
-      }).catch((error)=>{
-        setupdatingProfile("coundn't update");
       })
+      .catch((error) => {
+        setupdatingProfile("coundn't update");
+      });
   };
 
   // variables and functions for invite friends button inside profile screen
@@ -256,6 +262,9 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
   // we get user information from database
   /****************************************************** */
   const getUserInfo = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     var userId = await AsyncStorage.getItem("userId");
     var ApiUrl = Connection.url + Connection.MetaData;
     var headers = {
@@ -270,6 +279,7 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
       method: "POST",
       headers: headers,
       body: JSON.stringify(data),
+      signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
@@ -294,7 +304,9 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
         }
       });
 
-    return () => {};
+    return () => {
+      controller.abort();
+    };
   };
   // bottom sheet reference
   const panelRef = useRef(null);
@@ -303,6 +315,9 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
   const [buttonShown, setButtonShown] = useState(false);
 
   const updateButton = () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     var appVersion = require("../package.json");
     var localAppVersion = appVersion.version;
 
@@ -315,6 +330,7 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
     fetch(ApiUrl, {
       method: "POST",
       headers: headers,
+      signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
@@ -337,21 +353,30 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
       .catch((error) => {
         setButtonShown(false);
       });
+    return () => {
+      // cancel the request before component unmounts
+      controller.abort();
+    };
   };
 
   // useffect perform componentdidmount and componentwillUnmounted function here
   useEffect(() => {
-    getUserInfo();
-    featchUserInformation();
-    (async () => {
-      const gallerStatus =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      setHasGalleryPermission(gallerStatus.status === "granted");
-    })();
+    let isApiSubscribed = true;
 
-    updateButton();
+    if (isApiSubscribed) {
+      getUserInfo();
+      featchUserInformation();
+      (async () => {
+        const gallerStatus =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        setHasGalleryPermission(gallerStatus.status === "granted");
+      })();
 
-    return () => {};
+      updateButton();
+    }
+    return () => {
+      isApiSubscribed = false;
+    };
   }, []);
 
   return (
@@ -397,33 +422,27 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
                 onPress={() => selectFeaturedImage()}
               />
               <View style={styles.cameraIcon}>
-                {updatingProfile === "loaded" ?
-                (
+                {updatingProfile === "loaded" ? (
                   <MaterialCommunityIcons
-                  name="camera"
-                  size={20}
-                  color="#636363"
-                />
-                ) : updatingProfile === "loading" ? 
-                ( 
-                  <ActivityIndicator size="small" color={Constants.Success}/>
-
-                ): updatingProfile === "successfully uploaded" ? (
+                    name="camera"
+                    size={20}
+                    color="#636363"
+                  />
+                ) : updatingProfile === "loading" ? (
+                  <ActivityIndicator size="small" color={Constants.Success} />
+                ) : updatingProfile === "successfully uploaded" ? (
                   <MaterialCommunityIcons
-                  name="check-circle"
-                  size={20}
-                  color={Constants.Success}
-                />
-                ) :
-                (
+                    name="check-circle"
+                    size={20}
+                    color={Constants.Success}
+                  />
+                ) : (
                   <MaterialCommunityIcons
-                  name="information"
-                  size={20}
-                  color={Constants.Danger}
-                />
-                )
-                
-}
+                    name="information"
+                    size={20}
+                    color={Constants.Danger}
+                  />
+                )}
               </View>
             </TouchableOpacity>
 
@@ -447,21 +466,20 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
           </View>
 
           <View style={styles.setContainer}>
-          <TouchableOpacity
+            <TouchableOpacity
               activeOpacity={0.7}
-              onPress={()=>navigation.navigate("My Tickets")}
+              onPress={() => navigation.navigate("My Tickets")}
               style={styles.Settings} //share app with your friends
             >
               <View style={styles.iconbackground}>
                 <MaterialCommunityIcons
-                name="ticket"
+                  name="ticket"
                   size={20}
                   style={styles.optionIcon}
                 />
               </View>
               <Text style={styles.settingtxt}>My Tickets</Text>
             </TouchableOpacity>
-
 
             <TouchableOpacity
               activeOpacity={0.7}
@@ -509,13 +527,15 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
               <Text style={styles.settingtxt}>Invite Friends</Text>
             </TouchableOpacity>
 
-
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.Settings}
-              onPress={() => Linking.openURL("https://www.p2b-ethiopia.com/privacy-policy-2/")}
+              onPress={() =>
+                Linking.openURL(
+                  "https://www.p2b-ethiopia.com/privacy-policy-2/"
+                )
+              }
             >
-              
               <View style={styles.iconbackground}>
                 <MaterialCommunityIcons
                   name="security"
@@ -525,7 +545,6 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
               </View>
               <Text style={styles.settingtxt}>Privacy Policy</Text>
             </TouchableOpacity>
-
 
             <TouchableOpacity
               activeOpacity={0.7}
@@ -547,7 +566,6 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
               style={styles.Settings}
               onPress={() => navigation.navigate("About")}
             >
-
               <View style={styles.iconbackground}>
                 <MaterialCommunityIcons
                   name="information"
@@ -569,7 +587,9 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
               <Text style={styles.settingtxt}>Log-out</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.versioning}><Caption> Version 1.0.0</Caption></View>
+          <View style={styles.versioning}>
+            <Caption> Version 1.0.0</Caption>
+          </View>
         </View>
       ) : (
         <SkeletonPlaceholder>
@@ -648,7 +668,7 @@ const [updatingProfile, setupdatingProfile] = useState ("loaded");
                 borderRadius: 3,
               }}
             />
-             <View
+            <View
               style={{
                 marginLeft: 3,
                 marginTop: 16,
@@ -891,11 +911,11 @@ const styles = StyleSheet.create({
     color: Constants.Faded,
     marginLeft: 6,
   },
-  versioning:{
-    marginTop:-20,
-    marginBottom:30,
-    marginLeft:28,
-  }
+  versioning: {
+    marginTop: -20,
+    marginBottom: 30,
+    marginLeft: 28,
+  },
 });
 
 export default Profile;

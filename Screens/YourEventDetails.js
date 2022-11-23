@@ -32,6 +32,21 @@ const YoursDetail = ({ route, navigation }) => {
   const { item } = route.params; // an event item received from homepage flatlist will passed to this screen through route params
   const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
   const logged = userStatus.logged;
+
+
+  //get current to check weather event is expired or not
+
+  var today =new Date();
+  var day = today.getDate();
+  var month = today.getMonth();
+  var year = today.getFullYear();
+  var currentDate = year+"-"+month+"-"+day;
+  
+
+
+
+
+
   //dispatch bookmarking item
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
@@ -101,18 +116,7 @@ const YoursDetail = ({ route, navigation }) => {
     FileSystem.downloadAsync(remoteUrl, localPath); //download file to cached directory
 
     const doesExist = await FileSystem.getInfoAsync(localPath);
-    /*
-    if (doesExist.exists) {
 
-      const options = {
-          mimeType: 'image/jpeg',
-        dialogTitle: item.event_name,
-      };
-
-     
-      await Sharing.shareAsync(localPath, options);
-    }
-    */
 
     var weblink = Constants.webLink;
 
@@ -208,170 +212,22 @@ const YoursDetail = ({ route, navigation }) => {
     }
   };
 
-  /********************************************* */
-  //event organizer related code is writen below
-  /****************************************** */
-  const [organizerInfo, setOrganizerInfo] = useState();
-  var profile = "maleProfile.jpg"; // user profile placeholder
-  const [eventOrg, setEventOrg] = useState({
-    featuredImage: profile,
-    organizerName: "Organizer",
-    category: "Category",
-  });
 
-  /******************************************************************** */
-  // when user scroll organizer information will be fetched from the server
-  /******************************************************************* */
-  // fetch event organizer from database
-  const [followStatus, setFollowStatus] = useState();
-  const [featching, setFetching] = useState(false);
-
-  const featchOrganizer = async () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    let featchOrganizer = true;
-    var followerId = await AsyncStorage.getItem("userId");
-
-    var ApiUrl = Connection.url + Connection.organizer;
-    //organizer id is the only data to be sent to server in order to retrive organizer data
-    var userId = item.userId;
-    var Data = {
-      userId: userId,
-      followerId: followerId,
-    };
-    // header type for text data to be send to server
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-      signal: signal,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        let message = response[0].message;
-        let follow = response[0].follow;
-        let profile = response[0].profile[0];
-
-        if (featchOrganizer) {
-          if (message === "succeed") {
-            setEventOrg({
-              ...eventOrg,
-              featuredImage: profile.profile,
-              organizerName: profile.username,
-              category: profile.category,
-            });
-            setOrganizerInfo(profile);
-            setFetching(true);
-          } else {
-            // code goes here if you have something to return on negetive return
-          }
-          if (follow === "Following") {
-            setFollow({
-              ...follow,
-              subscription: follow,
-              btnDisabled: true,
-              ButtonColor: Constants.transparentPrimary,
-            });
-            setFollowStatus(follow);
-          } else {
-            setFollow({
-              ...follow,
-              subscription: follow,
-              btnDisabled: false,
-              ButtonColor: Constants.primary,
-            });
-            setFollowStatus(follow);
-          }
-        }
-        return () => {
-          // cancel the subscription
-          featchOrganizer = false;
-          controller.abort();
-        };
-      });
-  };
-  /********************************************************************* */
-  //user follow unfollow related code is writen below
-  /******************************************************************** */
-  const [follow, setFollow] = useState({
-    subscription: "Follow",
-    btnDisabled: false,
-    ButtonColor: Constants.primary,
-  });
-
-  const [followProgress, setFollowProgress] = useState(false);
-
-  const followOrganizer = async () => {
-    setFollowProgress(true);
-
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    let checkFollowing = true;
-    var organizerId = item.userId;
-    var followerId = await AsyncStorage.getItem("userId");
-    var APIUrl = Connection.url + Connection.follow;
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    var Data = {
-      organizerId: organizerId,
-      followerId: followerId,
-    };
-    fetch(APIUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-      signal: signal,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        let responseMessage = response[0].message;
-        // effect subscription indicator
-        if (checkFollowing) {
-          if (responseMessage === "Following") {
-            setFollow({
-              ...follow,
-              subscription: responseMessage,
-              btnDisabled: true,
-              ButtonColor: Constants.transparentPrimary,
-            });
-            setFollowProgress(false);
-            setFollowStatus(responseMessage);
-          } else {
-            setFollow({
-              ...follow,
-              subscription: responseMessage,
-              btnDisabled: false,
-              ButtonColor: Constants.primary,
-            });
-            setFollowStatus(responseMessage);
-            setFollowProgress(false);
-          }
-        }
-      });
-
-    return () => {
-      // cancel the subscription
-      checkFollowing = false;
-      controller.abort();
-    };
-  };
 
   //we call useeffect hook once the component get mounted
   useEffect(() => {
     // when component called featch organizer function will be called
-    featchOrganizer();
-    bookmarked();
+    let isApiSubscribed = true;
+
+    if (isApiSubscribed) {
+   
+      bookmarked();
+    }
     // when the component get unmounted nothing is called we just pass empty return
-    return () => {};
-  }, []);
+    return () => {
+      isApiSubscribed = false;
+    };
+  },[]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Constants.background }}>
@@ -398,7 +254,6 @@ const YoursDetail = ({ route, navigation }) => {
             style={styles.image} //featured image styles
           />
         </View>
-
 
         <View style={styles.EventTitle}>
           <Text
@@ -460,23 +315,26 @@ const YoursDetail = ({ route, navigation }) => {
           Venues={item.event_address}
           phone={item.contact_phone}
         />
-        
-        <View style={styles.TopButtons}>
-          <TouchableNativeFeedback 
-           onPress={()=>navigation.navigate("Add Ticket", { item })}
-          >
-            <View style={styles.AddTicket}>
-              <Text style={styles.addTicketText}>Add Ticket</Text>
-            </View>
-          </TouchableNativeFeedback>
 
-          <TouchableNativeFeedback >
-            <View style={styles.UpdateEvent}>
-              <Text style={styles.UpdateEventText}>Update</Text>
-            </View>
-          </TouchableNativeFeedback>
-        </View>
-      
+        {item.event_entrance_fee !== "0" && item.end_date >= currentDate ? (
+          <View style={styles.TopButtons}>
+            <TouchableNativeFeedback
+              onPress={() => navigation.navigate("Add Ticket", { item })}
+            >
+              <View style={styles.AddTicket}>
+                <Text style={styles.addTicketText}>Add Ticket</Text>
+              </View>
+            </TouchableNativeFeedback>
+
+            <TouchableNativeFeedback 
+             onPress={()=>navigation.navigate("Update Event",{item})}
+            >
+              <View style={styles.UpdateEvent}>
+                <Text style={styles.UpdateEventText}>Update</Text>
+              </View>
+            </TouchableNativeFeedback>
+          </View>
+        ) : null}
 
         <View style={styles.descDescription}>
           <Text style={styles.descTitle}> Description</Text>
@@ -494,8 +352,6 @@ const YoursDetail = ({ route, navigation }) => {
             </TouchableOpacity>
           ) : null}
         </View>
-
-    
       </ScrollView>
     </SafeAreaView>
   );
@@ -540,7 +396,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     padding: 8,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: Constants.icon,
     marginHorizontal: 20,
   },
@@ -548,30 +404,32 @@ const styles = StyleSheet.create({
   //addticket button
   AddTicket: {
     padding: 6,
-    paddingHorizontal: 26,
+    paddingHorizontal: 36,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Constants.primary,
-    borderRadius: Constants.tinybox,
+    borderRadius: 50,
     margin: 2,
   },
 
   //add ticket text styling
   addTicketText: {
     fontFamily: Constants.fontFam,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     fontSize: Constants.headingtwo,
     color: Constants.Inverse,
   },
-   //Update event button
-   UpdateEvent: {
+  //Update event button
+  UpdateEvent: {
     padding: 6,
-    paddingHorizontal: 26,
+    paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Constants.Faded,
     borderRadius: Constants.tinybox,
     margin: 2,
+    elevation:2,
+    shadowColor: Constants.Secondary
   },
 
   //Update event text styling
@@ -579,7 +437,7 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
-    color: Constants.Inverse,
+    color: Constants.primary,
   },
   // organizers section styling
   organizersSection: {

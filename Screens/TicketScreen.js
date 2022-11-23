@@ -1,27 +1,23 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect,useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  Image,
-  FlatList,
-  Alert
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Text, Image, FlatList, Alert } from "react-native";
 import { Paragraph, Title } from "react-native-paper";
 import Connection from "../constants/connection";
 import Constants from "../constants/Constants";
 import TicketListing from "../Components/TicketsListing";
-import { Button, Menu, Divider, Provider } from 'react-native-paper';
+import { Button, Menu, Divider, Provider } from "react-native-paper";
 
 // ticket functional component
 function Tickets({ navigation }) {
-  const [loading, setLoading] = React.useState(true); 
-  const [tickets, setTickets] = React.useState();  //tickets
+  const [loading, setLoading] = React.useState(true);
+  const [tickets, setTickets] = React.useState(); //tickets
   const [refreshing, setRefreshing] = React.useState(false); //flalist refreshing state
   const [shimmer, setShimmer] = useState(false); //shimmer effect state
-  
+
   const myTickets = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     let id = await AsyncStorage.getItem("userId");
 
     var ApiUrl = Connection.url + Connection.myTickets;
@@ -38,6 +34,7 @@ function Tickets({ navigation }) {
       method: "POST",
       headers: headers,
       body: JSON.stringify(Data),
+      signal:signal
     })
       .then((response) => response.json())
       .then((response) => {
@@ -56,6 +53,10 @@ function Tickets({ navigation }) {
       .catch((error) => {
         setLoading(false);
       });
+      return () => {
+        // cancel the request before component unmounts
+        controller.abort();
+      };
   };
 
   //ticket type icon
@@ -202,51 +203,55 @@ function Tickets({ navigation }) {
     }
     return StatusColor;
   };
-// refresh ticket listing
-const RefreshList = async() => {
+  // refresh ticket listing
+  const RefreshList = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-setRefreshing(true);
+    setRefreshing(true);
 
+    let id = await AsyncStorage.getItem("userId");
 
-let id = await AsyncStorage.getItem("userId");
+    var ApiUrl = Connection.url + Connection.myTickets;
+    var headers = {
+      accept: "application/json",
+      "Content-Type": "application/json",
+    };
 
-var ApiUrl = Connection.url + Connection.myTickets;
-var headers = {
-  accept: "application/json",
-  "Content-Type": "application/json",
-};
+    var Data = {
+      id: id,
+    };
 
-var Data = {
-  id: id,
-};
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+      signal: signal,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var message = response[0].message;
+        var ticket = response[0].Tickets;
 
-fetch(ApiUrl, {
-  method: "POST",
-  headers: headers,
-  body: JSON.stringify(Data),
-})
-  .then((response) => response.json())
-  .then((response) => {
-    var message = response[0].message;
-    var ticket = response[0].Tickets;
+        if (message === "succeed") {
+          setLoading(true);
+          setTickets(ticket);
+          setRefreshing(false);
+        } else {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+        setRefreshing(false);
+      });
 
-    if (message === "succeed") {
-      setLoading(true);
-      setTickets(ticket);
-      setRefreshing(false);
-    } else {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  })
-  .catch((error) => {
-    setLoading(false);
-    setRefreshing(false);
-  });
-}
-
-
-
+    return () => {
+      // cancel the request before component unmounts
+      controller.abort();
+    };
+  };
 
   // render ticket listing
   const renderItem = ({ item }) => (
@@ -259,14 +264,20 @@ fetch(ApiUrl, {
       status={Status(item.status)}
       textColor={StatusText(item.status)}
       onPress={() => navigation.navigate("Ticket Detail", { item })}
-      longPress={()=>navigation.navigate("Update Ticket", { item })}
+      longPress={() => navigation.navigate("Update Ticket", { item })}
     />
   );
 
   useEffect(() => {
-    myTickets();
+    let isApiSubscribed = true;
 
-    return () => {};
+    if (isApiSubscribed) {
+      myTickets();
+    }
+
+    return () => {
+      isApiSubscribed = false;
+    };
   });
 
   return (
@@ -292,7 +303,6 @@ fetch(ApiUrl, {
           //     </View>
           //   ) : null
           // }
-        
         />
       ) : (
         <View style={styles.noTicketContainer}>
@@ -316,10 +326,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   noTicketContainer: {
-    flex:1,
+    flex: 1,
     width: "80%",
     alignItems: "center",
-    alignSelf:"center",
+    alignSelf: "center",
     justifyContent: "center",
   },
   noTicketImage: {

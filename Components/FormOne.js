@@ -404,8 +404,6 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
     color: Constants.Inverse,
- 
-    
   },
   eventDescContainer: {
     width: "90%",

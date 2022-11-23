@@ -48,7 +48,7 @@ import TicketDetail from "./Screens/TicketDetail";
 import * as Animatable from "react-native-animatable";
 import Tickets from "./Screens/TicketScreen";
 import UpdateTicket from "./Screens/UpdateTicket";
-
+import UpdateEvent from "./Screens/UpdateEvent";
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
@@ -404,7 +404,7 @@ export default function App() {
           justifyContent: "center",
           alignItems: "center",
           backgroundColor: "#292b2c",
-          paddingBottom:30,
+          paddingBottom: 30,
         }}
       >
         <Animatable.Image
@@ -517,7 +517,7 @@ export default function App() {
                     headerShown: false,
                   }}
                 />
-                 <Stack.Screen
+                <Stack.Screen
                   name="YoursDetail"
                   component={YoursDetail}
                   options={{
@@ -595,7 +595,7 @@ export default function App() {
                   }}
                 />
 
-                 <Stack.Screen
+                <Stack.Screen
                   name="Ticket Added"
                   component={AddingTicketSucceed}
                   options={{
@@ -606,7 +606,7 @@ export default function App() {
                     headerShadowVisible: false,
                   }}
                 />
-               <Stack.Screen
+                <Stack.Screen
                   name="Ticket Detail"
                   component={TicketDetail}
                   options={{
@@ -618,7 +618,7 @@ export default function App() {
                   }}
                 />
 
-                  <Stack.Screen
+                <Stack.Screen
                   name="My Tickets"
                   component={Tickets}
                   options={{
@@ -629,19 +629,33 @@ export default function App() {
                     headerShadowVisible: false,
                   }}
                 />
-               <Stack.Screen
-               name="Update Ticket"
-               component={UpdateTicket}
-               options={{
-                headerStyle: {
-                  backgroundColor: Constants.primary,
-                },
-                headerTintColor: Constants.background,
-                headerShadowVisible: false,
-              }}
-               />
+               
 
-
+                <Stack.Screen
+                  name="Update Ticket"
+                  component={UpdateTicket}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                    
+                  }}
+                />
+                 <Stack.Screen
+                  name="Update Event"
+                  component={UpdateEvent}
+                  options={{
+                    title: 'Update',
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                    headerShown:false
+                  }}
+                />
               </Stack.Navigator>
             ) : (
               <View style={styles.noConnection}>

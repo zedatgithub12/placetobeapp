@@ -34,6 +34,8 @@ const Questions = () => {
 
   //get user information from database
   const getUserInfo = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     var userId = await AsyncStorage.getItem("userId");
 
     var ApiUrl = Connection.url + Connection.MetaData;
@@ -49,6 +51,7 @@ const Questions = () => {
       method: "POST",
       headers: headers,
       body: JSON.stringify(data),
+      signal:signal
     })
       .then((response) => response.json())
       .then((response) => {
@@ -62,10 +65,15 @@ const Questions = () => {
         } else {
         }
       });
-    return () => {};
+    return () => {
+      controller.abort();
+    };
   };
 
   const submit = () => {
+
+
+
     if (name.length == 0 || email.length == 0 || message.length == 0) {
       setAlertMessage({
         ...alertMessage,
@@ -95,6 +103,7 @@ const Questions = () => {
         headers: headers,
         body: JSON.stringify(data),
         
+        
       })
         .then((response) => response.json())
         .then((response) => {
@@ -116,8 +125,15 @@ const Questions = () => {
     }
   };
   useEffect(() => {
-    getUserInfo();
-    return () => {};
+    let isApiSubscribed = true;
+    if (isApiSubscribed) {
+      getUserInfo();
+  }
+ 
+    return () => {
+       isApiSubscribed = false;
+      
+    };
   }, []);
   return (
     <ScrollView contentContainerStyle={styles.mainContainer}>

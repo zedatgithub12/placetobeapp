@@ -127,12 +127,16 @@ const YourEvents = ({ route, navigation }) => {
   const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);
   // refresh the flatlist item
   const RefreshList = async () => {
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     var userId = await AsyncStorage.getItem("userId");
     setLoading(false);
     // featching abort controller
     // after featching events the fetching function will be aborted
 
-    let isApiSubscribed = true;
+   
     var ApiUrl = Connection.url + Connection.YourEvents;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
     var headers = {
@@ -148,11 +152,11 @@ const YourEvents = ({ route, navigation }) => {
       method: "POST",
       headers: headers,
       body: JSON.stringify(Data),
+      signal:signal
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        if (isApiSubscribed) {
-          // handle success
+  
           var message = response[0].message;
 
           if (message === "succeed") {
@@ -168,93 +172,90 @@ const YourEvents = ({ route, navigation }) => {
           } else {
             setLoading(false);
           }
-        }
+        
       })
       .catch((err) => {
         setLoading(false);
       });
 
     return () => {
-      // cancel the subscription
-      isApiSubscribed = false;
+      controller.abort();
     };
   };
 
   useEffect(() => {
-    RefreshList();
-    return () => {};
+    let isApiSubscribed = true;
+
+    if (isApiSubscribed) {
+      RefreshList();
+    }
+
+    return () => {
+      isApiSubscribed = false;
+    };
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      
-        <View>
-          <TouchableOpacity
-            style={styles.backArrow} // back arrow button style
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons
-              name="arrow-back-sharp"
-              size={25}
-              //back arrow icon
-            />
-          </TouchableOpacity>
-          <View style={styles.headerContainer}>
-            <Text style={styles.Title}>Your Events</Text>
-            {loading ? (
-              <Text style={styles.eventCount}>{count}</Text>
-            ) : (
-              <SkeletonPlaceholder>
-                <View
-                  style={{ width: 45, height: 30, borderRadius: 3, padding: 7 }}
-                />
-              </SkeletonPlaceholder>
-            )}
-          </View>
-        </View>
-        {
-  loading ?
-  (
-<FlatList
-        // List of events in extracted from database in the form JSON data
-        data={events}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.event_id}
-        onRefresh={RefreshList}
-        refreshing={refreshing}
-        // when ithere is no item to be listed in flatlist
-        ListHeaderComponent={() =>
-          notFound ? (
-            <View style={styles.container}>
-              <Image
-                source={require("../assets/NotFound.png")}
-                resizeMode="contain"
-                style={styles.notFound}
+      <View>
+        <TouchableOpacity
+          style={styles.backArrow} // back arrow button style
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons
+            name="arrow-back-sharp"
+            size={25}
+            //back arrow icon
+          />
+        </TouchableOpacity>
+        <View style={styles.headerContainer}>
+          <Text style={styles.Title}>Your Events</Text>
+          {loading ? (
+            <Text style={styles.eventCount}>{count}</Text>
+          ) : (
+            <SkeletonPlaceholder>
+              <View
+                style={{ width: 45, height: 30, borderRadius: 3, padding: 7 }}
               />
-              <Text style={styles.emptyMessageStyle}>{message}</Text>
-              <HelperText style={{ alignSelf: "center" }}>
-                You can add events using plus icon in the home page
-              </HelperText>
-            </View>
-          ) : null
-        }
-      />
-  
-  )
-  :
-  (
- <View>
-   <OrgShimmer/>
-   <OrgShimmer/>
-   <OrgShimmer/>
-   <OrgShimmer/>
-   <OrgShimmer/>
-   <OrgShimmer/>
-
-   </View>
-  )
-}
-     
+            </SkeletonPlaceholder>
+          )}
+        </View>
+      </View>
+      {loading ? (
+        <FlatList
+          // List of events in extracted from database in the form JSON data
+          data={events}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.event_id}
+          onRefresh={RefreshList}
+          refreshing={refreshing}
+          // when ithere is no item to be listed in flatlist
+          ListHeaderComponent={() =>
+            notFound ? (
+              <View style={styles.container}>
+                <Image
+                  source={require("../assets/NotFound.png")}
+                  resizeMode="contain"
+                  style={styles.notFound}
+                />
+                <Text style={styles.emptyMessageStyle}>{message}</Text>
+                <HelperText style={{ alignSelf: "center" }}>
+                  You can add events using plus icon in the home page
+                </HelperText>
+              </View>
+            ) : null
+          }
+        />
+      ) : (
+        <View>
+          <OrgShimmer />
+          <OrgShimmer />
+          <OrgShimmer />
+          <OrgShimmer />
+          <OrgShimmer />
+          <OrgShimmer />
+        </View>
+      )}
     </SafeAreaView>
   );
 };

@@ -109,6 +109,10 @@ const TicketDetail = ({ route, navigation }) => {
   const [indicator, setIndicator] = React.useState(false);
 
   const UpdateStatus = () => {
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     setIndicator(true);
     var ApiUrl = Connection.url + Connection.Soldout;
     var headers = {
@@ -144,9 +148,16 @@ const TicketDetail = ({ route, navigation }) => {
         setTicketStatus(Status());
         setIndicator(false);
       });
+
+      return () => {
+        controller.abort();
+    };
   };
 
   useEffect(() => {
+    let isApiSubscribed = true;
+   
+       
     return () => {};
   }, [TicketStatus]);
   return (

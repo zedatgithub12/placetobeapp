@@ -125,6 +125,10 @@ const UpdateTicket = ({ route, navigation }) => {
 
   //main function in the screen to executed when user press add to event button
   const Update = async () => {
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     setUpdating(true);
     let id = await AsyncStorage.getItem("userId");
 
@@ -151,6 +155,7 @@ const UpdateTicket = ({ route, navigation }) => {
         method: "POST",
         headers: headers,
         body: JSON.stringify(Data),
+        signal:signal,
       })
         .then((response) => response.json())
         .then((response) => {
@@ -171,13 +176,24 @@ const UpdateTicket = ({ route, navigation }) => {
           setUpdating(false);
           console.log(error);
         });
+        return () => {
+       
+          controller.abort();
+        };
     }
   };
 
   // declare screen useEffect hook
   useEffect(() => {
-    FetchImage();
-    return () => {};
+    let isApiSubscribed = true;
+    if (isApiSubscribed) {
+      FetchImage();
+  }
+   
+    return () => {
+      isApiSubscribed = false;
+    
+    };
   }, [poster]);
 
   return (
