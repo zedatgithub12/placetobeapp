@@ -49,6 +49,8 @@ import * as Animatable from "react-native-animatable";
 import Tickets from "./Screens/TicketScreen";
 import UpdateTicket from "./Screens/UpdateTicket";
 import UpdateEvent from "./Screens/UpdateEvent";
+import UpdateSucceed from "./Screens/UpdateSucceed";
+
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
@@ -656,6 +658,20 @@ export default function App() {
                     headerShown:false
                   }}
                 />
+                 <Stack.Screen
+                  name="Update Succeed"
+                  component={UpdateSucceed}
+                  options={{
+                    title: 'Updated',
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                    headerShown:false
+                  }}
+                />
+
               </Stack.Navigator>
             ) : (
               <View style={styles.noConnection}>

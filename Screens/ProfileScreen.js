@@ -456,7 +456,7 @@ function Profile({ navigation, props }) {
               </View>
               <InteractionInfo
                 Events={userInfo.eventPosted}
-                getData={() => navigation.navigate("yourEvents", { count })}
+                getData={() => navigation.navigate("yourEvents")}
                 followerCountPressed={() => navigation.navigate("Followers")}
                 followingCountPressed={() => navigation.navigate("Following")}
                 Followers={userInfo.followers}

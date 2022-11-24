@@ -21,9 +21,9 @@ import OrgShimmer from "../Components/orgShimmer";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 
 // create a component
-const YourEvents = ({ route, navigation }) => {
-  const { count } = route.params;
+const YourEvents = ({ navigation }) => {
 
+  const [load, setLoad] = React.useState(false);
   const [events, setEvents] = useState();
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
@@ -183,11 +183,56 @@ const YourEvents = ({ route, navigation }) => {
     };
   };
 
+
+  const [count, setCount] = useState(0);
+
+  const featchUserInformation = async () => {
+    const Controller = new AbortController();
+    const Signal = Controller.signal;
+
+    var fetchIt = true;
+    var id = await AsyncStorage.getItem("userId");
+    var Data = {
+      id: id,
+    };
+    var ApiUrl = Connection.url + Connection.userInfo;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    fetch(ApiUrl, {
+      method: "POST",
+      body: JSON.stringify(Data),
+      headers: headers,
+      signal: Signal,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var serverResponse = response[0].message;
+        if (fetchIt) {
+          if (serverResponse === "succeed") {
+            var eventPostedCount = response[0].events;
+            setCount(eventPostedCount);
+            setLoad(true);
+          } else {
+            setLoad(false);
+          }
+        }
+      })
+      .catch((err) => {
+        setLoad(false);
+      });
+    return () => {
+      fetchIt = false;
+      Controller.abort();
+    };
+  };
   useEffect(() => {
     let isApiSubscribed = true;
 
     if (isApiSubscribed) {
       RefreshList();
+      featchUserInformation();
     }
 
     return () => {

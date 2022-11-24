@@ -114,7 +114,7 @@ const FormThree = () => {
     }
   };
 
-  // function for to be called when category field gets updated
+  // function for to be called when event address field gets updated
   const updateEventAdress = (address) => {
     if (address.length <= 3) {
       setInputs({

@@ -1,5 +1,4 @@
 
-
 const Connection = {
   //url: "http://app.p2b-ethiopia.com/placetobe/",
   url: "http://192.168.100.3/p2b-app/",
@@ -42,7 +41,8 @@ const Connection = {
   myTickets: "MyTickets.php",
   Soldout: "SoldOut.php",
   EventPoster: "EventPoster.php",
-  UpdateTicket: "UpdateTicket.php"
+  UpdateTicket: "UpdateTicket.php",
+  updateEvent: "UpdateEvent.php",
 };
 
 export default Connection;

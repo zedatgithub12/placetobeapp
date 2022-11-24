@@ -13,7 +13,7 @@ import Connection from "../constants/connection";
 import Constants from "../constants/Constants";
 import { HelperText } from "react-native-paper";
 import Listing from "../Components/ListShimmer";
-import { color } from "react-native-reanimated";
+
 
 const TodaysEvents = ({ navigation }) => {
   const [events, setEvents] = useState();
