@@ -81,6 +81,7 @@ function Bookmarks({ navigation }){
       }
       useEffect(()=>{
         mount();
+        //var sorted = items.sort((a,b)=>{return a-b});
         return ()=>{}
       },[])
 

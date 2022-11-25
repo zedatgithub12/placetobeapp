@@ -11,6 +11,7 @@ import {
 } from "redux-persist";
 import { combineReducers } from "redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Ticket from '../Reducer/Ticket';
 
 const persistConfig = {
   key: "root",
@@ -20,7 +21,7 @@ const persistConfig = {
 
 const reducer = combineReducers({
   cart: CartReducer,
-  
+  ticket: Ticket,
 });
 
 const persistedReducer = persistReducer(persistConfig, reducer);

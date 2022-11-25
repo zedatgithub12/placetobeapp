@@ -33,19 +33,13 @@ const YoursDetail = ({ route, navigation }) => {
   const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
   const logged = userStatus.logged;
 
-
   //get current to check weather event is expired or not
 
-  var today =new Date();
+  var today = new Date();
   var day = today.getDate();
   var month = today.getMonth();
   var year = today.getFullYear();
-  var currentDate = year+"-"+month+"-"+day;
-  
-
-
-
-
+  var currentDate = year + "-" + month + "-" + day;
 
   //dispatch bookmarking item
   const dispatch = useDispatch();
@@ -116,7 +110,6 @@ const YoursDetail = ({ route, navigation }) => {
     FileSystem.downloadAsync(remoteUrl, localPath); //download file to cached directory
 
     const doesExist = await FileSystem.getInfoAsync(localPath);
-
 
     var weblink = Constants.webLink;
 
@@ -212,22 +205,19 @@ const YoursDetail = ({ route, navigation }) => {
     }
   };
 
-
-
   //we call useeffect hook once the component get mounted
   useEffect(() => {
     // when component called featch organizer function will be called
     let isApiSubscribed = true;
 
     if (isApiSubscribed) {
-   
       bookmarked();
     }
     // when the component get unmounted nothing is called we just pass empty return
     return () => {
       isApiSubscribed = false;
     };
-  },[]);
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Constants.background }}>
@@ -316,8 +306,8 @@ const YoursDetail = ({ route, navigation }) => {
           phone={item.contact_phone}
         />
 
-        {item.event_entrance_fee !== "0" && item.end_date >= currentDate ? (
-          <View style={styles.TopButtons}>
+        <View style={styles.TopButtons}>
+          {item.event_entrance_fee !== "0" ? (
             <TouchableNativeFeedback
               onPress={() => navigation.navigate("Add Ticket", { item })}
             >
@@ -325,16 +315,16 @@ const YoursDetail = ({ route, navigation }) => {
                 <Text style={styles.addTicketText}>Add Ticket</Text>
               </View>
             </TouchableNativeFeedback>
+          ) : null}
 
-            <TouchableNativeFeedback 
-             onPress={()=>navigation.navigate("Update Event",{item})}
-            >
-              <View style={styles.UpdateEvent}>
-                <Text style={styles.UpdateEventText}>Update</Text>
-              </View>
-            </TouchableNativeFeedback>
-          </View>
-        ) : null}
+          <TouchableNativeFeedback
+            onPress={() => navigation.navigate("Update Event", { item })}
+          >
+            <View style={styles.UpdateEvent}>
+              <Text style={styles.UpdateEventText}>Update</Text>
+            </View>
+          </TouchableNativeFeedback>
+        </View>
 
         <View style={styles.descDescription}>
           <Text style={styles.descTitle}> Description</Text>
@@ -425,19 +415,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.tinybox,
+    backgroundColor: Constants.background,
+    borderRadius: Constants.borderRad,
     margin: 2,
-    elevation:2,
-    shadowColor: Constants.Secondary
+    elevation: 2,
+    shadowColor: Constants.Secondary,
+    borderWidth: 0.5,
+    borderColor: Constants.primary
   },
 
   //Update event text styling
   UpdateEventText: {
-    fontFamily: Constants.fontFam,
+ 
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
     color: Constants.primary,
+  
   },
   // organizers section styling
   organizersSection: {

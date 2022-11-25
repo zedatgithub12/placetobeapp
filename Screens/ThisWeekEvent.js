@@ -240,10 +240,16 @@ const ThisWeekEvent = ({ navigation }) => {
   };
 
   useEffect(() => {
-    mountFunction();
+    var isSubcribed = true;
+    if(isSubcribed){
+      mountFunction();
+    }
+    
 
-    return () => {};
-  }, []);
+    return () => {
+      isSubcribed =false;
+    };
+  });
 
   return (
     <View style={{ minHeight: "100%", paddingBottom:60, backgroundColor: Constants.background }}>

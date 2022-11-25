@@ -204,7 +204,7 @@ const TicketDetail = ({ route, navigation }) => {
                     <MaterialCommunityIcons
                       name="close"
                       size={20}
-                      color={Constants.red}
+                      color={Constants.Inverse}
                     />
                   </View>
                 </TouchableWithoutFeedback>

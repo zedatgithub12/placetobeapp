@@ -24,6 +24,7 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import { HelperText } from "react-native-paper";
+import * as Animatable from "react-native-animatable";
 
 // create a component
 const UpdateEvent = ({ navigation, route }) => {
@@ -572,23 +573,33 @@ const UpdateEvent = ({ navigation, route }) => {
   /*************************************************** */
   //Event got cancelled
   /*************************************************** */
+const checkCancellation = ()=>{
+  var status;
+   if(item.cancelled == 1){
+    status ="Cancelled";
+   }
+   else {
+    status ="Cancel Event";
+   }
+   return status;
+}
+
   const [cancelButton, setCancelButton] = useState({
     cancelling: false,
     linethrough: false,
-    cancelText: "Cancel Event",
+    cancelText: checkCancellation(),
     btnDisabled: false,
   });
 
   const Cancelled = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     setCancelButton({
       ...cancelButton,
       cancelling: true,
-     
-
+      btnDisabled: true,
     });
-
-    const controller = new AbortController();
-    const signal = controller.signal;
 
     let userId = await AsyncStorage.getItem("userId");
 
@@ -612,6 +623,7 @@ const UpdateEvent = ({ navigation, route }) => {
       .then((response) => response.json())
       .then((response) => {
         var message = response[0].message;
+
         if (message === "succeed") {
           setCancelButton({
             ...cancelButton,
@@ -620,6 +632,11 @@ const UpdateEvent = ({ navigation, route }) => {
             cancelText: "Cancelled",
             btnDisabled: true,
           });
+          setInitialValue({
+            ...initialValue,
+            errorContainer: false,
+            errorMessage: "",
+          });
         } else {
           setCancelButton({
             ...cancelButton,
@@ -627,6 +644,11 @@ const UpdateEvent = ({ navigation, route }) => {
             linethrough: false,
             cancelText: "Cancel Event",
             btnDisabled: false,
+          });
+          setInitialValue({
+            ...initialValue,
+            errorContainer: true,
+            errorMessage: "Unable to cancel event!",
           });
         }
       })
@@ -643,6 +665,7 @@ const UpdateEvent = ({ navigation, route }) => {
           errorContainer: true,
           errorMessage: "Error cancelling event!",
         });
+        console.log(error);
       });
 
     return () => {
@@ -650,7 +673,16 @@ const UpdateEvent = ({ navigation, route }) => {
     };
   };
 
+  //function to close error container
+  const closeError = () => {
+    setInitialValue({
+      ...initialValue,
+      errorContainer: false,
+    });
+  };
+
   useEffect(() => {
+    checkCancellation();
     return () => {};
   });
 
@@ -673,7 +705,6 @@ const UpdateEvent = ({ navigation, route }) => {
           </TouchableOpacity>
           <Image
             //Featured Image of the event
-
             source={{ uri: image }} //featured image source
             resizeMode="cover"
             style={styles.image} //featured image styles
@@ -703,15 +734,32 @@ const UpdateEvent = ({ navigation, route }) => {
             </View>
           </TouchableNativeFeedback>
 
-          <TouchableNativeFeedback onPress={() => Cancelled()}>
+          <TouchableNativeFeedback
+            onPress={() => Cancelled()}
+            disabled={cancelButton.btnDisabled}
+          >
             <View style={styles.cancelEvent}>
-
               {cancelButton.cancelling ? (
                 <ActivityIndicator size="small" color={Constants.red} />
               ) : (
-                <Text style={styles.cancelText}>Cancel Event</Text>
+                <View style={{flexDirection:"row", alignItems:"center"}}>
+                  {cancelButton.cancelText === "Cancelled" ? (
+                  <MaterialCommunityIcons
+                    name="cancel"
+                    size={18}
+                    color={Constants.Danger}
+                    style={{marginRight:4,}}
+                  />
+                 
+                ) : null}
+                <Text style={[styles.cancelText]}>
+                  {cancelButton.cancelText}
+                  
+                </Text>
+                
+                 </View>
               )}
-
+              
             </View>
           </TouchableNativeFeedback>
         </View>
@@ -947,6 +995,23 @@ const UpdateEvent = ({ navigation, route }) => {
           />
         )}
       </ScrollView>
+
+      {initialValue.errorContainer ? (
+        <Animatable.View
+          animation="fadeInUpBig"
+          duration={0.3}
+          style={styles.errorPrompt}
+        >
+          <TouchableOpacity
+            onPress={() => closeError()}
+            style={styles.closePrompt}
+          >
+            <Ionicons name="close" size={25} color={Constants.background} />
+          </TouchableOpacity>
+          <Text style={styles.promptText}>{initialValue.errorMessage}</Text>
+        </Animatable.View>
+      ) : null}
+
       <TouchableNativeFeedback onPress={() => EventUpdate()}>
         <View style={styles.updateButton}>
           {initialValue.Updating ? (
@@ -1026,7 +1091,7 @@ const styles = StyleSheet.create({
   cancelEvent: {
     backgroundColor: Constants.lightRed,
     padding: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     margin: 8,
     borderRadius: Constants.tiny,
   },
@@ -1140,6 +1205,34 @@ const styles = StyleSheet.create({
   loadingText: {
     marginLeft: 6,
     color: Constants.Inverse,
+  },
+  closePrompt: {
+    position: "absolute",
+    right: 15,
+    top: 5,
+  },
+  promptText: {
+    color: Constants.background,
+    fontWeight: Constants.Bold,
+  },
+  errorPrompt: {
+    position: "absolute",
+    bottom: 50,
+    zIndex: 100,
+    width: "85%",
+    backgroundColor: Constants.Danger,
+    justifyContent: "center",
+    alignSelf: "center",
+    alignItems: "center",
+    margin: 10,
+    padding: 10,
+    borderRadius: Constants.tiny,
+    elevation: 4,
+    shadowColor: Constants.Secondary,
+    shadowOffset: {
+      height: 8,
+      width: 2,
+    },
   },
 });
 

@@ -50,7 +50,8 @@ import Tickets from "./Screens/TicketScreen";
 import UpdateTicket from "./Screens/UpdateTicket";
 import UpdateEvent from "./Screens/UpdateEvent";
 import UpdateSucceed from "./Screens/UpdateSucceed";
-
+import CheckoutScreen from "./Screens/CheckoutScreen";
+import PaymentScreen from "./Screens/PaymentScreen";
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
@@ -631,7 +632,6 @@ export default function App() {
                     headerShadowVisible: false,
                   }}
                 />
-               
 
                 <Stack.Screen
                   name="Update Ticket"
@@ -642,36 +642,65 @@ export default function App() {
                     },
                     headerTintColor: Constants.background,
                     headerShadowVisible: false,
-                    
                   }}
                 />
-                 <Stack.Screen
+                <Stack.Screen
                   name="Update Event"
                   component={UpdateEvent}
                   options={{
-                    title: 'Update',
+                    title: "Update",
                     headerStyle: {
                       backgroundColor: Constants.primary,
                     },
                     headerTintColor: Constants.background,
                     headerShadowVisible: false,
-                    headerShown:false
+                    headerShown: false,
                   }}
                 />
-                 <Stack.Screen
+                <Stack.Screen
                   name="Update Succeed"
                   component={UpdateSucceed}
                   options={{
-                    title: 'Updated',
+                    title: "Updated",
                     headerStyle: {
                       backgroundColor: Constants.primary,
                     },
                     headerTintColor: Constants.background,
                     headerShadowVisible: false,
-                    headerShown:false
+                    headerShown: false,
                   }}
                 />
-
+                
+                <Stack.Screen
+                  name="TicketScreen"
+                  component={PaymentScreen}
+                  options={{
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
+                  }}
+                />
+               
+          
+{/* 
+                <Stack.Screen
+                  name="Checkout Screen"
+                  component={CheckoutScreen}
+                  options={{
+                    title: "Checkout Screen",
+                    headerStyle: {
+                      backgroundColor: "white",
+                      headerBackButtonMenuEnabled: "true",
+                    },
+                    headerTitleAlign: "center",
+                    headerTintColor: "#000000",
+                    headerTitleStyle: {
+                      fontWeight: "bold",
+                    },
+                  }}
+                /> */}
               </Stack.Navigator>
             ) : (
               <View style={styles.noConnection}>
