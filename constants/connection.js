@@ -44,6 +44,7 @@ const Connection = {
   UpdateTicket: "UpdateTicket.php",
   updateEvent: "UpdateEvent.php",
   Cancelled: "Cancelled.php",
+  eventTicket: "EventTicket.php",
 };
 
 export default Connection;

@@ -129,10 +129,10 @@ const Following = ({ navigation }) => {
                     style={styles.notFound}
                   />
                   <Text style={styles.emptyMessageStyle}>
-                    No Followers yet!
+                    0 Following!
                   </Text>
                   <HelperText style={{ alignSelf: "center" }}>
-                    You have no follower yet!
+                    You have no following yet!
                   </HelperText>
                 </View>
               ) : null

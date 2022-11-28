@@ -51,7 +51,7 @@ import UpdateTicket from "./Screens/UpdateTicket";
 import UpdateEvent from "./Screens/UpdateEvent";
 import UpdateSucceed from "./Screens/UpdateSucceed";
 import CheckoutScreen from "./Screens/CheckoutScreen";
-import PaymentScreen from "./Screens/PaymentScreen";
+import EventTickets from "./Screens/EventTickets";
 
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
@@ -673,8 +673,9 @@ export default function App() {
                 
                 <Stack.Screen
                   name="TicketScreen"
-                  component={PaymentScreen}
+                  component={EventTickets}
                   options={{
+                    title: "Tickets",
                     headerStyle: {
                       backgroundColor: Constants.primary,
                     },
@@ -684,23 +685,19 @@ export default function App() {
                 />
                
           
-{/* 
+
                 <Stack.Screen
                   name="Checkout Screen"
                   component={CheckoutScreen}
                   options={{
-                    title: "Checkout Screen",
+                    title: "Checkout",
                     headerStyle: {
-                      backgroundColor: "white",
-                      headerBackButtonMenuEnabled: "true",
+                      backgroundColor: Constants.primary,
                     },
-                    headerTitleAlign: "center",
-                    headerTintColor: "#000000",
-                    headerTitleStyle: {
-                      fontWeight: "bold",
-                    },
+                    headerTintColor: Constants.background,
+                    headerShadowVisible: false,
                   }}
-                /> */}
+                />
               </Stack.Navigator>
             ) : (
               <View style={styles.noConnection}>

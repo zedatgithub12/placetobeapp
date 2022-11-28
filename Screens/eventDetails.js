@@ -13,7 +13,11 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons, Entypo, MaterialCommunityIcons } from "react-native-vector-icons";
+import {
+  Ionicons,
+  Entypo,
+  MaterialCommunityIcons,
+} from "react-native-vector-icons";
 import Constants from "../constants/Constants";
 import DetailContent from "../Components/EventContent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -360,6 +364,52 @@ const EventDetails = ({ route, navigation }) => {
     };
   };
 
+  /************************************************************* */
+  //Fetch tickets from database
+  /************************************************************* */
+  const [tickets, setTickets] = useState();
+  const [exist, setExist] = useState(false);
+
+  const FeatchTickets = () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    var ApiUrl = Connection.url + Connection.eventTicket;
+    var headers = {
+      accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    var Data = {
+      eventId: item.event_id,
+    };
+
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+      signal: signal,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var message = response[0].message;
+        var eventTickets = response[0].tickets;
+        if (message === "succeed") {
+          setTickets(eventTickets);
+          setExist(true);
+        } else {
+          setTickets();
+          setExist(false);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  };
+
   //we call useeffect hook once the component get mounted
   useEffect(() => {
     // when component called featch organizer function will be called
@@ -367,14 +417,23 @@ const EventDetails = ({ route, navigation }) => {
     if (isSubcribed) {
       featchOrganizer();
       bookmarked();
-      if (item.cancelled === "1") {
-        setTitle({
-          ...title,
-          decoration: "line-through",
-          color: Constants.red,
-          styles: "italic",
-        });
-      }
+      FeatchTickets();
+      // if (item.cancelled == 1) {
+      //   setTitle({
+      //     ...title,
+      //     decoration: "line-through",
+      //     color: Constants.red,
+      //     styles: "italic",
+      //   });
+      // }
+      // else {
+      //   setTitle({
+      //     ...title,
+      //     decoration: "none",
+      //     color: Constants.mainText,
+      //     styles: "normal",
+      //   })
+      // }
       // when the component get unmounted nothing is called we just pass empty return
     }
 
@@ -410,18 +469,17 @@ const EventDetails = ({ route, navigation }) => {
         </View>
 
         {item.cancelled === "1" ? (
-          <Animatable.View 
-          animation="slideInRight"
-          style={styles.eventGotCancelled}>
-             <MaterialCommunityIcons
-                    name="cancel"
-                    size={18}
-                    color={Constants.Danger}
-                    style={{marginLeft:6,}}
-                  />
-            <Text style={styles.cancelledText}>
-              This Event is Cancelled
-            </Text>
+          <Animatable.View
+            animation="slideInDown"
+            style={styles.eventGotCancelled}
+          >
+            <MaterialCommunityIcons
+              name="cancel"
+              size={18}
+              color={Constants.Danger}
+              style={{ marginLeft: 6 }}
+            />
+            <Text style={styles.cancelledText}>Cancelled Event</Text>
           </Animatable.View>
         ) : null}
 
@@ -580,17 +638,20 @@ const EventDetails = ({ route, navigation }) => {
           </SkeletonPlaceholder>
         )}
       </ScrollView>
-
-      <View style={[styles.ticketBtnContainer]}>
-           <TouchableOpacity 
-           activeOpacity={0.9}
-           onPress={()=> navigation.navigate("TicketScreen")}
-           style={styles.buyticketbtn}
-           >
-               <Text style={styles.ticketTxt}> Buy Ticket</Text>
-           </TouchableOpacity>
-      </View>
-
+      {exist ? (
+        <Animatable.View 
+        animation="fadeInUpBig"
+        style={[styles.ticketBtnContainer]}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate("TicketScreen", {item})}
+            style={styles.buyticketbtn}
+          >
+            <Text style={styles.ticketTxt}> Buy Ticket</Text>
+          </TouchableOpacity>
+        </Animatable.View>
+      ) : null}
+      
     </SafeAreaView>
   );
 };
@@ -667,7 +728,7 @@ const styles = StyleSheet.create({
     padding: Constants.padd,
     paddingHorizontal: 20,
     margin: 10,
-    marginBottom:70,
+    marginBottom: 70,
   },
   // follow button text style
   orgFollowTxt: {
@@ -678,22 +739,22 @@ const styles = StyleSheet.create({
   },
   eventGotCancelled: {
     flexDirection: "row",
-    alignItems:"center",
+    alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    top: "38.5%",
-    right: 0,
+    top: 0,
+    right: 7,
     backgroundColor: Constants.lightRed,
     padding: 8,
-    borderRadius:Constants.tinybox
+    borderTopEndRadius: Constants.borderRad,
   },
   cancelledText: {
     color: Constants.red,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingthree,
-    fontStyle: 'italic',
-    marginHorizontal:5,
-    paddingRight:5
+    fontStyle: "italic",
+    marginHorizontal: 5,
+    paddingRight: 5,
   },
   EventTitle: {
     flex: 1,
@@ -785,15 +846,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    
     alignSelf: "center",
     justifyContent: "center",
     backgroundColor: Constants.Faded,
   },
   buyticketbtn: {
-    marginVertical:10,
-    width: "80%",
-    alignSelf:"center",
+    marginVertical: 10,
+    width: "70%",
+    alignSelf: "center",
     backgroundColor: Constants.primary,
     padding: 12,
     borderRadius: 50,
