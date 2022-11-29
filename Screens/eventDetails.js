@@ -396,13 +396,18 @@ const EventDetails = ({ route, navigation }) => {
         if (message === "succeed") {
           setTickets(eventTickets);
           setExist(true);
-        } else {
+        } 
+       else if (message === "no tickets") {
+          setTickets(eventTickets);
+          setExist(false);
+        }
+        else {
           setTickets();
           setExist(false);
         }
       })
       .catch((error) => {
-        console.log(error);
+        setExist(false);
       });
 
     return () => {
@@ -418,23 +423,7 @@ const EventDetails = ({ route, navigation }) => {
       featchOrganizer();
       bookmarked();
       FeatchTickets();
-      // if (item.cancelled == 1) {
-      //   setTitle({
-      //     ...title,
-      //     decoration: "line-through",
-      //     color: Constants.red,
-      //     styles: "italic",
-      //   });
-      // }
-      // else {
-      //   setTitle({
-      //     ...title,
-      //     decoration: "none",
-      //     color: Constants.mainText,
-      //     styles: "normal",
-      //   })
-      // }
-      // when the component get unmounted nothing is called we just pass empty return
+      
     }
 
     return () => {

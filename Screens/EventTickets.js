@@ -29,18 +29,19 @@ import Constants from "../constants/Constants";
 const EventTickets = ({ navigation, route }) => {
   const { item } = route.params;
 
-  var placeholder = "placeholder.png";
+  
   var featuredImageUri = Connection.url + Connection.assets;
 
   const dispatch = useDispatch();
   const { tickets } = useSelector((state) => state.ticket);
 
-  const { totalCount, totalAmount } = useSelector((state) => state.ticket);
+ // const { totalCount, totalAmount } = useSelector((state) => state.ticket);
   const [amount, setAmount] = useState(0);
   const [price, setPrice] = useState();
+  const [total, setTotal] = useState();
   const [ticket, setTickets] = useState([]);
-  const [selectedTicket, setSelectedTicket] = useState([]);
-
+  const [selectedTicket, setSelectedTicket] = useState();
+ 
   //const [visible, setVisible] = useState(true);
   const [active, setActiveIndex] = useState();
   const [disable, setDisable] = useState(false);
@@ -224,17 +225,17 @@ const EventTickets = ({ navigation, route }) => {
 
   //increase count of an item
   const IncreaseCount = (identity) => {
-    var added = ticket.map((item) => {
+     ticket.map((item) => {
       if (item.id === identity) {
         setAmount(amount + 1);
         setPrice(item.currentprice);
-      
+        setSelectedTicket(item);
       }
-      
+
       return item;
     });
-    setSelectedTicket(added);
-    console.log(added);
+  
+    
   };
 
   //Decrease count of an item
@@ -248,6 +249,16 @@ const EventTickets = ({ navigation, route }) => {
     });
   
   };
+
+  //on continue button get pressed 
+  const PaymentGateway =()=>{
+   //selectedTicket.quantity = amount;
+   const pass = {...selectedTicket, amount};
+    console.log(pass);
+    navigation.navigate("Checkout Screen",{pass});
+  }
+
+
 
   useEffect(() => {
     var isSubcribed = true;
@@ -380,7 +391,7 @@ const EventTickets = ({ navigation, route }) => {
                       onPress={() => {
                         setDisable(true);
                         IncreaseCount(tik.id);
-                        dispatch(increase(tik.id));
+                       // dispatch(increase(tik.id));
                       }}
                       style={styles.counterButton}
                     >
@@ -397,7 +408,7 @@ const EventTickets = ({ navigation, route }) => {
                   activeOpacity={0.7}
                   onPress={() => {
                     setActiveIndex(index);
-                    dispatch(newItem(tik.id));
+                  //  dispatch(newItem(tik.id));
                     handlechange(index);
                   }}
                   disabled={disable}
@@ -437,9 +448,7 @@ const EventTickets = ({ navigation, route }) => {
             <Text style={styles.BSTicketcount}>{price * amount} Birr</Text>
           </View>
           <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("Checkout Screen",selectedTicket, item.event_image);
-            }}
+            onPress={() => PaymentGateway()}
             style={styles.appButtonContainer}
           >
             <Text style={styles.appButtonText}>Countinue</Text>
