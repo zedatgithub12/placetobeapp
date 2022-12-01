@@ -328,9 +328,7 @@ function CheckoutScreen({ navigation, route }) {
             <View style={styles.LeftPayment}>
               <Image
                 style={styles.Paymentlogo}
-                source={{
-                  uri: "https://play-lh.googleusercontent.com/Mtnybz6w7FMdzdQUbc7PWN3_0iLw3t9lUkwjmAa_usFCZ60zS0Xs8o00BW31JDCkAiQk",
-                }}
+                source={require('../assets/telebirr.png')}
               />
               <Text
                 style={[
@@ -373,9 +371,7 @@ function CheckoutScreen({ navigation, route }) {
             <View style={styles.LeftPayment}>
               <Image
                 style={styles.Paymentlogo}
-                source={{
-                  uri: "https://addisbiz.com/wp-content/uploads/Commercial-Bank-logo-1280x720.jpg",
-                }}
+                source={require("../assets/chapa.png")}
               />
               <Text
                 style={[
@@ -383,12 +379,12 @@ function CheckoutScreen({ navigation, route }) {
                   selection === 2 ? { color: "black" } : null,
                 ]}
               >
-                CBE
+                Chapa
               </Text>
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[
               styles.btn,
               selection === 3
@@ -434,7 +430,7 @@ function CheckoutScreen({ navigation, route }) {
                 Amole
               </Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {selection && (

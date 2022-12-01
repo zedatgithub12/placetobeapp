@@ -50,6 +50,7 @@ class EventSubmission extends Component {
       error: false,
       responseMessage: "",
       posting: false,
+      PosterStatus: false,
     };
   }
   getData = async () => {
@@ -117,6 +118,7 @@ this.setState({posting:true});
       var longitude = (this.state.locationLongitude = InputForm.mLong);
       var organizerPhone = (this.state.contactPhone = InputForm.cPhone);
       var redirectUrl = (this.state.redirectLink = InputForm.url);
+      var Poster = (this.state.PosterStatus = InputForm.imageStatus);
        
 
      
@@ -136,7 +138,13 @@ this.setState({posting:true});
         let blankField = "There is a field left blank";
         errorPanel(blankField);
         this.setState({posting:false});
-      } else {
+      }
+      else if(!Poster){
+        let poster = "Event poster is not uploaded!";
+        errorPanel(poster);
+        this.setState({posting:false});
+      }
+       else {
         // After this we initiate featch method to send user data to database
         var InsertAPIUrl = Connection.url + Connection.AddEvent;
         // header type for text data to be send to server

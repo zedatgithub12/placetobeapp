@@ -32,8 +32,8 @@ const FormOne = () => {
   const { formOne } = React.useContext(AuthContext);
 //we call context function inside eventProps function
 // we assign the value we collected with eventprops function to the context function  which is -> fromOne
-  const eventProps = (image, eventName, eventDesc) => {
-    formOne(image, eventName, eventDesc);
+  const eventProps = (image, eventName, eventDesc, status) => {
+    formOne(image, eventName, eventDesc, status);
     
   };
 //state for image picker
@@ -54,6 +54,8 @@ const [inputs, setInputs] = useState({
   descCheck: false,
   imageBoarder: Constants.purple,
   imageLoader: "notLoading",
+  imageStatus: true,
+
 });
   // this useeffect hook ask user to grant the app to access Gallery 
    useEffect(() => {
@@ -87,7 +89,8 @@ if (!result.cancelled) {
   setImageName(filename);
   setInputs({
     ...inputs,
-    imageLoader:"loading"
+    imageLoader:"loading",
+    imageStatus: false,
   })
 }
 
@@ -118,6 +121,7 @@ return await fetch(ApiUrl, {
           ...inputs,
           imageBoarder: Constants.Success,
           imageLoader: "loaded",
+          imageStatus: true,
         });
 
       }
@@ -126,6 +130,7 @@ return await fetch(ApiUrl, {
           ...inputs,
           imageBoarder: Constants.Danger,
           imageLoader: "loading",
+          imageStatus: false,
         });
       };
     }
@@ -207,7 +212,7 @@ return await fetch(ApiUrl, {
       ...inputs,
       descHelperText: "",
     });
-    eventProps(imageName, inputs.eventName, inputs.eventDesc);
+    eventProps(imageName, inputs.eventName, inputs.eventDesc, inputs.imageStatus);
     
   };
 
@@ -390,7 +395,7 @@ const styles = StyleSheet.create({
     borderRadius: Constants.mediumbox,
     paddingLeft: 10,
     marginTop: 20,
-    borderWidth: 1,
+    borderWidth: 0.5,
   },
   eventTitle: {
     width: "81%",
@@ -410,7 +415,7 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.Faded,
     borderRadius: Constants.mediumbox,
     padding: 8,
-    borderWidth: 1,
+    borderWidth: 0.5,
     
   },
   eventDescription: {

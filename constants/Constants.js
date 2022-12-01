@@ -53,7 +53,7 @@ const Constants = {
   PrimaryBlue: "#0fa7ff",
 
   //application link
-  appLink: "app.p2b-ethiopia.com/playstore",
+  appLink: "http://app.p2b-ethiopia.com/playstore",
   webLink: "https://www.p2b-ethiopia.com/",
 };
 export default Constants;

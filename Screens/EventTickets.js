@@ -29,19 +29,18 @@ import Constants from "../constants/Constants";
 const EventTickets = ({ navigation, route }) => {
   const { item } = route.params;
 
-  
   var featuredImageUri = Connection.url + Connection.assets;
 
   const dispatch = useDispatch();
   const { tickets } = useSelector((state) => state.ticket);
 
- // const { totalCount, totalAmount } = useSelector((state) => state.ticket);
+  // const { totalCount, totalAmount } = useSelector((state) => state.ticket);
   const [amount, setAmount] = useState(0);
   const [price, setPrice] = useState();
   const [total, setTotal] = useState();
   const [ticket, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState();
- 
+  const [exist, setExist] = useState(true);
   //const [visible, setVisible] = useState(true);
   const [active, setActiveIndex] = useState();
   const [disable, setDisable] = useState(false);
@@ -52,7 +51,7 @@ const EventTickets = ({ navigation, route }) => {
   const handlechange = (index) => {
     const newItem = tickets[index];
     const newUpdate = { ...newItem, open: false };
-    console.log(newUpdate);
+    // console.log(newUpdate);
     dispatch(addTicket(newUpdate));
   };
 
@@ -208,10 +207,10 @@ const EventTickets = ({ navigation, route }) => {
         var eventTickets = response[0].tickets;
         if (message === "succeed") {
           setTickets(eventTickets);
-          // setExist(true);
-        } else {
-          setTickets();
-          // setExist(false);
+          setExist(true);
+        } else if (message === "no tickets") {
+          setTickets([]);
+          setExist(false);
         }
       })
       .catch((error) => {
@@ -225,7 +224,7 @@ const EventTickets = ({ navigation, route }) => {
 
   //increase count of an item
   const IncreaseCount = (identity) => {
-     ticket.map((item) => {
+    ticket.map((item) => {
       if (item.id === identity) {
         setAmount(amount + 1);
         setPrice(item.currentprice);
@@ -234,8 +233,6 @@ const EventTickets = ({ navigation, route }) => {
 
       return item;
     });
-  
-    
   };
 
   //Decrease count of an item
@@ -247,18 +244,15 @@ const EventTickets = ({ navigation, route }) => {
       }
       return item;
     });
-  
   };
 
-  //on continue button get pressed 
-  const PaymentGateway =()=>{
-   //selectedTicket.quantity = amount;
-   const pass = {...selectedTicket, amount};
-    console.log(pass);
-    navigation.navigate("Checkout Screen",{pass});
-  }
+  //on continue button get pressed
+  const PaymentGateway = () => {
+    //selectedTicket.quantity = amount;
+    const pass = { ...selectedTicket, amount };
 
-
+    navigation.navigate("Checkout Screen", { pass });
+  };
 
   useEffect(() => {
     var isSubcribed = true;
@@ -315,126 +309,144 @@ const EventTickets = ({ navigation, route }) => {
           </View>
         </View>
 
-        <Text
-          style={[styles.H1Text, { margin: 10, marginLeft: 22, marginTop: 16 }]}
-        >
-          Avaliable Tickets
-        </Text>
-
-        {ticket.map((tik, index) => (
-          <View
-            key={tik.id}
+        {exist ? (
+          <Text
             style={[
-              styles.TicketView,
-              active === index
-                ? { borderLeftWidth: 3, borderLeftColor: Constants.primary }
-                : null,
+              styles.H1Text,
+              { margin: 10, marginLeft: 22, marginTop: 16 },
             ]}
           >
-            <View style={styles.LeftTicket}>
-              <View style={styles.IconWrapper}>
-                <MaterialCommunityIcons
-                  name={TicketName(tik.tickettype)}
-                  size={22}
-                  color={TicketColor(tik.tickettype)}
-                />
+            Avaliable Tickets
+          </Text>
+        ) : null}
+
+        {exist ? (
+          ticket.map((tik, index) => (
+            <View
+              key={tik.id}
+              style={[
+                styles.TicketView,
+                active === index
+                  ? { borderLeftWidth: 3, borderLeftColor: Constants.primary }
+                  : null,
+              ]}
+            >
+              <View style={styles.LeftTicket}>
+                <View style={styles.IconWrapper}>
+                  <MaterialCommunityIcons
+                    name={TicketName(tik.tickettype)}
+                    size={22}
+                    color={TicketColor(tik.tickettype)}
+                  />
+                </View>
+
+                <View>
+                  <Text style={styles.productTitle}>{tik.tickettype}</Text>
+                  {amount !== 0 ? (
+                    <View>
+                      <Text
+                        style={[
+                          styles.price,
+                          amount !== 0
+                            ? { color: "black" }
+                            : { color: "black" },
+                        ]}
+                      >
+                        {tik.currentprice} Birr
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.price}>{tik.currentprice} Birr</Text>
+                  )}
+                </View>
               </View>
 
-              <View>
-                <Text style={styles.productTitle}>{tik.tickettype}</Text>
-                {amount !== 0 ? (
-                  <View>
-                    <Text
-                      style={[
-                        styles.price,
-                        amount !== 0 ? { color: "black" } : { color: "black" },
-                      ]}
-                    >
-                      {tik.currentprice} Birr
-                    </Text>
+              <View style={styles.productRightView}>
+                {active == index ? (
+                  <View style={styles.productItemCounterView}>
+                    <View>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (amount < 2) {
+                            setActiveIndex(null);
+                            setDisable(false);
+                          }
+                          // amount > 0 && dispatch(decrease(tik.id));
+                          DecreaseCount(tik.id);
+                        }}
+                        style={styles.counterButton}
+                      >
+                        <MaterialCommunityIcons
+                          name="minus-thick"
+                          size={16}
+                          color="white"
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.amountcounterButton}>
+                      <Text style={[styles.counterValue]}>{amount}</Text>
+                    </View>
+
+                    <View>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setDisable(true);
+                          IncreaseCount(tik.id);
+                          // dispatch(increase(tik.id));
+                        }}
+                        style={styles.counterButton}
+                      >
+                        <MaterialCommunityIcons
+                          name="plus-thick"
+                          size={16}
+                          color="white"
+                        />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 ) : (
-                  <Text style={styles.price}>{tik.currentprice} Birr</Text>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setActiveIndex(index);
+                      //  dispatch(newItem(tik.id));
+                      handlechange(index);
+                    }}
+                    disabled={disable}
+                  >
+                    <View
+                      style={[
+                        styles.buyBtn,
+                        {
+                          backgroundColor: disable
+                            ? Constants.Secondary
+                            : Constants.primary,
+                          color: disable
+                            ? Constants.background
+                            : Constants.Inverse,
+                        },
+                      ]}
+                    >
+                      <Text style={styles.buyTxt}>Buy</Text>
+                    </View>
+                  </TouchableOpacity>
                 )}
               </View>
             </View>
 
-            <View style={styles.productRightView}>
-              {active == index ? (
-                <View style={styles.productItemCounterView}>
-                  <View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (amount < 2) {
-                          setActiveIndex(null);
-                          setDisable(false);
-                        }
-                        // amount > 0 && dispatch(decrease(tik.id));
-                        DecreaseCount(tik.id);
-                      }}
-                      style={styles.counterButton}
-                    >
-                      <MaterialCommunityIcons
-                        name="minus-thick"
-                        size={16}
-                        color="white"
-                      />
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.amountcounterButton}>
-                    <Text style={[styles.counterValue]}>{amount}</Text>
-                  </View>
-
-                  <View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setDisable(true);
-                        IncreaseCount(tik.id);
-                       // dispatch(increase(tik.id));
-                      }}
-                      style={styles.counterButton}
-                    >
-                      <MaterialCommunityIcons
-                        name="plus-thick"
-                        size={16}
-                        color="white"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ) : (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    setActiveIndex(index);
-                  //  dispatch(newItem(tik.id));
-                    handlechange(index);
-                  }}
-                  disabled={disable}
-                >
-                  <View
-                    style={[
-                      styles.buyBtn,
-                      {
-                        backgroundColor: disable
-                          ? Constants.Secondary
-                          : Constants.primary,
-                          color: disable
-                          ? Constants.background
-                          : Constants.Inverse,
-                      },
-                    ]}
-                  >
-                    <Text style={styles.buyTxt}>Buy</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            </View>
+            // <AvaliableTickets key={tik.id} ticket={tik} />
+          ))
+        ) : (
+          <View style={styles.noTicketView}>
+            <MaterialCommunityIcons
+              name="ticket"
+              size={46}
+              color={Constants.Secondary}
+            />
+            <Text style={styles.NoText}>No Ticket Avalable </Text>
           </View>
-
-          // <AvaliableTickets key={tik.id} ticket={tik} />
-        ))}
+        )}
       </View>
 
       {disable && (
@@ -452,7 +464,12 @@ const EventTickets = ({ navigation, route }) => {
             style={styles.appButtonContainer}
           >
             <Text style={styles.appButtonText}>Countinue</Text>
-            <MaterialCommunityIcons name="arrow-right" size={14} color={Constants.background} style={{marginLeft:4,}}/>
+            <MaterialCommunityIcons
+              name="arrow-right"
+              size={14}
+              color={Constants.background}
+              style={{ marginLeft: 4 }}
+            />
           </TouchableOpacity>
         </View>
       )}
@@ -666,25 +683,38 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   appButtonContainer: {
-    flexDirection:"row",
-    alignItems:"center",
+    flexDirection: "row",
+    alignItems: "center",
     elevation: 8,
     backgroundColor: Constants.Inverse,
     borderRadius: Constants.tiny,
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderWidth: 0.5,
-    borderColor:Constants.background,
-    marginRight:6,
-  //  backgroundColor:Constants.transparentPrimary
+    borderColor: Constants.background,
+    marginRight: 6,
+    //  backgroundColor:Constants.transparentPrimary
   },
-  
+
   appButtonText: {
     fontSize: Constants.headingtwo,
     color: Constants.background,
     fontWeight: Constants.Boldtwo,
     alignSelf: "center",
-   
+  },
+  noTicketView: {
+    margin: 20,
+    marginTop: 60,
+    alignSelf: "center",
+    alignItems: "center",
+    padding: 20,
+
+  },
+  NoText: {
+    fontWeight: Constants.Boldtwo,
+    fontSize: Constants.headingone,
+    margin: 7,
+    color: Constants.Secondary,
   },
 });
 
