@@ -70,7 +70,7 @@ const DetailContent = ({ ...props }) => {
           // Event price detail
         >
           <Text style={styles.prices}>
-            {props.Price == 0 ? free : props.Price + currency}{" "}
+            {props.Price == 0 ? free : props.Price + currency}
           </Text>
           <Text style={styles.time}>Entrance fee</Text>
         </View>

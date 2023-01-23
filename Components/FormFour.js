@@ -172,7 +172,7 @@ const FormFour = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.latBorder },
+          { borderWidth: 0.5, borderColor: inputs.latBorder },
         ]}
       >
         <MaterialIcons name="south" size={24} color={Constants.purple} />
@@ -206,7 +206,7 @@ const FormFour = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.longBorder },
+          { borderWidth: 0.5, borderColor: inputs.longBorder },
         ]}
       >
         <MaterialIcons name="north" size={24} color={Constants.purple} />
@@ -240,7 +240,7 @@ const FormFour = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.phoneBorder },
+          { borderWidth: 0.5, borderColor: inputs.phoneBorder },
         ]}
       >
         <Ionicons name="call-outline" size={24} color={Constants.purple} />
@@ -275,7 +275,7 @@ const FormFour = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.linkBorder },
+          { borderWidth: 0.5, borderColor: inputs.linkBorder },
         ]}
       >
         <AntDesign name="link" size={24} color={Constants.purple} />

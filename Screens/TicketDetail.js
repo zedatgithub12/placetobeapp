@@ -21,6 +21,8 @@ import { Badge } from "react-native-paper";
 const TicketDetail = ({ route, navigation }) => {
   const { item } = route.params;
   const [textc, setTextC] = useState(item.status);
+  const [telebirr, setTelebirr] = useState(0);
+  const [chapa, setChapa] = useState(0);
   // total sales
   const TotalSales = () => {
     var total;
@@ -261,59 +263,32 @@ const TicketDetail = ({ route, navigation }) => {
       <View>
         <View style={styles.PGContainer}>
           <TouchableWithoutFeedback>
-            <View>
+            <View style={styles.gatewayContainer}>
               <Image
-                source={require("../assets/telebirr.jpg")}
+                source={require("../assets/telebirr.png")}
                 resizeMode="contain"
                 style={styles.pgateway}
               />
               <Badge size={24} style={styles.countBadge}>
-                24
+                {telebirr}
               </Badge>
             </View>
           </TouchableWithoutFeedback>
 
           <TouchableWithoutFeedback>
-            <View>
+            <View style={styles.gatewayContainer}>
               <Image
                 source={require("../assets/chapa.png")}
                 resizeMode="contain"
                 style={styles.pgateway}
               />
               <Badge size={24} style={styles.countBadge}>
-                9
+                {chapa}
               </Badge>
             </View>
           </TouchableWithoutFeedback>
         </View>
 
-        <View style={styles.PGContainer}>
-          <TouchableWithoutFeedback>
-            <View>
-              <Image
-                source={require("../assets/cbe.jpg")}
-                resizeMode="contain"
-                style={styles.pgateway}
-              />
-              <Badge size={24} style={styles.countBadge}>
-                3
-              </Badge>
-            </View>
-          </TouchableWithoutFeedback>
-
-          <TouchableWithoutFeedback>
-            <View>
-              <Image
-                source={require("../assets/Amole.png")}
-                resizeMode="contain"
-                style={styles.pgateway}
-              />
-              <Badge size={24} style={styles.countBadge}>
-                8
-              </Badge>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
       </View>
     </ScrollView>
   );
@@ -479,9 +454,10 @@ const styles = StyleSheet.create({
   pgateway: {
     height: 80,
     width: 80,
+    backgroundColor: Constants.background,
     borderRadius: Constants.medium,
     margin: 26,
-    padding: 16,
+    padding: 26,
   },
   countBadge: {
     position: "absolute",
@@ -489,9 +465,10 @@ const styles = StyleSheet.create({
     right: 18,
     fontSize: Constants.headingthree,
     fontWeight: Constants.Boldtwo,
-    backgroundColor: Constants.Secondary,
+    //backgroundColor: Constants.red,
     color: Constants.background,
   },
+
 });
 
 //make this component available to the app

@@ -58,10 +58,10 @@ const styles = StyleSheet.create({
     borderRadius: Constants.tinybox,
     margin: 2,
     padding: 6,
-    backgroundColor: Constants.transparentPrimary,
+    backgroundColor: Constants.background,
   },
   iconStyle: {
-    backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
     padding: 8,
     borderRadius: 50,
     marginRight: 15,

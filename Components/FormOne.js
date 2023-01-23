@@ -6,7 +6,7 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import Constants from "../constants/Constants";
 import {
@@ -19,51 +19,46 @@ import { HelperText } from "react-native-paper";
 import { AuthContext } from "./context";
 import Connection from "../constants/connection";
 
-
-// formone is the first form in add event screen 
+// formone is the first form in add event screen
 // it collect featuredImage, eventName, eventDescription
 const FormOne = () => {
-
   // a useContent hook which will treat all input value as global variables
   // the eventproperties variable is declared inside App mathod bacause we need to keep all gloabal varibales in top tree
-  // value collect from input field will be access inside Submit event class found in Screens folder 
+  // value collect from input field will be access inside Submit event class found in Screens folder
   // while submitting event it will validate the value stored in glabal scope
 
   const { formOne } = React.useContext(AuthContext);
-//we call context function inside eventProps function
-// we assign the value we collected with eventprops function to the context function  which is -> fromOne
+  //we call context function inside eventProps function
+  // we assign the value we collected with eventprops function to the context function  which is -> fromOne
   const eventProps = (image, eventName, eventDesc, status) => {
     formOne(image, eventName, eventDesc, status);
-    
   };
-//state for image picker
+  //state for image picker
   const [hasGalleryPersmission, setHasGalleryPermission] = useState(null);
-  var placeholderImage = 'placeholder.png'; // adde event screen featuredImage placeholder
-  const placeholder = Connection.url+Connection.assets+placeholderImage; 
-  const [image, setImage] = useState(placeholder); //state for image which is displayed when user select image 
+  var placeholderImage = "placeholder.png"; // adde event screen featuredImage placeholder
+  const placeholder = Connection.url + Connection.assets + placeholderImage;
+  const [image, setImage] = useState(placeholder); //state for image which is displayed when user select image
   const [imageName, setImageName] = useState(); // state which save the image name which is sent to server and stored inside the database
-// event content state
-const [inputs, setInputs] = useState({
-  eventName: "",
-  eventDesc: "",
-  fieldBorder: Constants.purple,
-  descFieldBorder: Constants.purple,
-  helperText: "",
-  descHelperText: "",
-  checked: false,
-  descCheck: false,
-  imageBoarder: Constants.purple,
-  imageLoader: "notLoading",
-  imageStatus: true,
-
-});
-  // this useeffect hook ask user to grant the app to access Gallery 
-   useEffect(() => {
+  // event content state
+  const [inputs, setInputs] = useState({
+    eventName: "",
+    eventDesc: "",
+    fieldBorder: Constants.purple,
+    descFieldBorder: Constants.purple,
+    helperText: "",
+    descHelperText: "",
+    checked: false,
+    descCheck: false,
+    imageBoarder: Constants.purple,
+    imageLoader: "notLoading",
+    imageStatus: true,
+  });
+  // this useeffect hook ask user to grant the app to access Gallery
+  useEffect(() => {
     (async () => {
       const gallerStatus =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       setHasGalleryPermission(gallerStatus.status === "granted");
-
     })();
   }, []);
 
@@ -77,64 +72,60 @@ const [inputs, setInputs] = useState({
       quality: 1,
     });
 
-    
-// ImagePicker saves the taken photo to disk and returns a local URI to it
+    // ImagePicker saves the taken photo to disk and returns a local URI to it
 
-let localUri = result.uri; // local image uri 
-let filename = localUri.split('/').pop(); // the filename is stored in filename variable
+    let localUri = result.uri; // local image uri
+    let filename = localUri.split("/").pop(); // the filename is stored in filename variable
 
-//if the image selection process doesn't cancelled the statement inside the if condition is executed
-if (!result.cancelled) {
-  setImage(localUri);
-  setImageName(filename);
-  setInputs({
-    ...inputs,
-    imageLoader:"loading",
-    imageStatus: false,
-  })
-}
-
-// Infer the type of the image
-let match = /\.(\w+)$/.exec(filename);
-let kind = match ? `image/${match[1]}` : `image`;
-
-// Upload the image using the fetch and FormData APIs
-const formData = new FormData();
-// Assume "photo" is the name of the form field the server expects
-// all image properties needed by server is going to be appended in formdata object
-formData.append('photo',{ uri: localUri, name: filename, type:kind });
-//the url which the image will be sent to
-var ApiUrl = Connection.url + Connection.upload;
-
-return await fetch(ApiUrl, {
-  method: 'POST',//request method
-  body: formData, // data to be sent to server
-  headers: {
-    'content-type': 'multipart/form-data', // header type must be 'multipart/form-data' inorder to send image to server
-  },
-})
-.then((response) => response.json()) //check response type of the API
-     .then((response) => {
-       let message = response[0].message;
-      if(message === "successfully uploaded!"){
-        setInputs({
-          ...inputs,
-          imageBoarder: Constants.Success,
-          imageLoader: "loaded",
-          imageStatus: true,
-        });
-
-      }
-      else {
-        setInputs({
-          ...inputs,
-          imageBoarder: Constants.Danger,
-          imageLoader: "loading",
-          imageStatus: false,
-        });
-      };
+    //if the image selection process doesn't cancelled the statement inside the if condition is executed
+    if (!result.cancelled) {
+      setImage(localUri);
+      setImageName(filename);
+      setInputs({
+        ...inputs,
+        imageLoader: "loading",
+        imageStatus: false,
+      });
     }
-     );
+
+    // Infer the type of the image
+    let match = /\.(\w+)$/.exec(filename);
+    let kind = match ? `image/${match[1]}` : `image`;
+
+    // Upload the image using the fetch and FormData APIs
+    const formData = new FormData();
+    // Assume "photo" is the name of the form field the server expects
+    // all image properties needed by server is going to be appended in formdata object
+    formData.append("photo", { uri: localUri, name: filename, type: kind });
+    //the url which the image will be sent to
+    var ApiUrl = Connection.url + Connection.upload;
+
+    return await fetch(ApiUrl, {
+      method: "POST", //request method
+      body: formData, // data to be sent to server
+      headers: {
+        "content-type": "multipart/form-data", // header type must be 'multipart/form-data' inorder to send image to server
+      },
+    })
+      .then((response) => response.json()) //check response type of the API
+      .then((response) => {
+        let message = response[0].message;
+        if (message === "successfully uploaded!") {
+          setInputs({
+            ...inputs,
+            imageBoarder: Constants.Success,
+            imageLoader: "loaded",
+            imageStatus: true,
+          });
+        } else {
+          setInputs({
+            ...inputs,
+            imageBoarder: Constants.Danger,
+            imageLoader: "loading",
+            imageStatus: false,
+          });
+        }
+      });
   };
 
   //function for event title textField
@@ -184,27 +175,25 @@ return await fetch(ApiUrl, {
         descHelperText: "Make sure event Description is more than 15 letters",
         descCheck: false,
       });
-    } else if(desc.length >= 5000){
+    } else if (desc.length >= 5000) {
       setInputs({
         ...inputs,
         eventDesc: desc,
         descFieldBorder: Constants.Danger,
         descHelperText: "Event Description cannot be more than 5000 letters",
         descCheck: false,
-      })
-    }
-    else if(desc.length >= 2 && desc.length <= 5000){
+      });
+    } else if (desc.length >= 2 && desc.length <= 5000) {
       setInputs({
         ...inputs,
         eventDesc: desc,
         descFieldBorder: Constants.Success,
         descHelperText: "Describe your event in understandable way!",
         descCheck: true,
-      })
+      });
     }
   };
   // Event description helper text
- 
 
   // Helper text will be hidden onBlur function event description fielda
   const desHideHelperText = () => {
@@ -212,8 +201,12 @@ return await fetch(ApiUrl, {
       ...inputs,
       descHelperText: "",
     });
-    eventProps(imageName, inputs.eventName, inputs.eventDesc, inputs.imageStatus);
-    
+    eventProps(
+      imageName,
+      inputs.eventName,
+      inputs.eventDesc,
+      inputs.imageStatus
+    );
   };
 
   if (hasGalleryPersmission === false) {
@@ -226,42 +219,39 @@ return await fetch(ApiUrl, {
         <Feather name="image" size={24} style={styles.uploadImageIcon} />
         <Text style={styles.uploadImageTxt}>Upload Event Poster</Text>
       </View>
-     
+
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={() => selectFeaturedImage()}
       >
         <Image
           source={{ uri: image }}
-          style={[styles.formOneImage,  {  borderColor: inputs.imageBoarder }]}
+          style={[styles.formOneImage, { borderColor: inputs.imageBoarder }]}
           onPress={() => selectFeaturedImage()}
           onBlur={() => desHideHelperText()}
         />
       </TouchableOpacity>
-          
-       {inputs.imageLoader === "loading" ?
-       <View  
-       style={styles.activityIndicator}
-       >
-         <ActivityIndicator size="small" color={Constants.primary}/> 
-         <Text style={styles.loadingText}>Loading...</Text>
-         </View>
-       : inputs.imageLoader === "loaded" ?
-       <View  
-       style={styles.activityIndicator}
-       >
-         <MaterialCommunityIcons name="check-circle" size={20} color={Constants.Success}/>
-         <Text style={styles.loadingText}>Loaded</Text>
-         </View>
-      
-       : null
-       }
 
+      {inputs.imageLoader === "loading" ? (
+        <View style={styles.activityIndicator}>
+          <ActivityIndicator size="small" color={Constants.primary} />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      ) : inputs.imageLoader === "loaded" ? (
+        <View style={styles.activityIndicator}>
+          <MaterialCommunityIcons
+            name="check-circle"
+            size={20}
+            color={Constants.Success}
+          />
+          <Text style={styles.loadingText}>Loaded</Text>
+        </View>
+      ) : null}
 
       <View
         style={[
           styles.eventTitleContainer,
-          { borderColor: inputs.fieldBorder }
+          { borderColor: inputs.fieldBorder },
         ]}
       >
         <MaterialCommunityIcons
@@ -277,27 +267,29 @@ return await fetch(ApiUrl, {
           value={inputs.eventName}
           onChangeText={(text) => nameChange(text)}
           onBlur={() => desHideHelperText()}
-
         />
         {
-        //check button on validation of input field
-        inputs.checked ? (
-          <MaterialCommunityIcons
-            name="checkbox-marked-circle"
-            size={22}
-            color={Constants.Success}
-            style={styles.checkIcon}
-          />
-        ) : null}
-
-
+          //check button on validation of input field
+          inputs.checked ? (
+            <MaterialCommunityIcons
+              name="checkbox-marked-circle"
+              size={22}
+              color={Constants.Success}
+              style={styles.checkIcon}
+            />
+          ) : null
+        }
       </View>
       <HelperText style={{ color: Constants.Danger }}>
         {inputs.helperText}
       </HelperText>
 
-
-      <View style={[styles.eventDescContainer, {  borderColor: inputs.descFieldBorder}]} >
+      <View
+        style={[
+          styles.eventDescContainer,
+          { borderColor: inputs.descFieldBorder },
+        ]}
+      >
         <MaterialCommunityIcons
           name="subtitles-outline"
           size={24}
@@ -314,16 +306,17 @@ return await fetch(ApiUrl, {
           onChangeText={(desc) => EventDescription(desc)}
           onBlur={() => desHideHelperText()}
         />
-          {
-        //check button on validation of input field
-        inputs.descCheck ? (
-          <MaterialCommunityIcons
-            name="checkbox-marked-circle"
-            size={22}
-            color={Constants.Success}
-            style={styles.checkIcon}
-          />
-        ) : null}
+        {
+          //check button on validation of input field
+          inputs.descCheck ? (
+            <MaterialCommunityIcons
+              name="checkbox-marked-circle"
+              size={22}
+              color={Constants.Success}
+              style={styles.checkIcon}
+            />
+          ) : null
+        }
       </View>
       <HelperText style={{ color: Constants.Danger }}>
         {inputs.descHelperText}
@@ -336,7 +329,7 @@ const styles = StyleSheet.create({
   formOne: {
     justifyContent: "center",
     alignItems: "center",
-    marginTop:10,
+    marginTop: 10,
   },
   uploadImageTitleContainer: {
     width: "90%",
@@ -359,7 +352,7 @@ const styles = StyleSheet.create({
     width: 230,
     borderRadius: 10,
     marginTop: 5,
-    backgroundColor:Constants.Faded,
+    backgroundColor: Constants.Faded,
     borderWidth: 0.4,
   },
   ImageButtons: {
@@ -416,11 +409,10 @@ const styles = StyleSheet.create({
     borderRadius: Constants.mediumbox,
     padding: 8,
     borderWidth: 0.5,
-    
   },
   eventDescription: {
     width: "90%",
-    maxHeight:85,
+    maxHeight: 85,
     alignSelf: "flex-start",
     paddingLeft: 10,
     padding: 2,
@@ -429,23 +421,21 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
     color: Constants.Inverse,
- 
-    
   },
   checkIcon: {
-    position:"absolute",
-    top:10,
-    right:2,
-    paddingRight:4,
+    position: "absolute",
+    top: 10,
+    right: 2,
+    paddingRight: 4,
   },
-  activityIndicator:{
-    flexDirection:"row",
-    padding:5,
+  activityIndicator: {
+    flexDirection: "row",
+    padding: 5,
   },
-  loadingText:{
-    marginLeft:6,
+  loadingText: {
+    marginLeft: 6,
     color: Constants.Inverse,
-  }
+  },
 });
 
 export default FormOne;

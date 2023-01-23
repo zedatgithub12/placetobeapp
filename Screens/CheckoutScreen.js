@@ -20,7 +20,7 @@ import TicketDetail from "./TicketDetail";
 
 function CheckoutScreen({ navigation, route }) {
   const { pass } = route.params;
-
+ 
   const [selection, setSelection] = useState(null);
   const [agent, setAgent] = useState();
   const [price, setPrice] = useState();
@@ -85,7 +85,7 @@ function CheckoutScreen({ navigation, route }) {
       setContactInfo({
         ...contactInfo,
         nameBorder: Constants.red,
-        errorMessage: "Full name can not be less than 2 letter",
+        errorMessage: "Please enter you full name, letter only",
         nameError: true,
       });
     } else if (contactInfo.phone == 0) {
@@ -128,7 +128,7 @@ function CheckoutScreen({ navigation, route }) {
         agent: agent,
       };
 
-
+ console.log(Data);
       fetch(ApiUrl,{
         method: "POST",
         headers:headers,
@@ -155,7 +155,7 @@ function CheckoutScreen({ navigation, route }) {
 
   //on component did mount
   useEffect(() => {
-    
+    console.log(pass);
     return () => {};
   }, [selection]);
 
@@ -384,6 +384,9 @@ function CheckoutScreen({ navigation, route }) {
             </View>
           </TouchableOpacity>
 
+
+
+
           {/* <TouchableOpacity
             style={[
               styles.btn,
@@ -507,11 +510,13 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
     color: Constants.Inverse,
+    paddingLeft: 13,
   },
   ttype: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
+    paddingLeft: 13,
   },
 
   ticketcheckout: {

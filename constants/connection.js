@@ -13,7 +13,7 @@ const Connection = {
   following: "following.php",
   upload: "uploadimage.php",
   assets: "assets/",
-  organizer: "organizer.php",
+  organizer: "organizer.php", //updated
   search: "search.php",
   notification: "notification.php",
   profile: "UserProfile.php",
@@ -46,6 +46,7 @@ const Connection = {
   Cancelled: "Cancelled.php",
   eventTicket: "EventTicket.php",
   Payment: "Payment.php",
+  Event: "SingleEvent.php", // a file to retrive single event by its event ID
 };
 
 export default Connection;

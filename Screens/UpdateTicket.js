@@ -10,6 +10,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import Connection from "../constants/connection";
 import Constants from "../constants/Constants";
@@ -24,18 +25,19 @@ const UpdateTicket = ({ route, navigation }) => {
   const { item } = route.params;
 
   var featuredImageUri = Connection.url + Connection.assets;
-
+ 
   // state declarrations
   const [poster, setPoster] = useState("placeholder.png");
   const [price, setPrice] = useState(item.currentprice);
+  const [amount, setAmount]= useState(item.currentamount);
   const [errorMessage, setErrorMessage] = useState();
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState("date");
   const [show, setShow] = useState(false);
   const [expireDate, setExpireDate] = useState(item.expiredate);
   const [updating, setUpdating] = useState(false);
-  const [updateButton, setUpdateButton]= useState(Constants.primary);
-  const [updateText, setUpdateText] = useState("Update");
+  const [updateButton, setUpdateButton] = useState(Constants.primary);
+  const [updateText, setUpdateText] = useState("update");
 
   //function goes below this
   const FetchImage = async () => {
@@ -120,23 +122,25 @@ const UpdateTicket = ({ route, navigation }) => {
       setPrice(fees);
     } else {
       setErrorMessage("Ticket price cannot be other than number and comma");
+      setPrice(fees);
     }
   };
-
+// on change text of ticket amount 
+const TicketAmount = (ticketamount)=>{
+  setAmount(ticketamount);
+}
   //main function in the screen to executed when user press add to event button
   const Update = async () => {
-
     const controller = new AbortController();
     const signal = controller.signal;
 
-    setUpdating(true);
     let id = await AsyncStorage.getItem("userId");
 
-    if (price == 0 || expireDate == 0) {
+    if (price == 0 || amount == 0 || expireDate == 0) {
       setErrorMessage("Please fill all fields!");
     } else {
       setErrorMessage("");
-
+      setUpdating(true);
       var ApiUrl = Connection.url + Connection.UpdateTicket;
       var headers = {
         accept: "application/json",
@@ -147,6 +151,7 @@ const UpdateTicket = ({ route, navigation }) => {
         userId: id,
         ticketId: item.id,
         price: price,
+        amount: amount,
         expireDate: expireDate,
         tstatus: item.status,
       };
@@ -155,14 +160,14 @@ const UpdateTicket = ({ route, navigation }) => {
         method: "POST",
         headers: headers,
         body: JSON.stringify(Data),
-        signal:signal,
+        signal: signal,
       })
         .then((response) => response.json())
         .then((response) => {
           var message = response[0].message;
 
           if (message === "succeed") {
-            setUpdateButton(Constants.Success);
+            setUpdateButton(Constants.green);
             setUpdateText("Updated");
             setUpdating(false);
           } else {
@@ -176,10 +181,9 @@ const UpdateTicket = ({ route, navigation }) => {
           setUpdating(false);
           console.log(error);
         });
-        return () => {
-       
-          controller.abort();
-        };
+      return () => {
+        controller.abort();
+      };
     }
   };
 
@@ -188,24 +192,16 @@ const UpdateTicket = ({ route, navigation }) => {
     let isApiSubscribed = true;
     if (isApiSubscribed) {
       FetchImage();
-  }
-   
+    }
+
     return () => {
       isApiSubscribed = false;
-    
     };
   }, [poster]);
 
   return (
-    <KeyboardAvoidingView style={styles.container}>
-      <Image
-        //Featured Image of the event
-
-        source={{ uri: featuredImageUri + poster }} //featured image source
-        resizeMode="cover"
-        style={styles.eventPoster} //featured image styles
-      />
-
+    <ScrollView contentContainerStyle={styles.container}>
+   
       <View style={styles.EventTitle}>
         <Text
           numberOfLines={2}
@@ -215,6 +211,37 @@ const UpdateTicket = ({ route, navigation }) => {
         </Text>
       </View>
 
+      <Image
+        //Featured Image of the event
+        source={{ uri: featuredImageUri + poster }} //featured image source
+        resizeMode="cover"
+        style={styles.eventPoster} //featured image styles
+      />
+
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginLeft: 30,
+          marginTop: 10,
+        }}
+      >
+        <MaterialCommunityIcons
+          name="check-circle-outline"
+          size={20}
+          color={Constants.primary}
+        />
+        <Text
+          style={{
+            marginLeft: 4,
+            fontWeight: Constants.Bold,
+            fontSize: Constants.headingone,
+            color: Constants.primary,
+          }}
+        >
+          {item.tickettype} Ticket
+        </Text>
+      </View>
       {/* Ticket price and currency */}
       <View style={styles.ticketPriceContainer}>
         <Text
@@ -227,7 +254,7 @@ const UpdateTicket = ({ route, navigation }) => {
             color: Constants.Secondary,
           }}
         >
-          Ticket Price Update
+          Ticket Price
         </Text>
 
         <View style={styles.pricefieldContainer}>
@@ -239,6 +266,31 @@ const UpdateTicket = ({ route, navigation }) => {
             onChangeText={(fees) => TicketPrices(fees)}
           />
           <Text style={styles.currencyText}>ETB</Text>
+        </View>
+      </View>
+
+      <View style={styles.ticketAmountContainer}>
+        <Text
+          style={{
+            marginLeft: 30,
+            marginTop: 6,
+            marginBottom: -5,
+            padding: 0,
+            fontWeight: Constants.Boldtwo,
+            color: Constants.Secondary,
+          }}
+        >
+          Amount of Ticket
+        </Text>
+
+        <View style={styles.pricefieldContainer}>
+          <TextInput
+            placeholder="Amount"
+            keyboardType="numeric"
+            style={styles.amountfield}
+            value={amount}
+            onChangeText={(number) => TicketAmount(number)}
+          />
         </View>
       </View>
 
@@ -285,20 +337,21 @@ const UpdateTicket = ({ route, navigation }) => {
       {/* Add ticket to event button */}
 
       <TouchableWithoutFeedback onPress={() => Update()}>
-        <View style={[styles.addtoEventBtn, {backgroundColor: updateButton }]}>
+        <View style={[styles.addtoEventBtn, { backgroundColor: updateButton }]}>
           {updating ? (
-            <ActivityIndicator size="small" color={Constants.Inverse} />
+            <ActivityIndicator size="large" color={Constants.Inverse} />
           ) : (
-              <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
-            <Text style={styles.btntxt}>{updateText} </Text> 
-             {updateText === "Updated" ? (
-                <Ionicons
-                  name="ios-checkmark-circle-sharp"
-                  size={18}
-                  color={Constants.background}
-                />
-              ) : null}
-              </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              {updateText === "Updated" ? (
+            <MaterialCommunityIcons name="check" size={32} color={Constants.background}/>
+              ) : <MaterialCommunityIcons name="check" size={32} color={Constants.Inverse}/>}
+            </View>
           )}
         </View>
       </TouchableWithoutFeedback>
@@ -320,7 +373,8 @@ const UpdateTicket = ({ route, navigation }) => {
           minimumDate={new Date(2000, 0, 1)}
         />
       )}
-    </KeyboardAvoidingView>
+    
+    </ScrollView>
   );
 };
 
@@ -329,7 +383,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Constants.background,
-    marginTop: 10,
+    paddingTop: 10,
   },
   eventPoster: {
     width: "86%",
@@ -460,16 +514,29 @@ const styles = StyleSheet.create({
   },
   pricefield: {
     width: "71%",
-    backgroundColor: Constants.Faded,
+   // backgroundColor: Constants.Faded,
     borderBottomLeftRadius: Constants.tinybox,
     borderTopLeftRadius: Constants.tinybox,
+    margin: 4,
+    marginRight: 0,
+    padding: 5.5,
+    paddingLeft: 16,
+    borderWidth: 0.3,
+    borderColor: Constants.Secondary,
+    fontWeight: Constants.Bold,
+    fontSize: Constants.headingthree,
+  },
+  amountfield: {
+    width: "91%",
+    //backgroundColor: Constants.Faded,
+    borderRadius: Constants.tinybox,
     margin: 4,
     marginRight: 0,
     padding: 6,
     paddingLeft: 16,
     borderWidth: 0.3,
     borderColor: Constants.Secondary,
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     fontSize: Constants.headingthree,
   },
   currencyText: {
@@ -511,7 +578,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     margin: 10,
     marginLeft: 12,
-    backgroundColor: Constants.Faded,
+    //backgroundColor: Constants.Faded,
     paddingLeft: 10,
     borderRadius: Constants.tinybox,
   },
@@ -524,8 +591,8 @@ const styles = StyleSheet.create({
   selectDateTxt: {
     fontSize: Constants.headingthree,
     fontFamily: Constants.fontFam,
-    fontWeight: Constants.Boldtwo,
-    color: Constants.Secondary,
+    fontWeight: Constants.Bold,
+    color: Constants.Inverse,
   },
   checkIcon: {
     position: "absolute",
@@ -535,20 +602,21 @@ const styles = StyleSheet.create({
   },
   addtoEventBtn: {
     position: "absolute",
-    bottom: 25,
-    width: "60%",
-    padding: 9,
-    paddingHorizontal: 25,
+    bottom: 20,
+    right:10,
+    width:50, height:50,
+    padding: 7,
     borderRadius: 50,
     margin: 20,
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
+ 
   },
   btntxt: {
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
-    color: Constants.background,
+    color: Constants.mainText,
   },
   errorText: {
     marginVertical: 15,

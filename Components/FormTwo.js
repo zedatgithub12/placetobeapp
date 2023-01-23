@@ -147,7 +147,7 @@ const FormTwo = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.startDateBorder },
+          { borderWidth: 0.5, borderColor: inputs.startDateBorder },
         ]}
       >
         <Fontisto name="date" size={24} color={Constants.purple} />
@@ -173,7 +173,7 @@ const FormTwo = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.startTimeborder },
+          { borderWidth: 0.5, borderColor: inputs.startTimeborder },
         ]}
       >
         <MaterialCommunityIcons
@@ -203,7 +203,7 @@ const FormTwo = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.endDateBorder },
+          { borderWidth: 0.5, borderColor: inputs.endDateBorder },
         ]}
       >
         <Fontisto name="date" size={24} color={Constants.purple} />
@@ -229,7 +229,7 @@ const FormTwo = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.endTimeBoarder },
+          { borderWidth: 0.5, borderColor: inputs.endTimeBoarder },
         ]}
       >
         <MaterialCommunityIcons

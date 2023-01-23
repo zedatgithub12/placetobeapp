@@ -204,7 +204,7 @@ const FormThree = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.orgBorder },
+          { borderWidth: 0.5, borderColor: inputs.orgBorder },
         ]}
       >
         <MaterialCommunityIcons
@@ -242,7 +242,7 @@ const FormThree = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.catBorder },
+          { borderWidth: 0.5, borderColor: inputs.catBorder },
         ]}
       >
         <MaterialCommunityIcons
@@ -330,7 +330,7 @@ const FormThree = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.eventAddressBorder },
+          { borderWidth: 0.5, borderColor: inputs.eventAddressBorder },
         ]}
       >
         <MaterialCommunityIcons
@@ -368,7 +368,7 @@ const FormThree = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 1, borderColor: inputs.feeBorder },
+          { borderWidth: 0.5, borderColor: inputs.feeBorder },
         ]}
       >
         <MaterialCommunityIcons

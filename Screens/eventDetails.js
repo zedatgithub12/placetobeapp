@@ -29,24 +29,78 @@ import { bookmarkItem, remove } from "../Reducer/saveSlice";
 import Share from "react-native-share";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 import * as Animatable from "react-native-animatable";
-//import {writeJsonFile} from 'write-json-file';
+import DetailShimmer from "../Components/DetailShimmer";
 
 const EventDetails = ({ route, navigation }) => {
-  const { item } = route.params; // an event item received from homepage flatlist will passed to this screen through route params
+  const id = route.params; // an event item received from homepage flatlist will passed to this screen through route params
   const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
   const logged = userStatus.logged;
   //dispatch bookmarking item
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
+  //item as value from database
+  const [item, setItem] = useState({});
+  const [loading, setLoading] = useState(false);
+
+    const date = new Date();
+  var hour = date.getHours();
+  var minute = date.getMinutes();
+ // console.log(hour+":" +minute);
+  var Timing = hour+":" +minute;
+
+  const [timing, setTime] = useState({
+  StartTime: "",
+  EndTime: "",
+  });
+  const FeatchEvent = () => {
+    setLoading(true);
+    var ApiUrl = Connection.url + Connection.Event;
+    //organizer id is the only data to be sent to server in order to retrive organizer data
+    var Data = {
+      eventId: id,
+    };
+    // header type for text data to be send to server
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        let message = response[0].message;
+        let event = response[0].event;
+        let startTime = response[0].StartTime;
+        let EndTime = response[0].EndTime;
+         var start = TimeFun(startTime);
+         var end = TimeFun(EndTime);
+
+        if (message === "succeed") {
+          setItem(event);
+          setLoading(false);
+          
+          setTime({
+            ...timing,
+            StartTime: start,
+            EndTime: end,
+          });
+
+          
+        } else {
+          //setLoading(true);
+          console.log("There is miss understanding with backend");
+        }
+      })
+      .catch((error) => {
+        //setLoading(true);
+        console.log("Error: there is miss understanding with backend");
+      });
+  };
   // featuredImage asset location on the server
   var featuredImageUri = Connection.url + Connection.assets;
-
-  //title related codes
-  const [title, setTitle] = useState({
-    decoration: "none",
-    color: Constants.mainText,
-    styles: "normal",
-  });
 
   /********************* */
   // event bookmarking related code is writen below
@@ -77,7 +131,7 @@ const EventDetails = ({ route, navigation }) => {
 
   const bookmarked = () => {
     var yesItis = false;
-    const find = items.find((event) => event.event_id === item.event_id);
+    const find = items.find((event) => event.event_id === id);
     if (find) {
       //setBookmarkBtn(true);
       setBookmarkBtnColor(Constants.primary);
@@ -161,10 +215,12 @@ const EventDetails = ({ route, navigation }) => {
 
     return weekday[day] + monthName[month + 1] + " " + happeningDay;
   };
+
+
   const TimeFun = (eventTime) => {
     var time = eventTime;
-    var result = time.slice(0, 2);
-    var minute = time.slice(3, 5);
+    var result = time.slice(0,2);
+    var minute = time.slice(3,5);
     var globalTime;
     var postMeridian;
     var separator = ":";
@@ -178,6 +234,8 @@ const EventDetails = ({ route, navigation }) => {
 
     return postMeridian + separator + minute + " " + globalTime;
   };
+
+ 
 
   /********************************************** */
   //read more description button related code  is writen below
@@ -232,12 +290,11 @@ const EventDetails = ({ route, navigation }) => {
 
     let featchOrganizer = true;
     var followerId = await AsyncStorage.getItem("userId");
-
     var ApiUrl = Connection.url + Connection.organizer;
     //organizer id is the only data to be sent to server in order to retrive organizer data
-    var userId = item.userId;
+
     var Data = {
-      userId: userId,
+      eventId: id,
       followerId: followerId,
     };
     // header type for text data to be send to server
@@ -255,8 +312,8 @@ const EventDetails = ({ route, navigation }) => {
       .then((response) => {
         let message = response[0].message;
         let follow = response[0].follow;
-        let profile = response[0].profile[0];
-
+        let profile = response[0].profile;
+        console.log(profile);
         if (featchOrganizer) {
           if (message === "succeed") {
             setEventOrg({
@@ -288,12 +345,12 @@ const EventDetails = ({ route, navigation }) => {
             setFollowStatus(follow);
           }
         }
-        return () => {
-          // cancel the subscription
-          featchOrganizer = false;
-          controller.abort();
-        };
       });
+    return () => {
+      // cancel the subscription
+      featchOrganizer = false;
+      controller.abort();
+    };
   };
   /********************************************************************* */
   //user follow unfollow related code is writen below
@@ -380,7 +437,7 @@ const EventDetails = ({ route, navigation }) => {
       "Content-Type": "application/json",
     };
     var Data = {
-      eventId: item.event_id,
+      eventId: id,
     };
 
     fetch(ApiUrl, {
@@ -396,12 +453,10 @@ const EventDetails = ({ route, navigation }) => {
         if (message === "succeed") {
           setTickets(eventTickets);
           setExist(true);
-        } 
-       else if (message === "no tickets") {
+        } else if (message === "no tickets") {
           setTickets(eventTickets);
           setExist(false);
-        }
-        else {
+        } else {
           setTickets();
           setExist(false);
         }
@@ -415,17 +470,21 @@ const EventDetails = ({ route, navigation }) => {
     };
   };
 
+  const [orders, setOrders] = useState({
+    first: false,
+    second: false,
+  });
+
   //we call useeffect hook once the component get mounted
   useEffect(() => {
-    // when component called featch organizer function will be called
     var isSubcribed = true;
     if (isSubcribed) {
-      featchOrganizer();
-      bookmarked();
       FeatchTickets();
-      
+      FeatchEvent();
+      bookmarked();
+      featchOrganizer();
+   
     }
-
     return () => {
       isSubcribed = false;
     };
@@ -433,214 +492,215 @@ const EventDetails = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Constants.background }}>
-      <ScrollView
-        scrollEventThrottle={16}
-        style={{ backgroundColor: Constants.background }}
-      >
-        <View style={styles.featuredImageContainer}>
-          <TouchableOpacity
-            style={styles.backArrow} // back arrow button style
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons
-              name="arrow-back-sharp"
-              size={25}
-              //back arrow icon
-            />
-          </TouchableOpacity>
-          <Image
-            //Featured Image of the event
-
-            source={{ uri: featuredImageUri + item.event_image }} //featured image source
-            resizeMode="cover"
-            style={styles.image} //featured image styles
-          />
+      {loading ? (
+        <View>
+          <DetailShimmer />
         </View>
-
-        {item.cancelled === "1" ? (
-          <Animatable.View
-            animation="slideInDown"
-            style={styles.eventGotCancelled}
-          >
-            <MaterialCommunityIcons
-              name="cancel"
-              size={18}
-              color={Constants.Danger}
-              style={{ marginLeft: 6 }}
-            />
-            <Text style={styles.cancelledText}>Cancelled Event</Text>
-          </Animatable.View>
-        ) : null}
-
-        <View style={styles.EventTitle}>
-          <Text
-            numberOfLines={1}
-            style={[
-              styles.eventName,
-              {
-                textDecorationLine: title.decoration,
-                color: title.color,
-                fontStyle: title.styles,
-              },
-            ]} // event name on event detail section
-          >
-            {item.event_name}
-          </Text>
-
-          <View style={styles.actionButton}>
-            {logged && bookmarked ? (
-              <TouchableOpacity
-                //bookmark button beside event title
-                disabled={bookmarkBtn}
-                activeOpacity={0.7}
-                style={styles.bookmarkButton}
-                onPress={() => bookmarkEvent()}
-              >
-                <Ionicons
-                  name="bookmark"
-                  size={18}
-                  color={bookmarkBtnColor}
-                  style={styles.bookmarkIcon}
-                />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                //bookmark button beside event title
-                activeOpacity={0.7}
-                style={styles.bookmarkButton}
-                onPress={() => SignInAlert()}
-              >
-                <Ionicons
-                  name="bookmark"
-                  size={18}
-                  color={bookmarkBtnColor}
-                  style={styles.bookmarkIcon}
-                />
-              </TouchableOpacity>
-            )}
-
+      ) : (
+        <ScrollView
+          scrollEventThrottle={16}
+          style={{ backgroundColor: Constants.background }}
+        >
+          <View style={styles.featuredImageContainer}>
             <TouchableOpacity
-              style={styles.sharekButton}
-              activeOpacity={0.7}
-              onPress={() => ShareEvent()}
-
-              // share event button
+              style={styles.backArrow} // back arrow button style
+              onPress={() => navigation.goBack()}
             >
-              <Entypo name="share" size={18} style={styles.shareIcon} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <DetailContent
-          StartDate={DateFun(item.start_date)}
-          StartTime={TimeFun(item.start_time)}
-          EndDate={DateFun(item.end_date)}
-          EndTime={TimeFun(item.end_time)}
-          Price={item.event_entrance_fee}
-          Venues={item.event_address}
-          phone={item.contact_phone}
-        />
-        <View style={styles.descDescription}>
-          <Text style={styles.descTitle}> Description</Text>
-
-          <Text
-            style={styles.desctext}
-            numberOfLines={read}
-            onTextLayout={onTextLayout}
-          >
-            {item.event_description}
-          </Text>
-          {readMorebtn ? (
-            <TouchableOpacity activeOpacity={0.7} onPress={() => showmore()}>
-              <Text style={styles.ReadMore}>{descLength}</Text>
-            </TouchableOpacity>
-          ) : null}
-        </View>
-
-        {featching ? (
-          <View
-            style={styles.organizersSection}
-            //organizers section container, which contains
-            // Organizers profile, name, Category and subscription button
-          >
-            <Pressable
-              onPress={() =>
-                navigation.navigate("Organizer Detail", {
-                  organizerInfo,
-                  followStatus,
-                })
-              }
-            >
-              <Image
-                source={{ uri: featuredImageUri + eventOrg.featuredImage }}
-                style={styles.organizerProfile}
-                resizeMode="contain"
+              <Ionicons
+                name="arrow-back-sharp"
+                size={25}
+                //back arrow icon
               />
-            </Pressable>
-            <Pressable
-              // organizers name and operation category will be listed inside this component
-              style={styles.orgInfoContainer}
-              onPress={() =>
-                navigation.navigate("Organizer Detail", {
-                  organizerInfo,
-                  followStatus,
-                })
-              }
-            >
-              <Text style={styles.orgName}>{eventOrg.organizerName}</Text>
-              <Text
-                style={styles.orgCategory} //organizers operation field or category
-              >
-                {eventOrg.category}
-              </Text>
-            </Pressable>
-            {logged ? (
-              <TouchableOpacity
-                // follow organizers button
+            </TouchableOpacity>
+            <Image
+              //Featured Image of the event
 
-                activeOpacity={0.6}
-                style={[
-                  styles.orgFollowBtn,
-                  { backgroundColor: follow.ButtonColor },
-                ]}
-                onPress={() => followOrganizer()}
-              >
-                {followProgress ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={Constants.background}
+              source={{ uri: featuredImageUri + item.event_image }} //featured image source
+              resizeMode="cover"
+              style={styles.image} //featured image styles
+            />
+          </View>
+
+          {item.cancelled === "1" ? (
+            <Animatable.View
+              animation="slideInDown"
+              style={styles.eventGotCancelled}
+            >
+              <MaterialCommunityIcons
+                name="cancel"
+                size={18}
+                color={Constants.Danger}
+                style={{ marginLeft: 6 }}
+              />
+              <Text style={styles.cancelledText}>Cancelled Event</Text>
+            </Animatable.View>
+          ) : null}
+
+          <View style={styles.EventTitle}>
+            <Text
+              numberOfLines={1}
+              style={[styles.eventName]} // event name on event detail section
+            >
+              {item.event_name}
+            </Text>
+
+            <View style={styles.actionButton}>
+              {logged && bookmarked ? (
+                <TouchableOpacity
+                  //bookmark button beside event title
+                  disabled={bookmarkBtn}
+                  activeOpacity={0.7}
+                  style={styles.bookmarkButton}
+                  onPress={() => bookmarkEvent()}
+                >
+                  <Ionicons
+                    name="bookmark"
+                    size={18}
+                    color={bookmarkBtnColor}
+                    style={styles.bookmarkIcon}
                   />
-                ) : (
-                  <Text style={styles.orgFollowTxt}>{follow.subscription}</Text>
-                )}
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  //bookmark button beside event title
+                  activeOpacity={0.7}
+                  style={styles.bookmarkButton}
+                  onPress={() => SignInAlert()}
+                >
+                  <Ionicons
+                    name="bookmark"
+                    size={18}
+                    color={bookmarkBtnColor}
+                    style={styles.bookmarkIcon}
+                  />
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={styles.sharekButton}
+                activeOpacity={0.7}
+                onPress={() => ShareEvent()}
+
+                // share event button
+              >
+                <Entypo name="share" size={18} style={styles.shareIcon} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <DetailContent
+            StartDate={DateFun(item.start_date)}
+            StartTime={timing.StartTime}
+            EndDate={DateFun(item.end_date)}
+            EndTime={timing.EndTime}
+            Price={item.event_entrance_fee}
+            Venues={item.event_address}
+            phone={item.contact_phone}
+          />
+          <View style={styles.descDescription}>
+            <Text style={styles.descTitle}> Description</Text>
+
+            <Text
+              style={styles.desctext}
+              numberOfLines={read}
+              onTextLayout={onTextLayout}
+            >
+              {item.event_description}
+            </Text>
+            {readMorebtn ? (
+              <TouchableOpacity activeOpacity={0.7} onPress={() => showmore()}>
+                <Text style={styles.ReadMore}>{descLength}</Text>
               </TouchableOpacity>
             ) : null}
           </View>
-        ) : (
-          <SkeletonPlaceholder>
-            <View style={styles.orgConatinerShimmer}>
-              <View style={styles.orgProfileShimmer} />
-              <View style={styles.orgNameShimmer} />
-              <View style={styles.orgCategoryShimmer} />
-              <View style={styles.orgButtonShimmer} />
+
+          {featching ? (
+            <View
+              style={styles.organizersSection}
+              //organizers section container, which contains
+              // Organizers profile, name, Category and subscription button
+            >
+              <Pressable
+                onPress={() =>
+                  navigation.navigate("Organizer Detail", {
+                    organizerInfo,
+                    followStatus,
+                  })
+                }
+              >
+                <Image
+                  source={{ uri: featuredImageUri + eventOrg.featuredImage }}
+                  style={styles.organizerProfile}
+                  resizeMode="contain"
+                />
+              </Pressable>
+              <Pressable
+                // organizers name and operation category will be listed inside this component
+                style={styles.orgInfoContainer}
+                onPress={() =>
+                  navigation.navigate("Organizer Detail", {
+                    organizerInfo,
+                    followStatus,
+                  })
+                }
+              >
+                <Text style={styles.orgName}>{eventOrg.organizerName}</Text>
+                <Text
+                  style={styles.orgCategory} //organizers operation field or category
+                >
+                  {eventOrg.category}
+                </Text>
+              </Pressable>
+              {logged ? (
+                <TouchableOpacity
+                  // follow organizers button
+
+                  activeOpacity={0.6}
+                  style={[
+                    styles.orgFollowBtn,
+                    { backgroundColor: follow.ButtonColor },
+                  ]}
+                  onPress={() => followOrganizer()}
+                >
+                  {followProgress ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={Constants.background}
+                    />
+                  ) : (
+                    <Text style={styles.orgFollowTxt}>
+                      {follow.subscription}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ) : null}
             </View>
-          </SkeletonPlaceholder>
-        )}
-      </ScrollView>
+          ) : (
+            <SkeletonPlaceholder>
+              <View style={styles.orgConatinerShimmer}>
+                <View style={styles.orgProfileShimmer} />
+                <View style={styles.orgNameShimmer} />
+                <View style={styles.orgCategoryShimmer} />
+                <View style={styles.orgButtonShimmer} />
+              </View>
+            </SkeletonPlaceholder>
+          )}
+        </ScrollView>
+      )}
       {exist ? (
-        <Animatable.View 
-        animation="fadeInUpBig"
-        style={[styles.ticketBtnContainer]}>
+        <Animatable.View
+          animation="fadeInUpBig"
+          style={[styles.ticketBtnContainer]}
+        >
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => navigation.navigate("TicketScreen", {item})}
+            onPress={() => navigation.navigate("TicketScreen", { item })}
             style={styles.buyticketbtn}
           >
             <Text style={styles.ticketTxt}> Buy Ticket</Text>
           </TouchableOpacity>
         </Animatable.View>
       ) : null}
-      
     </SafeAreaView>
   );
 };

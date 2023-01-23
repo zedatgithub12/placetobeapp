@@ -113,6 +113,7 @@ const AddTicket = ({ route, navigation }) => {
       
     } else {
       setErrorMessage("Ticket price cannot be other than number and comma");
+      setPrice(fees);
     }
   };
 
@@ -124,16 +125,21 @@ const AddTicket = ({ route, navigation }) => {
     
     } else {
       setErrorMessage("Number of ticket cannot be other than number and comma");
+      setNumberofTicket(count);
     }
   };
 
   //main function in the screen to executed when user press add to event button
   const AddingTicket = async() => {
     let id = await AsyncStorage.getItem("userId");
-
-    if (price === 0 || numberofTicket === 0 || expireDate === "Date") {
+    var numbers = /^[0-9,.]+$/;
+    if (price == 0 || numberofTicket == 0 || expireDate === "Date") {
       setErrorMessage("Please fill all fields!");
-    } else {
+    }
+    else if(!price.match(numbers)){
+      setErrorMessage("Please enter valid price!");
+    }
+     else {
       setErrorMessage("");
 
       var ApiUrl = Connection.url + Connection.AddTicket;
@@ -417,7 +423,7 @@ const AddTicket = ({ route, navigation }) => {
           collapsable={true}
           onChange={onChange}
           maximumDate={new Date(2050, 12, 31)}
-          minimumDate={new Date(2000, 0, 1)}
+          minimumDate={new Date(2023, 0, 1)}
         />
       )}
  
@@ -469,7 +475,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "94%",
-    backgroundColor: Constants.Faded,
+    //backgroundColor: Constants.Faded,
     borderRadius: Constants.tinybox,
     padding: 10,
     margin: 10,
@@ -558,7 +564,7 @@ const styles = StyleSheet.create({
   },
   pricefield: {
     width: "71%",
-    backgroundColor: Constants.Faded,
+    //backgroundColor: Constants.Faded,
     borderBottomLeftRadius: Constants.tinybox,
     borderTopLeftRadius: Constants.tinybox,
     margin: 4,
@@ -567,7 +573,7 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     borderWidth: 0.3,
     borderColor: Constants.Secondary,
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     fontSize: Constants.headingthree,
   },
   currencyText: {
@@ -590,7 +596,7 @@ const styles = StyleSheet.create({
   },
   numberofticketfield: {
     width: "92%",
-    backgroundColor: Constants.Faded,
+    //backgroundColor: Constants.Faded,
     borderRadius: Constants.tinybox,
     margin: 4,
     marginRight: 0,
@@ -598,7 +604,7 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     borderWidth: 0.3,
     borderColor: Constants.Secondary,
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     fontSize: Constants.headingthree,
   },
 
@@ -609,7 +615,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     margin: 10,
     marginLeft: 12,
-    backgroundColor: Constants.Faded,
+    //backgroundColor: Constants.Faded,
     paddingLeft: 10,
     borderRadius: Constants.tinybox,
   },
@@ -622,7 +628,7 @@ const styles = StyleSheet.create({
   selectDateTxt: {
     fontSize: Constants.headingthree,
     fontFamily: Constants.fontFam,
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     color: Constants.Secondary,
   },
   checkIcon: {

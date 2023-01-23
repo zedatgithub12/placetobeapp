@@ -276,7 +276,7 @@ const [subscription, setSubscription] = useState(false); // follow unfollow acti
       time={TimeFun(item.start_time)}
       venue={item.event_address}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { item })}
+      onPress={() => navigation.navigate("EventDetail", item.event_id)}
     />
   );
   const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);

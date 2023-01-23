@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
 
-    backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
     paddingVertical: 6,
   },
   noTicketContainer: {

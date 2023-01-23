@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     borderRadius: 4,
     alignSelf: "center",
-    backgroundColor: Constants.Faded,
+    backgroundColor: Constants.background,
     borderRightWidth: 5,
   },
   ImageContainer: {

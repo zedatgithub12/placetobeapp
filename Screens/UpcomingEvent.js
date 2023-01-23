@@ -182,7 +182,7 @@ const UpcomingEvents = ({ navigation }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { item })}
+      onPress={() => navigation.navigate("EventDetail", item.event_id)}
     />
   );
   //after the flatlist is refreshed we call this funtion

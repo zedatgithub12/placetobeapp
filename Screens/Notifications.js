@@ -157,7 +157,7 @@ const Notifications = ({ navigation }) => {
       organizerName={item.event_organizer}
       noticeTitle={item.event_name}
       date={item.addedDate}
-      onPressNotice={() => navigation.navigate("EventDetail", { item })}
+      onPressNotice={() => navigation.navigate("EventDetail", item.event_id)}
     />
   );
 
