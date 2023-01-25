@@ -182,7 +182,6 @@ const AddTicket = ({ route, navigation }) => {
           setErrorMessage("you cannot add ticket now retry later!");
         }
       })
-
       .catch((error)=>{
         console.log(error);
       });

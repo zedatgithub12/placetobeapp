@@ -20,7 +20,7 @@ import TicketDetail from "./TicketDetail";
 
 function CheckoutScreen({ navigation, route }) {
   const { pass } = route.params;
- 
+
   const [selection, setSelection] = useState(null);
   const [agent, setAgent] = useState();
   const [price, setPrice] = useState();
@@ -45,7 +45,6 @@ function CheckoutScreen({ navigation, route }) {
   };
 
   //onchange happened in phone field
-
   const Phone = (phone) => {
     setContactInfo({
       ...contactInfo,
@@ -113,7 +112,7 @@ function CheckoutScreen({ navigation, route }) {
         accept: "application/json",
         "Content-Type": "application/json",
       };
-       var totalPrice = pass.currentprice*pass.amount;
+      var totalPrice = pass.currentprice * pass.amount;
       var Data = {
         id: pass.id,
         eventId: pass.eventId,
@@ -128,40 +127,120 @@ function CheckoutScreen({ navigation, route }) {
         agent: agent,
       };
 
- console.log(Data);
-      fetch(ApiUrl,{
+      //console.log(Data);
+      fetch(ApiUrl, {
         method: "POST",
-        headers:headers,
+        headers: headers,
         body: JSON.stringify(Data),
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          message = response[0].message;
 
-            })
-            .then((response)=> response.json())
-            .then((response)=>{
-               message = response[0].message;
-
-              if(message === "succeed"){
-                alert("succeed");
-              }
-              else {
-                alert("Some Problems");
-              }
-            })
-            .catch((error)=>{
-              console.log("chigr alee"+error);
-            });
+          if (message === "succeed") {
+            alert("succeed");
+          } else {
+            alert("Some Problems");
+          }
+        })
+        .catch((error) => {
+          console.log("chigr alee" + error);
+        });
     }
-   
   };
+
+  // We need ref in this, because we are dealing
+  // with JS setInterval to keep track of it and
+  // stop it when needed
+  const Ref = useRef(null);
+
+  // The state for our timer
+  const [timer, setTimer] = useState("00:00");
+
+  const getTimeRemaining = (e) => {
+    const total = Date.parse(e) - Date.parse(new Date());
+    const seconds = Math.floor((total / 1000) % 60);
+    const minutes = Math.floor((total / 1000 / 60) % 60);
+
+    return {
+      total,
+      minutes,
+      seconds,
+    };
+  };
+
+  const startTimer = (e) => {
+    let { total, minutes, seconds } = getTimeRemaining(e);
+    if (total >= 0) {
+      // update the timer
+      // check if less than 10 then we need to
+      // add '0' at the beginning of the variable
+      setTimer(
+        (minutes > 9 ? minutes : "0" + minutes) +
+          ":" +
+          (seconds > 9 ? seconds : "0" + seconds)
+      );
+    }
+  };
+
+  const clearTimer = (e) => {
+    // If you adjust it you should also need to
+    // adjust the Endtime formula we are about
+    // to code next
+    setTimer("12:00");
+
+    // If you try to remove this line the
+    // updating of timer Variable will be
+    // after 1000ms or 1sec
+    if (Ref.current) clearInterval(Ref.current);
+    const id = setInterval(() => {
+      startTimer(e);
+    }, 1000);
+    Ref.current = id;
+  };
+
+  const getDeadTime = () => {
+    //  let deadline = new Date();
+    let minutes = new Date();
+    // This is where you need to adjust if
+    // you entend to add more time
+    minutes.setMinutes(minutes.getMinutes() + 12);
+
+    return minutes;
+  };
+
+  // We can use useEffect so that when the component
+  // mount the timer will start as soon as possible
+
+  // We put empty array to act as componentDid
+  // mount only
+  useEffect(() => {
+    clearTimer(getDeadTime());
+  }, []);
+
+if(timer === "00:01"){
+  alert("time got elapsed");
+}
 
   //on component did mount
   useEffect(() => {
-    console.log(pass);
+
+
     return () => {};
   }, [selection]);
 
   return (
     <SafeAreaView style={styles.root}>
       <View style={{ height: 160 }}>
+        <View style={styles.timerContainer}>
+          <MaterialCommunityIcons
+            name="timer"
+            size={18}
+            color={Constants.Inverse}
+          />
+          <Text style={styles.timerTxt}>Time Left {timer}</Text>
+        </View>
+
         <View style={styles.ticketcheckout}>
           <View style={styles.leftCheckout}>
             <Text style={styles.eventName}>{pass.event_name}</Text>
@@ -308,7 +387,10 @@ function CheckoutScreen({ navigation, route }) {
                   ]
                 : { backgroundColor: "white" },
             ]}
-            onPress={() =>{ setSelection(1); setAgent(1)}}
+            onPress={() => {
+              setSelection(1);
+              setAgent(1);
+            }}
           >
             {selection === 1 ? (
               <MaterialCommunityIcons
@@ -328,7 +410,7 @@ function CheckoutScreen({ navigation, route }) {
             <View style={styles.LeftPayment}>
               <Image
                 style={styles.Paymentlogo}
-                source={require('../assets/telebirr.png')}
+                source={require("../assets/telebirr.png")}
               />
               <Text
                 style={[
@@ -351,7 +433,10 @@ function CheckoutScreen({ navigation, route }) {
                   ]
                 : { backgroundColor: "white" },
             ]}
-            onPress={() => {setSelection(2); setAgent(2)}}
+            onPress={() => {
+              setSelection(2);
+              setAgent(2);
+            }}
           >
             {selection === 2 ? (
               <MaterialCommunityIcons
@@ -383,9 +468,6 @@ function CheckoutScreen({ navigation, route }) {
               </Text>
             </View>
           </TouchableOpacity>
-
-
-
 
           {/* <TouchableOpacity
             style={[
@@ -619,6 +701,22 @@ const styles = StyleSheet.create({
     marginLeft: 38,
     marginTop: -6,
     marginBottom: 4,
+  },
+  timerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingRight: 12,
+    backgroundColor: Constants.primary,
+    borderBottomWidth: 0.3,
+    borderBottomColor: Constants.Inverse,
+    paddingBottom: 5,
+  },
+  timerTxt: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Bold,
+    color: Constants.Inverse,
+    marginLeft: 4,
   },
 });
 

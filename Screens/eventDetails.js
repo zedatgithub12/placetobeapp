@@ -42,15 +42,15 @@ const EventDetails = ({ route, navigation }) => {
   const [item, setItem] = useState({});
   const [loading, setLoading] = useState(false);
 
-    const date = new Date();
+  const date = new Date();
   var hour = date.getHours();
   var minute = date.getMinutes();
- // console.log(hour+":" +minute);
-  var Timing = hour+":" +minute;
+  // console.log(hour+":" +minute);
+  var Timing = hour + ":" + minute;
 
   const [timing, setTime] = useState({
-  StartTime: "",
-  EndTime: "",
+    StartTime: "",
+    EndTime: "",
   });
   const FeatchEvent = () => {
     setLoading(true);
@@ -75,20 +75,18 @@ const EventDetails = ({ route, navigation }) => {
         let event = response[0].event;
         let startTime = response[0].StartTime;
         let EndTime = response[0].EndTime;
-         var start = TimeFun(startTime);
-         var end = TimeFun(EndTime);
+        var start = TimeFun(startTime);
+        var end = TimeFun(EndTime);
 
         if (message === "succeed") {
           setItem(event);
           setLoading(false);
-          
+
           setTime({
             ...timing,
             StartTime: start,
             EndTime: end,
           });
-
-          
         } else {
           //setLoading(true);
           console.log("There is miss understanding with backend");
@@ -216,11 +214,10 @@ const EventDetails = ({ route, navigation }) => {
     return weekday[day] + monthName[month + 1] + " " + happeningDay;
   };
 
-
   const TimeFun = (eventTime) => {
     var time = eventTime;
-    var result = time.slice(0,2);
-    var minute = time.slice(3,5);
+    var result = time.slice(0, 2);
+    var minute = time.slice(3, 5);
     var globalTime;
     var postMeridian;
     var separator = ":";
@@ -234,8 +231,6 @@ const EventDetails = ({ route, navigation }) => {
 
     return postMeridian + separator + minute + " " + globalTime;
   };
-
- 
 
   /********************************************** */
   //read more description button related code  is writen below
@@ -483,7 +478,6 @@ const EventDetails = ({ route, navigation }) => {
       FeatchEvent();
       bookmarked();
       featchOrganizer();
-   
     }
     return () => {
       isSubcribed = false;
@@ -699,6 +693,7 @@ const EventDetails = ({ route, navigation }) => {
           >
             <Text style={styles.ticketTxt}> Buy Ticket</Text>
           </TouchableOpacity>
+
         </Animatable.View>
       ) : null}
     </SafeAreaView>
@@ -900,17 +895,17 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.Faded,
   },
   buyticketbtn: {
-    marginVertical: 10,
-    width: "70%",
+    marginVertical: 6,
     alignSelf: "center",
     backgroundColor: Constants.primary,
-    padding: 12,
-    borderRadius: 50,
+    padding: 10,
+    paddingHorizontal: 26,
+    borderRadius:8,
     justifyContent: "center",
     textAlign: "center",
   },
   ticketTxt: {
-    fontSize: Constants.headingone,
+    fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
     textAlign: "center",
     color: Constants.textColor,

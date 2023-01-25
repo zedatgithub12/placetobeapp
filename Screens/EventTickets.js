@@ -293,7 +293,7 @@ const EventTickets = ({ navigation, route }) => {
               <MaterialCommunityIcons
                 name="check-circle-outline"
                 size={16}
-                color={Constants.green}
+                color={Constants.Inverse}
               />
               <Text style={[styles.H4Text]}>{DateFun(item.start_date)}</Text>
             </View>
@@ -302,7 +302,7 @@ const EventTickets = ({ navigation, route }) => {
               <MaterialCommunityIcons
                 name="check-circle-outline"
                 size={16}
-                color={Constants.green}
+                color={Constants.Inverse}
               />
               <Text style={[styles.H4Text]}>{item.event_address}</Text>
             </View>
@@ -444,7 +444,7 @@ const EventTickets = ({ navigation, route }) => {
               size={46}
               color={Constants.Secondary}
             />
-            <Text style={styles.NoText}>No Ticket Avalable </Text>
+            <Text style={styles.NoText}>No Ticket Available </Text>
           </View>
         )}
       </View>
@@ -491,6 +491,8 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     height: "100%",
     width: "50%",
+    
+    
   },
   image: {
     borderRadius: Constants.medium,
@@ -500,6 +502,9 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.background,
     marginLeft: 8,
     marginRight: 8,
+    padding:4,
+    borderWidth:4,
+    borderColor: Constants.background
   },
   DiscriptionText: {
     marginLeft: 16,
@@ -512,13 +517,15 @@ const styles = StyleSheet.create({
   },
   H1Text: {
     fontSize: Constants.headingone,
-    fontWeight: "bold",
+    fontWeight: Constants.Bold,
     color: Constants.Inverse,
   },
   H4Text: {
-    fontSize: 15,
-    color: "grey",
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Boldtwo,
+    color:Constants.Inverse,
     paddingLeft: 10,
+    
   },
   Date: {
     marginTop: 14,
@@ -568,10 +575,10 @@ const styles = StyleSheet.create({
   },
   TicketView: {
     flexDirection: "row",
-    backgroundColor: Constants.transparentPrimary,
+    backgroundColor: Constants.background,
     paddingVertical: 10,
     paddingHorizontal: 12,
-
+    borderRadius:8,
     justifyContent: "space-between",
     shadowOffset: {
       width: 0,
