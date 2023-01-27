@@ -183,7 +183,7 @@ const ThisWeekEvent = ({ navigation }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", item.event_id)}
+      onPress={() => navigation.navigate("EventDetail", {id:item.event_id})}
     />
   );
 
@@ -298,7 +298,7 @@ const ThisWeekEvent = ({ navigation }) => {
 };
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
     alignSelf: "center",
     justifyContent: "center",
     width: "80%",

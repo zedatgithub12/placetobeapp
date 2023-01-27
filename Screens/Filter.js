@@ -292,7 +292,7 @@ const Filter = ({ navigation, route }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", item.event_id)}
+      onPress={() => navigation.navigate("EventDetail", {id:item.event_id})}
     />
   );
 

@@ -116,9 +116,10 @@ const OrganizerEvents = ({
 const styles = StyleSheet.create({
   EventContainer: {
     flexDirection: "row",
-    width: "98%",
-    paddingLeft: 10,
-    marginTop: 8,
+    width: "96%",
+    paddingLeft: 4,
+    padding:3,
+    marginTop: 4,
     borderRadius: Constants.mediumbox,
     alignSelf: "center",
     backgroundColor: Constants.background,

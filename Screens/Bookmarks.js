@@ -101,7 +101,7 @@ function Bookmarks({ navigation }){
             time = {TimeFun(item.start_time)}
             venue={item.event_address}
             Price={EntranceFee(item.event_entrance_fee)}
-            onPress={() => navigation.navigate("EventDetail", item.event_id)}
+            onPress={() => navigation.navigate("EventDetail", {id:item.event_id})}
             removeItem = {() =>dispatch(remove(item.event_id))}
             />
           })}
@@ -148,7 +148,7 @@ const styles=StyleSheet.create({
     container:{
         flex:1,
         alignItems: 'center',
-        backgroundColor:Constants.background,
+        backgroundColor:Constants.Faded,
     
     },
     noBookmarkContainer: {

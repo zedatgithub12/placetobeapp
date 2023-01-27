@@ -32,7 +32,8 @@ import * as Animatable from "react-native-animatable";
 import DetailShimmer from "../Components/DetailShimmer";
 
 const EventDetails = ({ route, navigation }) => {
-  const id = route.params; // an event item received from homepage flatlist will passed to this screen through route params
+  const params = route.params || {};
+  const {id, externalLink} = params; // an event item received from homepage flatlist will passed to this screen through route params
   const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
   const logged = userStatus.logged;
   //dispatch bookmarking item
@@ -40,7 +41,7 @@ const EventDetails = ({ route, navigation }) => {
   const { items } = useSelector((state) => state.cart);
   //item as value from database
   const [item, setItem] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const date = new Date();
   var hour = date.getHours();
@@ -53,7 +54,54 @@ const EventDetails = ({ route, navigation }) => {
     EndTime: "",
   });
   const FeatchEvent = () => {
+    if(externalLink){
     setLoading(true);
+    var ApiUrl = Connection.url + Connection.Event;
+    //organizer id is the only data to be sent to server in order to retrive organizer data
+    var Data = {
+      eventId: externalLink,
+    };
+    // header type for text data to be send to server
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        let message = response[0].message;
+        let event = response[0].event;
+        let startTime = response[0].StartTime;
+        let EndTime = response[0].EndTime;
+        var start = TimeFun(startTime);
+        var end = TimeFun(EndTime);
+
+        if (message === "succeed") {
+          setItem(event);
+        
+          setTime({
+            ...timing,
+            StartTime: start,
+            EndTime: end,
+          });
+          setLoading(false);
+        }
+         else {
+          //setLoading(true);
+          console.log("There is miss understanding with backend iternal");
+        }
+      })
+      .catch((error) => {
+        //setLoading(true);
+        console.log("Error: there is miss understanding with backend" + error);
+      });
+    }
+    else {
+      setLoading(true);
     var ApiUrl = Connection.url + Connection.Event;
     //organizer id is the only data to be sent to server in order to retrive organizer data
     var Data = {
@@ -80,13 +128,14 @@ const EventDetails = ({ route, navigation }) => {
 
         if (message === "succeed") {
           setItem(event);
-          setLoading(false);
-
+        
           setTime({
             ...timing,
             StartTime: start,
             EndTime: end,
           });
+
+          setLoading(false);
         } else {
           //setLoading(true);
           console.log("There is miss understanding with backend");
@@ -96,6 +145,8 @@ const EventDetails = ({ route, navigation }) => {
         //setLoading(true);
         console.log("Error: there is miss understanding with backend");
       });
+    }
+    
   };
   // featuredImage asset location on the server
   var featuredImageUri = Connection.url + Connection.assets;
@@ -474,8 +525,8 @@ const EventDetails = ({ route, navigation }) => {
   useEffect(() => {
     var isSubcribed = true;
     if (isSubcribed) {
-      FeatchTickets();
       FeatchEvent();
+      FeatchTickets();
       bookmarked();
       featchOrganizer();
     }

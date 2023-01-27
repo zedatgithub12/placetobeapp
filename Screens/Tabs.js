@@ -3,11 +3,11 @@ import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import Constants from "../constants/Constants";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./HomeScreen";
-import { Feather,Ionicons} from "react-native-vector-icons";
+import { Feather,Ionicons, MaterialCommunityIcons, SimpleLineIcons} from "react-native-vector-icons";
 import EventSubmission from "./SubmitEvent";
 import Notifications from "./Notifications";
-
-
+import Events from "./Events";
+import UserTickets from "./userTickets";
 const Tab = createBottomTabNavigator();
 const AddEvent = ({ children, onPress }) => (
   <TouchableOpacity
@@ -19,10 +19,12 @@ const AddEvent = ({ children, onPress }) => (
       style={
         (styles.addEventVeiw,
         {
-          width: 50,
-          height: 50,
-          borderRadius: 35,
+          width: 40,
+          height: 40,
+          borderRadius: 20,
           backgroundColor: Constants.primary,
+          margin:14,
+          
         })
       }
     >
@@ -42,11 +44,13 @@ function TabNav({ navigation }) {
         tabBarStyle: {
           position: "absolute",
           bottom: 0,
+          padding:8,
+          paddingBottom:3,
           elevation: 0,
-          backgroundColor: Constants.background,
-          height: 60,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
+          backgroundColor: Constants.Faded,
+          height: 54,
+          borderTopLeftRadius: 15,
+          borderTopRightRadius: 15,
           
         },
       })}
@@ -58,14 +62,35 @@ function TabNav({ navigation }) {
           headerShown: false,
 
           tabBarIcon: ({ focused, color }) => (
-            <Ionicons
+            <Feather
               name="home"
-              size={28}
+              size={22}
               color={color}
             />
           ),
           tabBarActiveTintColor: Constants.primary,
-          tabBarInactiveTintColor: Constants.Secondary,
+          tabBarInactiveTintColor: Constants.Inverse,
+        }}
+      />
+         <Tab.Screen
+        name="Events"
+        component={Events}
+        options={{
+          headerTitleAlign: "center",
+          headerStyle: {
+           backgroundColor: Constants.primary,
+         },
+         headerTintColor: Constants.Inverse,
+
+          tabBarIcon: ({ focused, color }) => (
+            <SimpleLineIcons
+              name="calendar"
+              size={21}
+              color={color}
+            />
+          ),
+          tabBarActiveTintColor: Constants.primary,
+          tabBarInactiveTintColor: Constants.Inverse,
         }}
       />
 
@@ -73,17 +98,42 @@ function TabNav({ navigation }) {
         name="Add Event"
         component={EventSubmission}
         options={{
+       
          headerTitleAlign: "center",
          headerStyle: {
           backgroundColor: Constants.primary,
         },
-        headerTintColor: Constants.background,
+        headerTintColor: Constants.Inverse,
           tabBarIcon: ({ focused }) => (
-            <Feather name="plus" size={32} color={Constants.background} />
+            <Feather name="plus" size={22} color={Constants.Inverse} />
           ),
           tabBarButton: (props) => <AddEvent {...props} />,
         }}
       />
+       <Tab.Screen
+        name="Tickets"
+        component={UserTickets}
+        options={{
+          headerTitleAlign: "center",
+          headerStyle: {
+           backgroundColor: Constants.primary,
+         },
+         headerTintColor: Constants.Inverse,
+          tabBarIcon: ({ focused, color }) => (
+            <MaterialCommunityIcons
+              name="ticket-confirmation-outline"
+              size={24}
+              color={color}
+            />
+          ),
+          tabBarActiveTintColor: Constants.primary,
+          tabBarInactiveTintColor: Constants.Inverse,
+          
+   
+          
+        }}
+      />
+
       <Tab.Screen
         name="Notifications"
         component={Notifications}
@@ -92,16 +142,16 @@ function TabNav({ navigation }) {
           headerStyle: {
            backgroundColor: Constants.primary,
          },
-         headerTintColor: Constants.background,
+         headerTintColor: Constants.Inverse,
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
-              name="notifications"
-              size={28}
+              name="notifications-outline"
+              size={22}
               color={color}
             />
           ),
           tabBarActiveTintColor: Constants.primary,
-          tabBarInactiveTintColor: Constants.Secondary,
+          tabBarInactiveTintColor: Constants.Inverse,
           
    
           
@@ -115,7 +165,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Constants.background
+    backgroundColor: Constants.Faded
   },
   profileButton: {
     backgroundColor: Constants.primary,

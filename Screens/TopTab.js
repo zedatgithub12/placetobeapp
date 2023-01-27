@@ -12,24 +12,27 @@ function MyTabs() {
     <Tab.Navigator
       initialRouteName="Happening"
       screenOptions={{
-        tabBarActiveTintColor:Constants.primary,
-        tabBarInactiveTintColor: Constants.purple,
+        tabBarActiveTintColor:Constants.background,
+        tabBarInactiveTintColor: Constants.Inverse,
   
         tabBarLabelStyle: {
           borderRadius: Constants.borderRad,
           padding: 3,
           paddingHorizontal: 4,
           fontWeight: Constants.Bold,
+          
         },
         tabBarIndicatorStyle: {
-          backgroundColor: Constants.primary,
+          backgroundColor: Constants.background,
         },
         tabBarPressColor: Constants.Faded,
         swipeEnabled: true,
 
         tabBarStyle:{
-        shadowColor: Constants.lightPurple
-         
+        shadowColor: Constants.lightPurple,
+        backgroundColor: Constants.primary,
+        borderTopWidth:0.3,
+        borderColor: Constants.transparentPrimary
         }
       }}
     >

@@ -182,7 +182,7 @@ const TodaysEvents = ({ navigation }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail",   item.event_id )}
+      onPress={() => navigation.navigate("EventDetail",   {id:item.event_id} )}
     />
   );
   //after the flatlist is refreshed we call this funtion
@@ -291,12 +291,13 @@ const TodaysEvents = ({ navigation }) => {
 };
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Constants.Faded,
+ 
     alignSelf: "center",
     justifyContent: "center",
     width: "80%",
     borderRadius: 10,
     padding: 28,
+    backgroundColor: Constants.Faded,
   },
   notFound: {
     width: "85%",

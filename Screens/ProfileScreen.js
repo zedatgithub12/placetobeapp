@@ -15,7 +15,7 @@ import {
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
 import Constants from "../constants/Constants";
-import { Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../Components/context";
 import { Avatar, Badge, Caption, Paragraph, Title } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
@@ -479,6 +479,13 @@ function Profile({ navigation, props }) {
                 />
               </View>
               <Text style={styles.settingtxt}>My Tickets</Text>
+
+              <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[styles.rightarrow,{position:"absolute", right:10}]}
+                  
+                />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -496,6 +503,12 @@ function Profile({ navigation, props }) {
                 />
               </View>
               <Text style={styles.settingtxt}>Account Settings</Text>
+              <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[styles.rightarrow,{position:"absolute", right:10}]}
+                  
+                />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -510,6 +523,12 @@ function Profile({ navigation, props }) {
               {items.length !== 0 ? (
                 <Badge style={styles.badgeStyle}>{items.length}</Badge>
               ) : null}
+               <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[styles.rightarrow,{position:"absolute", right:10}]}
+                  
+                />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -525,6 +544,12 @@ function Profile({ navigation, props }) {
                 />
               </View>
               <Text style={styles.settingtxt}>Invite Friends</Text>
+              <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[styles.rightarrow,{position:"absolute", right:10}]}
+                  
+                />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -544,6 +569,12 @@ function Profile({ navigation, props }) {
                 />
               </View>
               <Text style={styles.settingtxt}>Privacy Policy</Text>
+              <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[styles.rightarrow,{position:"absolute", right:10}]}
+                  
+                />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -559,6 +590,12 @@ function Profile({ navigation, props }) {
                 />
               </View>
               <Text style={styles.settingtxt}>Ask Question</Text>
+              <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[styles.rightarrow,{position:"absolute", right:10}]}
+                  
+                />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -574,6 +611,12 @@ function Profile({ navigation, props }) {
                 />
               </View>
               <Text style={styles.settingtxt}>About</Text>
+              <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[styles.rightarrow,{position:"absolute", right:10}]}
+                  
+                />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -728,7 +771,7 @@ const styles = StyleSheet.create({
   iconbackground: {
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Constants.Faded,
+  //  backgroundColor: Constants.Faded,
     padding: 8,
     borderRadius: 10,
 
@@ -738,22 +781,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     margin: 3,
-    marginLeft: 18,
+    marginHorizontal: 16,
+    backgroundColor: Constants.background,
+    borderRadius: 8,
+    paddingVertical:6
+  },
+  rightarrow:{
+color: Constants.Secondary,
   },
   optionIcon: {
-    color: Constants.Secondary,
+    color: Constants.primary,
   },
   bookmark: {
     flexDirection: "row",
     alignItems: "center",
-    margin: 5,
-    marginLeft: 20,
+    margin: 1,
+    marginHorizontal: 16,
+    backgroundColor: Constants.background,
+    borderRadius: 8,
+    paddingVertical:6
   },
   settingtxt: {
     justifyContent: "center",
     fontSize: Constants.headingtwo,
     marginLeft: 15,
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
   },
   horizontalline: {

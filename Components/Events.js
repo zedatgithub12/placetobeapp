@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   EventContainer: {
     flexDirection: "row",
     width: "96%",
-    padding: 3,
+    padding: 5,
     marginTop: 2,
     borderRadius: 4,
     alignSelf: "center",

@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
 import { Ionicons } from "react-native-vector-icons";
 import MyTabs from "./TopTab";
-import { Caption, Divider, Title } from "react-native-paper";
+import {Divider, Title } from "react-native-paper";
 import { AuthContext } from "../Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../constants/connection";
@@ -272,7 +272,6 @@ function Home({ navigation, ...props }) {
         ) : null}
       </View>
 
-      <MyTabs />
     </SafeAreaView>
   );
 }

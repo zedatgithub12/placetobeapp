@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
         borderRadius: Constants.mediumbox,
         alignSelf: "center",
-        backgroundColor:Constants.Faded,
+        backgroundColor:Constants.background,
         
       },
       ImageContainer: {

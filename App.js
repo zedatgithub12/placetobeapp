@@ -52,7 +52,7 @@ import UpdateEvent from "./Screens/UpdateEvent";
 import UpdateSucceed from "./Screens/UpdateSucceed";
 import CheckoutScreen from "./Screens/CheckoutScreen";
 import EventTickets from "./Screens/EventTickets";
-
+import Events from './Screens/Events';
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
 const prefix = Linking.createURL("com.afromina.placetobe://");
@@ -60,8 +60,22 @@ const prefix = Linking.createURL("com.afromina.placetobe://");
 export default function App() {
   // const [isLoading, setIsLoading] = React.useState(true);
   //const [userToken, setUserToken] = React.useState(null);
-  const p2blinking = {
+  const Linking = {
     prefixes: [prefix],
+    config: {
+      initialRouteName: 'TabNav',
+      screens: {
+        TabNav: {
+          path: 'tabNav'
+        },
+        Profile:{
+          path: 'profile'
+        },
+        EventDetail: {
+          path: 'eventDetail/:externalLink'
+        }
+      }
+    }
   };
 
   const initialLoginState = {
@@ -426,7 +440,7 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <AuthContext.Provider value={authContext}>
-          <NavigationContainer linking={p2blinking}>
+          <NavigationContainer linking={Linking}  fallback={<View style={styles.loader}><ActivityIndicator color={Constants.primary} size="large" /></View>}>
             <StatusBar style={Constants.Inverse} />
             {connectionState ? (
               <Stack.Navigator headerMode="none" initialRouteName="TabNav">
@@ -488,6 +502,7 @@ export default function App() {
                     headerShadowVisible: false,
                   }}
                 />
+                 
                 <Stack.Screen
                   name="EventDetail"
                   component={EventDetails}
@@ -765,4 +780,9 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
   },
+  loader:{
+    flex:1,
+    justifyContent:"center",
+    alignItems:"center",
+  }
 });

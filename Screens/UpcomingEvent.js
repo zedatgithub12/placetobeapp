@@ -182,7 +182,7 @@ const UpcomingEvents = ({ navigation }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", item.event_id)}
+      onPress={() => navigation.navigate("EventDetail", {id:item.event_id})}
     />
   );
   //after the flatlist is refreshed we call this funtion
@@ -291,7 +291,7 @@ const UpcomingEvents = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
     alignItems: "center",
     alignSelf: "center",
     justifyContent: "center",

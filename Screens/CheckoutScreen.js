@@ -24,6 +24,7 @@ function CheckoutScreen({ navigation, route }) {
   const [selection, setSelection] = useState(null);
   const [agent, setAgent] = useState();
   const [price, setPrice] = useState();
+  const [timerStatus, setTimerStatus] = useState("initial");
   const [contactInfo, setContactInfo] = useState({
     fullname: "",
     nameBorder: Constants.Secondary,
@@ -51,105 +52,7 @@ function CheckoutScreen({ navigation, route }) {
       phone: phone,
     });
   };
-
-  /**************************************** */
-  //on pay button pressed
-  /************************************** */
-  const Pay = () => {
-    var regName = /^[a-zA-Z]+ [a-zA-Z]+$/;
-    var message;
-    if (contactInfo.fullname.length == 0) {
-      setContactInfo({
-        ...contactInfo,
-        nameBorder: Constants.red,
-        errorMessage: "Please enter you full name, letter only",
-        nameError: true,
-      });
-    } else if (!regName.test(contactInfo.fullname)) {
-      setContactInfo({
-        ...contactInfo,
-        nameBorder: Constants.red,
-        errorMessage: "Full name can not contain number or special characters",
-        nameError: true,
-      });
-    } else if (contactInfo.fullname.length > 30) {
-      setContactInfo({
-        ...contactInfo,
-        nameBorder: Constants.red,
-        errorMessage: "Full name can not be more than 30 letter",
-        nameError: true,
-      });
-    }
-    if (contactInfo.fullname.length < 2) {
-      setContactInfo({
-        ...contactInfo,
-        nameBorder: Constants.red,
-        errorMessage: "Please enter you full name, letter only",
-        nameError: true,
-      });
-    } else if (contactInfo.phone == 0) {
-      setContactInfo({
-        ...contactInfo,
-        phoneBorder: Constants.red,
-        phoneErrorMessage: "Please enter your Phone Number",
-        phoneError: true,
-      });
-    } else {
-      setContactInfo({
-        ...contactInfo,
-        nameBorder: Constants.Inverse,
-        errorMessage: "",
-        nameError: false,
-        phoneBorder: Constants.Inverse,
-        phoneErrorMessage: "",
-        phoneError: false,
-      });
-
-      // we call backend from here
-
-      var ApiUrl = Connection.url + Connection.Payment;
-      var headers = {
-        accept: "application/json",
-        "Content-Type": "application/json",
-      };
-      var totalPrice = pass.currentprice * pass.amount;
-      var Data = {
-        id: pass.id,
-        eventId: pass.eventId,
-        username: contactInfo.fullname,
-        phone: contactInfo.phone,
-
-        ticketName: pass.event_name,
-        type: pass.tickettype,
-        eachprice: pass.currentprice,
-        quantity: pass.amount,
-        total: totalPrice,
-        agent: agent,
-      };
-
-      //console.log(Data);
-      fetch(ApiUrl, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(Data),
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          message = response[0].message;
-
-          if (message === "succeed") {
-            alert("succeed");
-          } else {
-            alert("Some Problems");
-          }
-        })
-        .catch((error) => {
-          console.log("chigr alee" + error);
-        });
-    }
-  };
-
-  // We need ref in this, because we are dealing
+ // We need ref in this, because we are dealing
   // with JS setInterval to keep track of it and
   // stop it when needed
   const Ref = useRef(null);
@@ -212,22 +115,177 @@ function CheckoutScreen({ navigation, route }) {
   // We can use useEffect so that when the component
   // mount the timer will start as soon as possible
 
-  // We put empty array to act as componentDid
-  // mount only
-  useEffect(() => {
-    clearTimer(getDeadTime());
-  }, []);
-
 if(timer === "00:01"){
-  alert("time got elapsed");
+  setTimer("Elapsed");
 }
+
+// code to send and featch from app backend 
+// it featches responses culculated inside Resource file
+
+const featchOperation =(currentStatus, rsvp)=>{
+
+var ApiUrl = Connection.url+Connection.reservation;
+var headers = {
+  accept: "application/json",
+  "Content-Type": "application/json",
+};
+
+var Data={
+  id: pass.id,
+  user: pass.userId,
+  quantity: pass.amount,
+  timer: currentStatus,
+  rsvp: rsvp,
+};
+
+fetch(ApiUrl, {
+  method: "POST",
+  headers: headers,
+  body: JSON.stringify(Data),
+})
+.then((response)=>response.json())
+.then((response)=>{
+
+  var message = response[0].message;
+
+  if(message==="start timer"){
+    clearTimer(getDeadTime());
+    console.log(message);
+  }
+  else if(message==="elapsed"){
+    setTimer("elapsed");
+    console.log(message);
+  }
+  else {
+    console.log(message);
+  }
+}).catch((error)=>{
+  console.log(error);
+})
+
+}
+
+
+  //check out timer function
+  //check if the time is starting or elapsed by lestning to the state 
+
+  const CheckoutTimer=(status)=>{
+
+    if(status ==="initial"){
+      featchOperation(status, null);
+    }
+    else if(status === "elapsed"){
+      featchOperation(status, pass.id);
+    }
+    else if(status === "payed"){
+      featchOperation(status, pass.id);
+    }
+  }
+
+  /**************************************** */
+  //on pay button pressed
+  /************************************** */
+  const Pay = () => {
+    var regName = /^[a-zA-Z]+ [a-zA-Z]+$/;
+    var message;
+    if (contactInfo.fullname.length == 0) {
+      setContactInfo({
+        ...contactInfo,
+        nameBorder: Constants.red,
+        errorMessage: "Please enter you full name, letter only",
+        nameError: true,
+      });
+    } else if (!regName.test(contactInfo.fullname)) {
+      setContactInfo({
+        ...contactInfo,
+        nameBorder: Constants.red,
+        errorMessage: "Full name can not contain number or special characters",
+        nameError: true,
+      });
+    } else if (contactInfo.fullname.length > 30) {
+      setContactInfo({
+        ...contactInfo,
+        nameBorder: Constants.red,
+        errorMessage: "Full name can not be more than 30 letter",
+        nameError: true,
+      });
+    }
+    if (contactInfo.fullname.length < 2) {
+      setContactInfo({
+        ...contactInfo,
+        nameBorder: Constants.red,
+        errorMessage: "Please enter you full name, letter only",
+        nameError: true,
+      });
+    } else if (contactInfo.phone == 0) {
+      setContactInfo({
+        ...contactInfo,
+        phoneBorder: Constants.red,
+        phoneErrorMessage: "Please enter your Phone Number",
+        phoneError: true,
+      });
+    } else {
+      setContactInfo({
+        ...contactInfo,
+        nameBorder: Constants.Inverse,
+        errorMessage: "",
+        nameError: false,
+        phoneBorder: Constants.Inverse,
+        phoneErrorMessage: "",
+        phoneError: false,
+      });
+
+      // we call backend from here
+
+      var ApiUrl = Connection.url + Connection.Payment;
+      var headers = {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      };
+
+      var Data = {
+        id: pass.id,
+        userId: pass.userId,
+        eventId: pass.eventId,
+        username: contactInfo.fullname,
+        phone: contactInfo.phone,
+
+        eventName: pass.event_name,
+        type: pass.tickettype,
+        eachprice: pass.currentprice,
+        quantity: pass.amount,
+        agent: agent,
+
+      };
+
+      fetch(ApiUrl, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(Data),
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          message = response[0].message;
+
+          if (message === "succeed") {
+            alert("succeed");
+          } else {
+            alert("Some Problems");
+          }
+        })
+        .catch((error) => {
+          console.log("chigr alee" + error);
+        });
+    }
+  };
+
 
   //on component did mount
   useEffect(() => {
-
-
-    return () => {};
-  }, [selection]);
+ 
+  CheckoutTimer(timerStatus);
+    
+  }, []);
 
   return (
     <SafeAreaView style={styles.root}>
@@ -238,7 +296,7 @@ if(timer === "00:01"){
             size={18}
             color={Constants.Inverse}
           />
-          <Text style={styles.timerTxt}>Time Left {timer}</Text>
+          <Text style={styles.timerTxt}>Time {timer}</Text>
         </View>
 
         <View style={styles.ticketcheckout}>
