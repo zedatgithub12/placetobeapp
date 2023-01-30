@@ -4,6 +4,7 @@ import TodaysEvents from "./TodaysEvent";
 import ThisWeekEvents from "./ThisWeekEvent";
 import UpcomingEvents from "./UpcomingEvent";
 import Constants from "../constants/Constants";
+import {SimpleLineIcons} from "react-native-vector-icons";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -17,7 +18,7 @@ function MyTabs() {
   
         tabBarLabelStyle: {
           borderRadius: Constants.borderRad,
-          padding: 3,
+         
           paddingHorizontal: 4,
           fontWeight: Constants.Bold,
           
@@ -29,11 +30,14 @@ function MyTabs() {
         swipeEnabled: true,
 
         tabBarStyle:{
+          
         shadowColor: Constants.lightPurple,
         backgroundColor: Constants.primary,
         borderTopWidth:0.3,
-        borderColor: Constants.transparentPrimary
-        }
+        borderColor: Constants.transparentPrimary,
+    
+        },
+      
       }}
     >
       <Tab.Screen name="Happening" component={TodaysEvents} />

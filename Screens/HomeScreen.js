@@ -7,21 +7,32 @@ import {
   Image,
   Dimensions,
   ScrollView,
+  Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
 import { Ionicons } from "react-native-vector-icons";
 import MyTabs from "./TopTab";
-import {Divider, Title } from "react-native-paper";
+import { Divider, Title } from "react-native-paper";
 import { AuthContext } from "../Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../constants/connection";
 import { SliderBox } from "react-native-image-slider-box";
 import Categories from "../Components/CategoryListing";
 import Category from "../src/Category";
-
+import TicketCard from "../Components/TicketCard";
+import TicketData from "../src/Tickets";
+import FeaturedEvent from "../Components/FeaturedEvents";
+import FeaturedShimmer from "../Components/FeaturedEventsShimmer";
+import TicketShimmer from '../Components/TicketShimmer';
 function Home({ navigation, ...props }) {
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
+
+  const [Tickets, setTickets] = useState();
+  const [ticketShimmer, setTicketShimmer] = useState(true);
+  const [events, setEvents] = useState();
+  const [eventShimmer, setEventShimmer] = useState(true);
 
   const profile = () => {
     navigation.navigate("Profile");
@@ -162,13 +173,78 @@ function Home({ navigation, ...props }) {
       });
   };
 
-  //scroll View con
-  const [shown, setShown] = useState(true);
+  //featch available tickets
 
+  const FeatchTickets = () => {
+    var ApiUrl = Connection.url + Connection.AvailableTickets;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    // start Api request
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var message = response[0].message;
+
+        if (message === "succeed") {
+          var tickets = response[0].tickets;
+          setTickets(tickets);
+          setTicketShimmer(false);
+        } else {
+          setTicketShimmer(true);
+          console.log(message);
+        }
+      })
+      .catch((error) => {
+        console.log("Error ticket featching" + error);
+      });
+  };
+
+  // featch Featured events
+  //featured events are the event which have high priority or value of number 1 in databse table
+  const FeatchEvents = () => {
+    var ApiUrl = Connection.url + Connection.FeaturedEvent;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        var message = response[0].message;
+
+        if (message === "succeed") {
+          var FeaturedEvent = response[0].Events;
+          setEvents(FeaturedEvent);
+          setEventShimmer(false);
+          console.log(message);
+        } else {
+          console.log(message);
+          setEventShimmer(true);
+        }
+      })
+      .catch((error) => {
+        setEventShimmer(true);
+        console.log(error);
+      });
+  };
+
+  const [shown, setShown] = useState(true);
   useEffect(() => {
     userInfoFunction();
     featchImage();
     userProfile();
+    FeatchTickets();
+    FeatchEvents();
     return () => {};
   }, [logged]);
 
@@ -176,102 +252,186 @@ function Home({ navigation, ...props }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        //to component container
-        // profile avatar, App name and serach is included inside the component
-        style={styles.headers}
-      >
-        <View style={styles.brands}>
-          <Image
-            source={require("../assets/homebranding.png")}
-            resizeMode="cover"
-            style={{ width: 152, height: 70 }}
-          />
-        </View>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.searchBtn}
-          onPress={() => navigation.push("Eventcat")}
+      <ScrollView>
+        <View
+          //to component container
+          // profile avatar, App name and serach is included inside the component
+          style={styles.headers}
         >
-          <Ionicons
-            name="search-outline"
-            size={20}
-            color={Constants.primary}
-            style={styles.submitIcon}
-          />
-        </TouchableOpacity>
-
-        {logged ? (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => profile()}
-            style={styles.profileContainer}
-          >
+          <View style={styles.brands}>
             <Image
-              source={{ uri: Connection.url + Connection.assets + userPhoto }}
-              style={styles.profileIcon}
+              source={require("../assets/homebranding.png")}
+              resizeMode="cover"
+              style={{ width: 152, height: 70 }}
             />
-          </TouchableOpacity>
-        ) : (
+          </View>
+
           <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate("SignIn")}
-            style={styles.profileContainer}
+            activeOpacity={0.8}
+            style={styles.searchBtn}
+            onPress={() => navigation.push("Eventcat")}
           >
             <Ionicons
-              name="person"
-              size={22}
-              //style={styles.profileIcon}
+              name="search-outline"
+              size={20}
               color={Constants.primary}
+              style={styles.submitIcon}
             />
           </TouchableOpacity>
-        )}
-      </View>
-      <Divider style={{ color: Constants.transparentPrimary }} />
 
-      <View>
-        {shown ? (
-          <ScrollView contentContainerStyle={{ minHeight: 180 }}>
-            <SliderBox
-              images={Images}
-              dotColor={Constants.primary}
-              inactiveDotColor={Constants.transparentPrimary}
-              dotStyle={{
-                height: 9,
-                width: 9,
-                borderRadius: 8,
-              }}
-              firstItem={0}
-              imageLoadingColor={Constants.Secondary}
-              autoplay={true}
-              autoplayInterval={5000}
-              circleLoop={true}
-              paginationBoxVerticalPadding={10}
-              resizeMode="contain"
-              activeOpacity={1.0}
+          {logged ? (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => profile()}
+              style={styles.profileContainer}
+            >
+              <Image
+                source={{ uri: Connection.url + Connection.assets + userPhoto }}
+                style={styles.profileIcon}
+              />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate("SignIn")}
+              style={styles.profileContainer}
+            >
+              <Ionicons
+                name="person"
+                size={22}
+                //style={styles.profileIcon}
+                color={Constants.primary}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.homeSection2}>
+          <Divider style={{ color: Constants.transparentPrimary }} />
+          {shown ? (
+            <ScrollView contentContainerStyle={{ minHeight: 180 }}>
+              <SliderBox
+                images={Images}
+                dotColor={Constants.primary}
+                inactiveDotColor={Constants.transparentPrimary}
+                dotStyle={{
+                  height: 9,
+                  width: 9,
+                  borderRadius: 8,
+                }}
+                firstItem={0}
+                imageLoadingColor={Constants.Secondary}
+                autoplay={true}
+                autoplayInterval={5000}
+                circleLoop={true}
+                paginationBoxVerticalPadding={10}
+                resizeMode="contain"
+                activeOpacity={1.0}
+              />
+              <View>
+                <ScrollView
+                  horizontal
+                  contentContainerStyle={styles.categories}
+                  showsHorizontalScrollIndicator={false}
+                >
+                  {Category.map((item) => (
+                    <Categories
+                      key={item.id}
+                      icon={item.icon}
+                      category={item.name}
+                      color={item.background}
+                      onPress={() => navigation.push("Filter", { item })}
+                    />
+                  ))}
+                </ScrollView>
+              </View>
+            </ScrollView>
+          ) : null}
+        </View>
+
+        <View style={styles.availableTickets}>
+          <Text style={styles.ticketTitle}>Available Tickets</Text>
+          <Pressable>
+            <Ionicons
+              name="md-grid-outline"
+              size={18}
+              color={Constants.Inverse}
             />
-            <View>
-              <ScrollView
-                horizontal
-                contentContainerStyle={styles.categories}
-                showsHorizontalScrollIndicator={false}
-              >
-                {Category.map((item) => (
-                  <Categories
-                    key={item.id}
-                    icon={item.icon}
-                    category={item.name}
-                    color={item.background}
-                    onPress={() => navigation.push("Filter", { item })}
-                  />
-                ))}
-              </ScrollView>
-            </View>
-          </ScrollView>
-        ) : null}
-      </View>
+          </Pressable>
+        </View>
 
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            marginLeft: 8,
+            backgroundColor: Constants.background,
+          }}
+        >
+          {ticketShimmer ? (
+            <View style={{flexDirection:"row"}}>
+            <TicketShimmer/>
+            <TicketShimmer/>
+            <TicketShimmer/>
+            <TicketShimmer/>
+            </View>
+          ) : (
+            Tickets.map((item) => (
+              <TicketCard
+                key={item.id}
+                picture={item.event_image}
+                title={item.event_name}
+                price={item.currentprice}
+                type={item.tickettype}
+                EventName={() =>
+                  navigation.navigate("EventDetail", { id: item.event_id })
+                }
+                onPress={() => navigation.navigate("TicketScreen", { item })}
+              />
+            ))
+          )}
+        </ScrollView>
+
+        <View style={styles.availableTickets}>
+          <Text style={styles.ticketTitle}>Featured Events</Text>
+          <Pressable>
+            <Ionicons
+            onPress={()=> navigation.navigate("Events")}
+              name="md-grid-outline"
+              size={18}
+              color={Constants.Inverse}
+            />
+          </Pressable>
+        </View>
+
+        <View style={{ backgroundColor: Constants.Faded }}>
+          {eventShimmer ? (
+            <View>
+          <FeaturedShimmer/>
+          <FeaturedShimmer/>
+          <FeaturedShimmer/>
+          <FeaturedShimmer/>
+          </View>
+          ) : events.length == 0 ? (
+            <View>
+              <Text>No event</Text>
+            </View>
+          ) : (
+            events.map((item) =>(
+                <FeaturedEvent
+                  key={item.event_id}
+                  picture={item.event_image}
+                  title={item.event_name}
+                  organizer={item.event_organizer}
+                  onPress={() =>
+                    navigation.navigate("EventDetail", { id: item.event_id })
+                  }
+                />
+              )
+            )
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -289,6 +449,10 @@ const styles = StyleSheet.create({
     paddingTop: Constants.paddTwo,
     alignSelf: "center",
     marginBottom: 10,
+    position: "absolute",
+    top: 0,
+    zIndex: 1000,
+    backgroundColor: Constants.background,
   },
   SearchFieldContainer: {
     flexDirection: "row",
@@ -382,8 +546,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  homeSection2: {
+    marginTop: 80,
+  },
   categories: {
     paddingHorizontal: 6,
+  },
+  availableTickets: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    padding: 6,
+    margin: 4,
+    marginTop: 8,
+    marginBottom: 0,
+    backgroundColor: Constants.background,
+  },
+  ticketTitle: {
+    fontWeight: Constants.Boldtwo,
+    fontSize: Constants.headingone,
   },
 });
 

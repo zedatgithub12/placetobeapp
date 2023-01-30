@@ -48,6 +48,8 @@ const Connection = {
   Payment: "Payment.php",
   Event: "SingleEvent.php", // a file to retrive single event by its event ID
   reservation: "Reservation.php",
+  AvailableTickets: "AvailableTickets.php",
+  FeaturedEvent: "FeaturedEvent.php",
 };
 
 export default Connection;

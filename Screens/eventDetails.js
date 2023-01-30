@@ -33,7 +33,7 @@ import DetailShimmer from "../Components/DetailShimmer";
 
 const EventDetails = ({ route, navigation }) => {
   const params = route.params || {};
-  const {id, externalLink} = params; // an event item received from homepage flatlist will passed to this screen through route params
+  const { id, externalLink } = params; // an event item received from homepage flatlist will passed to this screen through route params
   const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
   const logged = userStatus.logged;
   //dispatch bookmarking item
@@ -54,99 +54,98 @@ const EventDetails = ({ route, navigation }) => {
     EndTime: "",
   });
   const FeatchEvent = () => {
-    if(externalLink){
-    setLoading(true);
-    var ApiUrl = Connection.url + Connection.Event;
-    //organizer id is the only data to be sent to server in order to retrive organizer data
-    var Data = {
-      eventId: externalLink,
-    };
-    // header type for text data to be send to server
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        let message = response[0].message;
-        let event = response[0].event;
-        let startTime = response[0].StartTime;
-        let EndTime = response[0].EndTime;
-        var start = TimeFun(startTime);
-        var end = TimeFun(EndTime);
-
-        if (message === "succeed") {
-          setItem(event);
-        
-          setTime({
-            ...timing,
-            StartTime: start,
-            EndTime: end,
-          });
-          setLoading(false);
-        }
-         else {
-          //setLoading(true);
-          console.log("There is miss understanding with backend iternal");
-        }
-      })
-      .catch((error) => {
-        //setLoading(true);
-        console.log("Error: there is miss understanding with backend" + error);
-      });
-    }
-    else {
+    if (externalLink) {
       setLoading(true);
-    var ApiUrl = Connection.url + Connection.Event;
-    //organizer id is the only data to be sent to server in order to retrive organizer data
-    var Data = {
-      eventId: id,
-    };
-    // header type for text data to be send to server
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        let message = response[0].message;
-        let event = response[0].event;
-        let startTime = response[0].StartTime;
-        let EndTime = response[0].EndTime;
-        var start = TimeFun(startTime);
-        var end = TimeFun(EndTime);
-
-        if (message === "succeed") {
-          setItem(event);
-        
-          setTime({
-            ...timing,
-            StartTime: start,
-            EndTime: end,
-          });
-
-          setLoading(false);
-        } else {
-          //setLoading(true);
-          console.log("There is miss understanding with backend");
-        }
+      var ApiUrl = Connection.url + Connection.Event;
+      //organizer id is the only data to be sent to server in order to retrive organizer data
+      var Data = {
+        eventId: externalLink,
+      };
+      // header type for text data to be send to server
+      var headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+      fetch(ApiUrl, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(Data),
       })
-      .catch((error) => {
-        //setLoading(true);
-        console.log("Error: there is miss understanding with backend");
-      });
+        .then((response) => response.json())
+        .then((response) => {
+          let message = response[0].message;
+          let event = response[0].event;
+          let startTime = response[0].StartTime;
+          let EndTime = response[0].EndTime;
+          var start = TimeFun(startTime);
+          var end = TimeFun(EndTime);
+
+          if (message === "succeed") {
+            setItem(event);
+
+            setTime({
+              ...timing,
+              StartTime: start,
+              EndTime: end,
+            });
+            setLoading(false);
+          } else {
+            //setLoading(true);
+            console.log("There is miss understanding with backend iternal");
+          }
+        })
+        .catch((error) => {
+          //setLoading(true);
+          console.log(
+            "Error: there is miss understanding with backend" + error
+          );
+        });
+    } else {
+      setLoading(true);
+      var ApiUrl = Connection.url + Connection.Event;
+      //organizer id is the only data to be sent to server in order to retrive organizer data
+      var Data = {
+        eventId: id,
+      };
+      // header type for text data to be send to server
+      var headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+      fetch(ApiUrl, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(Data),
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          let message = response[0].message;
+          let event = response[0].event;
+          let startTime = response[0].StartTime;
+          let EndTime = response[0].EndTime;
+          var start = TimeFun(startTime);
+          var end = TimeFun(EndTime);
+
+          if (message === "succeed") {
+            setItem(event);
+
+            setTime({
+              ...timing,
+              StartTime: start,
+              EndTime: end,
+            });
+
+            setLoading(false);
+          } else {
+            //setLoading(true);
+            console.log("There is miss understanding with backend");
+          }
+        })
+        .catch((error) => {
+          //setLoading(true);
+          console.log("Error: there is miss understanding with backend");
+        });
     }
-    
   };
   // featuredImage asset location on the server
   var featuredImageUri = Connection.url + Connection.assets;
@@ -474,46 +473,89 @@ const EventDetails = ({ route, navigation }) => {
   const [exist, setExist] = useState(false);
 
   const FeatchTickets = () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
+    if (externalLink) {
+      const controller = new AbortController();
+      const signal = controller.signal;
 
-    var ApiUrl = Connection.url + Connection.eventTicket;
-    var headers = {
-      accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    var Data = {
-      eventId: id,
-    };
+      var ApiUrl = Connection.url + Connection.eventTicket;
+      var headers = {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      };
+      var Data = {
+        eventId: externalLink,
+      };
 
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-      signal: signal,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        var message = response[0].message;
-        var eventTickets = response[0].tickets;
-        if (message === "succeed") {
-          setTickets(eventTickets);
-          setExist(true);
-        } else if (message === "no tickets") {
-          setTickets(eventTickets);
-          setExist(false);
-        } else {
-          setTickets();
-          setExist(false);
-        }
+      fetch(ApiUrl, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(Data),
+        signal: signal,
       })
-      .catch((error) => {
-        setExist(false);
-      });
+        .then((response) => response.json())
+        .then((response) => {
+          var message = response[0].message;
+          var eventTickets = response[0].tickets;
+          if (message === "succeed") {
+            setTickets(eventTickets);
+            setExist(true);
+          } else if (message === "no tickets") {
+            setTickets(eventTickets);
+            setExist(false);
+          } else {
+            setTickets();
+            setExist(false);
+          }
+        })
+        .catch((error) => {
+          setExist(false);
+        });
 
-    return () => {
-      controller.abort();
-    };
+      return () => {
+        controller.abort();
+      };
+    } else {
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      var ApiUrl = Connection.url + Connection.eventTicket;
+      var headers = {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      };
+      var Data = {
+        eventId: id,
+      };
+
+      fetch(ApiUrl, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(Data),
+        signal: signal,
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          var message = response[0].message;
+          var eventTickets = response[0].tickets;
+          if (message === "succeed") {
+            setTickets(eventTickets);
+            setExist(true);
+          } else if (message === "no tickets") {
+            setTickets(eventTickets);
+            setExist(false);
+          } else {
+            setTickets();
+            setExist(false);
+          }
+        })
+        .catch((error) => {
+          setExist(false);
+        });
+
+      return () => {
+        controller.abort();
+      };
+    }
   };
 
   const [orders, setOrders] = useState({
@@ -744,7 +786,6 @@ const EventDetails = ({ route, navigation }) => {
           >
             <Text style={styles.ticketTxt}> Buy Ticket</Text>
           </TouchableOpacity>
-
         </Animatable.View>
       ) : null}
     </SafeAreaView>
@@ -951,7 +992,7 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.primary,
     padding: 10,
     paddingHorizontal: 26,
-    borderRadius:8,
+    borderRadius: 8,
     justifyContent: "center",
     textAlign: "center",
   },

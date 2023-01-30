@@ -152,6 +152,7 @@ const AddTicket = ({ route, navigation }) => {
         userId: id,
         eventId: item.event_id,
         eventName: item.event_name,
+        eventImage: item.event_image,
         type: category,
         price: price,
         Amount: numberofTicket,
