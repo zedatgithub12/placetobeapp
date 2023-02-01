@@ -37,38 +37,38 @@ const styles = StyleSheet.create({
   },
 
   VenueName: {
-    width: "80%",
+    width: "90%",
     height: 12,
     margin:4,
-    marginLeft:4,
+    marginLeft:0,
     marginTop:4,
-    borderRadius: 3,
+    borderRadius: 2,
     
   },
   type:{
     width: "70%",
     height: 8,
     borderRadius:3,
-    marginLeft:4,
-    marginTop:6,
+    marginLeft:0,
+    marginTop:5,
   },
   price: {
-  width: "60%",
-  height: 14,
+  width: "63%",
+  height: 12,
   marginTop:14,
-  marginLeft:4,
-  borderRadius:3
+  marginLeft:0,
+  borderRadius:2
   
   },
   checkin: {
-    width: "25%",
-    height: 16,
+    width: "28%",
+    height: 12,
     marginTop:18,
     marginRight:4,
     position: "absolute",
     right:2,
     bottom:0,
-    borderRadius:3
+    borderRadius:2
   },
 
 });

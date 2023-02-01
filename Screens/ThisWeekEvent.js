@@ -298,7 +298,7 @@ const ThisWeekEvent = ({ navigation }) => {
 };
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Constants.Faded,
+    
     alignSelf: "center",
     justifyContent: "center",
     width: "80%",

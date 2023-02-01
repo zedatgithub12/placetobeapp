@@ -34,7 +34,7 @@ function MyTabs() {
         shadowColor: Constants.lightPurple,
         backgroundColor: Constants.primary,
         borderTopWidth:0.3,
-        borderColor: Constants.transparentPrimary,
+        borderColor: Constants.primary,
     
         },
       

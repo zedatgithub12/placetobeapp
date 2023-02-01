@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     width: "80%",
     borderRadius: 10,
     padding: 28,
-    backgroundColor: Constants.Faded,
+    
   },
   notFound: {
     width: "85%",

@@ -32,16 +32,17 @@ const FeaturedEvent = ({ title, picture, organizer,onPress }) => {
 };
 const styles = StyleSheet.create({
   featuredEventList: {
-    width:"97%",
+    width:"96%",
     flexDirection: "row",
     alignItems: "center",
     alignSelf:"center",
     justifyContent: "space-between",
     backgroundColor: Constants.background,
-    borderRadius: Constants.mediumbox,
+    borderRadius: 3,
     margin: 2,
-    padding:6,
-    
+    padding:3,
+    borderWidth:0.2,
+    borderColor:Constants.Secondary
   },
   featuredEventImage: {
     borderRadius: Constants.mediumbox,

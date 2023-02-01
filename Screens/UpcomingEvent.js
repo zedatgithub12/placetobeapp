@@ -291,7 +291,7 @@ const UpcomingEvents = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.Faded,
+ 
     alignItems: "center",
     alignSelf: "center",
     justifyContent: "center",

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   TouchableNativeFeedback,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,11 +19,7 @@ import {
   increase,
   newItem,
 } from "../Reducer/Ticket";
-import {
-  FontAwesome,
-  MaterialCommunityIcons,
-  FontAwesome5,
-} from "react-native-vector-icons";
+import { MaterialCommunityIcons } from "react-native-vector-icons";
 import Connection from "../constants/connection";
 import Constants from "../constants/Constants";
 
@@ -44,6 +41,8 @@ const EventTickets = ({ navigation, route }) => {
   //const [visible, setVisible] = useState(true);
   const [active, setActiveIndex] = useState();
   const [disable, setDisable] = useState(false);
+
+const [loading, setLoading] = useState(true);
 
   const width = Dimensions.get("window").width;
   const height = Dimensions.get("window").height;
@@ -207,6 +206,7 @@ const EventTickets = ({ navigation, route }) => {
         var eventTickets = response[0].tickets;
         if (message === "succeed") {
           setTickets(eventTickets);
+          setLoading(false);
           setExist(true);
         } else if (message === "no tickets") {
           setTickets([]);
@@ -308,7 +308,7 @@ const EventTickets = ({ navigation, route }) => {
             </View>
           </View>
         </View>
-
+       
         {exist ? (
           <Text
             style={[
@@ -319,15 +319,20 @@ const EventTickets = ({ navigation, route }) => {
             Avaliable Tickets
           </Text>
         ) : null}
-
-        {exist ? (
+  
+  {loading ? (
+<View>
+  <ActivityIndicator size="large" color={Constants.primary}/>
+</View>
+  ):
+        exist ? (
           ticket.map((tik, index) => (
             <View
               key={tik.id}
               style={[
                 styles.TicketView,
                 active === index
-                  ? { borderLeftWidth: 3, borderLeftColor: Constants.primary }
+                  ? { borderLeftWidth: 3, borderLeftColor: Constants.Inverse }
                   : null,
               ]}
             >
@@ -335,7 +340,7 @@ const EventTickets = ({ navigation, route }) => {
                 <View style={styles.IconWrapper}>
                   <MaterialCommunityIcons
                     name={TicketName(tik.tickettype)}
-                    size={22}
+                    size={24}
                     color={TicketColor(tik.tickettype)}
                   />
                 </View>
@@ -491,8 +496,6 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     height: "100%",
     width: "50%",
-    
-    
   },
   image: {
     borderRadius: Constants.medium,
@@ -502,9 +505,9 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.background,
     marginLeft: 8,
     marginRight: 8,
-    padding:4,
-    borderWidth:4,
-    borderColor: Constants.background
+    padding: 4,
+    borderWidth: 4,
+    borderColor: Constants.background,
   },
   DiscriptionText: {
     marginLeft: 16,
@@ -523,9 +526,8 @@ const styles = StyleSheet.create({
   H4Text: {
     fontSize: Constants.headingthree,
     fontWeight: Constants.Boldtwo,
-    color:Constants.Inverse,
+    color: Constants.Inverse,
     paddingLeft: 10,
-    
   },
   Date: {
     marginTop: 14,
@@ -578,7 +580,7 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.background,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius:8,
+    borderRadius: 8,
     justifyContent: "space-between",
     shadowOffset: {
       width: 0,
@@ -602,16 +604,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   price: {
-    color: Constants.Success,
+    color: Constants.Inverse,
   },
   productTitle: {
-    fontSize: Constants.headingtwo,
-    fontWeight: Constants.Boldtwo,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Bold,
     color: Constants.Inverse,
   },
   productCompanyTitle: {
-    fontSize: 16,
-    fontWeight: "300",
+    // fontSize: 16,
+    // fontWeight: "300",
   },
   productRightView: {
     alignItems: "center",
@@ -715,7 +717,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     padding: 20,
-
   },
   NoText: {
     fontWeight: Constants.Boldtwo,

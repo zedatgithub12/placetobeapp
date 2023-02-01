@@ -46,7 +46,7 @@ const EventDetails = ({ route, navigation }) => {
   const date = new Date();
   var hour = date.getHours();
   var minute = date.getMinutes();
-  // console.log(hour+":" +minute);
+
   var Timing = hour + ":" + minute;
 
   const [timing, setTime] = useState({
@@ -358,7 +358,7 @@ const EventDetails = ({ route, navigation }) => {
         let message = response[0].message;
         let follow = response[0].follow;
         let profile = response[0].profile;
-        console.log(profile);
+ 
         if (featchOrganizer) {
           if (message === "succeed") {
             setEventOrg({

@@ -1,12 +1,15 @@
 //import liraries
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-
+import BoughtTicket from "../Components/BoughtTicket";
 // create a component
 const UserTickets = () => {
     return (
         <View style={styles.container}>
-            <Text>UserTickets</Text>
+           <BoughtTicket/>
+           <BoughtTicket/>
+           <BoughtTicket/>
+           <BoughtTicket/>
         </View>
     );
 };
@@ -15,8 +18,7 @@ const UserTickets = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        
       
     },
 });

@@ -32,7 +32,7 @@ const TicketCard = ({title,picture,type, price, onPress,EventName }) => {
            numberOfLines={1} style={styles.VenueName}>
             {title}
           </Text>
-          <Caption style={styles.date}>{type}</Caption>
+          <Caption style={styles.date}>{type} Ticket</Caption>
 
           <View style={styles.pricesection}>
             <View style={styles.price}>

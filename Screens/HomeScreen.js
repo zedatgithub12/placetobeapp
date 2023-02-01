@@ -25,7 +25,11 @@ import TicketCard from "../Components/TicketCard";
 import TicketData from "../src/Tickets";
 import FeaturedEvent from "../Components/FeaturedEvents";
 import FeaturedShimmer from "../Components/FeaturedEventsShimmer";
-import TicketShimmer from '../Components/TicketShimmer';
+import TicketShimmer from "../Components/TicketShimmer";
+
+
+
+
 function Home({ navigation, ...props }) {
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
 
@@ -226,9 +230,7 @@ function Home({ navigation, ...props }) {
           var FeaturedEvent = response[0].Events;
           setEvents(FeaturedEvent);
           setEventShimmer(false);
-          console.log(message);
         } else {
-          console.log(message);
           setEventShimmer(true);
         }
       })
@@ -369,11 +371,11 @@ function Home({ navigation, ...props }) {
           }}
         >
           {ticketShimmer ? (
-            <View style={{flexDirection:"row"}}>
-            <TicketShimmer/>
-            <TicketShimmer/>
-            <TicketShimmer/>
-            <TicketShimmer/>
+            <View style={{ flexDirection: "row" }}>
+              <TicketShimmer />
+              <TicketShimmer />
+              <TicketShimmer />
+              <TicketShimmer />
             </View>
           ) : (
             Tickets.map((item) => (
@@ -396,7 +398,7 @@ function Home({ navigation, ...props }) {
           <Text style={styles.ticketTitle}>Featured Events</Text>
           <Pressable>
             <Ionicons
-            onPress={()=> navigation.navigate("Events")}
+              onPress={() => navigation.navigate("Events")}
               name="md-grid-outline"
               size={18}
               color={Constants.Inverse}
@@ -404,31 +406,32 @@ function Home({ navigation, ...props }) {
           </Pressable>
         </View>
 
-        <View style={{ backgroundColor: Constants.Faded }}>
+        <View
+          style={{ backgroundColor: Constants.background, marginBottom: 55 }}
+        >
           {eventShimmer ? (
             <View>
-          <FeaturedShimmer/>
-          <FeaturedShimmer/>
-          <FeaturedShimmer/>
-          <FeaturedShimmer/>
-          </View>
+              <FeaturedShimmer />
+              <FeaturedShimmer />
+              <FeaturedShimmer />
+              <FeaturedShimmer />
+            </View>
           ) : events.length == 0 ? (
             <View>
               <Text>No event</Text>
             </View>
           ) : (
-            events.map((item) =>(
-                <FeaturedEvent
-                  key={item.event_id}
-                  picture={item.event_image}
-                  title={item.event_name}
-                  organizer={item.event_organizer}
-                  onPress={() =>
-                    navigation.navigate("EventDetail", { id: item.event_id })
-                  }
-                />
-              )
-            )
+            events.map((item) => (
+              <FeaturedEvent
+                key={item.event_id}
+                picture={item.event_image}
+                title={item.event_name}
+                organizer={item.event_organizer}
+                onPress={() =>
+                  navigation.navigate("EventDetail", { id: item.event_id })
+                }
+              />
+            ))
           )}
         </View>
       </ScrollView>
@@ -557,10 +560,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 12,
-    padding: 6,
+    paddingVertical: 6,
     margin: 4,
-    marginTop: 8,
-    marginBottom: 0,
+    marginTop:10,
     backgroundColor: Constants.background,
   },
   ticketTitle: {

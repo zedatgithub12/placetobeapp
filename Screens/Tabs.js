@@ -39,8 +39,7 @@ function TabNav({ navigation }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarShowLabel: false,
-
+       
         tabBarStyle: {
           position: "absolute",
           bottom: 0,
@@ -60,7 +59,7 @@ function TabNav({ navigation }) {
         component={Home}
         options={{
           headerShown: false,
-
+      
           tabBarIcon: ({ focused, color }) => (
             <Feather
               name="home"
@@ -98,16 +97,18 @@ function TabNav({ navigation }) {
         name="Add Event"
         component={EventSubmission}
         options={{
-       
+         
          headerTitleAlign: "center",
          headerStyle: {
           backgroundColor: Constants.primary,
         },
         headerTintColor: Constants.Inverse,
-          tabBarIcon: ({ focused }) => (
-            <Feather name="plus" size={22} color={Constants.Inverse} />
+        
+          tabBarIcon: ({ focused, color }) => (
+            <Feather name="plus" size={22} color={color.Inverse} />
           ),
           tabBarButton: (props) => <AddEvent {...props} />,
+          
         }}
       />
        <Tab.Screen
@@ -128,9 +129,6 @@ function TabNav({ navigation }) {
           ),
           tabBarActiveTintColor: Constants.primary,
           tabBarInactiveTintColor: Constants.Inverse,
-          
-   
-          
         }}
       />
 
