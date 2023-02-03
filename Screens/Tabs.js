@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import Constants from "../constants/Constants";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./HomeScreen";
-import { Feather,Ionicons, MaterialCommunityIcons, SimpleLineIcons} from "react-native-vector-icons";
+import { Feather,Ionicons, MaterialCommunityIcons, SimpleLineIcons,AntDesign} from "react-native-vector-icons";
 import EventSubmission from "./SubmitEvent";
 import Notifications from "./Notifications";
 import Events from "./Events";
@@ -103,12 +103,15 @@ function TabNav({ navigation }) {
           backgroundColor: Constants.primary,
         },
         headerTintColor: Constants.Inverse,
-        
+        tabBarLabel: "Add Event",
+
           tabBarIcon: ({ focused, color }) => (
-            <Feather name="plus" size={22} color={color.Inverse} />
+            <SimpleLineIcons name="plus" size={24} color={color} />
           ),
-          tabBarButton: (props) => <AddEvent {...props} />,
-          
+          // tabBarButton: (props) => <AddEvent {...props} />,
+
+          tabBarActiveTintColor: Constants.primary,
+          tabBarInactiveTintColor: Constants.Inverse,
         }}
       />
        <Tab.Screen

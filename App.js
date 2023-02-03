@@ -52,7 +52,9 @@ import UpdateEvent from "./Screens/UpdateEvent";
 import UpdateSucceed from "./Screens/UpdateSucceed";
 import CheckoutScreen from "./Screens/CheckoutScreen";
 import EventTickets from "./Screens/EventTickets";
-import Events from './Screens/Events';
+import Events from "./Screens/Events";
+import BoughtDetail from "./Screens/BoughtTicketDetail";
+
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
 const prefix = Linking.createURL("com.afromina.placetobe://");
@@ -63,19 +65,19 @@ export default function App() {
   const Linking = {
     prefixes: [prefix],
     config: {
-      initialRouteName: 'TabNav',
+      initialRouteName: "TabNav",
       screens: {
         TabNav: {
-          path: 'tabNav'
+          path: "tabNav",
         },
-        Profile:{
-          path: 'profile'
+        Profile: {
+          path: "profile",
         },
         EventDetail: {
-          path: 'eventDetail/:externalLink'
-        }
-      }
-    }
+          path: "eventDetail/:externalLink",
+        },
+      },
+    },
   };
 
   const initialLoginState = {
@@ -440,7 +442,14 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <AuthContext.Provider value={authContext}>
-          <NavigationContainer linking={Linking}  fallback={<View style={styles.loader}><ActivityIndicator color={Constants.primary} size="large" /></View>}>
+          <NavigationContainer
+            linking={Linking}
+            fallback={
+              <View style={styles.loader}>
+                <ActivityIndicator color={Constants.primary} size="large" />
+              </View>
+            }
+          >
             <StatusBar style={Constants.Inverse} />
             {connectionState ? (
               <Stack.Navigator headerMode="none" initialRouteName="TabNav">
@@ -502,7 +511,7 @@ export default function App() {
                     headerShadowVisible: false,
                   }}
                 />
-                 
+
                 <Stack.Screen
                   name="EventDetail"
                   component={EventDetails}
@@ -687,7 +696,7 @@ export default function App() {
                     headerShown: false,
                   }}
                 />
-                
+
                 <Stack.Screen
                   name="TicketScreen"
                   component={EventTickets}
@@ -700,8 +709,6 @@ export default function App() {
                     headerShadowVisible: false,
                   }}
                 />
-               
-          
 
                 <Stack.Screen
                   name="Checkout Screen"
@@ -713,6 +720,26 @@ export default function App() {
                     },
                     headerTintColor: Constants.background,
                     headerShadowVisible: false,
+                  }}
+                />
+
+                <Stack.Screen
+                  name="BoughtDetail"
+                  component={BoughtDetail}
+                  options={{
+                    title: "Ticket Detail",
+                    headerStyle: {
+                      backgroundColor: Constants.primary,
+                      
+                    },
+                    headerTintColor: Constants.Inverse,
+                    headerShadowVisible: false,
+                    headerTitleAlign: "center",
+                    headerTitleStyle:{
+                     
+                      fontStyle: "italic",
+                      fontSize: Constants.headingone
+                    }
                   }}
                 />
               </Stack.Navigator>
@@ -780,9 +807,9 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
   },
-  loader:{
-    flex:1,
-    justifyContent:"center",
-    alignItems:"center",
-  }
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

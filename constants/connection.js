@@ -50,6 +50,7 @@ const Connection = {
   reservation: "Reservation.php",
   AvailableTickets: "AvailableTickets.php",
   FeaturedEvent: "FeaturedEvent.php",
+  boughtTickets: "boughtTickets.php",
 };
 
 export default Connection;

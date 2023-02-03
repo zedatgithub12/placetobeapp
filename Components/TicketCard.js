@@ -26,7 +26,7 @@ const TicketCard = ({title,picture,type, price, onPress,EventName }) => {
           />
         </View>
 
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardContent}>
           <Text
           
            numberOfLines={1} style={styles.VenueName}>
@@ -44,7 +44,7 @@ const TicketCard = ({title,picture,type, price, onPress,EventName }) => {
               <Text style={styles.checkin}>Buy</Text>
             </TouchableOpacity>
           </View>
-        </Card.Content>
+        </View>
       </Pressable>
     </Card>
   );
@@ -73,6 +73,8 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     paddingVertical: 2,
+    padding:6,
+
   },
   VenueName: {
     fontSize: Constants.headingthree,

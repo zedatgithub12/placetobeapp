@@ -1,44 +1,46 @@
 //import liraries
 import React, { Component } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableNativeFeedback,
+} from "react-native";
 import Constants from "../constants/Constants";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
-// import SvgQRCode from 'react-native-qrcode-svg';
 
 // create a component
-const BoughtTicket = ({ icon, title, quantity, type }) => {
-  // function Simple() {
-  //     return <SvgQRCode value="http://example.com" />;
-  //   }
+const BoughtTicket = ({ iconName,iconColor, title, quantity, type, onPress }) => {
+ 
 
-  // 20% (default) sized logo from local file string with white logo backdrop
-  //   function LogoFromFile() {
-  //     let logoFromFile = require('../assets/logo.png');
-
-  //     return <SvgQRCode value="Just some string value" logo={logoFromFile} />;
-  //   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.IconContainer}>
-        <MaterialCommunityIcons
-          name={icon}
-          size={24}
-          color={Constants.PrimaryBlue}
-        />
-      </View>
+    <TouchableNativeFeedback onPress={onPress}>
+      <View style={styles.container}>
+        <View style={styles.IconContainer}>
+          <MaterialCommunityIcons
+            name={iconName}
+            size={24}
+            color={iconColor}
+          />
+        </View>
 
-      <View style={styles.txtcontent}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.tickettype}>
-          {quantity} * {type}
-        </Text>
-      </View>
+        <View style={styles.txtcontent}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.tickettype}>
+            {quantity} {type} Ticket
+          </Text>
+        </View>
 
-      <View style={styles.qrcodecontainer}>
-        <Image style={styles.qrcode} source={require("../assets/qrcode.png")} />
+        <View style={styles.qrcodecontainer}>
+          <Image
+            style={styles.qrcode}
+            source={require("../assets/qrcode.png")}
+          />
+        </View>
       </View>
-    </View>
+    </TouchableNativeFeedback>
   );
 };
 
@@ -52,7 +54,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     margin: 6,
-    marginVertical: 1,
+   
+    marginVertical: 2,
     borderRadius: Constants.mediumbox,
   },
   IconContainer: {
@@ -70,6 +73,7 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     color: Constants.Inverse,
     marginLeft: 12,
+    textTransform: "capitalize",
   },
   tickettype: {
     fontSize: Constants.headingthree,
@@ -77,14 +81,19 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     color: Constants.Inverse,
     marginLeft: 12,
+    textTransform: "capitalize",
   },
   qrcodecontainer: {
+    position: "absolute",
+    right: 6,
     margin: 4,
     padding: 2,
+    backgroundColor: Constants.Faded,
+    borderRadius: 4,
   },
   qrcode: {
-    width: 30,
-    height: 30,
+    width: 36,
+    height: 36,
   },
 });
 

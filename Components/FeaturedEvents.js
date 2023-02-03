@@ -41,8 +41,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     margin: 2,
     padding:3,
-    borderWidth:0.2,
-    borderColor:Constants.Secondary
+
   },
   featuredEventImage: {
     borderRadius: Constants.mediumbox,

@@ -26,6 +26,8 @@ import TicketData from "../src/Tickets";
 import FeaturedEvent from "../Components/FeaturedEvents";
 import FeaturedShimmer from "../Components/FeaturedEventsShimmer";
 import TicketShimmer from "../Components/TicketShimmer";
+import Events from "../Components/Events";
+import Listing from "../Components/ListShimmer";
 
 
 
@@ -239,7 +241,111 @@ function Home({ navigation, ...props }) {
         console.log(error);
       });
   };
+  /********************************************************** */
+  //date function which perform date format conversion and return the suitable format for frontend
+  /********************************************************** */
+  const DateFun = (startingDate) => {
+    var date = new Date(startingDate);
+    let day = date.getDay();
+    let month = date.getMonth();
+    let happeningDay = date.getDate();
 
+    // return weekname
+    var weekday = new Array(7);
+    weekday[1] = "Mon, ";
+    weekday[2] = "Tue, ";
+    weekday[3] = "Wed, ";
+    weekday[4] = "Thu, ";
+    weekday[5] = "Fri, ";
+    weekday[6] = "Sat, ";
+    weekday[0] = "Sun, ";
+
+    //an array of month name
+    var monthName = new Array(12);
+    monthName[1] = "Jan";
+    monthName[2] = "Feb";
+    monthName[3] = "Mar";
+    monthName[4] = "Apr";
+    monthName[5] = "May";
+    monthName[6] = "Jun";
+    monthName[7] = "Jul";
+    monthName[8] = "Aug";
+    monthName[9] = "Sep";
+    monthName[10] = "Oct";
+    monthName[11] = "Nov";
+    monthName[12] = "Dec";
+
+    return weekday[day] + monthName[month + 1] + " " + happeningDay;
+  };
+  const TimeFun = (eventTime) => {
+    var time = eventTime;
+    var result = time.slice(0, 2);
+    var minute = time.slice(3, 5);
+    var globalTime;
+    var postMeridian;
+    var separator = ":";
+    if (result > 12) {
+      postMeridian = result - 12;
+      globalTime = "PM";
+    } else {
+      postMeridian = result;
+      globalTime = "AM";
+    }
+
+    return postMeridian + separator + minute + " " + globalTime;
+  };
+  const EntranceFee = (price) => {
+    var eventPrice;
+    var free = "Free";
+    var currency = " ETB";
+    if (price != 0) {
+      eventPrice = price + currency;
+    } else {
+      eventPrice = free;
+    }
+    return eventPrice;
+  };
+  // events category color
+  const CategoryColor = (category) => {
+    var color;
+    switch (category) {
+      case "Entertainment":
+        color = "#007bc2";
+        break;
+      case "Travelling":
+        color = "#0c790c";
+        break;
+
+      case "Cinema & Theater":
+        color = "#00e8e0";
+        break;
+
+      case "Community":
+        color = "#F96666";
+        break;
+      case "Trade Fairs & Expo":
+        color = "#f57a00";
+        break;
+      case "Nightlife":
+        color = "#472D2D";
+        break;
+      case "Professional":
+        color = "#2c2e27";
+        break;
+      case "Shopping":
+        color = "#9306c2";
+        break;
+      case "Sport":
+        color = "#ff0571";
+        break;
+      case "Others":
+        color = "#e8b200";
+        break;
+      default:
+        color = "#ffbb00";
+    }
+    return color;
+  };
   const [shown, setShown] = useState(true);
   useEffect(() => {
     userInfoFunction();
@@ -411,10 +517,10 @@ function Home({ navigation, ...props }) {
         >
           {eventShimmer ? (
             <View>
-              <FeaturedShimmer />
-              <FeaturedShimmer />
-              <FeaturedShimmer />
-              <FeaturedShimmer />
+               <Listing />
+               <Listing />
+               <Listing />
+          
             </View>
           ) : events.length == 0 ? (
             <View>
@@ -422,15 +528,19 @@ function Home({ navigation, ...props }) {
             </View>
           ) : (
             events.map((item) => (
-              <FeaturedEvent
-                key={item.event_id}
-                picture={item.event_image}
-                title={item.event_name}
-                organizer={item.event_organizer}
-                onPress={() =>
-                  navigation.navigate("EventDetail", { id: item.event_id })
-                }
-              />
+              <Events
+              key={item.event_id}
+              Event_Id={item.event_id}
+              org_id={item.userId}
+              FeaturedImage={item.event_image}
+              title={item.event_name}
+              date={DateFun(item.start_date)}
+              time={TimeFun(item.start_time)}
+              venue={item.event_address}
+              category={CategoryColor(item.category)}
+              Price={EntranceFee(item.event_entrance_fee)}
+              onPress={() => navigation.navigate("EventDetail",   {id:item.event_id} )}
+            />
             ))
           )}
         </View>
