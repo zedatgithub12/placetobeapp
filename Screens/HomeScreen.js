@@ -29,9 +29,6 @@ import TicketShimmer from "../Components/TicketShimmer";
 import Events from "../Components/Events";
 import Listing from "../Components/ListShimmer";
 
-
-
-
 function Home({ navigation, ...props }) {
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
 
@@ -346,6 +343,18 @@ function Home({ navigation, ...props }) {
     }
     return color;
   };
+
+  // check if there is discount on ticket price and let them know there is discount
+  const discount = (current, origional) => {
+    var discount = origional - current;
+
+    if (discount > 0) {
+      return origional + " Birr";
+    } else {
+      return discount;
+    }
+  };
+
   const [shown, setShown] = useState(true);
   useEffect(() => {
     userInfoFunction();
@@ -473,6 +482,7 @@ function Home({ navigation, ...props }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
             marginLeft: 8,
+            paddingRight:12,
             backgroundColor: Constants.background,
           }}
         >
@@ -489,8 +499,9 @@ function Home({ navigation, ...props }) {
                 key={item.id}
                 picture={item.event_image}
                 title={item.event_name}
-                price={item.currentprice}
                 type={item.tickettype}
+                price={item.currentprice}
+                discount={discount(item.currentprice, item.origionalprice)}
                 EventName={() =>
                   navigation.navigate("EventDetail", { id: item.event_id })
                 }
@@ -517,10 +528,9 @@ function Home({ navigation, ...props }) {
         >
           {eventShimmer ? (
             <View>
-               <Listing />
-               <Listing />
-               <Listing />
-          
+              <Listing />
+              <Listing />
+              <Listing />
             </View>
           ) : events.length == 0 ? (
             <View>
@@ -529,18 +539,20 @@ function Home({ navigation, ...props }) {
           ) : (
             events.map((item) => (
               <Events
-              key={item.event_id}
-              Event_Id={item.event_id}
-              org_id={item.userId}
-              FeaturedImage={item.event_image}
-              title={item.event_name}
-              date={DateFun(item.start_date)}
-              time={TimeFun(item.start_time)}
-              venue={item.event_address}
-              category={CategoryColor(item.category)}
-              Price={EntranceFee(item.event_entrance_fee)}
-              onPress={() => navigation.navigate("EventDetail",   {id:item.event_id} )}
-            />
+                key={item.event_id}
+                Event_Id={item.event_id}
+                org_id={item.userId}
+                FeaturedImage={item.event_image}
+                title={item.event_name}
+                date={DateFun(item.start_date)}
+                time={TimeFun(item.start_time)}
+                venue={item.event_address}
+                category={CategoryColor(item.category)}
+                Price={EntranceFee(item.event_entrance_fee)}
+                onPress={() =>
+                  navigation.navigate("EventDetail", { id: item.event_id })
+                }
+              />
             ))
           )}
         </View>
@@ -672,7 +684,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     margin: 4,
-    marginTop:10,
+    marginTop: 10,
     backgroundColor: Constants.background,
   },
   ticketTitle: {

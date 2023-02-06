@@ -30,6 +30,7 @@ import Share from "react-native-share";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 import * as Animatable from "react-native-animatable";
 import DetailShimmer from "../Components/DetailShimmer";
+import MapView from "react-native-maps";
 
 const EventDetails = ({ route, navigation }) => {
   const params = route.params || {};
@@ -358,7 +359,7 @@ const EventDetails = ({ route, navigation }) => {
         let message = response[0].message;
         let follow = response[0].follow;
         let profile = response[0].profile;
- 
+
         if (featchOrganizer) {
           if (message === "succeed") {
             setEventOrg({

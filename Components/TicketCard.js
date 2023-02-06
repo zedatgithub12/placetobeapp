@@ -9,11 +9,19 @@ import {
 } from "react-native";
 import Constants from "../constants/Constants";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
-import { Card,Caption } from "react-native-paper";
+import { Card, Caption } from "react-native-paper";
 import Connection from "../constants/connection";
 
 // create a component
-const TicketCard = ({title,picture,type, price, onPress,EventName }) => {
+const TicketCard = ({
+  title,
+  picture,
+  type,
+  price,
+  onPress,
+  EventName,
+  discount,
+}) => {
   const featuredImageUri = Connection.url + Connection.assets;
   return (
     <Card style={styles.EventContainer}>
@@ -27,24 +35,30 @@ const TicketCard = ({title,picture,type, price, onPress,EventName }) => {
         </View>
 
         <View style={styles.cardContent}>
-          <Text
-          
-           numberOfLines={1} style={styles.VenueName}>
+          <Text numberOfLines={1} style={styles.TicketName}>
             {title}
           </Text>
-          <Caption style={styles.date}>{type} Ticket</Caption>
+          <Text style={styles.type}>{type} Ticket</Text>
 
           <View style={styles.pricesection}>
             <View style={styles.price}>
-              <Text style={styles.pricetxts}>{price}</Text>
-              <Text style={styles.pricetxts}> ETB</Text>
+              <Text style={styles.pricetxts} numberOfLines={1}>{price}</Text>
+              <Text style={styles.pricetxts} numberOfLines={1}> Birr</Text>
             </View>
-
-            <TouchableOpacity activeOpacity={0.7} onPress={onPress}>
-              <Text style={styles.checkin}>Buy</Text>
-            </TouchableOpacity>
+            <View>
+              <Text style={styles.discount} numberOfLines={1}>
+                {discount == 0 ? null : discount}
+              </Text>
+            </View>
           </View>
         </View>
+        <TouchableOpacity
+          style={styles.checkinbtn}
+          activeOpacity={0.7}
+          onPress={onPress}
+        >
+          <Text style={styles.checkin}>Buy</Text>
+        </TouchableOpacity>
       </Pressable>
     </Card>
   );
@@ -53,17 +67,16 @@ const TicketCard = ({title,picture,type, price, onPress,EventName }) => {
 // define your styles
 const styles = StyleSheet.create({
   EventContainer: {
-    width: 150,
-    height: 178,
+    width: 115,
+    height: 150,
     justifyContent: "center",
     backgroundColor: Constants.background,
-    margin: 4,
+    margin: 3,
     paddingBottom: 12,
-    //elevation: 4,
   },
   ImageContainer: {
     width: "100%",
-    height: 100,
+    height: 84,
   },
   FeaturedImagestyle: {
     width: "100%",
@@ -73,43 +86,61 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     paddingVertical: 2,
-    padding:6,
-
+    padding: 6,
   },
-  VenueName: {
+  TicketName: {
     fontSize: Constants.headingthree,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     color: Constants.Inverse,
     alignSelf: "flex-start",
+    width: "100%",
   },
-  price: {
+  type: {
+    fontFamily: Constants.fontFam,
+    fontWeight: Constants.Boldtwo,
+    fontSize: Constants.textSize,
+  },
+
+  checkinbtn: {
     flexDirection: "row",
     position: "absolute",
-    bottom: -24,
-    left: 0,
+    right: 0,
   },
   checkin: {
-    position: "absolute",
-    bottom: -26,
-    right: 0,
-    borderRadius: Constants.tinybox,
-    padding: 2,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     justifyContent: "center",
     backgroundColor: Constants.primary,
     fontWeight: Constants.Boldtwo,
-    color: Constants.mainText,
+    color: Constants.Inverse,
     textAlign: "center",
+    borderBottomLeftRadius: 4,
+    borderTopRightRadius:4,
+    fontSize: Constants.headingthree,
   },
   pricesection: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  pricetxts: {
-    fontWeight: Constants.Boldtwo,
-    color: Constants.mainText,
+  price: {
+    flexDirection: "row",
   },
+  pricetxts: {
+    fontSize: Constants.textSize,
+    fontWeight: Constants.Bold,
+    color: Constants.Inverse,
+    marginTop: 4,
+  },
+  discount:{
+    fontSize: Constants.textSize,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.primary,
+    marginTop: 4,
+    textDecorationLine: 'line-through',
+     textDecorationStyle: 'solid',
+     
+  }
+
 });
 
 //make this component available to the app

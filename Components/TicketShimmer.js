@@ -11,9 +11,9 @@ const TicketShimmer = () => {
         <View style={styles.ImageContainer} />
         <View style={styles.VenueName} />
         <View style={styles.type}/>
-        
+
             <View style={styles.price}/>
-            <View style={styles.checkin}/>
+            
      
       </View>
     </SkeletonPlaceholder>
@@ -23,21 +23,21 @@ const TicketShimmer = () => {
 // define your styles
 const styles = StyleSheet.create({
   EventContainer: {
-    width: 150,
-    height: 178,
+    width: 130,
+    height: 152,
     justifyContent: "center",
     margin: 4,
     //elevation: 4,
   },
   ImageContainer: {
     width: "100%",
-    height: 100,
+    height: 84,
     borderTopRightRadius: 6,
     borderTopLeftRadius: 6,
   },
 
   VenueName: {
-    width: "90%",
+    width: "96%",
     height: 12,
     margin:4,
     marginLeft:0,
@@ -46,16 +46,16 @@ const styles = StyleSheet.create({
     
   },
   type:{
-    width: "70%",
-    height: 8,
-    borderRadius:3,
+    width: "80%",
+    height: 12,
+    borderRadius:2,
     marginLeft:0,
-    marginTop:5,
+    marginTop:0,
   },
   price: {
   width: "63%",
-  height: 12,
-  marginTop:14,
+  height: 10,
+  marginTop:5,
   marginLeft:0,
   borderRadius:2
   
