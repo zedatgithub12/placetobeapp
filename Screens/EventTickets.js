@@ -34,15 +34,13 @@ const EventTickets = ({ navigation, route }) => {
   // const { totalCount, totalAmount } = useSelector((state) => state.ticket);
   const [amount, setAmount] = useState(0);
   const [price, setPrice] = useState();
-  const [total, setTotal] = useState();
   const [ticket, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState();
   const [exist, setExist] = useState(true);
-  //const [visible, setVisible] = useState(true);
   const [active, setActiveIndex] = useState();
   const [disable, setDisable] = useState(false);
-
-const [loading, setLoading] = useState(true);
+  const [event, setEvents] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const width = Dimensions.get("window").width;
   const height = Dimensions.get("window").height;
@@ -204,13 +202,17 @@ const [loading, setLoading] = useState(true);
       .then((response) => {
         var message = response[0].message;
         var eventTickets = response[0].tickets;
+        var Event = response[0].Events[0];
+     
         if (message === "succeed") {
           setTickets(eventTickets);
+          setEvents(Event);
           setLoading(false);
           setExist(true);
         } else if (message === "no tickets") {
-          setTickets([]);
+          setLoading(false);
           setExist(false);
+      
         }
       })
       .catch((error) => {
@@ -264,11 +266,17 @@ const [loading, setLoading] = useState(true);
     return () => {
       isSubcribed = false;
     };
-  }, [ticket]);
+  }, []);
 
   return (
     <SafeAreaView style={styles.Main}>
+       {loading ? (
+          <View>
+            <ActivityIndicator size="large" color={Constants.primary} />
+          </View>
+        ) : (
       <View>
+        
         <View
           style={[
             styles.ticketsdescription,
@@ -279,37 +287,52 @@ const [loading, setLoading] = useState(true);
             <Image
               style={styles.image}
               source={{
-                uri: featuredImageUri + item.event_image,
+                uri: featuredImageUri + event.event_image,
               }}
             />
           </View>
 
           <View style={[styles.DiscriptionText]}>
             <View>
-              <Text style={[styles.H1Text]}>{item.event_name}</Text>
+              <Text style={[styles.H1Text]}>{event.event_name}</Text>
             </View>
 
             <View style={[styles.Date]}>
               <MaterialCommunityIcons
-                name="check-circle-outline"
+                name="calendar-clock-outline"
                 size={16}
                 color={Constants.Inverse}
               />
-              <Text style={[styles.H4Text]}>{DateFun(item.start_date)}</Text>
+              <Text style={[styles.H4Text]} numberOfLines={1}>
+                {DateFun(event.start_date)}
+              </Text>
             </View>
 
             <View style={[styles.Date]}>
               <MaterialCommunityIcons
-                name="check-circle-outline"
+                name="map-marker-radius-outline"
                 size={16}
                 color={Constants.Inverse}
               />
-              <Text style={[styles.H4Text]}>{item.event_address}</Text>
+              <Text style={[styles.H4Text]} numberOfLines={2}>
+                {event.event_address}
+              </Text>
+            </View>
+
+            <View style={[styles.Date]}>
+              <MaterialCommunityIcons
+                name="account-group-outline"
+                size={16}
+                color={Constants.Inverse}
+              />
+              <Text style={[styles.H4Text]} numberOfLines={2}>
+                {event.event_organizer}
+              </Text>
             </View>
           </View>
         </View>
-       
-        {exist ? (
+
+      
           <Text
             style={[
               styles.H1Text,
@@ -318,14 +341,9 @@ const [loading, setLoading] = useState(true);
           >
             Avaliable Tickets
           </Text>
-        ) : null}
-  
-  {loading ? (
-<View>
-  <ActivityIndicator size="large" color={Constants.primary}/>
-</View>
-  ):
-        exist ? (
+        
+
+       { exist ? (
           ticket.map((tik, index) => (
             <View
               key={tik.id}
@@ -453,7 +471,8 @@ const [loading, setLoading] = useState(true);
           </View>
         )}
       </View>
-
+        )
+}
       {disable && (
         <View style={[styles.bottomNavigationView]}>
           <View></View>
@@ -519,6 +538,7 @@ const styles = StyleSheet.create({
     width: "50%",
   },
   H1Text: {
+    fontFamily: Constants.fontFam,
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
     color: Constants.Inverse,

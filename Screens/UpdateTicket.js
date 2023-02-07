@@ -213,7 +213,7 @@ const TicketAmount = (ticketamount)=>{
 
       <Image
         //Featured Image of the event
-        source={{ uri: featuredImageUri + poster }} //featured image source
+        source={{ uri: featuredImageUri + item.event_image}} //featured image source
         resizeMode="cover"
         style={styles.eventPoster} //featured image styles
       />
