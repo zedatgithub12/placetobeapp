@@ -12,6 +12,7 @@ import {
 import {Caption, HelperText, Title } from "react-native-paper";
 import Constants from "../constants/Constants";
 import { MaterialCommunityIcons,AntDesign,Ionicons } from "react-native-vector-icons";
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { AuthContext } from "./context";
 import * as Animatable from "react-native-animatable";
 import Category from "../src/Category";
@@ -338,13 +339,22 @@ const FormThree = () => {
           size={24}
           color={Constants.purple}
         />
-        <TextInput
+        <GooglePlacesAutocomplete
           placeholder="Event Address"
           style={styles.selectDateBtn}
           value={inputs.eventAddress}
           onChangeText={(address) => updateEventAdress(address)}
           onBlur={() => storeValueGlobalScope()}
+          onPress={(data, details = null) => {
+            // 'details' is provided when fetchDetails = true
+            console.log(data, details);
+          }}
+          query={{
+            key: 'AIzaSyDEGK4PwL7O726B8Eua11qnR1lGoZcMAhM',
+            language: 'en',
+          }}
         />
+        
         {
           //check button on validation of input field
           inputs.eventAddressCheckIcon ? (
