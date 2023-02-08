@@ -7,15 +7,30 @@ import {
   Modal,
   Pressable,
   FlatList,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
-import {Caption, HelperText, Title } from "react-native-paper";
+import { Caption, HelperText, Title } from "react-native-paper";
 import Constants from "../constants/Constants";
-import { MaterialCommunityIcons,AntDesign,Ionicons } from "react-native-vector-icons";
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import {
+  MaterialCommunityIcons,
+  AntDesign,
+  Ionicons,
+} from "react-native-vector-icons";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { AuthContext } from "./context";
 import * as Animatable from "react-native-animatable";
 import Category from "../src/Category";
+
+navigator.geolocation = require("@react-native-community/geolocation");
+
+const homePlace = {
+  description: "Home",
+  geometry: { location: { lat: 8.9633398, lng: 38.7081047 } },
+};
+const workPlace = {
+  description: "Work",
+  geometry: { location: { lat: 8.9633398, lng: 38.7081047 } },
+};
 
 const FormThree = () => {
   // a useContent hook which will treat all input value as global variables
@@ -117,6 +132,7 @@ const FormThree = () => {
 
   // function for to be called when event address field gets updated
   const updateEventAdress = (address) => {
+    console.log(inputs.eventAddress);
     if (address.length <= 3) {
       setInputs({
         ...inputs,
@@ -174,10 +190,9 @@ const FormThree = () => {
   /**************************************************** */
   //rendered category list which i shown in the modal when user click on slect catory button
   /**************************************************** */
-  const [category, setCategory] = useState("Select category"); 
+  const [category, setCategory] = useState("Select category");
   const [modalVisible, setModalVisible] = useState(false);
   const [catCheck, setCatCheck] = useState(false);
-
 
   const OnSelectCategory = (itemName) => {
     setCategory(itemName);
@@ -187,13 +202,12 @@ const FormThree = () => {
       ...inputs,
 
       catBorder: Constants.Success,
-   
     });
   };
   //render category list
   const renderCategory = ({ item }) => (
     <TouchableOpacity
-      style={[styles.CategoryList, {backgroundColor:item.background}]}
+      style={[styles.CategoryList, { backgroundColor: item.background }]}
       onPress={() => OnSelectCategory(item.name)}
     >
       <Text style={styles.catName}>{item.name}</Text>
@@ -295,7 +309,11 @@ const FormThree = () => {
             onPress={() => setModalVisible(true)}
           >
             <Text style={styles.selectedCategory}>{category}</Text>
-            <Ionicons name="chevron-down-outline" size={22} color={Constants.purple} />
+            <Ionicons
+              name="chevron-down-outline"
+              size={22}
+              color={Constants.purple}
+            />
           </Pressable>
         </View>
 
@@ -341,20 +359,40 @@ const FormThree = () => {
         />
         <GooglePlacesAutocomplete
           placeholder="Event Address"
-          style={styles.selectDateBtn}
+          style={styles.eventAddress}
           value={inputs.eventAddress}
           onChangeText={(address) => updateEventAdress(address)}
           onBlur={() => storeValueGlobalScope()}
-          onPress={(data, details = null) => {
-            // 'details' is provided when fetchDetails = true
-            console.log(data, details);
+          // onPress={(data, details, LatLngLiteral) =>
+          //  console.log(data)
+          // }
+          onPress={(data, details) =>
+            console.log(data.structured_formatting.main_text, details)
+          }
+          keepResultsAfterBlur={true}
+          returnKeyType={"default"}
+          autoFocus={false}
+          fetchDetails={true}
+          disableScroll={false}
+          enablePoweredByContainer={false}
+          minLength={2}
+          nearbyPlacesAPI="GooglePlacesSearch"
+          listViewDisplayed="auto"
+          filterReverseGeocodingByTypes={[
+            "locality",
+            "administrative_area_level_3",
+          ]}
+          debounce={200}
+          GooglePlacesDetailsQuery={{
+            fields: ['formatted_address','LatLngLiteral']
           }}
           query={{
-            key: 'AIzaSyDEGK4PwL7O726B8Eua11qnR1lGoZcMAhM',
-            language: 'en',
+            key: "AIzaSyDEGK4PwL7O726B8Eua11qnR1lGoZcMAhM",
+            language: "en",
+            components: "country:et",
           }}
         />
-        
+
         {
           //check button on validation of input field
           inputs.eventAddressCheckIcon ? (
@@ -488,12 +526,12 @@ const styles = StyleSheet.create({
   category: {
     width: "96%",
     alignSelf: "flex-start",
-    alignItems:"center",
+    alignItems: "center",
     marginLeft: 5,
     justifyContent: "center",
   },
   catSelector: {
-    width:"85%",
+    width: "85%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -543,13 +581,15 @@ const styles = StyleSheet.create({
   CategoryList: {
     padding: 10,
     margin: 3,
-   
+
     borderRadius: Constants.tiny,
   },
   catName: {
     fontSize: Constants.headingthree,
-    color: Constants.background
+    color: Constants.background,
   },
+
+  //event address styles
 });
 
 export default FormThree;

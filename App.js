@@ -55,6 +55,10 @@ import EventTickets from "./Screens/EventTickets";
 import Events from "./Screens/Events";
 import BoughtDetail from "./Screens/BoughtTicketDetail";
 
+import Geolocation from "@react-native-community/geolocation";
+
+Geolocation.getCurrentPosition((info) => console.log(info.coords.latitude));
+
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
 const prefix = Linking.createURL("com.afromina.placetobe://");
@@ -730,16 +734,14 @@ export default function App() {
                     title: "Ticket Detail",
                     headerStyle: {
                       backgroundColor: Constants.primary,
-                      
                     },
                     headerTintColor: Constants.Inverse,
                     headerShadowVisible: false,
                     headerTitleAlign: "center",
-                    headerTitleStyle:{
-                     
+                    headerTitleStyle: {
                       fontStyle: "italic",
-                      fontSize: Constants.headingone
-                    }
+                      fontSize: Constants.headingone,
+                    },
                   }}
                 />
               </Stack.Navigator>
