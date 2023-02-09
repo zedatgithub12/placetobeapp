@@ -19,29 +19,18 @@ const FormFour = () => {
   const { formFour } = React.useContext(AuthContext);
 
   const FormFourFields = (
-    eventLocationLatitude,
-    eventLocationLongtude,
+ 
     eventContactPhone,
     eventLink
   ) => {
     formFour(
-      eventLocationLatitude,
-      eventLocationLongtude,
       eventContactPhone,
       eventLink
     );
   };
 
   const [inputs, setInputs] = React.useState({
-    latitude: "",
-    latBorder: Constants.purple,
-    latHelperText: "",
-    latCheckIcon: false,
-
-    longitude: "",
-    longBorder: Constants.purple,
-    longHelperText: "",
-    longCheckIcon: false,
+ 
 
     contactPhone: "",
     phoneBorder: Constants.purple,
@@ -54,65 +43,65 @@ const FormFour = () => {
     linkCheckIcon: false,
   });
 
-  //event location map latitude onchangeText() functions
+  // //event location map latitude onchangeText() functions
 
-  const updateLatitude = (lat) => {
-    if (lat.length <= 2) {
-      setInputs({
-        ...inputs,
-        latitude: lat,
-        latBorder: Constants.Danger,
-        latHelperText: "Enter your event location map latitude",
-        latCheckIcon: false,
-      });
-    } else if (lat.length >= 30) {
-      setInputs({
-        ...inputs,
-        latitude: lat,
-        latBorder: Constants.Danger,
-        latHelperText: "Map latitude cannot be this long!",
-        latCheckIcon: false,
-      });
-    } else {
-      setInputs({
-        ...inputs,
-        latitude: lat,
-        latBorder: Constants.Success,
-        latHelperText: "",
-        latCheckIcon: true,
-      });
-    }
-  };
+  // const updateLatitude = (lat) => {
+  //   if (lat.length <= 2) {
+  //     setInputs({
+  //       ...inputs,
+  //       latitude: lat,
+  //       latBorder: Constants.Danger,
+  //       latHelperText: "Enter your event location map latitude",
+  //       latCheckIcon: false,
+  //     });
+  //   } else if (lat.length >= 30) {
+  //     setInputs({
+  //       ...inputs,
+  //       latitude: lat,
+  //       latBorder: Constants.Danger,
+  //       latHelperText: "Map latitude cannot be this long!",
+  //       latCheckIcon: false,
+  //     });
+  //   } else {
+  //     setInputs({
+  //       ...inputs,
+  //       latitude: lat,
+  //       latBorder: Constants.Success,
+  //       latHelperText: "",
+  //       latCheckIcon: true,
+  //     });
+  //   }
+  // };
 
-  //event location map longitude onChangeText Functionality
+  // //event location map longitude onChangeText Functionality
 
-  const updateLongitude = (long) => {
-    if (long.length <= 2) {
-      setInputs({
-        ...inputs,
-        longitude: long,
-        longBorder: Constants.Danger,
-        longHelperText: "Enter your event location map Longitude",
-        longCheckIcon: false,
-      });
-    } else if (long.length >= 30) {
-      setInputs({
-        ...inputs,
-        longitude: lat,
-        longBorder: Constants.Danger,
-        longHelperText: "Map longitude cannot be this long ",
-        longCheckIcon: false,
-      });
-    } else {
-      setInputs({
-        ...inputs,
-        longitude: long,
-        longBorder: Constants.Success,
-        longHelperText: "",
-        longCheckIcon: true,
-      });
-    }
-  };
+  // const updateLongitude = (long) => {
+  //   if (long.length <= 2) {
+  //     setInputs({
+  //       ...inputs,
+  //       longitude: long,
+  //       longBorder: Constants.Danger,
+  //       longHelperText: "Enter your event location map Longitude",
+  //       longCheckIcon: false,
+  //     });
+  //   } else if (long.length >= 30) {
+  //     setInputs({
+  //       ...inputs,
+  //       longitude: lat,
+  //       longBorder: Constants.Danger,
+  //       longHelperText: "Map longitude cannot be this long ",
+  //       longCheckIcon: false,
+  //     });
+  //   } else {
+  //     setInputs({
+  //       ...inputs,
+  //       longitude: long,
+  //       longBorder: Constants.Success,
+  //       longHelperText: "",
+  //       longCheckIcon: true,
+  //     });
+  //   }
+  // };
 
   //event Contact phone onchangeText functionality
 
@@ -159,8 +148,6 @@ const FormFour = () => {
   };
   const fieldBlured = () => {
     FormFourFields(
-      inputs.latitude,
-      inputs.longitude,
       inputs.contactPhone,
       inputs.links
     );
@@ -169,74 +156,7 @@ const FormFour = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.eventSession}>Additional Information (Optional)</Text>
-      <View
-        style={[
-          styles.eventContentContainer,
-          { borderWidth: 0.5, borderColor: inputs.latBorder },
-        ]}
-      >
-        <MaterialIcons name="south" size={24} color={Constants.purple} />
-        <TextInput
-          placeholder="Event Location Latitude"
-          style={styles.selectDateBtn}
-          value={inputs.latitude}
-          onChangeText={(lat) => updateLatitude(lat)}
-          onBlur={() => fieldBlured()}
-        />
-        {
-          //check button on validation of input field
-          inputs.latCheckIcon ? (
-            <MaterialCommunityIcons
-              name="checkbox-marked-circle"
-              size={22}
-              color={Constants.Success}
-              style={styles.checkIcon}
-            />
-          ) : null
-        }
-      </View>
-
-      <HelperText
-        //helper text which will promot error and suggestion and textinput fields
-        style={{ color: Constants.Danger }}
-      >
-        {inputs.latHelperText}
-      </HelperText>
-
-      <View
-        style={[
-          styles.eventContentContainer,
-          { borderWidth: 0.5, borderColor: inputs.longBorder },
-        ]}
-      >
-        <MaterialIcons name="north" size={24} color={Constants.purple} />
-        <TextInput
-          placeholder="Event Location Longitude"
-          style={styles.selectDateBtn}
-          value={inputs.longitude}
-          onChangeText={(long) => updateLongitude(long)}
-          onBlur={() => fieldBlured()}
-        />
-        {
-          //check button on validation of input field
-          inputs.longCheckIcon ? (
-            <MaterialCommunityIcons
-              name="checkbox-marked-circle"
-              size={22}
-              color={Constants.Success}
-              style={styles.checkIcon}
-            />
-          ) : null
-        }
-      </View>
-
-      <HelperText
-        //helper text which will promot error and suggestion and textinput fields
-        style={{ color: Constants.Danger }}
-      >
-        {inputs.longHelperText}
-      </HelperText>
-
+     
       <View
         style={[
           styles.eventContentContainer,
@@ -271,6 +191,10 @@ const FormFour = () => {
       >
         {inputs.phoneHelperText}
       </HelperText>
+
+
+
+
 
       <View
         style={[

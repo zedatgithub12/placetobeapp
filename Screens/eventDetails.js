@@ -9,7 +9,6 @@ import {
   Pressable,
   ActivityIndicator,
   ToastAndroid,
-  TouchableNativeFeedback,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -208,7 +207,7 @@ const EventDetails = ({ route, navigation }) => {
   /******************************************* */
   //event Sharing functionality related code is writen below
   /******************************************* */
-  const ShareEvent = async () => {
+  const ShareEvent = async (eventId) => {
     let remoteUrl = featuredImageUri + item.event_image; //file path on the server
     let event_image = item.event_image; //name of image to be shared
 
@@ -218,7 +217,7 @@ const EventDetails = ({ route, navigation }) => {
     const doesExist = await FileSystem.getInfoAsync(localPath);
 
     var weblink = Constants.webLink;
-
+    // var urlAddress = Connection.url+"/"+Connection.Event+"/"+eventId;
     const shareOptions = {
       url: localPath,
       title: item.event_name,
@@ -667,7 +666,7 @@ const EventDetails = ({ route, navigation }) => {
               <TouchableOpacity
                 style={styles.sharekButton}
                 activeOpacity={0.7}
-                onPress={() => ShareEvent()}
+                onPress={() => ShareEvent(item.event_id)}
 
                 // share event button
               >
@@ -762,6 +761,7 @@ const EventDetails = ({ route, navigation }) => {
                   )}
                 </TouchableOpacity>
               ) : null}
+              {/* <MapView style={styles.map} /> */}
             </View>
           ) : (
             <SkeletonPlaceholder>
@@ -825,7 +825,10 @@ const styles = StyleSheet.create({
     width: "96%",
     height: "90%",
   },
-
+  map: {
+    width: '100%',
+    height: '100%',
+  },
   // organizers section styling
   organizersSection: {
     justifyContent: "center",

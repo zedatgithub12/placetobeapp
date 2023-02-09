@@ -109,7 +109,8 @@ const FormOne = () => {
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        let message = response[0].message;
+        var message = response[0].message;
+        console.log(message);
         if (message === "successfully uploaded!") {
           setInputs({
             ...inputs,
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
   eventTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Constants.Faded,
+    backgroundColor: Constants.background,
     borderRadius: Constants.mediumbox,
     paddingLeft: 10,
     marginTop: 20,
@@ -405,7 +406,7 @@ const styles = StyleSheet.create({
   },
   eventDescContainer: {
     width: "90%",
-    backgroundColor: Constants.Faded,
+    backgroundColor: Constants.background,
     borderRadius: Constants.mediumbox,
     padding: 8,
     borderWidth: 0.5,

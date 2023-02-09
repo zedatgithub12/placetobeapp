@@ -313,7 +313,8 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     backgroundColor: Constants.background,
     paddingLeft: 12,
-    borderRadius: Constants.mediumbox,
+    borderRadius: Constants.tiny,
+    borderWidth: 0.3,
   },
   selectDateBtn: {
     width: "86%",

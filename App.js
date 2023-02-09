@@ -250,39 +250,36 @@ export default function App() {
       eventOrganizer,
       eventCategory,
       eventAddress,
+      eventLocationLatitude,
+      eventLocationLongtude,
       eventEntrance
     ) => {
       if (
         eventOrganizer == eventOrganizer &&
         eventCategory == eventCategory &&
         eventAddress == eventAddress &&
-        eventEntrance == eventEntrance
+        eventLocationLatitude == eventLocationLatitude &&
+        eventLocationLongtude == eventLocationLongtude &&
+        eventEntrance == eventEntrance 
+       
       ) {
         setEventInfo({
           ...eventInfo,
           eventOrg: eventOrganizer,
           eventCat: eventCategory,
           eventAddr: eventAddress,
+          locationLatitude: eventLocationLatitude,
+          locationLongitude: eventLocationLongtude,
           entranceFee: eventEntrance,
+     
         });
       }
     },
-    formFour: async (
-      eventLocationLatitude,
-      eventLocationLongtude,
-      eventContactPhone,
-      eventLink
-    ) => {
-      if (
-        eventLocationLatitude == eventLocationLatitude &&
-        eventLocationLongtude == eventLocationLongtude &&
-        eventContactPhone == eventContactPhone &&
-        eventLink == eventLink
-      ) {
+    formFour: async (eventContactPhone, eventLink) => {
+      if (eventContactPhone == eventContactPhone && eventLink == eventLink) {
         setEventInfo({
           ...eventInfo,
-          locationLatitude: eventLocationLatitude,
-          locationLongitude: eventLocationLongtude,
+
           contactPhone: eventContactPhone,
           redirectLink: eventLink,
         });

@@ -59,7 +59,7 @@ const Events = ({
                 size={16}
                 style={styles.VenueIcon}
               />
-              <Text style={styles.EventVenue}>{venue}</Text>
+              <Text style={styles.EventVenue} numberOfLines={1}>{venue}</Text>
             </View>
 
             <View style={styles.ticketContainer}>
@@ -68,7 +68,7 @@ const Events = ({
                 size={14}
                 style={styles.ticketIcon}
               />
-              <Text style={styles.EventPrice}>{Price}</Text>
+              <Text style={styles.EventPrice} numberOfLines={1}>{Price}</Text>
             </View>
             
           </View>

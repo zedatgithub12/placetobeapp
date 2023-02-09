@@ -98,6 +98,7 @@ class EventSubmission extends Component {
 
 
     const PostEvent = async () => {
+      
 this.setState({posting:true});
           // we retrived usertoken from async storage and store it in global scope
       let id = await AsyncStorage.getItem("userId");
@@ -119,8 +120,6 @@ this.setState({posting:true});
       var organizerPhone = (this.state.contactPhone = InputForm.cPhone);
       var redirectUrl = (this.state.redirectLink = InputForm.url);
       var Poster = (this.state.PosterStatus = InputForm.imageStatus);
-       
-
      
       // event field validation
       if (

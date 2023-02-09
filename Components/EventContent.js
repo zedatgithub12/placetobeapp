@@ -7,9 +7,14 @@ import {
   TouchableNativeFeedback,
 } from "react-native";
 import { Caption, HelperText } from "react-native-paper";
-import { MaterialCommunityIcons, FontAwesome, FontAwesome5 } from "react-native-vector-icons";
+import {
+  MaterialCommunityIcons,
+  FontAwesome,
+  FontAwesome5,
+} from "react-native-vector-icons";
 import Constants from "../constants/Constants";
 import call from "react-native-phone-call";
+import * as Linking from "expo-linking";
 
 const DetailContent = ({ ...props }) => {
   const free = "Free";
@@ -23,6 +28,10 @@ const DetailContent = ({ ...props }) => {
 
     call(args);
   };
+
+  var location = props.Venues;
+  var replacedSpaces = location.split(" ").join("+");
+
   return (
     <View
       style={styles.topContent} //event detail text content container component
@@ -35,26 +44,35 @@ const DetailContent = ({ ...props }) => {
         />
         <View style={styles.eventDate}>
           <Text style={styles.date}>Happening Date</Text>
-          <Text style={styles.time}>
+          <Text style={styles.time} numberOfLines={1}>
             {props.StartDate} ({props.StartTime}) - {props.EndDate} (
             {props.EndTime})
           </Text>
         </View>
       </View>
 
-      
-
-      <View style={styles.subContainer}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={styles.subContainer}
+        onPress={() =>
+          Linking.openURL(
+            "https://www.google.com/maps/search/?api=1&query=" + replacedSpaces
+          )
+        }
+      >
         <MaterialCommunityIcons
           name="map-marker-radius"
           size={22}
           style={styles.iconContainer}
         />
+
         <View style={styles.eventDate}>
-          <Text style={styles.venues}>{props.Venues}</Text>
+          <Text style={styles.venues} numberOfLines={1}>
+            {props.Venues}
+          </Text>
           <Text style={styles.time}>Event Address</Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View
         style={styles.subContainer} // july 19 last edited area
@@ -69,19 +87,19 @@ const DetailContent = ({ ...props }) => {
           style={styles.eventDate}
           // Event price detail
         >
-          <Text style={styles.prices}>
+          <Text style={styles.prices} numberOfLines={1}>
             {props.Price == 0 ? free : props.Price + currency}
           </Text>
           <Text style={styles.time}>Entrance fee</Text>
         </View>
       </View>
 
-
       {/* call button */}
       {props.phone == 0 ? null : (
-        <View style={styles.subContainer}>
-          <TouchableNativeFeedback
-            activeOpacity
+        <View>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.subContainer}
             onPress={() => MakeCall(props.phone)}
           >
             <FontAwesome5
@@ -89,19 +107,17 @@ const DetailContent = ({ ...props }) => {
               size={21}
               style={styles.iconContainer}
             />
-          </TouchableNativeFeedback>
+        
           <View style={styles.eventDate}>
-            <TouchableNativeFeedback
-              activeOpacity
-              onPress={() => MakeCall(props.phone)}
-            >
+          
               <View>
                 <Text style={styles.venues}>{props.phone}</Text>
               </View>
-            </TouchableNativeFeedback>
+            
 
             <Text style={styles.time}>Contact Phone</Text>
           </View>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -133,7 +149,7 @@ const styles = StyleSheet.create({
     margin: 5,
     padding: 8,
     borderRadius: 25,
-    color: Constants.Success
+    color: Constants.Success,
   },
   venues: {
     marginLeft: 2,

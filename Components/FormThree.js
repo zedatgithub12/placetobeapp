@@ -44,9 +44,18 @@ const FormThree = () => {
     eventOrganizer,
     eventCategory,
     eventAddress,
+    eventLocationLatitude,
+    eventLocationLongtude,
     eventEntrance
   ) => {
-    formThree(eventOrganizer, eventCategory, eventAddress, eventEntrance);
+    formThree(
+      eventOrganizer,
+      eventCategory,
+      eventAddress,
+      eventLocationLatitude,
+      eventLocationLongtude,
+      eventEntrance
+    );
   };
 
   const [inputs, setInputs] = React.useState({
@@ -64,6 +73,9 @@ const FormThree = () => {
     eventAddressBorder: Constants.purple,
     eventAddressCheckIcon: false,
     eventAddressHelperText: "",
+
+    eventLocationLatitude: "",
+    eventLocationLongtude:"",
 
     entranceFee: "",
     feeBorder: Constants.purple,
@@ -131,28 +143,30 @@ const FormThree = () => {
   };
 
   // function for to be called when event address field gets updated
-  const updateEventAdress = (address) => {
-    console.log(inputs.eventAddress);
-    if (address.length <= 3) {
+  const updateEventAdress = (address, coordinates) => {
+ 
+    if (address.length <= 2) {
       setInputs({
         ...inputs,
         eventAddress: address,
         eventAddressBorder: Constants.Danger,
-        eventAddressHelperText: "Event Address cannnot less than 4 letter!",
+        eventAddressHelperText: "Event Address cannnot be less than 2 letter!",
         eventAddressCheckIcon: false,
       });
-    } else if (address.length >= 40) {
+    } else if (address.length >= 200) {
       setInputs({
         ...inputs,
         eventAddress: address,
         eventAddressBorder: Constants.Danger,
-        eventAddressHelperText: "Event address can not exced 35 character!",
+        eventAddressHelperText: "The maximum character limitation exceeded!",
         eventAddressCheckIcon: false,
       });
     } else {
       setInputs({
         ...inputs,
         eventAddress: address,
+        eventLocationLatitude: coordinates.lat,
+        eventLocationLongtude: coordinates.lng,
         eventAddressBorder: Constants.Success,
         eventAddressHelperText: " ",
         eventAddressCheckIcon: true,
@@ -184,6 +198,8 @@ const FormThree = () => {
       inputs.organizer,
       category,
       inputs.eventAddress,
+      inputs.eventLocationLatitude,
+      inputs.eventLocationLongtude,
       inputs.entranceFee
     );
   };
@@ -363,12 +379,12 @@ const FormThree = () => {
           value={inputs.eventAddress}
           onChangeText={(address) => updateEventAdress(address)}
           onBlur={() => storeValueGlobalScope()}
-          // onPress={(data, details, LatLngLiteral) =>
-          //  console.log(data)
-          // }
           onPress={(data, details) =>
-            console.log(data.structured_formatting.main_text, details)
+            updateEventAdress(data.description, details.geometry.location)
           }
+          // onPress={(data, details) =>
+          //   console.log(data.structured_formatting.main_text, details)
+          // }
           keepResultsAfterBlur={true}
           returnKeyType={"default"}
           autoFocus={false}
@@ -384,7 +400,7 @@ const FormThree = () => {
           ]}
           debounce={200}
           GooglePlacesDetailsQuery={{
-            fields: ['formatted_address','LatLngLiteral']
+            fields: ["formatted_address", "geometry"],
           }}
           query={{
             key: "AIzaSyDEGK4PwL7O726B8Eua11qnR1lGoZcMAhM",
