@@ -143,7 +143,36 @@ const FormThree = () => {
   };
 
   // function for to be called when event address field gets updated
-  const updateEventAdress = (address, coordinates) => {
+  const updateEventAdress = (address) => {
+ 
+    if (address.length <= 2) {
+      setInputs({
+        ...inputs,
+        eventAddress: address,
+        eventAddressBorder: Constants.Danger,
+        eventAddressHelperText: "Event Address cannnot be less than 2 letter!",
+        eventAddressCheckIcon: false,
+      });
+    } else if (address.length >= 200) {
+      setInputs({
+        ...inputs,
+        eventAddress: address,
+        eventAddressBorder: Constants.Danger,
+        eventAddressHelperText: "The maximum character limitation exceeded!",
+        eventAddressCheckIcon: false,
+      });
+    } else {
+      setInputs({
+        ...inputs,
+        eventAddress: address,
+        eventAddressBorder: Constants.Success,
+        eventAddressHelperText: " ",
+        eventAddressCheckIcon: true,
+      });
+    }
+  };
+
+  const Coordinates = (address, coordinates) => {
  
     if (address.length <= 2) {
       setInputs({
@@ -365,7 +394,7 @@ const FormThree = () => {
       <View
         style={[
           styles.eventContentContainer,
-          { borderWidth: 0.5, borderColor: inputs.eventAddressBorder },
+          { borderWidth: 0.5, borderColor: inputs.eventAddressBorder, overflow: 'hidden' },
         ]}
       >
         <MaterialCommunityIcons
@@ -380,7 +409,7 @@ const FormThree = () => {
           onChangeText={(address) => updateEventAdress(address)}
           onBlur={() => storeValueGlobalScope()}
           onPress={(data, details) =>
-            updateEventAdress(data.description, details.geometry.location)
+            Coordinates(data.description, details.geometry.location)
           }
           // onPress={(data, details) =>
           //   console.log(data.structured_formatting.main_text, details)

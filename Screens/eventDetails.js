@@ -611,6 +611,7 @@ const EventDetails = ({ route, navigation }) => {
         <ScrollView
           scrollEventThrottle={16}
           style={{ backgroundColor: Constants.background }}
+          showsVerticalScrollIndicator={false}
         >
           <View style={styles.featuredImageContainer}>
             <TouchableOpacity
@@ -733,36 +734,39 @@ const EventDetails = ({ route, navigation }) => {
                   {item.event_address}
                 </Text>
               </View>
-              <MapView
-                provider={PROVIDER_GOOGLE}
-                mapType="standard"
-                userInterfaceStyle="dark"
-                minZoomLevel={16}
-                maxZoomLevel={20}
-                loadingEnabled={true}
-                loadingBackgroundColor={Constants.Faded}
-                loadingIndicatorColor={Constants.primary}
-                tintColor={Constants.primary}
-                userLocationCalloutEnabled={true}
-                style={[styles.map]}
-                initialRegion={{
-                  latitude: parseFloat(item.address_latitude),
-                  longitude: parseFloat(item.address_longitude),
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}
-              >
-                <Marker
-                  coordinate={{
+
+              <View style={styles.mapParent}>
+                <MapView
+                  provider={PROVIDER_GOOGLE}
+                  mapType="standard"
+                  userInterfaceStyle="dark"
+                  minZoomLevel={16}
+                  maxZoomLevel={20}
+                  loadingEnabled={true}
+                  loadingBackgroundColor={Constants.Faded}
+                  loadingIndicatorColor={Constants.primary}
+                  tintColor={Constants.primary}
+                  userLocationCalloutEnabled={true}
+                  style={[styles.map]}
+                  initialRegion={{
                     latitude: parseFloat(item.address_latitude),
                     longitude: parseFloat(item.address_longitude),
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
                   }}
-                  image={{
-                    uri: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngwing.com%2Fen%2Fsearch%3Fq%3Dmap%2BMarker&psig=AOvVaw1sWuU_lBSs-5sii34I1Nz_&ust=1676116422134000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCLDxkLXyiv0CFQAAAAAdAAAAABAF",
-                  }}
-                />
-                <Callout tooltip={true} />
-              </MapView>
+                >
+                  <Marker
+                    coordinate={{
+                      latitude: parseFloat(item.address_latitude),
+                      longitude: parseFloat(item.address_longitude),
+                    }}
+                    image={{
+                      uri: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngwing.com%2Fen%2Fsearch%3Fq%3Dmap%2BMarker&psig=AOvVaw1sWuU_lBSs-5sii34I1Nz_&ust=1676116422134000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCLDxkLXyiv0CFQAAAAAdAAAAABAF",
+                    }}
+                  />
+                  <Callout tooltip={true} />
+                </MapView>
+              </View>
             </View>
           ) : null}
 
@@ -1039,13 +1043,20 @@ const styles = StyleSheet.create({
     fontSize: Constants.thirty,
     color: Constants.Inverse,
   },
-  map: {
+  mapParent: {
     width: "90%",
     height: "80%",
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     borderRadius: 10,
     marginBottom: 6,
+    overflow: "hidden",
+  },
+  map: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 6,
+    overflow: "hidden",
   },
 
   ticketBtnContainer: {

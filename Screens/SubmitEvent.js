@@ -120,7 +120,7 @@ this.setState({posting:true});
       var organizerPhone = (this.state.contactPhone = InputForm.cPhone);
       var redirectUrl = (this.state.redirectLink = InputForm.url);
       var Poster = (this.state.PosterStatus = InputForm.imageStatus);
-     
+   
       // event field validation
       if (
         picture.length == 0 ||
