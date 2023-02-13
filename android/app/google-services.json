@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "903368065253",
+    "project_id": "local-mediator-334011",
+    "storage_bucket": "local-mediator-334011.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903368065253:android:a22fe6e638db51aa73140c",
+        "android_client_info": {
+          "package_name": "com.afromina.placetobe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903368065253-g8k9n3vv8594b7erho9rem4ajqbu9um6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0x7oOWUoiWe0gxp6y2ydgSQ0X7-GHClE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903368065253-g8k9n3vv8594b7erho9rem4ajqbu9um6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
