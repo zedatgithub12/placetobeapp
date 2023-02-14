@@ -1,8 +1,9 @@
 import PushNotification, { Importance } from 'react-native-push-notification';
+import Constants from '../../constants/Constants';
 
 PushNotification.configure({
     onNotification: function(notification){
-        console.log('Local Notification', notification);
+        //console.log('Local Notification', notification);
     },
     popInitialNotification: true,
     requestPermissions: true,
@@ -31,6 +32,9 @@ export const LocalNotification =()=>{
         soundName: 'default',
         importance: 10,
         vibrate:true,
-        vibration: 400,
+        vibration: 1000,
+        color: Constants.primary,
+        onlyAlertOnce: true,
+        // actions: ["Yes", "No"],
     });
 }

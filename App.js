@@ -57,7 +57,7 @@ import BoughtDetail from "./Screens/BoughtTicketDetail";
 import Geolocation from "@react-native-community/geolocation";
 //import {requestUserPermission, NotificationListener} from './src/utils/pushnotification_helper';
 import {LocalNotification} from './src/Utils/localPushController';
-
+import RemotePushController from './src/Utils/RemotePushController';
 
 Geolocation.getCurrentPosition((info) => console.log(info.coords.latitude));
 const Stack = createNativeStackNavigator();
@@ -419,6 +419,7 @@ const handleNotification =()=>{
       }
     });
     handleNotification();
+   
     return () => {};
   }, [retry]);
 
@@ -453,6 +454,7 @@ const handleNotification =()=>{
             fallback={
               <View style={styles.loader}>
                 <ActivityIndicator color={Constants.primary} size="large" />
+                <RemotePushController/>
               </View>
             }
           >
