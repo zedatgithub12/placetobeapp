@@ -55,38 +55,38 @@ import EventTickets from "./Screens/EventTickets";
 import Events from "./Screens/Events";
 import BoughtDetail from "./Screens/BoughtTicketDetail";
 import Geolocation from "@react-native-community/geolocation";
-//import {requestUserPermission, NotificationListener} from './src/utils/pushnotification_helper';
-import {LocalNotification} from './src/Utils/localPushController';
+import {LocalNotification, onOpenNotification} from './src/Utils/localPushController';
 import RemotePushController from './src/Utils/RemotePushController';
 
-Geolocation.getCurrentPosition((info) => console.log(info.coords.latitude));
+Geolocation.getCurrentPosition((info) => (info.coords.latitude));
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
-const prefix = Linking.createURL("com.afromina.placetobe://");
+const app = Linking.createURL('com.afromina.placetobe://');
+const Domain = Linking.createURL('https://www.p2b-ethiopia.com');
+const secSubDomain= Linking.createURL('https://www.app.p2b-ethiopia.com');
+const subDomain= Linking.createURL('http://www.app.p2b-ethiopia.com');
 
 export default function App() {
 const handleNotification =()=>{
   LocalNotification();
+  
 }
 
   // const [isLoading, setIsLoading] = React.useState(true);
   //const [userToken, setUserToken] = React.useState(null);
+
+//Screens path configuration for deep linking purpose
+const config = {
+  screens: {
+    user: 'Profile',
+    EventDetail: 'EventDetail/:externalLink',
+    
+  },
+};
+
   const Linking = {
-    prefixes: [prefix],
-    config: {
-      initialRouteName: "TabNav",
-      screens: {
-        TabNav: {
-          path: "tabNav",
-        },
-        Profile: {
-          path: "profile",
-        },
-        EventDetail: {
-          path: "eventDetail/:externalLink",
-        },
-      },
-    },
+    prefixes: [app,Domain,subDomain, secSubDomain],
+    config,
   };
 
   const initialLoginState = {
@@ -418,8 +418,7 @@ const handleNotification =()=>{
         setConnectionState(true);
       }
     });
-    handleNotification();
-   
+
     return () => {};
   }, [retry]);
 
@@ -455,6 +454,7 @@ const handleNotification =()=>{
               <View style={styles.loader}>
                 <ActivityIndicator color={Constants.primary} size="large" />
                 <RemotePushController/>
+              
               </View>
             }
           >

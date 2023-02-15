@@ -118,11 +118,19 @@ const FormOne = () => {
             imageLoader: "loaded",
             imageStatus: true,
           });
-        } else {
+        } else if(message=== "Sorry, there was an error uploading your file."){
           setInputs({
             ...inputs,
             imageBoarder: Constants.Danger,
-            imageLoader: "loading",
+            imageLoader: "Error Uploading",
+            imageStatus: false,
+          });
+        }
+        else {
+          setInputs({
+            ...inputs,
+            imageBoarder: Constants.Danger,
+            imageLoader: "Loading",
             imageStatus: false,
           });
         }

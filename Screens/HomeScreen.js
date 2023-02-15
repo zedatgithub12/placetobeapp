@@ -12,9 +12,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
-import { Ionicons } from "react-native-vector-icons";
-import MyTabs from "./TopTab";
-import { Divider, Title } from "react-native-paper";
+import { Ionicons, MaterialIcons } from "react-native-vector-icons";
+import { Divider } from "react-native-paper";
 import { AuthContext } from "../Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../constants/connection";
@@ -28,6 +27,7 @@ import FeaturedShimmer from "../Components/FeaturedEventsShimmer";
 import TicketShimmer from "../Components/TicketShimmer";
 import Events from "../Components/Events";
 import Listing from "../Components/ListShimmer";
+import { LocalNotification } from "../src/Utils/localPushController";
 
 function Home({ navigation, ...props }) {
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
@@ -36,6 +36,32 @@ function Home({ navigation, ...props }) {
   const [ticketShimmer, setTicketShimmer] = useState(true);
   const [events, setEvents] = useState();
   const [eventShimmer, setEventShimmer] = useState(true);
+  const d = new Date();
+  let Hour = d.getHours();
+  let minute = d.getMinutes();
+
+  // notification arrival time in human readable format
+  const ArrivalTime = () => {
+    var time;
+    if (Hour >= 12) {
+      time = Hour - 12 + ":" + minute + " pm";
+    }
+    else {
+      time = Hour + ":" + minute + " am";
+    }
+   
+    return time;
+  };
+
+  // const handleNotification = (
+  //   alert,
+  //   bigText,
+  //   message,
+  //   time,
+  //   picture
+  // ) => {
+  //   LocalNotification(alert, bigText, message, time, picture);
+  // };
 
   const profile = () => {
     navigation.navigate("Profile");
@@ -224,9 +250,9 @@ function Home({ navigation, ...props }) {
       .then((response) => response.json())
       .then((response) => {
         var message = response[0].message;
-
-        if (message === "succeed") {
-          var FeaturedEvent = response[0].Events;
+        var FeaturedEvent = response[0].Events;
+        if (message === "succeed" && FeaturedEvent != null ) {
+        
           setEvents(FeaturedEvent);
           setEventShimmer(false);
         } else {
@@ -354,6 +380,15 @@ function Home({ navigation, ...props }) {
       return discount;
     }
   };
+  
+  
+  const UserInfo ={
+    id: 87,
+    type: 'events',
+    name: 'place to be'
+  }
+  //image to be used in notification
+  const featuredImageUri = Connection.url + Connection.assets + "Placeholder.png";
 
   const [shown, setShown] = useState(true);
   useEffect(() => {
@@ -468,13 +503,26 @@ function Home({ navigation, ...props }) {
 
         <View style={styles.availableTickets}>
           <Text style={styles.ticketTitle}>Available Tickets</Text>
-          <Pressable>
-            <Ionicons
-              name="md-grid-outline"
-              size={18}
+          <TouchableOpacity
+          activeOpacity={0.7}
+            onPress={() =>
+              LocalNotification(
+                "Alert",
+                "Hellow There am transpassed here it good to be here!",
+                "Bermel Fest",
+                ArrivalTime(),
+                featuredImageUri,
+                UserInfo,
+           
+              )
+            }
+          >
+            <MaterialIcons
+              name="expand-more"
+              size={22}
               color={Constants.Inverse}
             />
-          </Pressable>
+          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -482,7 +530,7 @@ function Home({ navigation, ...props }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
             marginLeft: 8,
-            paddingRight:12,
+            paddingRight: 12,
             backgroundColor: Constants.background,
           }}
         >
