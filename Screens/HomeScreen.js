@@ -9,6 +9,7 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
+  
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
@@ -383,7 +384,7 @@ function Home({ navigation, ...props }) {
   
   
   const UserInfo ={
-    id: 87,
+    id: 88,
     type: 'events',
     name: 'place to be'
   }

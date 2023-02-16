@@ -1,16 +1,16 @@
 import PushNotification, { Importance } from "react-native-push-notification";
 import Constants from "../../constants/Constants";
-import { useNavigation } from '@react-navigation/native';
-
+import * as Linking from "expo-linking";
 
 
 
 PushNotification.configure({
   onNotification: function (notify) {
-    // console.log("notify", notify.data.type);
-    // if (notify.data.type == "events") {
-    //     navigation.push("EventDetail", { id: notify.data.id });
-    // }
+    
+    if (notify.data.type == "events") {
+       Linking.openURL('https://www.p2b-ethiopia.com/eventDetail/'+notify.data.id);
+       console.log('www.p2b-ethiopia.com/details/'+notify.data.id);
+    }
   },
   popInitialNotification: true,
   requestPermissions: true,
@@ -24,12 +24,7 @@ PushNotification.createChannel({
   importance: Importance.HIGH,
   vibrate: false,
 });
-// PushNotification.onNotification = (notify, navigation) => {
-//   console.log("notify", notify.data.type);
-//   if (notify.data.type && notify.data.notify == "events") {
-//     navigation.navigate("EventDetail", { id: notify.data.id });
-//   }
-// };
+
 
 export const LocalNotification = (
   title,
@@ -42,7 +37,7 @@ export const LocalNotification = (
 ) => {
   PushNotification.localNotification({
     channelId: "channel-id",
-    channelName: "my channel",
+    channelName: "My channel",
     title: title,
     message: message,
     bigText: bigText,

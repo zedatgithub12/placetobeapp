@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -27,7 +28,6 @@ import GallerDetail from "./Screens/GalleryDetail";
 import CategorizedEvent from "./Screens/CategorizedEvent";
 import UserDetails from "./Screens/UserDetails";
 import store from "./store/store";
-//import notices from "./store/noticestore";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
@@ -51,11 +51,10 @@ import UpdateTicket from "./Screens/UpdateTicket";
 import UpdateEvent from "./Screens/UpdateEvent";
 import UpdateSucceed from "./Screens/UpdateSucceed";
 import CheckoutScreen from "./Screens/CheckoutScreen";
-import EventTickets from "./Screens/EventTickets";
-import Events from "./Screens/Events";
+import EventTickets from "./Screens/EventTickets"; 
 import BoughtDetail from "./Screens/BoughtTicketDetail";
 import Geolocation from "@react-native-community/geolocation";
-import {LocalNotification, onOpenNotification} from './src/Utils/localPushController';
+import {LocalNotification} from './src/Utils/localPushController';
 import RemotePushController from './src/Utils/RemotePushController';
 
 Geolocation.getCurrentPosition((info) => (info.coords.latitude));
@@ -63,30 +62,31 @@ const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
 const app = Linking.createURL('com.afromina.placetobe://');
 const Domain = Linking.createURL('https://www.p2b-ethiopia.com');
-const secSubDomain= Linking.createURL('https://www.app.p2b-ethiopia.com');
-const subDomain= Linking.createURL('http://www.app.p2b-ethiopia.com');
+const subDomain= Linking.createURL('https://www.*.p2b-ethiopia.com');
 
 export default function App() {
 const handleNotification =()=>{
   LocalNotification();
-  
 }
 
   // const [isLoading, setIsLoading] = React.useState(true);
   //const [userToken, setUserToken] = React.useState(null);
-
-//Screens path configuration for deep linking purpose
-const config = {
-  screens: {
-    user: 'Profile',
-    EventDetail: 'EventDetail/:externalLink',
-    
-  },
-};
-
-  const Linking = {
-    prefixes: [app,Domain,subDomain, secSubDomain],
-    config,
+  const linking = {
+    prefixes: [app,Domain,subDomain],
+    config: {
+      initialRouteName: "TabNav",
+      screens: {
+        TabNav: {
+          path: "tabNav",
+        },
+        Profile: {
+          path: "profile",
+        },
+        EventDetail: {
+          path: "eventDetails/:externalLink",
+        },
+      },
+    },
   };
 
   const initialLoginState = {
@@ -410,9 +410,9 @@ const config = {
       } catch (e) {
         //
       }
-
+      
       dispatch({ type: "REGISTER", token: userToken });
-    }, 6000);
+    }, 4000);
     NetInfo.fetch().then((state) => {
       if (state.isConnected) {
         setConnectionState(true);
@@ -449,7 +449,7 @@ const config = {
       <PersistGate loading={null} persistor={persistor}>
         <AuthContext.Provider value={authContext}>
           <NavigationContainer
-            linking={Linking}
+            linking={linking}
             fallback={
               <View style={styles.loader}>
                 <ActivityIndicator color={Constants.primary} size="large" />
