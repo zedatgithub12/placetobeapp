@@ -599,7 +599,7 @@ const EventDetails = ({ route, navigation }) => {
     return () => {
       isSubcribed = false;
     };
-  }, [timing]);
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Constants.background }}>

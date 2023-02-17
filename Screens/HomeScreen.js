@@ -22,9 +22,6 @@ import { SliderBox } from "react-native-image-slider-box";
 import Categories from "../Components/CategoryListing";
 import Category from "../src/Category";
 import TicketCard from "../Components/TicketCard";
-import TicketData from "../src/Tickets";
-import FeaturedEvent from "../Components/FeaturedEvents";
-import FeaturedShimmer from "../Components/FeaturedEventsShimmer";
 import TicketShimmer from "../Components/TicketShimmer";
 import Events from "../Components/Events";
 import Listing from "../Components/ListShimmer";
@@ -32,7 +29,6 @@ import { LocalNotification } from "../src/Utils/localPushController";
 
 function Home({ navigation, ...props }) {
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
-
   const [Tickets, setTickets] = useState();
   const [ticketShimmer, setTicketShimmer] = useState(true);
   const [events, setEvents] = useState();

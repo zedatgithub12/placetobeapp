@@ -7,7 +7,6 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
-
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -51,28 +50,49 @@ import UpdateTicket from "./Screens/UpdateTicket";
 import UpdateEvent from "./Screens/UpdateEvent";
 import UpdateSucceed from "./Screens/UpdateSucceed";
 import CheckoutScreen from "./Screens/CheckoutScreen";
-import EventTickets from "./Screens/EventTickets"; 
+import EventTickets from "./Screens/EventTickets";
 import BoughtDetail from "./Screens/BoughtTicketDetail";
 import Geolocation from "@react-native-community/geolocation";
-import {LocalNotification} from './src/Utils/localPushController';
-import RemotePushController from './src/Utils/RemotePushController';
+import { LocalNotification } from "./src/Utils/localPushController";
+import RemotePushController from "./src/Utils/RemotePushController";
 
-Geolocation.getCurrentPosition((info) => (info.coords.latitude));
+Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
-const app = Linking.createURL('com.afromina.placetobe://');
-const Domain = Linking.createURL('https://www.p2b-ethiopia.com');
-const subDomain= Linking.createURL('https://www.*.p2b-ethiopia.com');
+const link = Linking.createURL("/");
+const app = Linking.createURL("com.afromina.placetobe://");
+const Domain = Linking.createURL("www.p2b-ethiopia.com");
+const subDomain = Linking.createURL("https://www.*.p2b-ethiopia.com");
 
 export default function App() {
-const handleNotification =()=>{
-  LocalNotification();
-}
+  const handleNotification = () => {
+    LocalNotification();
+  };
 
-  // const [isLoading, setIsLoading] = React.useState(true);
-  //const [userToken, setUserToken] = React.useState(null);
-  const linking = {
-    prefixes: [app,Domain,subDomain],
+  const url = Linking.useURL();
+  const handleURL = (url) => {
+    //Feb 17 last edited
+    const { hostname, path, queryParams } = Linking.parse(url);
+    if (path === "eventDetail") {
+      Linking.openURL(
+        "https://www.p2b-ethiopia.com/" +
+          path +
+          "?externalLink=" +
+          queryParams.externalLink
+      );
+      console.log(
+        "https://www.p2b-ethiopia.com/" +
+          path +
+          "?externalLink=" +
+          queryParams.externalLink
+      );
+    } else {
+      console.log(path, queryParams);
+    }
+  };
+
+  const Linkings = {
+    prefixes: [link, app, Domain, subDomain],
     config: {
       initialRouteName: "TabNav",
       screens: {
@@ -83,7 +103,7 @@ const handleNotification =()=>{
           path: "profile",
         },
         EventDetail: {
-          path: "eventDetails/:externalLink",
+          path: "eventDetail/:externalLink",
         },
       },
     },
@@ -265,8 +285,7 @@ const handleNotification =()=>{
         eventAddress == eventAddress &&
         eventLocationLatitude == eventLocationLatitude &&
         eventLocationLongtude == eventLocationLongtude &&
-        eventEntrance == eventEntrance 
-       
+        eventEntrance == eventEntrance
       ) {
         setEventInfo({
           ...eventInfo,
@@ -276,7 +295,6 @@ const handleNotification =()=>{
           locationLatitude: eventLocationLatitude,
           locationLongitude: eventLocationLongtude,
           entranceFee: eventEntrance,
-     
         });
       }
     },
@@ -410,7 +428,7 @@ const handleNotification =()=>{
       } catch (e) {
         //
       }
-      
+
       dispatch({ type: "REGISTER", token: userToken });
     }, 4000);
     NetInfo.fetch().then((state) => {
@@ -419,8 +437,12 @@ const handleNotification =()=>{
       }
     });
 
+    if (url) {
+      handleURL(url);
+    }
+
     return () => {};
-  }, [retry]);
+  }, [retry, url]);
 
   //activity indicator which is going to be shown and the opening of app
   if (loginState.isLoading) {
@@ -449,12 +471,11 @@ const handleNotification =()=>{
       <PersistGate loading={null} persistor={persistor}>
         <AuthContext.Provider value={authContext}>
           <NavigationContainer
-            linking={linking}
+            linking={Linkings}
             fallback={
               <View style={styles.loader}>
                 <ActivityIndicator color={Constants.primary} size="large" />
-                <RemotePushController/>
-              
+                <RemotePushController />
               </View>
             }
           >
