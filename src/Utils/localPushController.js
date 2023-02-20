@@ -8,8 +8,8 @@ PushNotification.configure({
   onNotification: function (notify) {
     
     if (notify.data.type == "events") {
-       Linking.openURL('https://www.p2b-ethiopia.com/eventDetail/'+notify.data.id);
-       console.log('www.p2b-ethiopia.com/details/'+notify.data.id);
+       Linking.openURL('com.afromina.placetobe://eventdetail/'+notify.data.id);
+     
     }
   },
   popInitialNotification: true,
@@ -19,10 +19,10 @@ PushNotification.createChannel({
   channelId: "channel-id", // (required)
   channelName: "My channel", // (required)
   channelDescription: "A channel is for notification",
-  playSound: false,
+  playSound: true,
   soundName: "default",
   importance: Importance.HIGH,
-  vibrate: false,
+  vibrate: true,
 });
 
 
@@ -45,12 +45,12 @@ export const LocalNotification = (
     picture: picture,
     userInfo: userInfo,
     autoCancel: true,
-    playSound: false,
+    playSound: true,
     soundName: "default",
     importance: 10,
-    vibrate: false,
+    vibrate: true,
     vibration: 1000,
     color: Constants.primary,
-    onlyAlertOnce: true,
+    onlyAlertOnce: false,
   });
 };

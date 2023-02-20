@@ -62,34 +62,13 @@ const persistor = persistStore(store);
 const link = Linking.createURL("/");
 const app = Linking.createURL("com.afromina.placetobe://");
 const Domain = Linking.createURL("www.p2b-ethiopia.com");
-const subDomain = Linking.createURL("https://www.*.p2b-ethiopia.com");
+const subDomain = Linking.createURL("www.*.p2b-ethiopia.com");
 
 export default function App() {
   const handleNotification = () => {
     LocalNotification();
   };
 
-  const url = Linking.useURL();
-  const handleURL = (url) => {
-    //Feb 17 last edited
-    const { hostname, path, queryParams } = Linking.parse(url);
-    if (path === "eventDetail") {
-      Linking.openURL(
-        "https://www.p2b-ethiopia.com/" +
-          path +
-          "?externalLink=" +
-          queryParams.externalLink
-      );
-      console.log(
-        "https://www.p2b-ethiopia.com/" +
-          path +
-          "?externalLink=" +
-          queryParams.externalLink
-      );
-    } else {
-      console.log(path, queryParams);
-    }
-  };
 
   const Linkings = {
     prefixes: [link, app, Domain, subDomain],
@@ -103,7 +82,7 @@ export default function App() {
           path: "profile",
         },
         EventDetail: {
-          path: "eventDetail/:externalLink",
+          path: "eventdetail/:externalLink",
         },
       },
     },
@@ -437,12 +416,9 @@ export default function App() {
       }
     });
 
-    if (url) {
-      handleURL(url);
-    }
 
     return () => {};
-  }, [retry, url]);
+  }, [retry]);
 
   //activity indicator which is going to be shown and the opening of app
   if (loginState.isLoading) {

@@ -363,7 +363,7 @@ const EventDetails = ({ route, navigation }) => {
     //organizer id is the only data to be sent to server in order to retrive organizer data
 
     var Data = {
-      eventId: id,
+      eventId: id? id: externalLink,
       followerId: followerId,
     };
     // header type for text data to be send to server
@@ -599,7 +599,7 @@ const EventDetails = ({ route, navigation }) => {
     return () => {
       isSubcribed = false;
     };
-  }, []);
+  }, [externalLink]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Constants.background }}>
