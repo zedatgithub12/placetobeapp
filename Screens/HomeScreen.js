@@ -9,7 +9,6 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../constants/Constants";
@@ -40,26 +39,18 @@ function Home({ navigation, ...props }) {
   // notification arrival time in human readable format
   const ArrivalTime = () => {
     var time;
-    if (Hour >= 12) {
+    if (Hour > 12) {
       time = Hour - 12 + ":" + minute + " pm";
-    }
-    else {
+    } else if (Hour == 12) {
+      time = Hour + ":" + minute + " pm";
+    } else {
       time = Hour + ":" + minute + " am";
     }
-   
+
     return time;
   };
 
-  // const handleNotification = (
-  //   alert,
-  //   bigText,
-  //   message,
-  //   time,
-  //   picture
-  // ) => {
-  //   LocalNotification(alert, bigText, message, time, picture);
-  // };
-
+  // check if the profile got updated and update the top right profile indicator
   const profile = () => {
     navigation.navigate("Profile");
     userProfile();
@@ -248,8 +239,7 @@ function Home({ navigation, ...props }) {
       .then((response) => {
         var message = response[0].message;
         var FeaturedEvent = response[0].Events;
-        if (message === "succeed" && FeaturedEvent != null ) {
-        
+        if (message === "succeed" && FeaturedEvent != null) {
           setEvents(FeaturedEvent);
           setEventShimmer(false);
         } else {
@@ -377,15 +367,16 @@ function Home({ navigation, ...props }) {
       return discount;
     }
   };
-  
-  
-  const UserInfo ={
+
+  const UserInfo = {
     id: 88,
-    type: 'events',
-    name: 'place to be'
-  }
+    type: "events",
+    name: "place to be",
+  };
   //image to be used in notification
-  const featuredImageUri = Connection.url + Connection.assets + "Placeholder.png";
+  const featuredImageUri =
+    Connection.url + Connection.assets + "Placeholder.png";
+  const NotificationIcon = Connection.url + Connection.assets + "favicon.png";
 
   const [shown, setShown] = useState(true);
   useEffect(() => {
@@ -501,16 +492,14 @@ function Home({ navigation, ...props }) {
         <View style={styles.availableTickets}>
           <Text style={styles.ticketTitle}>Available Tickets</Text>
           <TouchableOpacity
-          activeOpacity={0.7}
+            activeOpacity={0.7}
             onPress={() =>
               LocalNotification(
-                "Alert",
-                "Hellow There am transpassed here it good to be here!",
-                "Bermel Fest",
-                ArrivalTime(),
-                featuredImageUri,
-                UserInfo,
-           
+                ArrivalTime(), //notification arrival time
+                "Alert", //title of the notification
+                "Hellow There am transpassed here it good to be here!", //message of the the notification
+                featuredImageUri, // the big picture coming with the notification
+                UserInfo //a JSON formatted data sent beside the notification
               )
             }
           >

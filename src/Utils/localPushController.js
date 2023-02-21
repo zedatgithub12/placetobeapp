@@ -9,7 +9,7 @@ PushNotification.configure({
     
     if (notify.data.type == "events") {
        Linking.openURL('com.afromina.placetobe://eventdetail/'+notify.data.id);
-     
+      // Linking.openURL('http://www.p2b-ethiopia.com/eventdetail/'+notify.data.id);
     }
   },
   popInitialNotification: true,
@@ -27,21 +27,21 @@ PushNotification.createChannel({
 
 
 export const LocalNotification = (
-  title,
-  bigText,
-  message,
   time,
+  title,
+  message,
   picture,
   userInfo,
-
+ 
 ) => {
   PushNotification.localNotification({
     channelId: "channel-id",
     channelName: "My channel",
     title: title,
+    ticker: 'Tcker',
     message: message,
-    bigText: bigText,
     subText: time,
+    when: time,
     picture: picture,
     userInfo: userInfo,
     autoCancel: true,
@@ -49,8 +49,13 @@ export const LocalNotification = (
     soundName: "default",
     importance: 10,
     vibrate: true,
-    vibration: 1000,
+    vibration: 400,
     color: Constants.primary,
     onlyAlertOnce: false,
+
+    largeIcon: "ic_launcher",
+    largeIconUrl:picture,
+    bigLargeIcon: "ic_launcher",
+    bigLargeIconUrl:picture
   });
 };
