@@ -49,11 +49,7 @@ const EventDetails = ({ route, navigation }) => {
   const [item, setItem] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // const date = new Date();
-  // var hour = date.getHours();
-  // var minute = date.getMinutes();
 
-  // var Timing = hour + ":" + minute;
 
   const [timing, setTime] = useState({
     StartTime: "",
