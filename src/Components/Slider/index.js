@@ -34,8 +34,8 @@ const Slider = ({ Images }) => {
           setCurrentImageIndex(index);
         }}
       >
-        {Images.map((image) => (
-          <View key={image.id} style={styles.box}>
+        {Images.map((image, index) => (
+          <View key={index} style={styles.box}>
             <Image
               source={{ uri: Connection.url + Connection.assets + image.image }}
               style={styles.image}
@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     borderRadius: 12,
+   
   },
   image: {
     width: "100%",

@@ -17,7 +17,6 @@ import { Divider } from "react-native-paper";
 import { AuthContext } from "../../Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../../constants/connection";
-import { SliderBox } from "react-native-image-slider-box";
 import Categories from "../../Components/Categories/CategoryListing";
 import Category from "../../dummies/Category";
 import TicketCard from "../../Components/Tickets/TicketCard";
@@ -448,7 +447,7 @@ function Home({ navigation, ...props }) {
         </View>
 
         <View style={styles.homeSection2}>
-          <Divider style={{ color: Constants.transparentPrimary }} />
+          <Divider style={{ color: Constants.background }} />
 
           {shown ? (
             <ScrollView contentContainerStyle={{ minHeight: 180 }}>
@@ -477,24 +476,6 @@ function Home({ navigation, ...props }) {
 
         <View style={styles.availableTickets}>
           <Text style={styles.ticketTitle}>Available Tickets</Text>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() =>
-              LocalNotification(
-                ArrivalTime(), //notification arrival time
-                "Alert", //title of the notification
-                "Hellow There am transpassed here it good to be here!", //message of the the notification
-                featuredImageUri, // the big picture coming with the notification
-                UserInfo //a JSON formatted data sent beside the notification
-              )
-            }
-          >
-            <MaterialIcons
-              name="expand-more"
-              size={22}
-              color={Constants.Inverse}
-            />
-          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -503,7 +484,6 @@ function Home({ navigation, ...props }) {
           contentContainerStyle={{
             marginLeft: 8,
             paddingRight: 12,
-            backgroundColor: Constants.background,
           }}
         >
           {ticketShimmer ? (
@@ -543,16 +523,14 @@ function Home({ navigation, ...props }) {
           </Pressable>
         </View>
 
-        <View
-          style={{ backgroundColor: Constants.background, marginBottom: 55 }}
-        >
+        <View style={{ marginBottom: 55 }}>
           {eventShimmer ? (
             <View>
               <Listing />
               <Listing />
               <Listing />
             </View>
-          ) : events.length == 0 ? (
+          ) : events.length === 0 ? (
             <View>
               <Text>No event</Text>
             </View>
@@ -583,7 +561,7 @@ function Home({ navigation, ...props }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
   },
   headers: {
     width: "95%",
@@ -597,7 +575,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     zIndex: 1000,
-    backgroundColor: Constants.background,
   },
   SearchFieldContainer: {
     flexDirection: "row",
@@ -705,10 +682,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     margin: 4,
     marginTop: 10,
-    backgroundColor: Constants.background,
   },
   ticketTitle: {
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     fontSize: Constants.headingone,
   },
 });

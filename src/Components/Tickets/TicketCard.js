@@ -30,7 +30,6 @@ const TicketCard = ({
           <Card.Cover
             source={{ uri: featuredImageUri + picture }}
             style={styles.FeaturedImagestyle}
-            resizeMode="cover"
           />
         </View>
 
@@ -72,16 +71,16 @@ const TicketCard = ({
 // define your styles
 const styles = StyleSheet.create({
   EventContainer: {
-    width: 115,
-    height: 150,
+    width: 155,
+    height: 200,
     justifyContent: "center",
-    backgroundColor: Constants.background,
-    margin: 3,
+    margin: 5,
     paddingBottom: 12,
   },
   ImageContainer: {
     width: "100%",
-    height: 84,
+    height: 120,
+    resizeMode: "contain",
   },
   FeaturedImagestyle: {
     width: "100%",
