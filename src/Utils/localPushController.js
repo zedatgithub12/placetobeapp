@@ -1,5 +1,5 @@
 import PushNotification, { Importance } from "react-native-push-notification";
-import Constants from "../../constants/Constants";
+import Constants from "../constants/Constants";
 import * as Linking from "expo-linking";
 
 

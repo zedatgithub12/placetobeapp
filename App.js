@@ -9,55 +9,24 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Signin from "./Screens/Signin";
-import SignUp from "./Screens/Signup";
-import TabNav from "./Screens/Tabs";
-import Notifications from "./Screens/Notifications";
 //import Organizers from "./Screens/Organizers";
-import Bookmarks from "./Screens/Bookmarks";
-import Setting from "./Screens/Setting";
-import Profile from "./Screens/ProfileScreen";
-import EventDetails from "./Screens/eventDetails";
 import { Caption } from "react-native-paper";
-import Constants from "./constants/Constants";
-import { AuthContext } from "./Components/context";
+import Constants from "./src/constants/Constants";
+import { AuthContext } from "./src/Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import GallerDetail from "./Screens/GalleryDetail";
-import CategorizedEvent from "./Screens/CategorizedEvent";
-import UserDetails from "./Screens/UserDetails";
-import store from "./store/store";
+import store from "./src/store/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
-import YourEvents from "./Screens/YourEvents";
-import YoursDetail from "./Screens/YourEventDetails";
-import OrganizersDetail from "./Screens/OrganizersDetails";
-import Questions from "./Screens/AskQuestion";
-import About from "./Screens/About";
 import * as Linking from "expo-linking";
-import ForgotPass from "./Screens/ForgotPassword";
 import NetInfo from "@react-native-community/netinfo";
-import Followers from "./Screens/Followers";
-import Following from "./Screens/Following";
-import Filter from "./Screens/Filter";
-import AddTicket from "./Screens/AddTicket";
-import AddingTicketSucceed from "./Screens/AddingTicketSucceed";
-import TicketDetail from "./Screens/TicketDetail";
 import * as Animatable from "react-native-animatable";
-import Tickets from "./Screens/TicketScreen";
-import UpdateTicket from "./Screens/UpdateTicket";
-import UpdateEvent from "./Screens/UpdateEvent";
-import UpdateSucceed from "./Screens/UpdateSucceed";
-import CheckoutScreen from "./Screens/CheckoutScreen";
-import EventTickets from "./Screens/EventTickets";
-import BoughtDetail from "./Screens/BoughtTicketDetail";
 import Geolocation from "@react-native-community/geolocation";
 import { LocalNotification } from "./src/Utils/localPushController";
 import RemotePushController from "./src/Utils/RemotePushController";
+import Routes from "./src/routes";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
-const Stack = createNativeStackNavigator();
 const persistor = persistStore(store);
 const link = Linking.createURL("/");
 const app = Linking.createURL("com.afromina.placetobe://");
@@ -68,7 +37,6 @@ export default function App() {
   const handleNotification = () => {
     LocalNotification();
   };
-
 
   const Linkings = {
     prefixes: [link, app, Domain, subDomain],
@@ -293,6 +261,7 @@ export default function App() {
       userId: user.userId,
       userTokens: user.userTokens,
       FeaturedImage: eventInfo.featuredImage,
+      imageStatus: eventInfo.imageStatus,
       eventNamed: eventInfo.eventTitle,
       aboutEvent: eventInfo.eventDescription,
       sDate: eventInfo.startingDay,
@@ -416,7 +385,6 @@ export default function App() {
       }
     });
 
-
     return () => {};
   }, [retry]);
 
@@ -434,7 +402,7 @@ export default function App() {
       >
         <Animatable.Image
           animation="zoomIn"
-          source={require("./assets/splash.png")}
+          source={require("./src/assets/images/splash.png")}
           style={{ height: 300, width: 300 }}
         />
         <ActivityIndicator size="small" color={Constants.primary} />
@@ -457,304 +425,16 @@ export default function App() {
           >
             <StatusBar style={Constants.Inverse} />
             {connectionState ? (
-              <Stack.Navigator headerMode="none" initialRouteName="TabNav">
-                <Stack.Screen
-                  name="TabNav"
-                  component={TabNav}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="SignIn"
-                  component={Signin}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="SignUp"
-                  component={SignUp}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen name="Notifications" component={Notifications} />
-
-                <Stack.Screen
-                  name="Settings"
-                  component={Setting}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                  }}
-                />
-                <Stack.Screen
-                  name="Account Settings"
-                  component={UserDetails}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                  }}
-                />
-                <Stack.Screen
-                  name="Bookmarks"
-                  component={Bookmarks}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                  }}
-                />
-                <Stack.Screen
-                  name="Profile"
-                  component={Profile}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-
-                <Stack.Screen
-                  name="EventDetail"
-                  component={EventDetails}
-                  options={{ headerShown: false }}
-                />
-
-                <Stack.Screen
-                  name="GalleryDetail"
-                  component={GallerDetail}
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Eventcat"
-                  component={CategorizedEvent}
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Filter"
-                  component={Filter}
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="yourEvents"
-                  component={YourEvents}
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="YoursDetail"
-                  component={YoursDetail}
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Organizer Detail"
-                  component={OrganizersDetail}
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Questions"
-                  component={Questions}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerTitle: "Questions and Feedback",
-                  }}
-                />
-                <Stack.Screen
-                  name="About"
-                  component={About}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerTitle: "About us",
-                  }}
-                />
-
-                <Stack.Screen
-                  name="ForgotPass"
-                  component={ForgotPass}
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Followers"
-                  component={Followers}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Following"
-                  component={Following}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Add Ticket"
-                  component={AddTicket}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-
-                <Stack.Screen
-                  name="Ticket Added"
-                  component={AddingTicketSucceed}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Ticket Detail"
-                  component={TicketDetail}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-
-                <Stack.Screen
-                  name="My Tickets"
-                  component={Tickets}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-
-                <Stack.Screen
-                  name="Update Ticket"
-                  component={UpdateTicket}
-                  options={{
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Update Event"
-                  component={UpdateEvent}
-                  options={{
-                    title: "Update",
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="Update Succeed"
-                  component={UpdateSucceed}
-                  options={{
-                    title: "Updated",
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                    headerShown: false,
-                  }}
-                />
-
-                <Stack.Screen
-                  name="TicketScreen"
-                  component={EventTickets}
-                  options={{
-                    title: "Tickets",
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-
-                <Stack.Screen
-                  name="Checkout Screen"
-                  component={CheckoutScreen}
-                  options={{
-                    title: "Checkout",
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.background,
-                    headerShadowVisible: false,
-                  }}
-                />
-
-                <Stack.Screen
-                  name="BoughtDetail"
-                  component={BoughtDetail}
-                  options={{
-                    title: "Ticket Detail",
-                    headerStyle: {
-                      backgroundColor: Constants.primary,
-                    },
-                    headerTintColor: Constants.Inverse,
-                    headerShadowVisible: false,
-                    headerTitleAlign: "center",
-                    headerTitleStyle: {
-                      fontStyle: "italic",
-                      fontSize: Constants.headingone,
-                    },
-                  }}
-                />
-              </Stack.Navigator>
+              <Routes />
             ) : (
               <View style={styles.noConnection}>
                 <Image
-                  source={require("./assets/connect.png")}
+                  source={require("./src/assets/images/connect.png")}
                   style={styles.connImage}
                   resizeMode="contain"
                 />
                 <Image
-                  source={require("./assets/icon.png")}
+                  source={require("./src/assets/images/icon.png")}
                   style={styles.icon}
                   resizeMode="contain"
                 />
