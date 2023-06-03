@@ -1,5 +1,5 @@
 //import liraries
-import React, { Component } from "react";
+import React from "react";
 import { View, Text, StyleSheet, TouchableNativeFeedback } from "react-native";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import Constants from "../../constants/Constants";
