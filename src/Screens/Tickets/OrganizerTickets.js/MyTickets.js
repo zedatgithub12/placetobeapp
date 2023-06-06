@@ -1,12 +1,22 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, Image, FlatList, Alert } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Image,
+  FlatList,
+  Alert,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
 import { Paragraph, Title } from "react-native-paper";
 import Connection from "../../../constants/connection";
 import Constants from "../../../constants/Constants";
 import TicketListing from "../../../Components/Tickets/TicketsListing";
 import Header from "./HeaderActions";
 
+import Modal from "react-native-modal";
 // ticket functional component
 function Tickets({ navigation }) {
   const [loading, setLoading] = React.useState(true);
@@ -58,6 +68,89 @@ function Tickets({ navigation }) {
     };
   };
   const ActiveTickets = tickets.filter((ticket) => ticket.status == "1");
+
+  //Upcoming event listed in bottom sheet modal is listed here
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [loadUpcoming, setLoadUpcoming] = useState(true);
+  const [message, setMessage] = useState();
+  const [notFound, setNotFound] = useState(false);
+
+  const handleUpcomingEvents = async () => {
+    setLoadUpcoming(true);
+    // set refreshing state to true
+    // featching abort controller
+    // after featching events the fetching function will be aborted
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    let id = await AsyncStorage.getItem("userId");
+    var ApiUrl = Connection.url + Connection.organizerEvents;
+
+    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
+
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    var Data = {
+      userId: id,
+    };
+
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+    })
+      .then((response) => response.json()) //check response type of the API
+      .then((response) => {
+        // handle success
+        var message = response[0].message;
+
+        if (message === "succeed") {
+          var todayEvents = response[0].Events;
+          setUpcomingEvents(todayEvents);
+          setLoadUpcoming(false);
+          setNotFound(false);
+        } else if (message === "no event") {
+          setUpcomingEvents(upcomingEvents);
+          setMessage("Event will be listed here.");
+          setLoadUpcoming(false);
+          setNotFound(true);
+        } else {
+          setLoadUpcoming(false);
+          setNotFound(true);
+        }
+      })
+      .catch(() => {
+        setLoadUpcoming(false);
+      });
+
+    return () => {
+      // cancel the subscription
+      controller.abort();
+    };
+  };
+  const renderEvent = ({ item }) => (
+    <View>
+      <Text>{item.event_name}</Text>
+    </View>
+  );
+  const filterUpcomings = upcomingEvents.filter((event) => {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, "0");
+    var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+    var yyyy = today.getFullYear();
+
+    today = yyyy + "-" + mm + "-" + dd;
+
+    return event.start_date >= today;
+  });
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+    handleUpcomingEvents();
+  };
   //ticket type icon
   const TicketName = (iconname) => {
     var name;
@@ -282,10 +375,7 @@ function Tickets({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={{ backgroundColor: Constants.primary }}>
-        <Header
-          activeTickets={ActiveTickets.length}
-          addTicket={() => alert("Add Ticket")}
-        />
+        <Header activeTickets={ActiveTickets.length} addTicket={toggleModal} />
       </View>
       {loading ? (
         <FlatList
@@ -306,6 +396,46 @@ function Tickets({ navigation }) {
           <Paragraph>Ticket you added to event will be listed here.</Paragraph>
         </View>
       )}
+
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={toggleModal}
+        style={styles.bottomsheetcontainer}
+      >
+        <View style={styles.bottomsheet}>
+          <Text
+            style={{
+              fontSize: Constants.headingtwo,
+              fontWeight: Constants.Boldtwo,
+            }}
+          >
+            Upcoming Events
+          </Text>
+          {loadUpcoming ? (
+            <View>
+              <ActivityIndicator />
+            </View>
+          ) : (
+            <FlatList
+              data={filterUpcomings}
+              renderItem={renderEvent}
+              keyExtractor={(item) => item.event_id}
+              ListHeaderComponent={() =>
+                notFound ? (
+                  <View style={styles.container}>
+                    <Image
+                      source={require("../../../assets/images/NotFound.png")}
+                      resizeMode="contain"
+                      style={styles.notFound}
+                    />
+                    <Text style={styles.emptyMessageStyle}>{message}</Text>
+                  </View>
+                ) : null
+              }
+            />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -345,6 +475,18 @@ const styles = StyleSheet.create({
   eventstxt: {
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
+  },
+
+  bottomsheetcontainer: {
+    justifyContent: "flex-end",
+    margin: 0,
+  },
+  bottomsheet: {
+    backgroundColor: Constants.background,
+    padding: 16,
+    borderTopLeftRadius: 14,
+    borderTopEndRadius: 14,
+    minHeight: 400,
   },
 });
 
