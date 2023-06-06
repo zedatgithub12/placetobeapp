@@ -17,6 +17,7 @@ import call from "react-native-phone-call";
 import * as Linking from "expo-linking";
 
 const DetailContent = ({ ...props }) => {
+  const cancelled = props.isCancelled === "1" ? true : false;
   const free = "Free";
   const currency = " ETB";
   const MakeCall = (phone) => {
@@ -43,14 +44,29 @@ const DetailContent = ({ ...props }) => {
           style={styles.iconContainer}
         />
         <View style={styles.eventDate}>
-          <Text style={styles.date}>Happening Date</Text>
+          <Text style={cancelled ? styles.cancelled : styles.happening}>
+            {props.StartDate} @{props.StartTime}
+          </Text>
           <Text style={styles.time} numberOfLines={1}>
-            {props.StartDate} ({props.StartTime}) - {props.EndDate} (
-            {props.EndTime})
+            Happening Date
           </Text>
         </View>
       </View>
-
+      <View style={styles.subContainer}>
+        <FontAwesome
+          name="calendar-times-o"
+          size={22}
+          style={styles.iconContainer}
+        />
+        <View style={styles.eventDate}>
+          <Text style={cancelled ? styles.cancelled : styles.happening}>
+            {props.EndDate} @{props.EndTime}
+          </Text>
+          <Text style={styles.time} numberOfLines={1}>
+            End Date
+          </Text>
+        </View>
+      </View>
       <TouchableOpacity
         activeOpacity={0.7}
         style={styles.subContainer}
@@ -107,16 +123,14 @@ const DetailContent = ({ ...props }) => {
               size={21}
               style={styles.iconContainer}
             />
-        
-          <View style={styles.eventDate}>
-          
+
+            <View style={styles.eventDate}>
               <View>
                 <Text style={styles.venues}>{props.phone}</Text>
               </View>
-            
 
-            <Text style={styles.time}>Contact Phone</Text>
-          </View>
+              <Text style={styles.time}>Contact Phone</Text>
+            </View>
           </TouchableOpacity>
         </View>
       )}
@@ -133,6 +147,7 @@ const styles = StyleSheet.create({
   subContainer: {
     flexDirection: "row",
     alignItems: "center",
+    width: "94%",
   },
   iconContainer: {
     backgroundColor: Constants.iconBack,
@@ -153,24 +168,40 @@ const styles = StyleSheet.create({
   },
   venues: {
     marginLeft: 2,
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     fontWeight: Constants.Bold,
   },
 
   prices: {
     marginLeft: 2,
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     fontWeight: Constants.Bold,
   },
   date: {
     marginLeft: 2,
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     fontWeight: Constants.Bold,
+    color: Constants.Inverse,
   },
   time: {
     fontSize: 12,
     fontWeight: Constants.Boldtwo,
     color: Constants.Secondary,
+    marginLeft: 2,
+  },
+  happening: {
+    marginLeft: 2,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Bold,
+    color: Constants.Inverse,
+  },
+  cancelled: {
+    marginLeft: 2,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Bold,
+    color: Constants.Secondary,
+    textDecorationLine: "line-through",
+    textDecorationStyle: "solid",
   },
 });
 export default DetailContent;

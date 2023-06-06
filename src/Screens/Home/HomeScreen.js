@@ -213,8 +213,7 @@ function Home({ navigation, ...props }) {
           setTickets(tickets);
           setTicketShimmer(false);
         } else {
-          setTicketShimmer(true);
-          console.log(message);
+          setTicketShimmer(false);
         }
       })
       .catch((error) => {
@@ -561,7 +560,7 @@ function Home({ navigation, ...props }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.Faded,
+    backgroundColor: "#fcfcfc",
   },
   headers: {
     width: "95%",

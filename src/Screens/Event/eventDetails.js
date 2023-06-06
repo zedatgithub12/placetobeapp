@@ -49,8 +49,6 @@ const EventDetails = ({ route, navigation }) => {
   const [item, setItem] = useState({});
   const [loading, setLoading] = useState(true);
 
-
-
   const [timing, setTime] = useState({
     StartTime: "",
     EndTime: "",
@@ -359,7 +357,7 @@ const EventDetails = ({ route, navigation }) => {
     //organizer id is the only data to be sent to server in order to retrive organizer data
 
     var Data = {
-      eventId: id? id: externalLink,
+      eventId: id ? id : externalLink,
       followerId: followerId,
     };
     // header type for text data to be send to server
@@ -591,10 +589,9 @@ const EventDetails = ({ route, navigation }) => {
       FeatchTickets();
       bookmarked();
       featchOrganizer();
-    }
-    return () => {
       isSubcribed = false;
-    };
+    }
+    return () => {};
   }, [externalLink]);
 
   return (
@@ -704,6 +701,7 @@ const EventDetails = ({ route, navigation }) => {
             Price={item.event_entrance_fee}
             Venues={item.event_address}
             phone={item.contact_phone}
+            isCancelled={item.cancelled}
           />
           <View style={styles.descDescription}>
             <Text style={styles.descTitle}> Description</Text>
@@ -840,7 +838,7 @@ const EventDetails = ({ route, navigation }) => {
           )}
         </ScrollView>
       )}
-      {exist ? (
+      {exist && item.cancelled === "0" ? (
         <Animatable.View
           animation="fadeInUpBig"
           style={[styles.ticketBtnContainer]}
@@ -978,7 +976,7 @@ const styles = StyleSheet.create({
   eventName: {
     width: "79%",
     marginTop: 5,
-    fontSize: Constants.primaryHeading,
+    fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
 
     paddingRight: 4,
@@ -1062,20 +1060,22 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     justifyContent: "center",
     backgroundColor: Constants.Faded,
+    padding: 6,
   },
   buyticketbtn: {
     marginVertical: 6,
     alignSelf: "center",
     backgroundColor: Constants.primary,
-    padding: 10,
+    padding: 12,
     paddingHorizontal: 26,
     borderRadius: 8,
     justifyContent: "center",
     textAlign: "center",
+    width: "94%",
   },
   ticketTxt: {
     fontSize: Constants.headingtwo,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     textAlign: "center",
     color: Constants.textColor,
   },

@@ -26,7 +26,7 @@ import AddTicket from "../Screens/Tickets/AddTicket";
 import AddingTicketSucceed from "../Screens/Tickets/AddingTicketSucceed";
 import EventTickets from "../Screens/Tickets/EventTickets";
 import TicketDetail from "../Screens/Tickets/TicketDetail";
-import Tickets from "../Screens/Tickets/TicketScreen";
+import Tickets from "../Screens/Tickets/OrganizerTickets.js/MyTickets";
 import UpdateTicket from "../Screens/Tickets/UpdateTicket";
 import CheckoutScreen from "../Screens/Tickets/CheckoutScreen";
 import BoughtDetail from "../Screens/Tickets/BoughtTicketDetail";

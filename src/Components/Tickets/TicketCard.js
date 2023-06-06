@@ -24,7 +24,7 @@ const TicketCard = ({
 }) => {
   const featuredImageUri = Connection.url + Connection.assets;
   return (
-    <Card style={styles.EventContainer}>
+    <View style={styles.EventContainer}>
       <Pressable onPress={EventName}>
         <View style={styles.ImageContainer}>
           <Card.Cover
@@ -57,36 +57,35 @@ const TicketCard = ({
           </View>
         </View>
         <TouchableOpacity
-          style={styles.checkinbtn}
+          style={styles.BuyBtn}
           activeOpacity={0.7}
           onPress={onPress}
         >
           <Text style={styles.checkin}>Buy</Text>
         </TouchableOpacity>
       </Pressable>
-    </Card>
+    </View>
   );
 };
 
 // define your styles
 const styles = StyleSheet.create({
   EventContainer: {
-    width: 155,
-    height: 200,
+    width: 165,
     justifyContent: "center",
     margin: 5,
-    paddingBottom: 12,
+    padding: 4,
+    backgroundColor: Constants.background,
   },
   ImageContainer: {
-    width: "100%",
-    height: 120,
-    resizeMode: "contain",
+    width: 156,
+    height: 110,
   },
   FeaturedImagestyle: {
     width: "100%",
     height: "100%",
-    borderTopRightRadius: 6,
-    borderTopLeftRadius: 6,
+    borderRadius: 4,
+    resizeMode: "contain",
   },
   cardContent: {
     paddingVertical: 2,
@@ -105,18 +104,22 @@ const styles = StyleSheet.create({
     fontSize: Constants.textSize,
   },
 
-  checkinbtn: {
-    flexDirection: "row",
-    position: "absolute",
-    right: 0,
+  BuyBtn: {
+    width: "96%",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: Constants.transparentPrimary,
+    margin: 6,
+    marginTop: 8,
+    padding: 4,
+    borderRadius: 6,
+    textAlign: "center",
   },
   checkin: {
     paddingHorizontal: 8,
-    justifyContent: "center",
-    backgroundColor: Constants.primary,
     fontWeight: Constants.Boldtwo,
     color: Constants.Inverse,
-    textAlign: "center",
     borderBottomLeftRadius: 4,
     borderTopRightRadius: 4,
     fontSize: Constants.headingthree,
@@ -130,15 +133,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   pricetxts: {
-    fontSize: Constants.textSize,
-    fontWeight: Constants.Bold,
-    color: Constants.Inverse,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.primaryTwo,
     marginTop: 4,
   },
   discount: {
     fontSize: Constants.textSize,
     fontWeight: Constants.Boldtwo,
-    color: Constants.primary,
+    color: "#999",
     marginTop: 4,
     textDecorationLine: "line-through",
     textDecorationStyle: "solid",

@@ -9,12 +9,11 @@ const TicketShimmer = () => {
     <SkeletonPlaceholder>
       <View style={styles.EventContainer}>
         <View style={styles.ImageContainer} />
-        <View style={styles.VenueName} />
-        <View style={styles.type}/>
+        <View style={styles.name} />
+        <View style={styles.type} />
 
-            <View style={styles.price}/>
-            
-     
+        <View style={styles.price} />
+        <View style={styles.btn} />
       </View>
     </SkeletonPlaceholder>
   );
@@ -36,41 +35,37 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 6,
   },
 
-  VenueName: {
+  name: {
     width: "96%",
     height: 12,
-    margin:4,
-    marginLeft:0,
-    marginTop:4,
+    margin: 4,
+    marginLeft: 0,
+    marginTop: 5,
     borderRadius: 2,
-    
   },
-  type:{
-    width: "80%",
+  type: {
+    width: "96%",
     height: 12,
-    borderRadius:2,
-    marginLeft:0,
-    marginTop:0,
+    borderRadius: 2,
+    marginLeft: 0,
+    marginTop: 0,
   },
   price: {
-  width: "63%",
-  height: 10,
-  marginTop:5,
-  marginLeft:0,
-  borderRadius:2
-  
-  },
-  checkin: {
-    width: "28%",
-    height: 12,
-    marginTop:18,
-    marginRight:4,
-    position: "absolute",
-    right:2,
-    bottom:0,
-    borderRadius:2
+    width: "96%",
+    height: 10,
+    marginTop: 5,
+    marginLeft: 0,
+    borderRadius: 2,
   },
 
+  btn: {
+    width: "96%",
+    height: 18,
+    margin: 4,
+    marginLeft: 0,
+    marginTop: 4,
+    borderRadius: 2,
+  },
 });
 
 //make this component available to the app

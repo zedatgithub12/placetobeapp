@@ -2,17 +2,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text, Image, FlatList, Alert } from "react-native";
 import { Paragraph, Title } from "react-native-paper";
-import Connection from "../../constants/connection";
-import Constants from "../../constants/Constants";
-import TicketListing from "../../Components/Tickets/TicketsListing";
-import { Button, Menu, Divider, Provider } from "react-native-paper";
+import Connection from "../../../constants/connection";
+import Constants from "../../../constants/Constants";
+import TicketListing from "../../../Components/Tickets/TicketsListing";
+import Header from "./HeaderActions";
 
 // ticket functional component
 function Tickets({ navigation }) {
   const [loading, setLoading] = React.useState(true);
-  const [tickets, setTickets] = React.useState(); //tickets
+  const [tickets, setTickets] = React.useState([]); //tickets
   const [refreshing, setRefreshing] = React.useState(false); //flalist refreshing state
-  const [shimmer, setShimmer] = useState(false); //shimmer effect state
 
   const myTickets = async () => {
     const controller = new AbortController();
@@ -58,7 +57,7 @@ function Tickets({ navigation }) {
       controller.abort();
     };
   };
-
+  const ActiveTickets = tickets.filter((ticket) => ticket.status == "1");
   //ticket type icon
   const TicketName = (iconname) => {
     var name;
@@ -282,6 +281,12 @@ function Tickets({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <View style={{ backgroundColor: Constants.primary }}>
+        <Header
+          activeTickets={ActiveTickets.length}
+          addTicket={() => alert("Add Ticket")}
+        />
+      </View>
       {loading ? (
         <FlatList
           data={tickets}
@@ -289,25 +294,11 @@ function Tickets({ navigation }) {
           keyExtractor={(item) => item.id}
           onRefresh={RefreshList}
           refreshing={refreshing}
-          // ListHeaderComponent={() =>
-          //   notFound ? (
-          //     <View style={styles.noNoticeContainer}>
-          //       <Image
-          //         source={require("../assets/noNotification.png")}
-          //         style={styles.noNoticeImage}
-          //         resizeMode="contain"
-          //       />
-          //       <Title style={styles.prompttxt}>
-          //         You have no notification yet!
-          //       </Title>
-          //     </View>
-          //   ) : null
-          // }
         />
       ) : (
         <View style={styles.noTicketContainer}>
           <Image
-            source={require("../../assets/images/noticket.png")}
+            source={require("../../../assets/images/noticket.png")}
             style={styles.noTicketImage}
             resizeMode="contain"
           />
@@ -321,9 +312,8 @@ function Tickets({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
     backgroundColor: Constants.Faded,
-    paddingVertical: 6,
+    paddingBottom: 6,
   },
   noTicketContainer: {
     flex: 1,
