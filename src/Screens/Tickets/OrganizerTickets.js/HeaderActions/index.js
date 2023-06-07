@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
     width: "90%",
     margin: 10,
     padding: 10,
+    paddingVertical: 20,
     borderRadius: 8,
   },
   activeTickets: {
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 6,
     borderBottomLeftRadius: 6,
     borderRightWidth: 1,
-    borderColor: Constants.primary,
+    borderColor: Constants.background,
   },
   addTicket: {
     width: "44%",

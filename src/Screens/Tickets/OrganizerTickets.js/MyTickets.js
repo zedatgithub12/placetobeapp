@@ -1,22 +1,25 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
   Text,
   Image,
   FlatList,
-  Alert,
-  Dimensions,
   ActivityIndicator,
+  Pressable,
+  Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { Paragraph, Title } from "react-native-paper";
 import Connection from "../../../constants/connection";
 import Constants from "../../../constants/Constants";
 import TicketListing from "../../../Components/Tickets/TicketsListing";
 import Header from "./HeaderActions";
-
 import Modal from "react-native-modal";
+import UpcomingEvents from "./UpcomingEvents";
+import { MaterialCommunityIcons } from "react-native-vector-icons";
+import * as Animatable from "react-native-animatable";
 // ticket functional component
 function Tickets({ navigation }) {
   const [loading, setLoading] = React.useState(true);
@@ -78,11 +81,11 @@ function Tickets({ navigation }) {
 
   const handleUpcomingEvents = async () => {
     setLoadUpcoming(true);
-    // set refreshing state to true
+
     // featching abort controller
     // after featching events the fetching function will be aborted
     const controller = new AbortController();
-    const signal = controller.signal;
+    // const signal = controller.signal;
 
     let id = await AsyncStorage.getItem("userId");
     var ApiUrl = Connection.url + Connection.organizerEvents;
@@ -132,10 +135,45 @@ function Tickets({ navigation }) {
       controller.abort();
     };
   };
+  const DateFun = (startingTime) => {
+    var date = new Date(startingTime);
+    let day = date.getDay();
+    let month = date.getMonth();
+    let happeningDay = date.getDate();
+
+    // return weekname
+    var weekday = new Array(7);
+    weekday[1] = "Mon, ";
+    weekday[2] = "Tue, ";
+    weekday[3] = "Wed, ";
+    weekday[4] = "Thu, ";
+    weekday[5] = "Fri, ";
+    weekday[6] = "Sat, ";
+    weekday[0] = "Sun, ";
+
+    //an array of month name
+    var monthName = new Array(12);
+    monthName[1] = "Jan";
+    monthName[2] = "Feb";
+    monthName[3] = "Mar";
+    monthName[4] = "Apr";
+    monthName[5] = "May";
+    monthName[6] = "Jun";
+    monthName[7] = "Jul";
+    monthName[8] = "Aug";
+    monthName[9] = "Sep";
+    monthName[10] = "Oct";
+    monthName[11] = "Nov";
+    monthName[12] = "Dec";
+
+    return weekday[day] + monthName[month + 1] + " " + happeningDay;
+  };
   const renderEvent = ({ item }) => (
-    <View>
-      <Text>{item.event_name}</Text>
-    </View>
+    <UpcomingEvents
+      event_name={item.event_name}
+      start_date={DateFun(item.start_date)}
+      onPress={() => navigation.navigate("Add Ticket", { item })}
+    />
   );
   const filterUpcomings = upcomingEvents.filter((event) => {
     var today = new Date();
@@ -149,7 +187,10 @@ function Tickets({ navigation }) {
   });
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
-    handleUpcomingEvents();
+
+    if (upcomingEvents.length == 0) {
+      handleUpcomingEvents();
+    }
   };
   //ticket type icon
   const TicketName = (iconname) => {
@@ -374,12 +415,13 @@ function Tickets({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={{ backgroundColor: Constants.primary }}>
+      <View style={{ backgroundColor: Constants.background, marginBottom: 6 }}>
         <Header activeTickets={ActiveTickets.length} addTicket={toggleModal} />
       </View>
       {loading ? (
         <FlatList
           data={tickets}
+          numColumns={2}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
           onRefresh={RefreshList}
@@ -402,18 +444,33 @@ function Tickets({ navigation }) {
         onBackdropPress={toggleModal}
         style={styles.bottomsheetcontainer}
       >
-        <View style={styles.bottomsheet}>
-          <Text
-            style={{
-              fontSize: Constants.headingtwo,
-              fontWeight: Constants.Boldtwo,
-            }}
-          >
-            Upcoming Events
-          </Text>
+        <Animatable.View
+          animation="slideInUp"
+          duration={0.5}
+          style={styles.bottomsheet}
+        >
+          <View style={styles.sheetHeader}>
+            <Text
+              style={{
+                fontSize: Constants.headingtwo,
+                fontWeight: Constants.Boldtwo,
+              }}
+            >
+              Upcoming Events
+            </Text>
+
+            <TouchableOpacity style={styles.closebtn} onPress={toggleModal}>
+              <MaterialCommunityIcons
+                name="close"
+                size={22}
+                color={Constants.Inverse}
+              />
+            </TouchableOpacity>
+          </View>
+
           {loadUpcoming ? (
             <View>
-              <ActivityIndicator />
+              <ActivityIndicator size="large" color={Constants.primary} />
             </View>
           ) : (
             <FlatList
@@ -434,7 +491,7 @@ function Tickets({ navigation }) {
               }
             />
           )}
-        </View>
+        </Animatable.View>
       </Modal>
     </View>
   );
@@ -482,11 +539,27 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   bottomsheet: {
-    backgroundColor: Constants.background,
-    padding: 16,
+    backgroundColor: Constants.Faded,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
     borderTopLeftRadius: 14,
     borderTopEndRadius: 14,
     minHeight: 400,
+    maxHeight: Dimensions.get("screen").height / 1.5,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingLeft: 4,
+    marginBottom: 18,
+  },
+  closebtn: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 40,
+    height: 40,
+    borderRadius: 18,
   },
 });
 
