@@ -20,6 +20,8 @@ import Modal from "react-native-modal";
 import UpcomingEvents from "./UpcomingEvents";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import * as Animatable from "react-native-animatable";
+import NoTicket from "../../../handlers/Tickets";
+
 // ticket functional component
 function Tickets({ navigation }) {
   const [loading, setLoading] = React.useState(true);
@@ -54,15 +56,13 @@ function Tickets({ navigation }) {
         var ticket = response[0].Tickets;
 
         if (message === "succeed") {
-          setLoading(true);
+          setLoading(false);
           setTickets(ticket);
-          // console.log(ticket);
         } else {
           setLoading(false);
-          // console.log(ticket);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         setLoading(false);
       });
     return () => {
@@ -118,7 +118,7 @@ function Tickets({ navigation }) {
           setNotFound(false);
         } else if (message === "no event") {
           setUpcomingEvents(upcomingEvents);
-          setMessage("Event will be listed here.");
+          setMessage("You have no upcoming event!");
           setLoadUpcoming(false);
           setNotFound(true);
         } else {
@@ -367,7 +367,7 @@ function Tickets({ navigation }) {
         var ticket = response[0].Tickets;
 
         if (message === "succeed") {
-          setLoading(true);
+          setLoading(false);
           setTickets(ticket);
           setRefreshing(false);
         } else {
@@ -375,7 +375,7 @@ function Tickets({ navigation }) {
           setRefreshing(false);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         setLoading(false);
         setRefreshing(false);
       });
@@ -411,7 +411,7 @@ function Tickets({ navigation }) {
     return () => {
       isApiSubscribed = false;
     };
-  });
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -419,6 +419,10 @@ function Tickets({ navigation }) {
         <Header activeTickets={ActiveTickets.length} addTicket={toggleModal} />
       </View>
       {loading ? (
+        <View>
+          <ActivityIndicator size="large" color={Constants.primary} />
+        </View>
+      ) : (
         <FlatList
           data={tickets}
           numColumns={2}
@@ -426,17 +430,13 @@ function Tickets({ navigation }) {
           keyExtractor={(item) => item.id}
           onRefresh={RefreshList}
           refreshing={refreshing}
+          ListEmptyComponent={
+            <NoTicket
+              title="Not Found, Create One Here!"
+              helperText="Ticket you added to the event is listed here"
+            />
+          }
         />
-      ) : (
-        <View style={styles.noTicketContainer}>
-          <Image
-            source={require("../../../assets/images/noticket.png")}
-            style={styles.noTicketImage}
-            resizeMode="contain"
-          />
-          <Title style={styles.prompttxt}>No ticket yet!</Title>
-          <Paragraph>Ticket you added to event will be listed here.</Paragraph>
-        </View>
       )}
 
       <Modal
@@ -477,17 +477,15 @@ function Tickets({ navigation }) {
               data={filterUpcomings}
               renderItem={renderEvent}
               keyExtractor={(item) => item.event_id}
-              ListHeaderComponent={() =>
-                notFound ? (
-                  <View style={styles.container}>
-                    <Image
-                      source={require("../../../assets/images/NotFound.png")}
-                      resizeMode="contain"
-                      style={styles.notFound}
-                    />
-                    <Text style={styles.emptyMessageStyle}>{message}</Text>
-                  </View>
-                ) : null
+              ListEmptyComponent={
+                <View style={styles.noevent}>
+                  <Image
+                    source={require("../../../assets/images/NotFound.png")}
+                    resizeMode="contain"
+                    style={styles.notFound}
+                  />
+                  <Text style={styles.emptyMessageStyle}>{message}</Text>
+                </View>
               }
             />
           )}
@@ -502,23 +500,7 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.Faded,
     paddingBottom: 6,
   },
-  noTicketContainer: {
-    flex: 1,
-    width: "80%",
-    alignItems: "center",
-    alignSelf: "center",
-    justifyContent: "center",
-  },
-  noTicketImage: {
-    width: "85%",
-    height: 200,
-    borderRadius: 10,
-  },
-  prompttxt: {
-    fontSize: Constants.primaryHeading,
-    fontWeight: Constants.Bold,
-    marginTop: 10,
-  },
+
   eventsBtn: {
     width: "60%",
     padding: 8,
@@ -560,6 +542,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 18,
+  },
+  noevent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notFound: {
+    width: "75%",
+    height: 180,
+    borderRadius: 10,
+  },
+  emptyMessageStyle: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    marginTop: 10,
+    color: Constants.Secondary,
   },
 });
 

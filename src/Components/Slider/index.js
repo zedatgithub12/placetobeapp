@@ -4,7 +4,79 @@ import { View, StyleSheet, Image, ScrollView, Dimensions } from "react-native";
 import Connection from "../../constants/connection";
 
 // slider a component
-const Slider = ({ Images }) => {
+const Slider = () => {
+  var placeHoldersImage = "placeholders.jpg";
+
+  const PlaceholderImages = [
+    {
+      id: "1",
+      image: placeHoldersImage,
+    },
+    {
+      id: "2",
+      image: placeHoldersImage,
+    },
+    {
+      id: "3",
+      image: placeHoldersImage,
+    },
+    {
+      id: "4",
+      image: placeHoldersImage,
+    },
+    {
+      id: "5",
+      image: placeHoldersImage,
+    },
+    {
+      id: "6",
+      image: placeHoldersImage,
+    },
+    {
+      id: "7",
+      image: placeHoldersImage,
+    },
+    {
+      id: "8",
+      image: placeHoldersImage,
+    },
+  ];
+  // state of featured image
+  const [Images, setImage] = useState(PlaceholderImages);
+  //a function which featches featured-image on the top of home screen from database
+  // then the function will be called on the component mounting
+  useEffect(() => {
+    const featchImage = () => {
+      var ApiUrl = Connection.url + Connection.Images;
+      var headers = {
+        Accept: "application/json",
+        "Content-Type": "appliction/json",
+      };
+
+      fetch(ApiUrl, {
+        method: "post",
+        headers: headers,
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          var message = response[0].message;
+
+          if (message === "succeed") {
+            var featuredImages = response[0].images;
+
+            setImage(featuredImages);
+          } else {
+            setImage(Images);
+          }
+        })
+        .catch(() => {
+          setImage(Images);
+        });
+    };
+    featchImage();
+    return () => {};
+  }, []);
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scrollViewRef = useRef();
 
@@ -66,18 +138,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 12,
     margin: 10,
-    marginHorizontal: 0,
+    marginHorizontal: 10,
   },
 
   box: {
     flexDirection: "row",
     width: Dimensions.get("screen").width,
-    height: 120,
+    height: 110,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 10,
     borderRadius: 12,
-   
   },
   image: {
     width: "100%",
