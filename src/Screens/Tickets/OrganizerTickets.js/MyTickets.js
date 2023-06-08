@@ -1,11 +1,26 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, Image, FlatList, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Image,
+  FlatList,
+  ActivityIndicator,
+  Pressable,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import { Paragraph, Title } from "react-native-paper";
 import Connection from "../../../constants/connection";
 import Constants from "../../../constants/Constants";
 import TicketListing from "../../../Components/Tickets/TicketsListing";
 import Header from "./HeaderActions";
+import Modal from "react-native-modal";
+import UpcomingEvents from "./UpcomingEvents";
+import { MaterialCommunityIcons } from "react-native-vector-icons";
+import * as Animatable from "react-native-animatable";
+import NoTicket from "../../../handlers/Tickets";
 
 // ticket functional component
 function Tickets({ navigation }) {
@@ -41,15 +56,13 @@ function Tickets({ navigation }) {
         var ticket = response[0].Tickets;
 
         if (message === "succeed") {
-          setLoading(true);
+          setLoading(false);
           setTickets(ticket);
-          // console.log(ticket);
         } else {
           setLoading(false);
-          // console.log(ticket);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         setLoading(false);
       });
     return () => {
@@ -58,6 +71,127 @@ function Tickets({ navigation }) {
     };
   };
   const ActiveTickets = tickets.filter((ticket) => ticket.status == "1");
+
+  //Upcoming event listed in bottom sheet modal is listed here
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [loadUpcoming, setLoadUpcoming] = useState(true);
+  const [message, setMessage] = useState();
+  const [notFound, setNotFound] = useState(false);
+
+  const handleUpcomingEvents = async () => {
+    setLoadUpcoming(true);
+
+    // featching abort controller
+    // after featching events the fetching function will be aborted
+    const controller = new AbortController();
+    // const signal = controller.signal;
+
+    let id = await AsyncStorage.getItem("userId");
+    var ApiUrl = Connection.url + Connection.organizerEvents;
+
+    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
+
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    var Data = {
+      userId: id,
+    };
+
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+    })
+      .then((response) => response.json()) //check response type of the API
+      .then((response) => {
+        // handle success
+        var message = response[0].message;
+
+        if (message === "succeed") {
+          var todayEvents = response[0].Events;
+          setUpcomingEvents(todayEvents);
+          setLoadUpcoming(false);
+          setNotFound(false);
+        } else if (message === "no event") {
+          setUpcomingEvents(upcomingEvents);
+          setMessage("You have no upcoming event!");
+          setLoadUpcoming(false);
+          setNotFound(true);
+        } else {
+          setLoadUpcoming(false);
+          setNotFound(true);
+        }
+      })
+      .catch(() => {
+        setLoadUpcoming(false);
+      });
+
+    return () => {
+      // cancel the subscription
+      controller.abort();
+    };
+  };
+  const DateFun = (startingTime) => {
+    var date = new Date(startingTime);
+    let day = date.getDay();
+    let month = date.getMonth();
+    let happeningDay = date.getDate();
+
+    // return weekname
+    var weekday = new Array(7);
+    weekday[1] = "Mon, ";
+    weekday[2] = "Tue, ";
+    weekday[3] = "Wed, ";
+    weekday[4] = "Thu, ";
+    weekday[5] = "Fri, ";
+    weekday[6] = "Sat, ";
+    weekday[0] = "Sun, ";
+
+    //an array of month name
+    var monthName = new Array(12);
+    monthName[1] = "Jan";
+    monthName[2] = "Feb";
+    monthName[3] = "Mar";
+    monthName[4] = "Apr";
+    monthName[5] = "May";
+    monthName[6] = "Jun";
+    monthName[7] = "Jul";
+    monthName[8] = "Aug";
+    monthName[9] = "Sep";
+    monthName[10] = "Oct";
+    monthName[11] = "Nov";
+    monthName[12] = "Dec";
+
+    return weekday[day] + monthName[month + 1] + " " + happeningDay;
+  };
+  const renderEvent = ({ item }) => (
+    <UpcomingEvents
+      event_name={item.event_name}
+      start_date={DateFun(item.start_date)}
+      onPress={() => navigation.navigate("Add Ticket", { item })}
+    />
+  );
+  const filterUpcomings = upcomingEvents.filter((event) => {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, "0");
+    var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+    var yyyy = today.getFullYear();
+
+    today = yyyy + "-" + mm + "-" + dd;
+
+    return event.start_date >= today;
+  });
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+
+    if (upcomingEvents.length == 0) {
+      handleUpcomingEvents();
+    }
+  };
   //ticket type icon
   const TicketName = (iconname) => {
     var name;
@@ -233,7 +367,7 @@ function Tickets({ navigation }) {
         var ticket = response[0].Tickets;
 
         if (message === "succeed") {
-          setLoading(true);
+          setLoading(false);
           setTickets(ticket);
           setRefreshing(false);
         } else {
@@ -241,7 +375,7 @@ function Tickets({ navigation }) {
           setRefreshing(false);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         setLoading(false);
         setRefreshing(false);
       });
@@ -277,35 +411,86 @@ function Tickets({ navigation }) {
     return () => {
       isApiSubscribed = false;
     };
-  });
+  }, []);
 
   return (
     <View style={styles.container}>
-      <View style={{ backgroundColor: Constants.primary }}>
-        <Header
-          activeTickets={ActiveTickets.length}
-          addTicket={() => alert("Add Ticket")}
-        />
+      <View style={{ backgroundColor: Constants.background, marginBottom: 6 }}>
+        <Header activeTickets={ActiveTickets.length} addTicket={toggleModal} />
       </View>
       {loading ? (
+        <View>
+          <ActivityIndicator size="large" color={Constants.primary} />
+        </View>
+      ) : (
         <FlatList
           data={tickets}
+          numColumns={2}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
           onRefresh={RefreshList}
           refreshing={refreshing}
+          ListEmptyComponent={
+            <NoTicket
+              title="Not Found, Create One Here!"
+              helperText="Ticket you added to the event is listed here"
+            />
+          }
         />
-      ) : (
-        <View style={styles.noTicketContainer}>
-          <Image
-            source={require("../../../assets/images/noticket.png")}
-            style={styles.noTicketImage}
-            resizeMode="contain"
-          />
-          <Title style={styles.prompttxt}>No ticket yet!</Title>
-          <Paragraph>Ticket you added to event will be listed here.</Paragraph>
-        </View>
       )}
+
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={toggleModal}
+        style={styles.bottomsheetcontainer}
+      >
+        <Animatable.View
+          animation="slideInUp"
+          duration={0.5}
+          style={styles.bottomsheet}
+        >
+          <View style={styles.sheetHeader}>
+            <Text
+              style={{
+                fontSize: Constants.headingtwo,
+                fontWeight: Constants.Boldtwo,
+              }}
+            >
+              Upcoming Events
+            </Text>
+
+            <TouchableOpacity style={styles.closebtn} onPress={toggleModal}>
+              <MaterialCommunityIcons
+                name="close"
+                size={22}
+                color={Constants.Inverse}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {loadUpcoming ? (
+            <View>
+              <ActivityIndicator size="large" color={Constants.primary} />
+            </View>
+          ) : (
+            <FlatList
+              data={filterUpcomings}
+              renderItem={renderEvent}
+              keyExtractor={(item) => item.event_id}
+              ListEmptyComponent={
+                <View style={styles.noevent}>
+                  <Image
+                    source={require("../../../assets/images/NotFound.png")}
+                    resizeMode="contain"
+                    style={styles.notFound}
+                  />
+                  <Text style={styles.emptyMessageStyle}>{message}</Text>
+                </View>
+              }
+            />
+          )}
+        </Animatable.View>
+      </Modal>
     </View>
   );
 }
@@ -315,23 +500,7 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.Faded,
     paddingBottom: 6,
   },
-  noTicketContainer: {
-    flex: 1,
-    width: "80%",
-    alignItems: "center",
-    alignSelf: "center",
-    justifyContent: "center",
-  },
-  noTicketImage: {
-    width: "85%",
-    height: 200,
-    borderRadius: 10,
-  },
-  prompttxt: {
-    fontSize: Constants.primaryHeading,
-    fontWeight: Constants.Bold,
-    marginTop: 10,
-  },
+
   eventsBtn: {
     width: "60%",
     padding: 8,
@@ -345,6 +514,50 @@ const styles = StyleSheet.create({
   eventstxt: {
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
+  },
+
+  bottomsheetcontainer: {
+    justifyContent: "flex-end",
+    margin: 0,
+  },
+  bottomsheet: {
+    backgroundColor: Constants.Faded,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderTopLeftRadius: 14,
+    borderTopEndRadius: 14,
+    minHeight: 400,
+    maxHeight: Dimensions.get("screen").height / 1.5,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingLeft: 4,
+    marginBottom: 18,
+  },
+  closebtn: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 40,
+    height: 40,
+    borderRadius: 18,
+  },
+  noevent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notFound: {
+    width: "75%",
+    height: 180,
+    borderRadius: 10,
+  },
+  emptyMessageStyle: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    marginTop: 10,
+    color: Constants.Secondary,
   },
 });
 

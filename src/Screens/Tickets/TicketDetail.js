@@ -6,18 +6,19 @@ import {
   StyleSheet,
   ScrollView,
   TouchableNativeFeedback,
-  Modal,
   ActivityIndicator,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Image,
+  Dimensions,
 } from "react-native";
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
 import Connection from "../../constants/connection";
 import { Badge } from "react-native-paper";
-
-// create a component
+import Modal from "react-native-modal";
+import * as Animatable from "react-native-animatable";
+// Organizer Ticket Detail
 const TicketDetail = ({ route, navigation }) => {
   const { item } = route.params;
   const [textc, setTextC] = useState(item.status);
@@ -145,7 +146,7 @@ const TicketDetail = ({ route, navigation }) => {
           setIndicator(false);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         setTicketStatus(Status());
         setIndicator(false);
       });
@@ -156,8 +157,6 @@ const TicketDetail = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    let isApiSubscribed = true;
-
     return () => {};
   }, [TicketStatus]);
   return (
@@ -192,19 +191,24 @@ const TicketDetail = ({ route, navigation }) => {
 
           <View style={styles.statusBTN}>
             <Modal
-              animationType="slide"
+              animationType="fade"
               transparent={true}
-              visible={visible}
+              isVisible={visible}
               style={styles.modal}
               onRequestClose={() => setVisible(false)}
+              onBackdropPress={() => setVisible(false)}
             >
-              <View style={styles.modalContainer}>
+              <Animatable.View
+                animation="fadeInUp"
+                delay={1}
+                style={styles.modalContainer}
+              >
                 <TouchableWithoutFeedback onPress={() => setVisible(false)}>
                   <View style={styles.closebtn}>
                     <MaterialCommunityIcons
                       name="close"
                       size={20}
-                      color={Constants.Inverse}
+                      color={Constants.Secondary}
                     />
                   </View>
                 </TouchableWithoutFeedback>
@@ -217,9 +221,7 @@ const TicketDetail = ({ route, navigation }) => {
                     <ActivityIndicator size="small" color={Constants.primary} />
                   ) : (
                     <View style={styles.modalCont}>
-                      <Text style={styles.modalDesc}>
-                        To make it unavailable, press the button!
-                      </Text>
+                      <Text style={styles.modalDesc}>Change Ticket Status</Text>
                       <View style={[styles.itemStatus]}>
                         <Text style={styles.statusTexts}>Sold Out</Text>
                         {checkIcon ? (
@@ -233,7 +235,7 @@ const TicketDetail = ({ route, navigation }) => {
                     </View>
                   )}
                 </TouchableWithoutFeedback>
-              </View>
+              </Animatable.View>
             </Modal>
             <TouchableWithoutFeedback onPress={() => toggleModal()}>
               <Text style={[styles.statusContainer, { color: StatusText() }]}>
@@ -383,30 +385,26 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
   },
   modal: {
-    //backgroundColor:Constants.icon
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 0,
+    marginBottom: 50,
   },
   modalContainer: {
-    position: "absolute",
-    bottom: 0,
-    backgroundColor: Constants.background,
-    width: "98%",
-    height: 220,
-    alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 10,
-    elevation: 4,
-    borderTopEndRadius: Constants.borderRad,
-    borderTopLeftRadius: Constants.borderRad,
-  },
-  modalCont: {
-    width: "90%",
+    backgroundColor: Constants.transparentPrimary,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    minHeight: 160,
+    maxHeight: Dimensions.get("screen").height / 1.5,
+    width: Dimensions.get("screen").width / 1.2,
     alignItems: "center",
   },
+
   modalDesc: {
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
-    color: Constants.green,
+    color: Constants.Inverse,
     marginBottom: 20,
   },
   itemStatus: {
@@ -414,17 +412,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 10,
     paddingHorizontal: 20,
-    width: "80%",
     padding: 10,
-    backgroundColor: Constants.Faded,
+    backgroundColor: Constants.primary,
     margin: 6,
+    marginTop: 19,
     borderRadius: 50,
     alignItems: "center",
+    alignSelf: "center",
   },
   statusTexts: {
-    fontWeight: Constants.Bold,
-    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    fontSize: Constants.headingthree,
     color: Constants.Inverse,
+    marginRight: 6,
   },
   instockTexts: {
     fontWeight: Constants.Bold,
@@ -436,12 +436,9 @@ const styles = StyleSheet.create({
   },
   closebtn: {
     position: "absolute",
-    right: 15,
-    top: -15,
-    backgroundColor: Constants.background,
-    padding: 6,
-    borderRadius: 50,
-    elevation: 2,
+    right: 5,
+    top: 0,
+    padding: 12,
   },
   PGContainer: {
     flexDirection: "row",

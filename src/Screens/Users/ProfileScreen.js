@@ -202,7 +202,7 @@ function Profile({ navigation, props }) {
   };
   // when logout button pressed this function is called
   const userLoggedOut = async () => {
-    Signout();
+    await Signout();
     navigation.navigate("TabNav");
   };
 

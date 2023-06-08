@@ -56,105 +56,6 @@ function Home({ navigation, ...props }) {
     userProfile();
   };
 
-  var placeHoldersImage = "placeholders.jpg";
-
-  const PlaceholderImages = [
-    {
-      id: "1",
-      image: placeHoldersImage,
-    },
-    {
-      id: "2",
-      image: placeHoldersImage,
-    },
-    {
-      id: "3",
-      image: placeHoldersImage,
-    },
-    {
-      id: "4",
-      image: placeHoldersImage,
-    },
-    {
-      id: "5",
-      image: placeHoldersImage,
-    },
-    {
-      id: "6",
-      image: placeHoldersImage,
-    },
-    {
-      id: "7",
-      image: placeHoldersImage,
-    },
-    {
-      id: "8",
-      image: placeHoldersImage,
-    },
-  ];
-  // state of featured image
-  const [featured, setImage] = useState(PlaceholderImages);
-  //a function which featches featured-image on the top of home screen from database
-  // then the function will be called on the component mounting
-
-  const featchImage = () => {
-    var ApiUrl = Connection.url + Connection.Images;
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "appliction/json",
-    };
-
-    fetch(ApiUrl, {
-      method: "post",
-      headers: headers,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        var message = response[0].message;
-
-        if (message === "succeed") {
-          var featuredImages = response[0].images;
-          // // console.log(featuredImages);
-          // const featureImages = [];
-          // const lastArray = [];
-          // for (var i = 0; i <= featuredImages.length; i++) {
-          //   var networkaddress = Connection.url + Connection.assets;
-          //   featureImages.push(networkaddress + featuredImages[i].image);
-          //   lastArray = featureImages[featureImages.length -1];
-          //   console.log(featuredImages);
-          // }
-
-          setImage(featuredImages);
-        } else {
-          setImage(Images);
-        }
-      })
-      .catch((error) => {
-        setImage(Images);
-      });
-  };
-
-  //list of image to be added on the top crousel
-  var firstImage = featured[0].image;
-  var secondImage = featured[1].image;
-  var thirdImage = featured[2].image;
-  var fourthImage = featured[3].image;
-  var fifthImage = featured[4].image;
-  var sixthImage = featured[5].image;
-  var seventhImage = featured[6].image;
-  var eightImage = featured[7].image;
-
-  const Images = [
-    Connection.url + Connection.assets + firstImage,
-    Connection.url + Connection.assets + secondImage,
-    Connection.url + Connection.assets + thirdImage,
-    Connection.url + Connection.assets + fourthImage,
-    Connection.url + Connection.assets + fifthImage,
-    Connection.url + Connection.assets + sixthImage,
-    Connection.url + Connection.assets + seventhImage,
-    Connection.url + Connection.assets + eightImage,
-  ];
-
   // function to set user profile while user is logged in
   const [userPhoto, setUserphoto] = useState("maleProfile.jpg");
 
@@ -380,7 +281,6 @@ function Home({ navigation, ...props }) {
 
   useEffect(() => {
     userInfoFunction();
-    featchImage();
     userProfile();
     FeatchTickets();
     FeatchEvents();
@@ -451,7 +351,8 @@ function Home({ navigation, ...props }) {
           {shown ? (
             <ScrollView contentContainerStyle={{ minHeight: 180 }}>
               {/* promo slide component  */}
-              <Slider Images={featured} />
+              <Slider />
+
               <View>
                 <ScrollView
                   horizontal

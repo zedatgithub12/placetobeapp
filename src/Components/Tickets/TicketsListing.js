@@ -1,6 +1,12 @@
 //import liraries
 import React, { Component } from "react";
-import { View, Text, StyleSheet, TouchableNativeFeedback } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableNativeFeedback,
+  Dimensions,
+} from "react-native";
 import Constants from "../../constants/Constants";
 import { MaterialCommunityIcons, Ionicons } from "react-native-vector-icons";
 // create a component
@@ -26,7 +32,7 @@ const TicketListing = ({
           <Text numberOfLines={2} style={styles.title}>
             {event}
           </Text>
-          <Text style={styles.ticketType}>{type}</Text>
+          <Text style={styles.ticketType}>{type} Ticket</Text>
         </View>
 
         <View style={styles.priceContainer}>
@@ -51,10 +57,9 @@ const TicketListing = ({
 // define your styles
 const styles = StyleSheet.create({
   container: {
-    width: "94%",
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "center",
+    width: Dimensions.get("screen").width / 2.1,
+    height: 150,
+    justifyContent: "space-between",
     borderRadius: Constants.tinybox,
     margin: 2,
     padding: 6,
@@ -64,11 +69,10 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.Faded,
     padding: 8,
     borderRadius: 50,
-    marginRight: 15,
+    alignItems: "center",
   },
   ticketContent: {
-    width: "60%",
-    marginRight: 10,
+    paddingHorizontal: 5,
   },
   title: {
     fontFamily: Constants.fontFam,
@@ -76,9 +80,10 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
   },
   priceContainer: {
-    width: "19%",
-    justifyContent: "flex-end",
-    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 5,
+    marginBottom: 5,
   },
   priceText: {
     fontWeight: Constants.Boldtwo,

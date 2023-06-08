@@ -1,76 +1,65 @@
 //import liraries
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { Component, useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Image } from "react-native";
-import { HelperText } from "react-native-paper";
+import React, { useContext, useEffect, useState } from "react";
+import { View, Text, StyleSheet, FlatList } from "react-native";
+import { AuthContext } from "../../Components/context";
 import BoughtTicket from "../../Components/Tickets/BoughtTicket";
 import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
-import Sold from "../../dummies/boughtt";
+import NotLoggedIn from "../../handlers/auth";
+import NoTicket from "../../handlers/Tickets";
+import NetInfo from "@react-native-community/netinfo";
+import NoConnection from "../../handlers/connection";
 
-// create a component
+/********************************** User Tickets Listing Screen ************************** */
+
 const UserTickets = ({ navigation }) => {
-  const [Data, setData] = useState({
-    userId: "",
-    logged: false,
-    Sold: { ...Sold },
-    loading: true,
-    found: true,
-  });
-  const [sold, setSold] = useState();
+  const { userStatus } = useContext(AuthContext);
+  const logged = userStatus.logged;
+  const [connection, setConnection] = useState(true);
+  const [retry, setRetry] = useState(false);
+  const [sold, setSold] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [networkState, setNetworkState] = useState(true);
 
   const FeatchTicket = async () => {
     var userId = await AsyncStorage.getItem("userId");
     setRefreshing(true);
 
-    if (userId.length !== 0) {
-      var APIUrl = Connection.url + Connection.boughtTickets;
-      var headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      };
-      var Data = {
-        userId: userId,
-      };
+    var APIUrl = Connection.url + Connection.boughtTickets;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    var Data = {
+      userId: userId,
+    };
 
-      fetch(APIUrl, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(Data),
+    await fetch(APIUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+    })
+      .then((reponse) => reponse.json())
+      .then((response) => {
+        var message = response[0].message;
+        if (message === "succeed") {
+          var ticket = response[0].ticket;
+          setSold(ticket);
+          setRefreshing(false);
+        } else if (message === "no ticket") {
+          setRefreshing(false);
+          setSold([]);
+        } else {
+          setRefreshing(false);
+          setSold([]);
+        }
       })
-        .then((reponse) => reponse.json())
-        .then((response) => {
-          var message = response[0].message;
-          if (message === "succeed") {
-            var ticket = response[0].ticket;
-            setSold(ticket);
-
-            setData({
-              loading: false,
-              found: true,
-            });
-
-            setRefreshing(false);
-          } else if (message === "no ticket") {
-            setData({
-              ...Data,
-              found: false,
-            });
-          } else {
-            setData({
-              ...Data,
-              loading: true,
-            });
-          }
-        });
-    } else {
-      return (
-        <View>
-          <Text>No repsonse</Text>
-        </View>
-      );
-    }
+      .catch((error) => {
+        if (error) {
+          console.log("Unable to fetch your tickets");
+        }
+      });
   };
 
   // refresh the listing
@@ -78,53 +67,35 @@ const UserTickets = ({ navigation }) => {
     var userId = await AsyncStorage.getItem("userId");
     setRefreshing(true);
 
-    if (userId.length !== 0) {
-      var APIUrl = Connection.url + Connection.boughtTickets;
-      var headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      };
-      var Data = {
-        userId: userId,
-      };
+    var APIUrl = Connection.url + Connection.boughtTickets;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    var Data = {
+      userId: userId,
+    };
 
-      fetch(APIUrl, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(Data),
-      })
-        .then((reponse) => reponse.json())
-        .then((response) => {
-          var message = response[0].message;
-          if (message === "succeed") {
-            var ticket = response[0].ticket;
-            setSold(ticket);
-
-            setData({
-              loading: false,
-            });
-            setRefreshing(false);
-          } else {
-            setData({
-              ...Data,
-              loading: true,
-            });
-          }
-        })
-        .catch((error) => {
-          setData({
-            ...Data,
-            loading: true,
-          });
+    await fetch(APIUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(Data),
+    })
+      .then((reponse) => reponse.json())
+      .then((response) => {
+        var message = response[0].message;
+        if (message === "succeed") {
+          var ticket = response[0].ticket;
+          setSold(ticket);
           setRefreshing(false);
-        });
-    } else {
-      return (
-        <View>
-          <Text>No repsonse</Text>
-        </View>
-      );
-    }
+        } else {
+          setRefreshing(false);
+          setSold([]);
+        }
+      })
+      .catch(() => {
+        setRefreshing(false);
+      });
   };
 
   //
@@ -232,33 +203,55 @@ const UserTickets = ({ navigation }) => {
   );
 
   useEffect(() => {
-    FeatchTicket();
+    const InternetConnection = async () => {
+      const networkState = await NetInfo.fetch();
+      setConnection(networkState.isConnected);
+    };
+    InternetConnection();
+
+    const subscription = NetInfo.addEventListener(async (state) => {
+      setConnection(state.isConnected);
+    });
+    return () => {
+      subscription();
+    };
+  }, [retry]);
+
+  //handle the work to be done when network is available
+  useEffect(() => {
+    if (connection) {
+      FeatchTicket();
+    }
 
     return () => {};
-  }, []);
-
+  }, [connection]);
   return (
     <View style={styles.container}>
-      <FlatList
-        data={sold}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        onRefresh={Refresh}
-        refreshing={refreshing}
-        ListHeaderComponent={() =>
-          Data.found ? null : (
-            <View style={styles.containertwo}>
-              <Image
-                source={require("../../assets/images/NotFound.png")}
-                resizeMode="contain"
-                style={styles.notFound}
+      {logged ? (
+        connection ? (
+          <FlatList
+            data={sold}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            onRefresh={Refresh}
+            refreshing={refreshing}
+            ListEmptyComponent={
+              <NoTicket
+                title=" You didn't buy ticket yet!"
+                helperText="Once you bought a ticket, it will be listed here!"
               />
-              <Text style={styles.emptyMessageStyle}>No Ticket Yet!</Text>
-              <HelperText style={{ alignSelf: "center" }}></HelperText>
-            </View>
-          )
-        }
-      />
+            }
+          />
+        ) : (
+          <NoConnection onPress={() => setRetry(!retry)} />
+        )
+      ) : (
+        <NotLoggedIn
+          helpertext="You should have to login first to view your tickets"
+          signUp={() => navigation.navigate("SignUp")}
+          signIn={() => navigation.navigate("SignIn")}
+        />
+      )}
     </View>
   );
 };
@@ -275,19 +268,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 28,
   },
-  notFound: {
-    width: "85%",
-    height: 200,
-    borderRadius: 10,
-  },
-  emptyMessageStyle: {
-    fontSize: Constants.headingone,
-    fontWeight: Constants.Bold,
-    color: Constants.Secondary,
 
-    alignSelf: "center",
-    justifyContent: "center",
-  },
   listEnd: {
     padding: 20,
     backgroundColor: Constants.transparentPrimary,

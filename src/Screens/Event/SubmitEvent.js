@@ -21,6 +21,7 @@ import { AuthContext } from "../../Components/context";
 import Connection from "../../constants/connection";
 import * as Animatable from "react-native-animatable";
 import { ScrollView } from "react-native-gesture-handler";
+import NotLoggedIn from "../../handlers/auth";
 
 class EventSubmission extends Component {
   static contextType = AuthContext;
@@ -287,41 +288,11 @@ class EventSubmission extends Component {
             </View>
           </View>
         ) : (
-          <View
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
-            <View style={styles.notLogedPrompt}>
-              <FontAwesome5
-                name="exclamation-circle"
-                size={66}
-                color={Constants.background}
-              />
-
-              <Title style={styles.prompttxt}>Please Login First!</Title>
-              <Paragraph style={styles.helperText}>
-                To post event on Place to be Ethiopia you must have a user
-                account.
-              </Paragraph>
-
-              <View style={styles.actionBtns}>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={styles.createAccountBtn}
-                  onPress={() => this.props.navigation.navigate("SignUp")}
-                >
-                  <Text style={styles.btnTxt}>Create Account</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate("SignIn")}
-                  activeOpacity={0.7}
-                  style={styles.LoginBtn}
-                >
-                  <Text style={styles.btnTxt}>Login</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
+          <NotLoggedIn
+            helpertext="To post event on Place to be Ethiopia you must have a user account."
+            signUp={() => this.props.navigation.navigate("SignUp")}
+            signIn={() => this.props.navigation.navigate("SignIn")}
+          />
         )}
       </ScrollView>
     );
@@ -332,7 +303,7 @@ const styles = StyleSheet.create({
     minHeight: "100%",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Constants.background,
+    backgroundColor: Constants.Faded,
   },
   SliderActionBtns: {
     flexDirection: "row",
@@ -389,58 +360,7 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
     color: Constants.background,
   },
-  notLogedPrompt: {
-    height: 300,
-    width: 300,
-    alignItems: "center",
-    alignSelf: "center",
 
-    backgroundColor: Constants.purple,
-    borderRadius: Constants.borderRad,
-    elevation: 10,
-    padding: 15,
-    shadowColor: Constants.Secondary,
-  },
-  prompttxt: {
-    fontSize: Constants.primaryHeading,
-    fontWeight: Constants.Bold,
-    marginTop: 10,
-    color: Constants.background,
-  },
-  actionBtns: {
-    position: "absolute",
-    bottom: 25,
-    width: "90%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  createAccountBtn: {
-    width: "50%",
-    backgroundColor: Constants.background,
-    borderRadius: Constants.tiny,
-    padding: 10,
-    alignItems: "center",
-    elevation: 1,
-  },
-  LoginBtn: {
-    width: "38%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Constants.primary,
-    borderRadius: Constants.tiny,
-    padding: 6,
-  },
-  btnTxt: {
-    fontSize: Constants.headingthree,
-    fontWeight: Constants.Bold,
-    color: Constants.Inverse,
-  },
-  helperText: {
-    width: "90%",
-    textAlign: "center",
-    marginTop: 10,
-    color: Constants.background,
-  },
   successPrompt: {
     position: "absolute",
     bottom: 190,
