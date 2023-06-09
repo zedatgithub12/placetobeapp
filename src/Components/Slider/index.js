@@ -137,8 +137,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 12,
-    margin: 10,
-    marginHorizontal: 10,
   },
 
   box: {
@@ -147,7 +145,10 @@ const styles = StyleSheet.create({
     height: 110,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 8,
+    marginBottom: 6,
     paddingHorizontal: 10,
+
     borderRadius: 12,
   },
   image: {

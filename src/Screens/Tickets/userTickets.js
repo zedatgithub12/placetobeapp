@@ -20,7 +20,6 @@ const UserTickets = ({ navigation }) => {
   const [retry, setRetry] = useState(false);
   const [sold, setSold] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [networkState, setNetworkState] = useState(true);
 
   const FeatchTicket = async () => {
     var userId = await AsyncStorage.getItem("userId");

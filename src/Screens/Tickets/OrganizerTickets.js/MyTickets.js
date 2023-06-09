@@ -118,7 +118,7 @@ function Tickets({ navigation }) {
           setNotFound(false);
         } else if (message === "no event") {
           setUpcomingEvents(upcomingEvents);
-          setMessage("You have no upcoming event!");
+
           setLoadUpcoming(false);
           setNotFound(true);
         } else {
@@ -432,8 +432,8 @@ function Tickets({ navigation }) {
           refreshing={refreshing}
           ListEmptyComponent={
             <NoTicket
-              title="Not Found, Create One Here!"
-              helperText="Ticket you added to the event is listed here"
+              title="Not Found, Create One!"
+              helperText="Ticket you added to the events are listed here"
             />
           }
         />
@@ -484,7 +484,9 @@ function Tickets({ navigation }) {
                     resizeMode="contain"
                     style={styles.notFound}
                   />
-                  <Text style={styles.emptyMessageStyle}>{message}</Text>
+                  <Text style={styles.emptyMessageStyle}>
+                    You have no upcoming event!
+                  </Text>
                 </View>
               }
             />

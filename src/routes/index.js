@@ -329,7 +329,7 @@ const Routes = () => {
         name="BoughtDetail"
         component={BoughtDetail}
         options={{
-          title: "Ticket Detail",
+          title: "Purchased Ticket Details",
           headerStyle: {
             backgroundColor: Constants.primary,
           },
@@ -337,7 +337,6 @@ const Routes = () => {
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerTitleStyle: {
-            fontStyle: "italic",
             fontSize: Constants.headingone,
           },
         }}
@@ -345,16 +344,6 @@ const Routes = () => {
     </Stack.Navigator>
   );
 };
-
-// define your styles
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#2c3e50",
-  },
-});
 
 //make this component available to the app
 export default Routes;

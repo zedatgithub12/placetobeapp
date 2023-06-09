@@ -1,5 +1,6 @@
+import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -7,42 +8,35 @@ import {
   Image,
   FlatList,
   ToastAndroid,
+  Dimensions,
 } from "react-native";
-import { Title, Paragraph, HelperText } from "react-native-paper";
+import { Title, HelperText } from "react-native-paper";
 import { AuthContext } from "../../Components/context";
 import Notice from "../../Components/Notifications/Notice";
 import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
+import NotLoggedIn from "../../handlers/auth";
+import NoConnection from "../../handlers/connection";
 import NoticeShimmer from "../../Components/Notifications/Skeleton/NoticeShimmer";
-
+import Slider from "../../Components/Slider";
 const Notifications = ({ navigation }) => {
   // state from context from Context Hook
+  const { userStatus } = useContext(AuthContext);
+  const logged = userStatus.logged;
 
-  const SignInPrompt = () => {
-    return (
-      <View>
-        <Text>SignIN pLEASE</Text>
-      </View>
-    );
-  };
-
-  // function to be called when server respond with notice count
-
-  const [notification, setNotification] = React.useState();
-  const [notFound, setNotFound] = React.useState(false);
-  const [refreshing, setRefreshing] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  const [connection, setConnection] = useState(true);
+  const [retry, setRetry] = useState(false);
+  const [notification, setNotification] = useState();
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // refresh the list of notifications
-
   const RefreshList = async () => {
     let id = await AsyncStorage.getItem("userId");
-
     setRefreshing(true);
-    setLoading(false);
+    setLoading(true);
     let isApiSubscribed = true;
     var ApiUrl = Connection.url + Connection.notification;
-    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
 
     var userIdentity = {
       userId: id,
@@ -70,86 +64,34 @@ const Notifications = ({ navigation }) => {
             var result = response[0].Notification;
             var notice = result.filter(filter);
             var sorted = notice.sort(notice.event_id);
-
             setNotification(sorted);
-            setNotFound(false);
             setRefreshing(false);
-            setLoading(true);
+            setLoading(false);
           } else if (message === "no event") {
-            setNotification(notice);
+            setNotification([]);
             setRefreshing(false);
-            setNotFound(true);
-            setLoading(true);
+            setLoading(false);
           } else if ((message = "follow organizers")) {
             setNotification(notice);
             setRefreshing(false);
-            setNotFound(true);
-            setLoading(true);
+            setLoading(false);
           } else {
             setNotification(notification);
+            setLoading(false);
+            setRefreshing(false);
           }
         }
       })
-      .catch((error) => {
-        setNotification(notification);
+      .catch(() => {
+        setLoading(false);
+        setRefreshing(false);
       });
     return () => {
       // cancel the subscription
       isApiSubscribed = false;
     };
   };
-  // convert date to suitable format for app
-  const DateFun = (startingTime) => {
-    var date = new Date(startingTime);
-    let day = date.getDay();
-    let month = date.getMonth();
-    let happeningDay = date.getDate();
 
-    // return weekname
-    var weekday = new Array(7);
-    weekday[1] = "Mon, ";
-    weekday[2] = "Tue, ";
-    weekday[3] = "Wed, ";
-    weekday[4] = "Thu, ";
-    weekday[5] = "Fri, ";
-    weekday[6] = "Sat, ";
-    weekday[0] = "Sun, ";
-
-    //an array of month name
-    var monthName = new Array(12);
-    monthName[1] = "Jan";
-    monthName[2] = "Feb";
-    monthName[3] = "Mar";
-    monthName[4] = "Apr";
-    monthName[5] = "May";
-    monthName[6] = "Jun";
-    monthName[7] = "Jul";
-    monthName[8] = "Aug";
-    monthName[9] = "Sep";
-    monthName[10] = "Oct";
-    monthName[11] = "Nov";
-    monthName[12] = "Dec";
-
-    return weekday[day] + monthName[month + 1] + " " + happeningDay;
-  };
-  //convert time to suitable format for an app
-  const TimeFun = (eventTime) => {
-    var time = eventTime;
-    var result = time.slice(0, 2);
-    var minute = time.slice(3, 5);
-    var globalTime;
-    var postMeridian;
-    var separator = ":";
-    if (result > 12) {
-      postMeridian = result - 12;
-      globalTime = "PM";
-    } else {
-      postMeridian = result;
-      globalTime = "AM";
-    }
-
-    return postMeridian + separator + minute + " " + globalTime;
-  };
   // render flatlist item
   const renderNotice = ({ item }) => (
     <Notice
@@ -162,62 +104,89 @@ const Notifications = ({ navigation }) => {
       }
     />
   );
-
   useEffect(() => {
-    RefreshList();
+    const InternetConnection = async () => {
+      const networkState = await NetInfo.fetch();
+      setConnection(networkState.isConnected);
+    };
+    InternetConnection();
+
+    const subscription = NetInfo.addEventListener(async (state) => {
+      setConnection(state.isConnected);
+    });
+    return () => {
+      subscription();
+    };
+  }, [retry]);
+
+  //handle the work to be done when network is available
+  useEffect(() => {
+    if (connection) {
+      RefreshList();
+    }
+
     return () => {};
-  }, []);
+  }, [connection]);
 
   return (
     <View>
-      {loading ? (
-        <FlatList
-          data={notification}
-          renderItem={renderNotice}
-          keyExtractor={(item) => item.event_id}
-          onRefresh={RefreshList}
-          refreshing={refreshing}
-          ListHeaderComponent={() =>
-            notFound ? (
-              <View style={styles.noNoticeContainer}>
-                <Image
-                  source={require("../../assets/images/noNotification.png")}
-                  style={styles.noNoticeImage}
-                  resizeMode="contain"
-                />
-                <Title style={styles.prompttxt}>
-                  You have no notification yet!
-                </Title>
+      {logged ? (
+        connection ? (
+          loading ? (
+            <View>
+              <View>
+                <NoticeShimmer />
+                <NoticeShimmer />
+                <NoticeShimmer />
+                <NoticeShimmer />
+                <NoticeShimmer />
               </View>
-            ) : null
-          }
-          ListFooterComponent={() =>
-            notFound ? null : (
-              <View style={styles.listEnd}>
-                <HelperText>
-                  Notifications from organizers you followed.
-                </HelperText>
-              </View>
-            )
-          }
-        />
-      ) : (
-        <View>
-          <View>
-            <NoticeShimmer />
-            <NoticeShimmer />
-            <NoticeShimmer />
-            <NoticeShimmer />
-            <NoticeShimmer />
-          </View>
 
-          <View>
-            <NoticeShimmer />
-            <NoticeShimmer />
-            <NoticeShimmer />
-            <NoticeShimmer />
+              <View>
+                <NoticeShimmer />
+                <NoticeShimmer />
+                <NoticeShimmer />
+                <NoticeShimmer />
+              </View>
+            </View>
+          ) : (
+            <FlatList
+              data={notification}
+              renderItem={renderNotice}
+              keyExtractor={(item) => item.event_id}
+              onRefresh={RefreshList}
+              refreshing={refreshing}
+              ListEmptyComponent={
+                <View style={styles.noNoticeContainer}>
+                  <Image
+                    source={require("../../assets/images/noNotification.png")}
+                    style={styles.noNoticeImage}
+                    resizeMode="contain"
+                  />
+                  <Text>You have no notification yet!</Text>
+                </View>
+              }
+              ListHeaderComponent={<Slider />}
+              ListFooterComponent={() => (
+                <View style={styles.listEnd}>
+                  <HelperText>
+                    Notifications from organizers you followed.
+                  </HelperText>
+                </View>
+              )}
+            />
+          )
+        ) : (
+          <View style={{ height: Dimensions.get("screen").height / 1.2 }}>
+            <NoConnection onPress={() => setRetry(!retry)} />
           </View>
-        </View>
+        )
+      ) : (
+        <NotLoggedIn
+          helpertext="You should have to login first to view your tickets"
+          signUp={() => navigation.navigate("SignUp")}
+          signIn={() => navigation.navigate("SignIn")}
+        />
       )}
     </View>
   );
@@ -228,8 +197,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Constants.background,
-    paddingTop: 150,
-    paddingBottom: 280,
+    height: Dimensions.get("screen").height / 1.5,
   },
   noNoticeImage: {
     width: "85%",
@@ -237,8 +205,8 @@ const styles = StyleSheet.create({
     borderRadius: Constants.mediumbox,
   },
   prompttxt: {
-    fontSize: Constants.headingone,
-    fontWeight: Constants.Bold,
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
     color: Constants.Secondary,
 
     alignSelf: "center",

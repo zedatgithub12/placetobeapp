@@ -280,11 +280,6 @@ export default function App() {
 
     SignIn: async (userId, userToken, email, password, profile) => {
       if (email == email && password == password) {
-        setUser({
-          ...user,
-          logged: true,
-        });
-
         try {
           let store;
           await AsyncStorage.multiSet(
@@ -298,6 +293,10 @@ export default function App() {
         } catch (e) {
           console.log(e);
         }
+        setUser({
+          ...user,
+          logged: true,
+        });
       }
 
       dispatch({ type: "LOGIN", id: email, token: userToken });

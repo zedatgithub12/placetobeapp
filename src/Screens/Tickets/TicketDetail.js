@@ -15,7 +15,7 @@ import {
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
 import Connection from "../../constants/connection";
-import { Badge } from "react-native-paper";
+import { Badge, Caption } from "react-native-paper";
 import Modal from "react-native-modal";
 import * as Animatable from "react-native-animatable";
 // Organizer Ticket Detail
@@ -161,32 +161,13 @@ const TicketDetail = ({ route, navigation }) => {
   }, [TicketStatus]);
   return (
     <ScrollView ContentContainerStyle={styles.container}>
-      {/* section one */}
-
-      <View style={styles.totalRevenue}>
-        <Text style={styles.totaltext}>{TotalSales()}</Text>
-        <Text style={styles.currency}>ETB</Text>
-      </View>
-      {/* section two */}
-      <View style={styles.secondContainer}>
-        <View style={styles.itemProgress}>
-          <Text style={styles.itemCount}>{SoldTicket()}</Text>
-          <Text style={styles.itemNaming}>Ticket Sold</Text>
-        </View>
-
-        <View style={styles.itemProgress}>
-          <Text style={styles.leftCount}>{LeftTicket()}</Text>
-          <Text style={styles.itemNaming}>Ticket Left</Text>
-        </View>
-      </View>
-      {/* section three */}
-      <View style={styles.sectionThree}>
-        <View style={styles.threeOne}>
+      <View style={styles.sectionOne}>
+        <View style={styles.OneView}>
           <View>
             <Text style={styles.Label} numberOfLines={2}>
               {item.event_name}
             </Text>
-            <Text style={styles.threeText}>{item.tickettype}</Text>
+            <Text style={styles.ticketType}>{item.tickettype}</Text>
           </View>
 
           <View style={styles.statusBTN}>
@@ -199,8 +180,7 @@ const TicketDetail = ({ route, navigation }) => {
               onBackdropPress={() => setVisible(false)}
             >
               <Animatable.View
-                animation="fadeInUp"
-                delay={1}
+                animation="slideInUp"
                 style={styles.modalContainer}
               >
                 <TouchableWithoutFeedback onPress={() => setVisible(false)}>
@@ -213,28 +193,51 @@ const TicketDetail = ({ route, navigation }) => {
                   </View>
                 </TouchableWithoutFeedback>
 
-                <TouchableWithoutFeedback
-                  disabled={btn}
-                  onPress={() => UpdateStatus()}
-                >
-                  {indicator ? (
-                    <ActivityIndicator size="small" color={Constants.primary} />
-                  ) : (
-                    <View style={styles.modalCont}>
-                      <Text style={styles.modalDesc}>Change Ticket Status</Text>
-                      <View style={[styles.itemStatus]}>
-                        <Text style={styles.statusTexts}>Sold Out</Text>
-                        {checkIcon ? (
-                          <Ionicons
-                            name="ios-checkmark-circle-sharp"
-                            size={20}
-                            color={Constants.green}
+                <View>
+                  <View style={styles.modalCont}>
+                    <Text style={styles.modalDesc}>Change Ticket Status</Text>
+                    <Caption style={{ marginBottom: 20 }}>
+                      Once you changed the status to sold out, you can't revert
+                      the change from your side
+                    </Caption>
+                    <TouchableWithoutFeedback
+                      disabled={btn}
+                      onPress={() => UpdateStatus()}
+                    >
+                      <View
+                        style={[
+                          styles.itemStatus,
+                          {
+                            justifyContent: checkIcon
+                              ? "space-between"
+                              : "center",
+                            marginBottom: 20,
+                          },
+                        ]}
+                      >
+                        {indicator ? (
+                          <ActivityIndicator
+                            size="small"
+                            color={Constants.primary}
                           />
-                        ) : null}
+                        ) : (
+                          <>
+                            <Text style={styles.statusTexts}>Sold Out</Text>
+
+                            {checkIcon ? (
+                              <Ionicons
+                                name="ios-checkmark-circle-sharp"
+                                size={20}
+                                color={Constants.background}
+                                style={{ marginLeft: 10 }}
+                              />
+                            ) : null}
+                          </>
+                        )}
                       </View>
-                    </View>
-                  )}
-                </TouchableWithoutFeedback>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </View>
               </Animatable.View>
             </Modal>
             <TouchableWithoutFeedback onPress={() => toggleModal()}>
@@ -253,40 +256,67 @@ const TicketDetail = ({ route, navigation }) => {
           </View>
         </View>
 
-        <View style={styles.threeTwo}>
+        <View style={styles.ticketPrice}>
           <Text style={styles.Label}>Ticket Price</Text>
-          <Text style={styles.threeText}>{item.currentprice}</Text>
+          <Text style={styles.threeText}>{item.currentprice} ETB</Text>
         </View>
       </View>
 
-      {/* section four */}
-      <View>
-        <View style={styles.PGContainer}>
-          <TouchableWithoutFeedback>
-            <View style={styles.gatewayContainer}>
-              <Image
-                source={require("../../assets/images/telebirr.png")}
-                resizeMode="contain"
-                style={styles.pgateway}
-              />
-              <Badge size={24} style={styles.countBadge}>
-                {telebirr}
-              </Badge>
-            </View>
-          </TouchableWithoutFeedback>
+      <View style={styles.secondContainer}>
+        <View style={styles.sold}>
+          <View>
+            <Text style={styles.itemCount}>{SoldTicket()}</Text>
+            <Text style={styles.itemNaming}>Ticket Sold</Text>
+          </View>
+          <MaterialCommunityIcons
+            name="progress-check"
+            size={28}
+            color={Constants.Success}
+            style={{ marginRight: 4 }}
+          />
+        </View>
 
-          <TouchableWithoutFeedback>
-            <View style={styles.gatewayContainer}>
-              <Image
-                source={require("../../assets/images/chapa.png")}
-                resizeMode="contain"
-                style={styles.pgateway}
-              />
-              <Badge size={24} style={styles.countBadge}>
-                {chapa}
-              </Badge>
-            </View>
-          </TouchableWithoutFeedback>
+        <View style={styles.left}>
+          <View>
+            <Text style={styles.leftCount}>{LeftTicket()}</Text>
+            <Text style={styles.itemNaming}>Ticket Left</Text>
+          </View>
+
+          <MaterialCommunityIcons
+            name="progress-clock"
+            size={28}
+            color={Constants.primary}
+            style={{ marginRight: 4 }}
+          />
+        </View>
+      </View>
+      <View style={styles.totalRevenue}>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            flexDirection: "row",
+            padding: 12,
+            alignItems: "center",
+          }}
+        >
+          <Ionicons
+            name="ios-stats-chart"
+            size={19}
+            color={Constants.primary}
+            style={{ marginRight: 6 }}
+          />
+          <Text style={styles.itemNaming}>Total Revenue</Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingVertical: 20,
+          }}
+        >
+          <Text style={styles.totaltext}>{TotalSales()}</Text>
+          <Text style={styles.currency}>ETB</Text>
         </View>
       </View>
     </ScrollView>
@@ -301,88 +331,122 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Constants.background,
   },
-  totalRevenue: {
-    flexDirection: "row",
-    width: "100%",
-    height: 160,
-    padding: 4,
-    alignItems: "center",
-    justifyContent: "center",
+  sectionOne: {
     backgroundColor: Constants.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  totaltext: {
+
+  OneView: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    margin: 3,
+    padding: 6,
+  },
+  ticketPrice: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: 3,
+    padding: 6,
+  },
+  Label: {
     fontWeight: Constants.Boldtwo,
-    fontSize: 32,
-    color: Constants.background,
-  },
-  currency: {
+    fontSize: Constants.headingtwo,
     color: Constants.Inverse,
-    fontWeight: Constants.Bold,
-    marginLeft: 6,
   },
+  statusContainer: {
+    minWidth: 100,
+    backgroundColor: Constants.background,
+    borderRadius: 50,
+    padding: 6,
+    paddingHorizontal: 16,
+    fontWeight: Constants.Boldtwo,
+  },
+  ticketType: {
+    fontWeight: Constants.Boldtwo,
+    fontSize: Constants.headingthree,
+    color: Constants.Inverse,
+  },
+  threeText: {
+    minWidth: 100,
+    borderRadius: 50,
+    padding: 6,
+    paddingHorizontal: 16,
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.Inverse,
+  },
+  // an style for a
   secondContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    paddingVertical: 20,
-    marginTop: -58,
+    marginTop: 14,
+    marginHorizontal: 8,
   },
-  itemProgress: {
-    backgroundColor: Constants.background,
-    padding: 24,
+  left: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    backgroundColor: Constants.background,
+    padding: 18,
     borderRadius: Constants.medium,
-    elevation: 3,
-    shadowColor: Constants.icon,
+    borderColor: Constants.background,
+    borderWidth: 1,
   },
+  sold: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: Constants.background,
+    padding: 18,
+    borderRadius: Constants.medium,
+    borderColor: Constants.background,
+    borderWidth: 1,
+  },
+
   itemCount: {
+    width: Dimensions.get("screen").width / 3.9,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingone,
-    color: Constants.green,
+    color: Constants.Inverse,
   },
   leftCount: {
+    width: Dimensions.get("screen").width / 3.9,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingone,
     color: Constants.Inverse,
   },
   itemNaming: {
     fontWeight: Constants.Boldtwo,
-    fontSize: Constants.headingtwo,
-    //fontFamily:Constants.fontFam,
-    color: Constants.Secondary,
-    marginTop: 4,
-  },
-  sectionThree: {
-    width: "86%",
-    alignSelf: "center",
-  },
-  threeOne: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    margin: 3,
-    padding: 6,
-  },
-  threeTwo: {
-    margin: 3,
-    padding: 6,
-  },
-  Label: {
-    marginRight: 10,
-    fontWeight: Constants.Bold,
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     color: Constants.Inverse,
   },
-  threeText: {
-    fontWeight: Constants.Boldtwo,
-    fontSize: Constants.headingthree,
+  totalRevenue: {
+    position: "relative",
+    flexDirection: "column",
+    width: "93%",
+    padding: 20,
+    paddingTop: 35,
+    marginVertical: 10,
+    alignSelf: "center",
+    backgroundColor: Constants.background,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Constants.transparentPrimary,
+  },
+  totaltext: {
+    fontWeight: Constants.Bold,
+    fontFamily: Constants.fontFam,
+    fontSize: 32,
     color: Constants.Secondary,
   },
-  statusContainer: {
-    borderRadius: Constants.tinybox,
-    padding: 4,
-    paddingHorizontal: 16,
-    fontStyle: "italic",
-    fontWeight: Constants.Bold,
+  currency: {
+    color: Constants.Secondary,
+    fontWeight: Constants.Boldtwo,
+    marginLeft: 6,
+    marginBottom: 10,
   },
   modal: {
     justifyContent: "flex-end",
@@ -391,7 +455,7 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   },
   modalContainer: {
-    backgroundColor: Constants.transparentPrimary,
+    backgroundColor: Constants.background,
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 14,
@@ -405,14 +469,12 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
     color: Constants.Inverse,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   itemStatus: {
     flexDirection: "row",
-    justifyContent: "space-between",
     padding: 10,
     paddingHorizontal: 20,
-    padding: 10,
     backgroundColor: Constants.primary,
     margin: 6,
     marginTop: 19,
@@ -436,9 +498,10 @@ const styles = StyleSheet.create({
   },
   closebtn: {
     position: "absolute",
-    right: 5,
+    right: 0,
     top: 0,
-    padding: 12,
+    padding: 10,
+    borderTopRightRadius: 10,
   },
   PGContainer: {
     flexDirection: "row",
