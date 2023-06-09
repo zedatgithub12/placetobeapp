@@ -1,5 +1,5 @@
 //import liraries
-import React, { Component } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -23,7 +23,12 @@ const TicketListing = ({
 }) => {
   return (
     <TouchableNativeFeedback onPress={onPress} onLongPress={longPress}>
-      <View style={styles.container}>
+      <View
+        style={[
+          styles.container,
+          { borderRightWidth: 2, borderColor: iconColor },
+        ]}
+      >
         <View style={[styles.iconStyle]}>
           <MaterialCommunityIcons name={iconName} size={24} color={iconColor} />
         </View>
@@ -58,26 +63,31 @@ const TicketListing = ({
 const styles = StyleSheet.create({
   container: {
     width: Dimensions.get("screen").width / 2.1,
-    height: 150,
+    height: 160,
     justifyContent: "space-between",
-    borderRadius: Constants.tinybox,
-    margin: 2,
+    borderRadius: Constants.medium,
+    borderTopRightRadius: 0,
+    borderBottomEndRadius: 0,
+    margin: 3,
     padding: 6,
     backgroundColor: Constants.background,
   },
   iconStyle: {
-    backgroundColor: Constants.Faded,
     padding: 8,
     borderRadius: 50,
-    alignItems: "center",
   },
   ticketContent: {
     paddingHorizontal: 5,
   },
   title: {
     fontFamily: Constants.fontFam,
-    fontSize: Constants.headingthree,
+    fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
+  },
+  ticketType: {
+    color: Constants.Inverse,
+    fontWeight: Constants.Boldtwo,
+    fontFamily: Constants.fontFam,
   },
   priceContainer: {
     flexDirection: "row",
@@ -86,16 +96,14 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   priceText: {
+    fontSize: Constants.headingthree,
     fontWeight: Constants.Boldtwo,
     color: Constants.Inverse,
   },
-  ticketType: {
-    color: Constants.Secondary,
-    fontWeight: Constants.Boldtwo,
-  },
+
   statusstyl: {
-    fontStyle: "italic",
     justifyContent: "flex-end",
+    fontSize: Constants.textSize,
   },
 });
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity} from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import Constants from "../../constants/Constants";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../Home/HomeScreen";
@@ -8,36 +8,12 @@ import {
   Ionicons,
   MaterialCommunityIcons,
   SimpleLineIcons,
-
 } from "react-native-vector-icons";
 import EventSubmission from "../Event/SubmitEvent";
 import Notifications from "../Notifications/Notifications";
 import Events from "../Event/Events";
 import UserTickets from "../Tickets/userTickets";
 const Tab = createBottomTabNavigator();
-
-const AddEvent = ({ children, onPress }) => (
-  <TouchableOpacity
-    activeOpacity={0.7}
-    style={styles.add_event}
-    onPress={onPress}
-  >
-    <View
-      style={
-        (styles.addEventVeiw,
-        {
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          backgroundColor: Constants.primary,
-          margin: 14,
-        })
-      }
-    >
-      {children}
-    </View>
-  </TouchableOpacity>
-);
 
 function TabNav({ navigation }) {
   return (
@@ -123,18 +99,7 @@ function TabNav({ navigation }) {
               color={color}
             />
           ),
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => alert("This is a button!")}
-              style={styles.menubtn}
-            >
-              <MaterialCommunityIcons
-                name="dots-vertical"
-                size={22}
-                color={Constants.Inverse}
-              />
-            </TouchableOpacity>
-          ),
+
           tabBarActiveTintColor: Constants.primary,
           tabBarInactiveTintColor: Constants.Inverse,
         }}
