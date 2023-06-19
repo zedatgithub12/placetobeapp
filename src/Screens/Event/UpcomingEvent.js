@@ -15,7 +15,7 @@ import { HelperText } from "react-native-paper";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
 
 const UpcomingEvents = ({ navigation }) => {
-  const [UEvents, setUEvents] = useState();
+  const [UEvents, setUEvents] = useState([]);
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -34,30 +34,22 @@ const UpcomingEvents = ({ navigation }) => {
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
-
         if (isApiSubscribed) {
-          var UpcomingEvents = response[0].Events;
-
-          if (message === "succeed") {
+          if (response.success) {
             // handle success
-            setUEvents(UpcomingEvents);
+            setUEvents(response.data);
             setNotFound(false);
             setLoading(true);
-          } else if (message === "no event") {
-            setUEvents(UpcomingEvents);
-            setNotFound(true);
+          } else {
             setMessage("No upcoming events!");
             setLoading(true);
-          } else {
-            setLoading(true);
-            setUEvents(UEvents);
+            setUEvents([]);
           }
         }
       })
       .catch((err) => {
         setLoading(true);
-        setUEvents(UEvents);
+        setUEvents([]);
       });
     return () => {
       // cancel the subscription
@@ -173,7 +165,7 @@ const UpcomingEvents = ({ navigation }) => {
   // render item in flatlist format
   const renderItem = ({ item }) => (
     <Events
-      Event_Id={item.event_id}
+      Event_Id={item.id}
       org_id={item.userId}
       FeaturedImage={item.event_image}
       title={item.event_name}
@@ -182,7 +174,7 @@ const UpcomingEvents = ({ navigation }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { id: item.event_id })}
+      onPress={() => navigation.navigate("EventDetail", { id: item.id })}
     />
   );
   //after the flatlist is refreshed we call this funtion
@@ -197,46 +189,38 @@ const UpcomingEvents = ({ navigation }) => {
     setLoading(false);
     // featching abort controller
     // after featching events the fetching function will be aborted
-
-    let isApiSubscribed = true;
     var ApiUrl = Connection.url + Connection.UpcomingEvents;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    fetch(ApiUrl)
+
+    var headers = {
+      accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    fetch(ApiUrl, {
+      method: "GET",
+      headers: headers,
+    })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
-
-        if (isApiSubscribed) {
-          // handle success
-          var UpcomingEvents = response[0].Events;
-          if (message === "succeed") {
-            setUEvents(UpcomingEvents);
-            setNotFound(false);
-            setRefreshing(false);
-            setRefStatus("Refreshed");
-            setLoading(true);
-          } else if (message === "no event") {
-            setUEvents(UpcomingEvents);
-            setNotFound(true);
-            setMessage("No upcoming events!");
-            setRefStatus("Not refreshed retry");
-            setRefreshing(false);
-            setLoading(true);
-          } else {
-            setLoading(true);
-            setUEvents(UEvents);
-          }
+        if (response.success) {
+          setUEvents(response.data);
+          setNotFound(false);
+          setRefreshing(false);
+          setRefStatus("Refreshed");
+          setLoading(true);
+        } else {
+          setLoading(true);
+          setUEvents([]);
+          setMessage("No upcoming events!");
+          setRefStatus("Not refreshed retry");
+          setRefreshing(false);
         }
       })
       .catch((err) => {
         setLoading(true);
-        setUEvents(UEvents);
+        setUEvents([]);
+        setRefreshing(false);
       });
-
-    return () => {
-      // cancel the subscription
-      isApiSubscribed = false;
-    };
   };
 
   return (
@@ -252,7 +236,7 @@ const UpcomingEvents = ({ navigation }) => {
           // List of events in extracted from database in the form JSON data
           data={UEvents}
           renderItem={renderItem}
-          keyExtractor={(item) => item.event_id}
+          keyExtractor={(item) => item.id}
           onRefresh={RefreshList}
           refreshing={refreshing}
           initialNumToRender={2} // Reduce initial render amount

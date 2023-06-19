@@ -14,13 +14,13 @@ import { Divider, HelperText } from "react-native-paper";
 import Connection from "../../constants/connection";
 import TicketDetail from "./TicketDetail";
 
-function CheckoutScreen({ navigation, route }) {
+function CheckoutScreen({ route }) {
   const { pass } = route.params;
 
   const [selection, setSelection] = useState(null);
   const [agent, setAgent] = useState();
-  const [price, setPrice] = useState();
   const [timerStatus, setTimerStatus] = useState("initial");
+  const [reservationid, setReservationid] = useState();
   const [contactInfo, setContactInfo] = useState({
     fullname: "",
     nameBorder: Constants.Secondary,
@@ -54,80 +54,36 @@ function CheckoutScreen({ navigation, route }) {
   const Ref = useRef(null);
 
   // The state for our timer
-  const [timer, setTimer] = useState("00:00");
+  const [timer, setTimer] = useState(720); // 12 minutes in seconds
 
-  const getTimeRemaining = (e) => {
-    const total = Date.parse(e) - Date.parse(new Date());
-    const seconds = Math.floor((total / 1000) % 60);
-    const minutes = Math.floor((total / 1000 / 60) % 60);
+  useEffect(() => {
+    if (timer > 0) {
+      const intervalId = setInterval(() => {
+        setTimer(timer - 1);
+      }, 1000);
+      return () => clearInterval(intervalId);
+    } else {
+      featchOperation("elapsed", reservationid);
 
-    return {
-      total,
-      minutes,
-      seconds,
-    };
-  };
-
-  const startTimer = (e) => {
-    let { total, minutes, seconds } = getTimeRemaining(e);
-    if (total >= 0) {
-      // update the timer
-      // check if less than 10 then we need to
-      // add '0' at the beginning of the variable
-      setTimer(
-        (minutes > 9 ? minutes : "0" + minutes) +
-          ":" +
-          (seconds > 9 ? seconds : "0" + seconds)
-      );
+      //continue from here
     }
-  };
-
-  const clearTimer = (e) => {
-    // If you adjust it you should also need to
-    // adjust the Endtime formula we are about
-    // to code next
-    setTimer("12:00");
-
-    // If you try to remove this line the
-    // updating of timer Variable will be
-    // after 1000ms or 1sec
-    if (Ref.current) clearInterval(Ref.current);
-    const id = setInterval(() => {
-      startTimer(e);
-    }, 1000);
-    Ref.current = id;
-  };
-
-  const getDeadTime = () => {
-    //  let deadline = new Date();
-    let minutes = new Date();
-    // This is where you need to adjust if
-    // you entend to add more time
-    minutes.setMinutes(minutes.getMinutes() + 12);
-
-    return minutes;
-  };
-
-  // We can use useEffect so that when the component
-  // mount the timer will start as soon as possible
-
-  if (timer === "00:01") {
-    setTimer("Elapsed");
-  }
+  }, [timer]);
 
   // code to send and featch from app backend
   // it featches responses culculated inside Resource file
 
   const featchOperation = (currentStatus, rsvp) => {
-    var ApiUrl = Connection.url + Connection.reservation;
+    const controller = new AbortController();
+    const signal = controller.signal;
+    var ApiUrl = Connection.url + Connection.createReservation;
     var headers = {
       accept: "application/json",
       "Content-Type": "application/json",
     };
 
     var Data = {
-      id: pass.id,
-      user: pass.userId,
+      ticketId: pass.id,
+      userId: pass.userId,
       quantity: pass.amount,
       timer: currentStatus,
       rsvp: rsvp,
@@ -137,35 +93,36 @@ function CheckoutScreen({ navigation, route }) {
       method: "POST",
       headers: headers,
       body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-
-        if (message === "start timer") {
-          clearTimer(getDeadTime());
-          console.log(message);
-        } else if (message === "elapsed") {
-          setTimer("elapsed");
-          console.log(message);
+        if (response.success && response.message === "start timer") {
+          setTimer(720);
+          setReservationid(response.data);
+          console.log(response);
         } else {
-          console.log(message);
+          setTimer(response.message);
         }
       })
       .catch((error) => {
         console.log(error);
       });
+
+    return () => {
+      controller.abort();
+    };
   };
 
   //check out timer function
-  //check if the time is starting or elapsed by lestning to the state
+  //check if the time is starting or elapsed by lestining to the state
 
   const CheckoutTimer = (status) => {
     if (status === "initial") {
       featchOperation(status, null);
     } else if (status === "elapsed") {
       featchOperation(status, pass.id);
-    } else if (status === "payed") {
+    } else if (status === "paid") {
       featchOperation(status, pass.id);
     }
   };
@@ -261,7 +218,7 @@ function CheckoutScreen({ navigation, route }) {
           }
         })
         .catch((error) => {
-          console.log("chigr alee" + error);
+          console.log("in checkout screen" + error);
         });
     }
   };
@@ -280,7 +237,10 @@ function CheckoutScreen({ navigation, route }) {
             size={18}
             color={Constants.Inverse}
           />
-          <Text style={styles.timerTxt}>Time {timer}</Text>
+          <Text style={styles.timerTxt}>
+            Time {Math.floor(timer / 60)}:{timer % 60 < 10 ? "0" : ""}
+            {timer % 60}
+          </Text>
         </View>
 
         <View style={styles.ticketcheckout}>

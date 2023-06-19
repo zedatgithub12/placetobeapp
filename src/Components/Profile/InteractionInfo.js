@@ -57,22 +57,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 5,
-    elevation: 3,
+    elevation: 1,
     shadowColor: Constants.Secondary,
     borderRadius: Constants.tinybox,
     width: "30%",
-    backgroundColor: Constants.background,
-
+    backgroundColor: Constants.Faded,
   },
   describingtxt: {
-    color: Constants.Secondary,
-    fontFamily:Constants.fontFam,
+    color: Constants.Inverse,
+    fontFamily: Constants.fontFam,
     //fontWeight: Constants.Boldtwo,
   },
   txts: {
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
-    color: Constants.purple,
+    color: Constants.Inverse,
+    fontFamily: Constants.fontFam,
   },
 });
 

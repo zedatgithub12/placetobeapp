@@ -17,7 +17,7 @@ import call from "react-native-phone-call";
 import * as Linking from "expo-linking";
 
 const DetailContent = ({ ...props }) => {
-  const cancelled = props.isCancelled === "1" ? true : false;
+  const cancelled = props.isCancelled == "1" ? true : false;
   const free = "Free";
   const currency = " ETB";
   const MakeCall = (phone) => {
@@ -111,7 +111,7 @@ const DetailContent = ({ ...props }) => {
       </View>
 
       {/* call button */}
-      {props.phone == 0 ? null : (
+      {props.phone == null ? null : (
         <View>
           <TouchableOpacity
             activeOpacity={0.7}

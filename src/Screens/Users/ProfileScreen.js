@@ -32,7 +32,7 @@ import * as Animatable from "react-native-animatable";
 import * as Linking from "expo-linking";
 
 function Profile({ navigation, props }) {
-  const [load, setLoad] = React.useState(false);
+  const [load, setLoad] = React.useState(true);
   const { Signout } = React.useContext(AuthContext);
 
   //bookmarked item count state
@@ -209,35 +209,31 @@ function Profile({ navigation, props }) {
   //featch user information from databse
   //fetch event posted by user, followers and following
   // Event count state to b delivered to detail screen
-  const [count, setCount] = useState();
+  const [count, setCount] = useState(0);
   const featchUserInformation = async () => {
     const Controller = new AbortController();
     const Signal = Controller.signal;
 
     var fetchIt = true;
     var id = await AsyncStorage.getItem("userId");
-    var Data = {
-      id: id,
-    };
-    var ApiUrl = Connection.url + Connection.userInfo;
+
+    var ApiUrl = Connection.url + Connection.userInfo + id;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
     fetch(ApiUrl, {
-      method: "POST",
-      body: JSON.stringify(Data),
+      method: "GET",
       headers: headers,
       signal: Signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var serverResponse = response[0].message;
         if (fetchIt) {
-          if (serverResponse === "succeed") {
-            var eventPostedCount = response[0].events;
-            var followerCount = response[0].followers;
-            var followingCount = response[0].following;
+          if (response.success) {
+            var eventPostedCount = response.events;
+            var followerCount = response.followers;
+            var followingCount = response.following;
 
             setUserInfo({
               ...userInfo,
@@ -246,7 +242,7 @@ function Profile({ navigation, props }) {
               following: followingCount,
             });
             setCount(eventPostedCount);
-            setLoad(true);
+            setLoad(false);
           } else {
             setLoad(false);
           }
@@ -269,31 +265,26 @@ function Profile({ navigation, props }) {
     const signal = controller.signal;
 
     var userId = await AsyncStorage.getItem("userId");
-    var ApiUrl = Connection.url + Connection.MetaData;
+    var ApiUrl = Connection.url + Connection.MetaData + userId;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-    var data = {
-      userId: userId,
-    };
+
     //save user info into database
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(data),
       signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var resp = response[0];
-
-        if (resp.message === "succeed") {
-          var userInfo = response[0].user[0];
+        if (response.success) {
+          var userInfo = response.data;
           setDetailInfo(userInfo);
           setUserData({
             ...userData,
-            userId: userInfo.userId,
+            userId: userInfo.id,
             userProfile: userInfo.profile,
             userEmail: userInfo.email,
             userName: userInfo.username,
@@ -302,9 +293,10 @@ function Profile({ navigation, props }) {
             lastName: userInfo.last_name,
           });
           setImage(Connection.url + Connection.assets + userInfo.profile);
-        } else {
-          // console.log(resp.message);
         }
+      })
+      .catch((error) => {
+        console.log(error);
       });
 
     return () => {
@@ -385,6 +377,103 @@ function Profile({ navigation, props }) {
   return (
     <ScrollView style={styles.container}>
       {load ? (
+        <SkeletonPlaceholder>
+          <View style={{ height: 270 }}>
+            <View style={{ width: "100%", height: 130, borderRadius: 5 }} />
+
+            <View
+              style={[
+                styles.profilePicker,
+                { backgroundColor: Constants.Faded },
+              ]}
+            />
+            <View
+              style={[styles.userNameShimmer, { width: 180, borderRadius: 3 }]}
+            />
+            <View
+              style={[styles.userEmailshimmer, { width: 250, borderRadius: 3 }]}
+            />
+          </View>
+
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "space-evenly",
+              marginTop: -17,
+            }}
+          >
+            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
+            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
+            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
+          </View>
+          <View style={{ width: "100%", marginLeft: 13, marginVertical: 15 }}>
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "32%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+          </View>
+        </SkeletonPlaceholder>
+      ) : (
         <View>
           {buttonShown ? (
             <TouchableNativeFeedback
@@ -630,103 +719,6 @@ function Profile({ navigation, props }) {
             <Caption> Version 1.0.0</Caption>
           </View>
         </View>
-      ) : (
-        <SkeletonPlaceholder>
-          <View style={{ height: 270 }}>
-            <View style={{ width: "100%", height: 130, borderRadius: 5 }} />
-
-            <View
-              style={[
-                styles.profilePicker,
-                { backgroundColor: Constants.Faded },
-              ]}
-            />
-            <View
-              style={[styles.userNameShimmer, { width: 180, borderRadius: 3 }]}
-            />
-            <View
-              style={[styles.userEmailshimmer, { width: 250, borderRadius: 3 }]}
-            />
-          </View>
-
-          <View
-            style={{
-              width: "100%",
-              flexDirection: "row",
-              justifyContent: "space-evenly",
-              marginTop: -17,
-            }}
-          >
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-          </View>
-          <View style={{ width: "100%", marginLeft: 13, marginVertical: 15 }}>
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "32%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-          </View>
-        </SkeletonPlaceholder>
       )}
 
       <BottomSheet
@@ -778,7 +770,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 3,
     marginHorizontal: 16,
-    backgroundColor: Constants.background,
     borderRadius: 8,
     paddingVertical: 6,
   },
@@ -786,20 +777,20 @@ const styles = StyleSheet.create({
     color: Constants.Secondary,
   },
   optionIcon: {
-    color: Constants.primary,
+    color: Constants.Inverse,
   },
   bookmark: {
     flexDirection: "row",
     alignItems: "center",
     margin: 1,
     marginHorizontal: 16,
-    backgroundColor: Constants.background,
+
     borderRadius: 8,
     paddingVertical: 6,
   },
   settingtxt: {
     justifyContent: "center",
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     marginLeft: 15,
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,

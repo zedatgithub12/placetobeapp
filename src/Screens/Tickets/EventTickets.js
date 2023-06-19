@@ -37,7 +37,7 @@ const EventTickets = ({ navigation, route }) => {
   const [exist, setExist] = useState(true);
   const [active, setActiveIndex] = useState();
   const [disable, setDisable] = useState(false);
-  const [event, setEvents] = useState({});
+  const [event, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const width = Dimensions.get("window").width;
@@ -181,33 +181,25 @@ const EventTickets = ({ navigation, route }) => {
     const controller = new AbortController();
     const signal = controller.signal;
 
-    var ApiUrl = Connection.url + Connection.eventTicket;
+    var ApiUrl = Connection.url + Connection.eventTicket + item.id;
     var headers = {
       accept: "application/json",
       "Content-Type": "application/json",
     };
-    var Data = {
-      eventId: item.event_id,
-    };
 
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
       signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-        var eventTickets = response[0].tickets;
-        var Event = response[0].Events[0];
-
-        if (message === "succeed") {
-          setTickets(eventTickets);
-          setEvents(Event);
+        if (response.success) {
+          setTickets(response.data);
+          setEvents(response.Events);
           setLoading(false);
           setExist(true);
-        } else if (message === "no tickets") {
+        } else {
           setLoading(false);
           setExist(false);
         }
@@ -623,6 +615,7 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingthree,
     fontWeight: Constants.Bold,
     color: Constants.Inverse,
+    textTransform: "capitalize",
   },
   productCompanyTitle: {
     // fontSize: 16,

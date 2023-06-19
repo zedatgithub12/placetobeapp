@@ -12,13 +12,14 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
 import Connection from "../../constants/connection";
 import OrganizerEvents from "../../Components/Organizers/OrganizerEvents";
-import { Caption, HelperText } from "react-native-paper";
+import { Caption } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import call from "react-native-phone-call";
 import { AuthContext } from "../../Components/context";
@@ -27,7 +28,7 @@ import OrganizersShimmer from "../../Components/Organizers/Skeleton/organizerShi
 // create a component
 const OrganizersDetail = ({ route, navigation }) => {
   //parameters sent from event detail screen
-  var { organizerInfo, followStatus } = route.params;
+  var { organizerInfo } = route.params;
 
   // check wether user logged in or not
   // the state is store in the context and we are going to access it from context state
@@ -36,72 +37,73 @@ const OrganizersDetail = ({ route, navigation }) => {
 
   //image directory on the server
   var featuredImageUri = Connection.url + Connection.assets;
-  var cover = "AddisAbeba.jpg";
-  var coverpage = Connection.url + Connection.assets + cover;
+
   //organizer image in full screen
   const [modalVisible, setModalVisible] = useState(false);
+  const [count, setCount] = useState(0);
+  const [subscription, setSubscription] = useState(false); // follow unfollow activity indicator
+  const [follow, setFollow] = useState({
+    subscription: "",
+    btnDisabled: false,
+    ButtonColor: Constants.primary,
+  });
 
   // state of organizer followers
-  const [count, setCount] = useState(0);
-
-  const followCounter = () => {
-    var APIUrl = Connection.url + Connection.OrganizerFollowCounter;
+  const followCounter = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    var APIUrl =
+      Connection.url + Connection.OrganizerFollowCounter + organizerInfo.id;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
+
+    var followerId = await AsyncStorage.getItem("userId");
     var Data = {
-      organizerId: organizerInfo.userId,
+      fid: followerId,
     };
 
     fetch(APIUrl, {
       method: "POST",
       headers: headers,
       body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var ServerResponse = response[0].message;
-
-        if (ServerResponse === "succeed") {
-          var followers = response[0].followers;
+        if (response.success) {
+          var followers = response.data;
+          setFollow({ ...follow, subscription: response.status });
           setCount(followers);
         } else {
           setCount(0);
         }
+      })
+      .catch((error) => {
+        console.log(error);
       });
+
+    return () => {
+      controller.abort();
+    };
   };
-
-  //state of follow unfollow operation
-  const [follow, setFollow] = useState({
-    subscription: followStatus,
-    btnDisabled: false,
-    ButtonColor: Constants.primary,
-  });
-
-  //follow organizer if user is not following
-  //unfollow organizer if user is following
-
-  const [subscription, setSubscription] = useState(false); // follow unfollow activity indicator
 
   const followOrganizer = async () => {
     setSubscription(true);
+
     const controller = new AbortController();
     const signal = controller.signal;
-
-    let checkFollowing = true;
-    var organizerId = organizerInfo.userId;
+    var organizerId = organizerInfo.id;
     var followerId = await AsyncStorage.getItem("userId");
-
     var APIUrl = Connection.url + Connection.follow;
-
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
     var Data = {
-      organizerId: organizerId,
-      followerId: followerId,
+      oid: organizerId,
+      fid: followerId,
     };
     fetch(APIUrl, {
       method: "POST",
@@ -111,41 +113,34 @@ const OrganizersDetail = ({ route, navigation }) => {
     })
       .then((response) => response.json())
       .then((response) => {
-        let responseMessage = response[0].message;
         // effect subscription indicator
-        if (checkFollowing) {
-          if (responseMessage === "Following") {
-            setFollow({
-              ...follow,
-              subscription: responseMessage,
-              btnDisabled: true,
-              ButtonColor: Constants.transparentPrimary,
-            });
-            followCounter();
-            setSubscription(false);
-          } else {
-            setFollow({
-              ...follow,
-              subscription: responseMessage,
-              btnDisabled: false,
-              ButtonColor: Constants.primary,
-            });
-            followCounter();
-            setSubscription(false);
-          }
+
+        if (response.success) {
+          setFollow({
+            ...follow,
+            subscription: response.message,
+            btnDisabled: true,
+          });
+          setSubscription(false);
+          setFollowStatus(response.message);
+        } else {
+          setFollow({
+            ...follow,
+            subscription: response.message,
+            btnDisabled: false,
+            ButtonColor: Constants.primary,
+          });
+          setFollowStatus(response.message);
+          setSubscription(false);
         }
       })
-      .catch((err) => {
-        if (err.name === "AbortError") {
-          //console.log("successfully aborted");
-        } else {
-          // handle error
-          //console.log("error abortion");
-        }
+      .catch((error) => {
+        //  do something here
+        setSubscription(false);
       });
+
     return () => {
       // cancel the subscription
-      checkFollowing = false;
       controller.abort();
     };
   };
@@ -167,11 +162,10 @@ const OrganizersDetail = ({ route, navigation }) => {
   // shimmer effect state
   const [loading, setLoading] = useState(false);
   //event flatlist related code
-  const [events, setEvents] = useState();
+  const [events, setEvents] = useState([]);
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
-  const [refStatus, setRefStatus] = React.useState("Refreshed"); //toast message to be shown when user pull to refresh the page
 
   const DateFun = (startingTime) => {
     var date = new Date(startingTime);
@@ -264,7 +258,7 @@ const OrganizersDetail = ({ route, navigation }) => {
   //render item to be displayed in the flatlist
   const renderItem = ({ item }) => (
     <OrganizerEvents
-      Event_Id={item.event_id}
+      Event_Id={item.id}
       status={renderStatus(item.start_date, item.end_date)}
       org_id={item.userId}
       FeaturedImage={item.event_image}
@@ -273,71 +267,58 @@ const OrganizersDetail = ({ route, navigation }) => {
       time={TimeFun(item.start_time)}
       venue={item.event_address}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.push("EventDetail", { id: item.event_id })}
+      onPress={() => navigation.push("EventDetail", { id: item.id })}
     />
   );
-  const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);
-  // refresh the flatlist item
+
   const RefreshList = async () => {
     setLoading(false);
     // set refreshing state to true
     // featching abort controller
     // after featching events the fetching function will be aborted
-    var organizerId = organizerInfo.userId;
-    let isApiSubscribed = true;
-    var ApiUrl = Connection.url + Connection.organizerEvents;
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    var organizerId = organizerInfo.id;
+    var ApiUrl = Connection.url + Connection.organizerEvents + organizerId;
 
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
 
-    var Data = {
-      userId: organizerId,
-    };
-
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        if (isApiSubscribed) {
-          // handle success
-          var message = response[0].message;
-
-          if (message === "succeed") {
-            var todayEvents = response[0].Events;
-            setEvents(todayEvents);
-            setNotFound(false);
-            setLoading(true);
-          } else if (message === "no event") {
-            setEvents(todayEvents);
-            setNotFound(true);
-            setMessage("Event will be listed here.");
-            setLoading(true);
-          } else {
-            setLoading(false);
-          }
+        if (response.success) {
+          var orgEvents = response.data;
+          setEvents(orgEvents);
+          setNotFound(false);
+          setLoading(true);
+        } else {
+          setMessage("Event will be listed here.");
+          setLoading(true);
         }
       })
       .catch(() => {
-        setLoading(false);
+        setLoading(true);
       });
 
     return () => {
-      // cancel the subscription
-      isApiSubscribed = false;
+      controller.abort();
     };
   };
 
   useEffect(() => {
     //check wether event organizer have phone number added to his account
 
-    if (organizerInfo.phone != 0) {
+    if (organizerInfo.phone !== null) {
       setProvided(true);
     } else {
       setProvided(false);
@@ -382,113 +363,120 @@ const OrganizersDetail = ({ route, navigation }) => {
       </Modal>
 
       {loading ? (
-        <View>
-          <View style={styles.featuredImageContainer}>
-            <TouchableOpacity
-              style={styles.backArrow} // back arrow button style
-              onPress={() => navigation.goBack()}
-            >
-              <Ionicons
-                name="arrow-back-sharp"
-                size={25}
-                //back arrow icon
-              />
-            </TouchableOpacity>
-            <Image
-              //Featured Image of the event
-              source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
-              resizeMode="cover"
-              style={styles.image} //featured image styles
-              blurRadius={4}
-            />
-          </View>
+        <FlatList
+          // List of events in extracted from database in the form JSON data
+          data={events}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          onRefresh={RefreshList}
+          refreshing={refreshing}
+          style={styles.eventList}
+          initialNumToRender={2} // Reduce initial render amount
+          maxToRenderPerBatch={1} // Reduce number in each render batch
+          windowSize={7} // Reduce the window size
+          // when ithere is no item to be listed in flatlist
 
-          <View style={styles.sectionOne}>
-            <TouchableOpacity
-              onPress={() => setModalVisible(true)}
-              style={styles.profileImageContainer}
-            >
-              <Image
-                source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
-                resizeMode="cover"
-                style={styles.profileImage} //featured image styles
-              />
-            </TouchableOpacity>
-            <View style={styles.contentContainer}>
-              <Text numberOfLines={1} style={styles.organizerName}>
-                {organizerInfo.username}
-              </Text>
-              <Text>{organizerInfo.category}</Text>
+          ListHeaderComponent={
+            <View>
+              <View style={styles.featuredImageContainer}>
+                <TouchableOpacity
+                  style={styles.backArrow} // back arrow button style
+                  onPress={() => navigation.goBack()}
+                >
+                  <Ionicons
+                    name="arrow-back-sharp"
+                    size={25}
+                    //back arrow icon
+                  />
+                </TouchableOpacity>
+                <Image
+                  //Featured Image of the event
+                  source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
+                  resizeMode="cover"
+                  style={styles.image} //featured image styles
+                  blurRadius={4}
+                />
+              </View>
 
-              <View style={styles.followersContainer}>
-                <Text style={styles.followerCount}>{count}</Text>
-                <Caption style={styles.followerText}> Followers</Caption>
+              <View style={styles.sectionOne}>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(true)}
+                  style={styles.profileImageContainer}
+                >
+                  <Image
+                    source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
+                    resizeMode="cover"
+                    style={styles.profileImage} //featured image styles
+                  />
+                </TouchableOpacity>
+                <View style={styles.contentContainer}>
+                  <Text numberOfLines={1} style={styles.organizerName}>
+                    {organizerInfo.username}
+                  </Text>
+                  <Text>{organizerInfo.category}</Text>
+
+                  <View style={styles.followersContainer}>
+                    <Text style={styles.followerCount}>{count}</Text>
+                    <Caption style={styles.followerText}> Followers</Caption>
+                  </View>
+                </View>
+                <View
+                  //contaner of section two
+                  style={styles.sectionTwo}
+                >
+                  {provided ? (
+                    <TouchableOpacity
+                      onPress={() => MakeCall()}
+                      activeOpacity={0.7}
+                      style={styles.callBtn}
+                    >
+                      <Text numberOfLines={1} style={styles.callText}>
+                        Call
+                      </Text>
+                    </TouchableOpacity>
+                  ) : null}
+
+                  {logged ? (
+                    <TouchableOpacity
+                      onPress={() => followOrganizer()}
+                      activeOpacity={0.7}
+                      style={[
+                        styles.followBtn,
+                        {
+                          backgroundColor:
+                            follow.subscription === "Following"
+                              ? Constants.transparentPrimary
+                              : Constants.primary,
+                        },
+                      ]}
+                    >
+                      {subscription ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={Constants.background}
+                        />
+                      ) : (
+                        <Text numberOfLines={1} style={[styles.btnText]}>
+                          {follow.subscription}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
               </View>
             </View>
-            <View
-              //contaner of section two
-              style={styles.sectionTwo}
-            >
-              {provided ? (
-                <TouchableOpacity
-                  onPress={() => MakeCall()}
-                  activeOpacity={0.7}
-                  style={styles.callBtn}
-                >
-                  <Text numberOfLines={1} style={styles.callText}>
-                    Call
-                  </Text>
-                </TouchableOpacity>
-              ) : null}
-
-              {logged ? (
-                <TouchableOpacity
-                  onPress={() => followOrganizer()}
-                  activeOpacity={0.7}
-                  style={styles.followBtn}
-                >
-                  {subscription ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={Constants.background}
-                    />
-                  ) : (
-                    <Text numberOfLines={1} style={styles.btnText}>
-                      {follow.subscription}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              ) : null}
+          }
+          ListEmptyComponent={
+            <View style={styles.container}>
+              <Image
+                source={require("../../assets/images/NotFound.png")}
+                resizeMode="contain"
+                style={styles.notFound}
+              />
+              <Text style={styles.emptyMessageStyle}>{message}</Text>
             </View>
-          </View>
-
-          <FlatList
-            // List of events in extracted from database in the form JSON data
-            data={events}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.event_id}
-            onRefresh={RefreshList}
-            refreshing={refreshing}
-            style={styles.eventList}
-            initialNumToRender={2} // Reduce initial render amount
-            maxToRenderPerBatch={1} // Reduce number in each render batch
-            updateCellsBatchingPeriod={100} // Increase time between renders
-            windowSize={7} // Reduce the window size
-            // when ithere is no item to be listed in flatlist
-            ListHeaderComponent={() =>
-              notFound ? (
-                <View style={styles.container}>
-                  <Image
-                    source={require("../../assets/images/NotFound.png")}
-                    resizeMode="contain"
-                    style={styles.notFound}
-                  />
-                  <Text style={styles.emptyMessageStyle}>{message}</Text>
-                </View>
-              ) : null
-            }
-          />
-        </View>
+          }
+        />
       ) : (
         <OrganizersShimmer />
       )}
@@ -500,6 +488,7 @@ const OrganizersDetail = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    height: Dimensions.get("screen").height,
     backgroundColor: Constants.Faded,
   },
   backArrow: {
@@ -589,7 +578,6 @@ const styles = StyleSheet.create({
   followBtn: {
     width: 105,
     alignItems: "center",
-    backgroundColor: Constants.primary,
     padding: 5,
     paddingHorizontal: 15,
     borderRadius: Constants.tinybox,
@@ -599,6 +587,7 @@ const styles = StyleSheet.create({
     width: 105,
     alignItems: "center",
     backgroundColor: Constants.background,
+
     padding: 3,
     paddingHorizontal: 30,
     borderRadius: Constants.tinybox,
@@ -606,14 +595,14 @@ const styles = StyleSheet.create({
     borderColor: Constants.primary,
   },
   btnText: {
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
-    color: Constants.background,
+    color: Constants.Inverse,
   },
   callText: {
-    fontSize: Constants.headingtwo,
-    fontWeight: Constants.Bold,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Boldtwo,
     fontFamily: Constants.fontFam,
     color: Constants.primary,
   },
@@ -687,9 +676,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: "center",
   },
-  eventList: {
-    marginBottom: 300,
-  },
+  eventList: {},
 });
 
 //make this component available to the app

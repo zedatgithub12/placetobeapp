@@ -23,12 +23,12 @@ import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 // create a component
 const YourEvents = ({ navigation }) => {
   const [load, setLoad] = React.useState(false);
-  const [events, setEvents] = useState();
+  const [events, setEvents] = useState([]);
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
-  const [refStatus, setRefStatus] = React.useState("Refreshed"); //toast message to be shown when user pull to refresh the page
   const [loading, setLoading] = useState(false);
+  const [count, setCount] = useState(0);
 
   const DateFun = (startingTime) => {
     var date = new Date(startingTime);
@@ -108,23 +108,7 @@ const YourEvents = ({ navigation }) => {
 
     return currentStatus;
   };
-  //render item to be displayed in the flatlist
-  const renderItem = ({ item }) => (
-    <YourE
-      Event_Id={item.event_id}
-      status={renderStatus(item.event_status)}
-      org_id={item.userId}
-      FeaturedImage={item.event_image}
-      title={item.event_name}
-      date={DateFun(item.start_date)}
-      time={TimeFun(item.start_time)}
-      venue={item.event_address}
-      Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("YoursDetail", { item })}
-    />
-  );
-  const refreshed = () => ToastAndroid.show(refStatus, ToastAndroid.SHORT);
-  // refresh the flatlist item
+
   const RefreshList = async () => {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -133,40 +117,27 @@ const YourEvents = ({ navigation }) => {
     setLoading(false);
     // featching abort controller
     // after featching events the fetching function will be aborted
-
-    var ApiUrl = Connection.url + Connection.YourEvents;
+    var ApiUrl = Connection.url + Connection.YourEvents + userId;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
 
-    var Data = {
-      userId: userId,
-    };
-
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
       signal: signal,
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
-
-        if (message === "succeed") {
-          var todayEvents = response[0].Events;
+        if (response.success) {
+          var todayEvents = response.data;
           setEvents(todayEvents);
-          setNotFound(false);
-          setLoading(true);
-        } else if (message === "no event") {
-          setEvents(todayEvents);
-          setNotFound(true);
-          setMessage("Your event will be listed here.");
           setLoading(true);
         } else {
-          setLoading(false);
+          setMessage("Your event will be listed here.");
+          setLoading(true);
         }
       })
       .catch((err) => {
@@ -178,7 +149,21 @@ const YourEvents = ({ navigation }) => {
     };
   };
 
-  const [count, setCount] = useState(0);
+  //render item to be displayed in the flatlist
+  const renderItem = ({ item }) => (
+    <YourE
+      Event_Id={item.id}
+      status={renderStatus(item.event_status)}
+      org_id={item.userId}
+      FeaturedImage={item.event_image}
+      title={item.event_name}
+      date={DateFun(item.start_date)}
+      time={TimeFun(item.start_time)}
+      venue={item.event_address}
+      Price={EntranceFee(item.event_entrance_fee)}
+      onPress={() => navigation.navigate("YoursDetail", { item })}
+    />
+  );
 
   const featchUserInformation = async () => {
     const Controller = new AbortController();
@@ -186,28 +171,24 @@ const YourEvents = ({ navigation }) => {
 
     var fetchIt = true;
     var id = await AsyncStorage.getItem("userId");
-    var Data = {
-      id: id,
-    };
-    var ApiUrl = Connection.url + Connection.userInfo;
+
+    var ApiUrl = Connection.url + Connection.userInfo + id;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
     fetch(ApiUrl, {
-      method: "POST",
-      body: JSON.stringify(Data),
+      method: "GET",
       headers: headers,
       signal: Signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var serverResponse = response[0].message;
         if (fetchIt) {
-          if (serverResponse === "succeed") {
-            var eventPostedCount = response[0].events;
+          if (response.success) {
+            var eventPostedCount = response.events;
             setCount(eventPostedCount);
-            setLoad(true);
+            setLoad(false);
           } else {
             setLoad(false);
           }
@@ -222,16 +203,10 @@ const YourEvents = ({ navigation }) => {
     };
   };
   useEffect(() => {
-    let isApiSubscribed = true;
+    RefreshList();
+    featchUserInformation();
 
-    if (isApiSubscribed) {
-      RefreshList();
-      featchUserInformation();
-    }
-
-    return () => {
-      isApiSubscribed = false;
-    };
+    return () => {};
   }, []);
 
   return (
@@ -265,24 +240,22 @@ const YourEvents = ({ navigation }) => {
           // List of events in extracted from database in the form JSON data
           data={events}
           renderItem={renderItem}
-          keyExtractor={(item) => item.event_id}
+          keyExtractor={(item) => item.id}
           onRefresh={RefreshList}
           refreshing={refreshing}
           // when ithere is no item to be listed in flatlist
-          ListHeaderComponent={() =>
-            notFound ? (
-              <View style={styles.container}>
-                <Image
-                  source={require("../../assets/images/NotFound.png")}
-                  resizeMode="contain"
-                  style={styles.notFound}
-                />
-                <Text style={styles.emptyMessageStyle}>{message}</Text>
-                <HelperText style={{ alignSelf: "center" }}>
-                  You can add events using plus icon in the home page
-                </HelperText>
-              </View>
-            ) : null
+          ListEmptyComponent={
+            <View style={styles.container}>
+              <Image
+                source={require("../../assets/images/NotFound.png")}
+                resizeMode="contain"
+                style={styles.notFound}
+              />
+              <Text style={styles.emptyMessageStyle}>{message}</Text>
+              <HelperText style={{ alignSelf: "center" }}>
+                You can add events using plus icon in the home page
+              </HelperText>
+            </View>
           }
         />
       ) : (
@@ -331,7 +304,7 @@ const styles = StyleSheet.create({
   Title: {
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
-    fontSize: 36,
+    fontSize: Constants.primaryHeading,
   },
   eventCount: {
     backgroundColor: Constants.transparentPrimary,

@@ -28,11 +28,11 @@ import Listing from "../../Components/Events/Skeleton/ListShimmer";
 
 const CategorizedEvent = ({ navigation }) => {
   const [filterData, setFilterData] = React.useState(true);
-  const [searchInput, setSearchInput] = React.useState("");
+  const [searchInput, setSearchInput] = React.useState("All");
   const [inputs, setInputs] = React.useState({
     submitBtn: false,
   });
-  const [search, setSearch] = React.useState();
+  const [search, setSearch] = React.useState([]);
   const [loading, setLoading] = useState(false);
   /************************************************** */
   // when user enter keys inside search box this function will be triggered
@@ -69,52 +69,43 @@ const CategorizedEvent = ({ navigation }) => {
     // after the search button get pressed the state set to true
     const controller = new AbortController();
     const signal = controller.signal;
-    let isApiSubscribed = true;
-    var ApiUrl = Connection.url + Connection.search;
+
+    var ApiUrl = Connection.url + Connection.search + searchInput;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    var search = {
-      searchInput: searchInput,
-    };
+
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
 
     fetch(ApiUrl, {
-      method: "POST",
-      body: JSON.stringify(search),
+      method: "GET",
       headers: headers,
       signal: signal,
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
+        // handle success
 
-        if (isApiSubscribed) {
-          // handle success
-
-          if (message === "succeed") {
-            var searchResult = response[0].Filtered;
-            setSearch(searchResult);
-            setFilterData(true);
-            setLoading(true);
-            setSearching(false);
-          } else if (message === "no event") {
-            setFilterData(false);
-            setLoading(true);
-            setSearching(false);
-          } else {
-            setLoading(false);
-            setSearching(false);
-          }
+        if (response.success) {
+          var data = response.data;
+          setSearch(data);
+          setFilterData(true);
+          setLoading(true);
+          setSearching(false);
+        } else {
+          setFilterData(false);
+          setLoading(true);
+          setSearching(false);
         }
       })
       .catch((err) => {
-        setLoading(false);
+        setLoading(true);
+        setSearching(false);
       });
     return () => {
       // cancel the subscription
-      isApiSubscribed = false;
+
       controller.abort();
     };
   };
@@ -126,49 +117,37 @@ const CategorizedEvent = ({ navigation }) => {
     setLoading(false);
     const controller = new AbortController();
     const signal = controller.signal;
-    let isApiSubscribed = true;
-    var ApiUrl = Connection.url + Connection.categoryFilter;
+
+    var ApiUrl = Connection.url + Connection.categoryFilter + catname;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    var category = {
-      category: catname,
-    };
+
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
 
     fetch(ApiUrl, {
-      method: "POST",
-      body: JSON.stringify(category),
+      method: "GET",
       headers: headers,
       signal: signal,
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
-
-        if (isApiSubscribed) {
-          // handle success
-
-          if (message === "succeed") {
-            var searchResult = response[0].Filtered;
-            setSearch(searchResult);
-            setFilterData(true);
-            setLoading(true);
-          } else if (message === "no event") {
-            setFilterData(false);
-            setLoading(true);
-          } else {
-            setLoading(false);
-          }
+        if (response.success) {
+          var data = response.data;
+          setSearch(data);
+          setFilterData(true);
+          setLoading(true);
+        } else {
+          setSearch([]);
+          setFilterData(false);
+          setLoading(true);
         }
       })
       .catch((err) => {
-        setLoading(false);
+        setLoading(true);
       });
     return () => {
-      // cancel the subscription
-      isApiSubscribed = false;
       controller.abort();
     };
   };
@@ -295,7 +274,7 @@ const CategorizedEvent = ({ navigation }) => {
   //rendered event list
   const renderedItem = ({ item }) => (
     <Events
-      Event_Id={item.event_id}
+      Event_Id={item.id}
       org_id={item.userId}
       FeaturedImage={item.event_image}
       title={item.event_name}
@@ -304,7 +283,7 @@ const CategorizedEvent = ({ navigation }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { id: item.event_id })}
+      onPress={() => navigation.navigate("EventDetail", { id: item.id })}
     />
   );
 
@@ -409,7 +388,7 @@ const CategorizedEvent = ({ navigation }) => {
             // List of events in extracted from database in the form JSON data
             data={search}
             renderItem={renderedItem}
-            keyExtractor={(item) => item.event_id}
+            keyExtractor={(item) => item.id}
             ListEmptyComponent={() => listEmptyComponent()}
             style={styles.filteredEventList}
             initialNumToRender={2} // Reduce initial render amount

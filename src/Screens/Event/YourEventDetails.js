@@ -57,7 +57,7 @@ const YoursDetail = ({ route, navigation }) => {
   const [bookmarkBtnColor, setBookmarkBtnColor] = useState(Constants.Inverse);
 
   const bookmarkEvent = () => {
-    const find = items.find((event) => event.event_id === item.event_id);
+    const find = items.find((event) => event.id === item.id);
     if (find) {
       //setBookmarkBtn(true);
       setBookmarkBtnColor(Constants.Secondary);
@@ -74,7 +74,7 @@ const YoursDetail = ({ route, navigation }) => {
 
   const bookmarked = () => {
     var yesItis = false;
-    const find = items.find((event) => event.event_id === item.event_id);
+    const find = items.find((event) => event.id === item.id);
     if (find) {
       //setBookmarkBtn(true);
       setBookmarkBtnColor(Constants.primary);
@@ -421,16 +421,14 @@ const styles = StyleSheet.create({
     elevation: 2,
     shadowColor: Constants.Secondary,
     borderWidth: 0.5,
-    borderColor: Constants.primary
+    borderColor: Constants.primary,
   },
 
   //Update event text styling
   UpdateEventText: {
- 
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
     color: Constants.primary,
-  
   },
   // organizers section styling
   organizersSection: {

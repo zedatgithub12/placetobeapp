@@ -16,55 +16,12 @@ import { HelperText } from "react-native-paper";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
 
 const ThisWeekEvent = ({ navigation }) => {
-  const [WEvents, setWEvents] = useState();
+  const [WEvents, setWEvents] = useState([]);
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
   const [refStatus, setRefStatus] = React.useState("Refreshed"); //toast message to be shown when user pull to refresh the page
   const [loading, setLoading] = useState(false);
-
-  const mountFunction = () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    let isApiSubscribed = true;
-    var ApiUrl = Connection.url + Connection.WeekEvents;
-    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    fetch(ApiUrl, {
-      signal: signal,
-    })
-      .then((response) => response.json()) //check response type of the API
-      .then((response) => {
-        if (isApiSubscribed) {
-          // handle success
-          var message = response[0].message;
-          var WeekEvents = response[0].Events;
-
-          if (message === "succeed") {
-            setWEvents(WeekEvents);
-            setNotFound(false);
-            setLoading(true);
-          } else if (message === "no event") {
-            setWEvents(WeekEvents);
-            setNotFound(true);
-            setMessage("No event this week!");
-            setLoading(true);
-          } else {
-            setLoading(true);
-            setWEvents(WEvents);
-          }
-        }
-      })
-      .catch((err) => {
-        setLoading(true);
-        setWEvents(WEvents);
-      });
-    return () => {
-      // cancel the subscription
-      isApiSubscribed = false;
-      controller.abort();
-    };
-  };
 
   /********************************************************** */
   //date function which perform date format conversion and return the suitable format for frontend
@@ -174,7 +131,7 @@ const ThisWeekEvent = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <Events
-      Event_Id={item.event_id}
+      Event_Id={item.id}
       org_id={item.userId}
       FeaturedImage={item.event_image}
       title={item.event_name}
@@ -183,10 +140,40 @@ const ThisWeekEvent = ({ navigation }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { id: item.event_id })}
+      onPress={() => navigation.navigate("EventDetail", { id: item.id })}
     />
   );
 
+  const mountFunction = () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    var ApiUrl = Connection.url + Connection.WeekEvents;
+    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
+    fetch(ApiUrl, {
+      signal: signal,
+    })
+      .then((response) => response.json()) //check response type of the API
+      .then((response) => {
+        if (response.success) {
+          setWEvents(response.data);
+          setNotFound(false);
+          setLoading(true);
+        } else {
+          setNotFound(true);
+          setMessage("No event this week!");
+          setLoading(true);
+          setWEvents([]);
+        }
+      })
+      .catch((err) => {
+        setLoading(true);
+        setWEvents([]);
+      });
+    return () => {
+      controller.abort();
+    };
+  };
   // refresh the flatlist item
   const RefreshList = () => {
     // shimmer effect is called
@@ -197,45 +184,38 @@ const ThisWeekEvent = ({ navigation }) => {
     // featching abort controller
     // after featching events the fetching function will be aborted
 
-    let isApiSubscribed = true;
+    const controller = new AbortController();
+    const signal = controller.signal;
     var ApiUrl = Connection.url + Connection.WeekEvents;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    fetch(ApiUrl)
+    fetch(ApiUrl, {
+      signal: signal,
+    })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
-
-        if (isApiSubscribed) {
-          // handle success
-
-          if (message === "succeed") {
-            var WeekEvents = response[0].Events;
-            setWEvents(WeekEvents);
-            setNotFound(false);
-            setRefreshing(false);
-
-            setLoading(true);
-          } else if (message === "no event") {
-            setWEvents(WeekEvents);
-            setNotFound(true);
-            setMessage("No event this week!");
-
-            setRefreshing(false);
-            setLoading(true);
-          } else {
-            setLoading(true);
-            setWEvents(WEvents);
-          }
+        if (response.success) {
+          setWEvents(response.data);
+          setWEvents(WeekEvents);
+          setNotFound(false);
+          setRefreshing(false);
+          setLoading(true);
+        } else {
+          setWEvents([]);
+          setNotFound(true);
+          setMessage("No event this week!");
+          setRefreshing(false);
+          setLoading(true);
         }
       })
       .catch((err) => {
         setLoading(true);
-        setWEvents(WEvents);
+        setRefreshing(false);
+        setWEvents([]);
       });
 
     return () => {
-      // cancel the subscription
-      isApiSubscribed = false;
+      setRefreshing(false);
+      controller.abort();
     };
   };
 
@@ -248,7 +228,7 @@ const ThisWeekEvent = ({ navigation }) => {
     return () => {
       isSubcribed = false;
     };
-  });
+  }, []);
 
   return (
     <View
@@ -263,7 +243,7 @@ const ThisWeekEvent = ({ navigation }) => {
           // List of events in extracted from database in the form JSON data
           data={WEvents}
           renderItem={renderItem}
-          keyExtractor={(item) => item.event_id}
+          keyExtractor={(item) => item.id}
           onRefresh={RefreshList}
           refreshing={refreshing}
           initialNumToRender={2} // Reduce initial render amount
@@ -271,20 +251,20 @@ const ThisWeekEvent = ({ navigation }) => {
           updateCellsBatchingPeriod={100} // Increase time between renders
           windowSize={7} // Reduce the window size
           // when ithere is no item to be listed in flatlist
-          ListHeaderComponent={() =>
-            notFound ? (
-              <View style={styles.container}>
-                <Image
-                  source={require("../../assets/images/NotFound.png")}
-                  resizeMode="contain"
-                  style={styles.notFound}
-                />
-                <Text style={styles.emptyMessageStyle}>{message}</Text>
-                <HelperText style={{ alignSelf: "center" }}>
-                  check us after a while.
-                </HelperText>
-              </View>
-            ) : null
+          ListEmptyComponent={
+            <View style={styles.container}>
+              <Image
+                source={require("../../assets/images/NotFound.png")}
+                resizeMode="contain"
+                style={styles.notFound}
+              />
+              <Text style={styles.emptyMessageStyle}>
+                We don't have events happening this week
+              </Text>
+              <HelperText style={{ alignSelf: "center" }}>
+                Check us after a while.
+              </HelperText>
+            </View>
           }
         />
       ) : (
@@ -316,12 +296,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   emptyMessageStyle: {
-    fontSize: Constants.headingone,
+    fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
     color: Constants.Secondary,
-
+    textAlign: "center",
     alignSelf: "center",
     justifyContent: "center",
+    marginBottom: 8,
   },
   listEnd: {
     padding: 20,

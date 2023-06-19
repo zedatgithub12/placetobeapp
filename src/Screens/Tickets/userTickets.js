@@ -22,79 +22,82 @@ const UserTickets = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const FeatchTicket = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     var userId = await AsyncStorage.getItem("userId");
     setRefreshing(true);
 
-    var APIUrl = Connection.url + Connection.boughtTickets;
+    var APIUrl = Connection.url + Connection.boughtTickets + userId;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-    var Data = {
-      userId: userId,
-    };
 
     await fetch(APIUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((reponse) => reponse.json())
       .then((response) => {
-        var message = response[0].message;
-        if (message === "succeed") {
-          var ticket = response[0].ticket;
+        console.log(response);
+        if (response.success) {
+          var ticket = response.data;
           setSold(ticket);
           setRefreshing(false);
-        } else if (message === "no ticket") {
-          setRefreshing(false);
-          setSold([]);
         } else {
           setRefreshing(false);
-          setSold([]);
         }
       })
       .catch((error) => {
-        if (error) {
-          console.log("Unable to fetch your tickets");
-        }
+        setRefreshing(false);
+        console.log(error);
       });
+
+    return () => {
+      controller.abort();
+    };
   };
 
   // refresh the listing
   const Refresh = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     var userId = await AsyncStorage.getItem("userId");
     setRefreshing(true);
 
-    var APIUrl = Connection.url + Connection.boughtTickets;
+    var APIUrl = Connection.url + Connection.boughtTickets + userId;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-    var Data = {
-      userId: userId,
-    };
 
     await fetch(APIUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((reponse) => reponse.json())
       .then((response) => {
-        var message = response[0].message;
-        if (message === "succeed") {
-          var ticket = response[0].ticket;
+        console.log(response);
+        if (response.success) {
+          var ticket = response.data;
           setSold(ticket);
           setRefreshing(false);
         } else {
           setRefreshing(false);
-          setSold([]);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         setRefreshing(false);
+        console.log(error);
       });
+
+    return () => {
+      controller.abort();
+    };
   };
 
   //

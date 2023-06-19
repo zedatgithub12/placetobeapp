@@ -1,92 +1,73 @@
 //import liraries
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { Component, useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Image } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { HelperText } from "react-native-paper";
 import Listing from "../../Components/userList";
 import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
-import NoticeShimmer from "../../Components/Notifications/Skeleton/NoticeShimmer";
-import SkeletonPlaceholder from "react-native-skeleton-placeholder";
-// create a component
+
 const Followers = ({ navigation }) => {
   // state of followers
   // state is updated by the array retived from server on component mount
-  const [notFound, setNotFound] = useState(false);
+
   const [followers, setFollowers] = useState();
   const [count, setCount] = useState(0);
-  const [followStatus, setFollowStatus] = useState("Follow");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const featchFollowers = async () => {
+    const Controller = new AbortController();
+    const signal = Controller.signal;
     setRefreshing(true);
+    setLoading(true);
     var userId = await AsyncStorage.getItem("userId");
 
-    var ApiUrl = Connection.url + Connection.followers;
+    var ApiUrl = Connection.url + Connection.followers + userId;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-    var Data = {
-      userId: userId,
-    };
 
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-        if (message === "succeed") {
-          var followersArray = response[0].followers;
+        if (response.success) {
+          const followersArray = response.data;
           setCount(followersArray.length);
           setFollowers(followersArray);
           setRefreshing(false);
-          setNotFound(false);
+          setLoading(false);
         } else {
           setRefreshing(false);
-          setNotFound(true);
+          setLoading(false);
         }
       })
       .catch((error) => {
         setRefreshing(false);
+        setLoading(false);
       });
+
+    return () => {
+      Controller.abort();
+    };
   };
 
   //status user weather user is following  or not
   const featchOrganizer = async (organizerInfo) => {
-    var followerId = await AsyncStorage.getItem("userId");
-
-    var ApiUrl = Connection.url + Connection.organizer;
-    //organizer id is the only data to be sent to server in order to retrive organizer data
-    var userId = organizerInfo.userId;
-    var Data = {
-      userId: userId,
-      followerId: followerId,
-    };
-    // header type for text data to be send to server
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        // let message = response[0].message;
-        let follow = response[0].follow;
-        setFollowStatus(follow);
-      });
-
     navigation.navigate("Organizer Detail", {
       organizerInfo,
-      followStatus,
     });
   };
 
@@ -106,33 +87,39 @@ const Followers = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.topContent}>
-        <Text style={styles.followersCount}>{count}</Text>
-        <Text style={styles.allfollowers}>Followers</Text>
-      </View>
+      {loading ? (
+        <View style={{ paddingTop: 20 }}>
+          <ActivityIndicator size="large" color={Constants.Inverse} />
+        </View>
+      ) : (
+        <>
+          <View style={styles.topContent}>
+            <Text style={styles.followersCount}>{count}</Text>
+            <Text style={styles.allfollowers}>Followers</Text>
+          </View>
 
-      <FlatList
-        data={followers}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.userId}
-        onRefresh={featchFollowers}
-        refreshing={refreshing}
-        ListHeaderComponent={() =>
-          notFound ? (
-            <View style={styles.noContainer}>
-              <Image
-                source={require("../../assets/images/followers.png")}
-                resizeMode="contain"
-                style={styles.notFound}
-              />
-              <Text style={styles.emptyMessageStyle}>No Followers yet!</Text>
-              <HelperText style={{ alignSelf: "center" }}>
-                To get notification of event follow some organizer!
-              </HelperText>
-            </View>
-          ) : null
-        }
-      />
+          <FlatList
+            data={followers}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            onRefresh={featchFollowers}
+            refreshing={refreshing}
+            ListEmptyComponent={
+              <View style={styles.noContainer}>
+                <Image
+                  source={require("../../assets/images/followers.png")}
+                  resizeMode="contain"
+                  style={styles.notFound}
+                />
+                <Text style={styles.emptyMessageStyle}>No Followers yet!</Text>
+                <HelperText style={{ alignSelf: "center" }}>
+                  To get notification of event follow some organizer!
+                </HelperText>
+              </View>
+            }
+          />
+        </>
+      )}
     </View>
   );
 };

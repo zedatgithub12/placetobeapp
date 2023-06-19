@@ -218,12 +218,13 @@ export default function SignUp({ navigation }) {
       var category = "Entertainment";
 
       var Data = {
-        Email: Email,
-        User: User,
+        email: Email,
+        user: User,
         passwords: passwords,
         category: category,
         token: token(),
       };
+
       // featch function
       fetch(InserAPIURL, {
         method: "POST",
@@ -232,9 +233,7 @@ export default function SignUp({ navigation }) {
       })
         .then((response) => response.json()) //check response type of the API
         .then((response) => {
-          let resp = response[0];
-
-          if (resp.message === "successfully Registered") {
+          if (response.success) {
             setVisible(true);
             setLoader(false);
           } else {
@@ -242,7 +241,7 @@ export default function SignUp({ navigation }) {
               ...data,
               check_textInputChange: false,
               isFieldEmpty: false,
-              emptyField: response[0].message,
+              emptyField: response.message,
             });
             setLoader(false);
           }

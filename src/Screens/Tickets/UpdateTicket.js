@@ -25,11 +25,11 @@ const UpdateTicket = ({ route, navigation }) => {
   const { item } = route.params;
 
   var featuredImageUri = Connection.url + Connection.assets;
- 
+
   // state declarrations
   const [poster, setPoster] = useState("placeholder.png");
   const [price, setPrice] = useState(item.currentprice);
-  const [amount, setAmount]= useState(item.currentamount);
+  const [amount, setAmount] = useState(parseInt(item.currentamount));
   const [errorMessage, setErrorMessage] = useState();
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState("date");
@@ -41,26 +41,23 @@ const UpdateTicket = ({ route, navigation }) => {
 
   //function goes below this
   const FetchImage = async () => {
-    var ApiUrl = Connection.url + Connection.EventPoster;
+    var ApiUrl = Connection.url + Connection.EventPoster + item.id;
     var headers = {
       accept: "application/json",
       "Content-Type": "application/json",
     };
-
-    var Data = {
-      eventId: item.eventId,
-    };
+    const controller = new AbortController();
+    const signal = controller.signal;
 
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-        if (message === "succeed") {
-          var poster = response[0].poster[0].event_image;
+        if (response.success) {
+          var poster = response.data.event_image;
           setPoster(poster);
         }
       })
@@ -125,10 +122,10 @@ const UpdateTicket = ({ route, navigation }) => {
       setPrice(fees);
     }
   };
-// on change text of ticket amount 
-const TicketAmount = (ticketamount)=>{
-  setAmount(ticketamount);
-}
+  // on change text of ticket amount
+  const TicketAmount = (ticketamount) => {
+    setAmount(ticketamount);
+  };
   //main function in the screen to executed when user press add to event button
   const Update = async () => {
     const controller = new AbortController();
@@ -141,7 +138,7 @@ const TicketAmount = (ticketamount)=>{
     } else {
       setErrorMessage("");
       setUpdating(true);
-      var ApiUrl = Connection.url + Connection.UpdateTicket;
+      var ApiUrl = Connection.url + Connection.UpdateTicket + item.id;
       var headers = {
         accept: "application/json",
         "Content-Type": "application/json",
@@ -149,7 +146,6 @@ const TicketAmount = (ticketamount)=>{
 
       var Data = {
         userId: id,
-        ticketId: item.id,
         price: price,
         amount: amount,
         expireDate: expireDate,
@@ -157,16 +153,14 @@ const TicketAmount = (ticketamount)=>{
       };
 
       fetch(ApiUrl, {
-        method: "POST",
+        method: "PUT",
         headers: headers,
         body: JSON.stringify(Data),
         signal: signal,
       })
         .then((response) => response.json())
         .then((response) => {
-          var message = response[0].message;
-
-          if (message === "succeed") {
+          if (response.success) {
             setUpdateButton(Constants.green);
             setUpdateText("Updated");
             setUpdating(false);
@@ -179,7 +173,6 @@ const TicketAmount = (ticketamount)=>{
         .catch((error) => {
           setErrorMessage("There is error retry later!");
           setUpdating(false);
-          console.log(error);
         });
       return () => {
         controller.abort();
@@ -201,7 +194,6 @@ const TicketAmount = (ticketamount)=>{
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-   
       <View style={styles.EventTitle}>
         <Text
           numberOfLines={2}
@@ -213,7 +205,7 @@ const TicketAmount = (ticketamount)=>{
 
       <Image
         //Featured Image of the event
-        source={{ uri: featuredImageUri + item.event_image}} //featured image source
+        source={{ uri: featuredImageUri + item.event_image }} //featured image source
         resizeMode="cover"
         style={styles.eventPoster} //featured image styles
       />
@@ -229,15 +221,19 @@ const TicketAmount = (ticketamount)=>{
         <MaterialCommunityIcons
           name="check-circle-outline"
           size={20}
-          color={Constants.primary}
+          color={Constants.Secondary}
         />
         <Text
-          style={{
-            marginLeft: 4,
-            fontWeight: Constants.Bold,
-            fontSize: Constants.headingone,
-            color: Constants.primary,
-          }}
+          style={
+            (styles.eventName,
+            {
+              marginLeft: 4,
+              fontWeight: Constants.Boldtwo,
+              fontSize: Constants.headingtwo,
+              color: Constants.Secondary,
+              textTransform: "capitalize",
+            })
+          }
         >
           {item.tickettype} Ticket
         </Text>
@@ -339,7 +335,7 @@ const TicketAmount = (ticketamount)=>{
       <TouchableWithoutFeedback onPress={() => Update()}>
         <View style={[styles.addtoEventBtn, { backgroundColor: updateButton }]}>
           {updating ? (
-            <ActivityIndicator size="large" color={Constants.Inverse} />
+            <ActivityIndicator size="small" color={Constants.Inverse} />
           ) : (
             <View
               style={{
@@ -349,8 +345,18 @@ const TicketAmount = (ticketamount)=>{
               }}
             >
               {updateText === "Updated" ? (
-            <MaterialCommunityIcons name="check" size={32} color={Constants.background}/>
-              ) : <MaterialCommunityIcons name="check" size={32} color={Constants.Inverse}/>}
+                <MaterialCommunityIcons
+                  name="check"
+                  size={26}
+                  color={Constants.background}
+                />
+              ) : (
+                <MaterialCommunityIcons
+                  name="check"
+                  size={26}
+                  color={Constants.Inverse}
+                />
+              )}
             </View>
           )}
         </View>
@@ -373,7 +379,6 @@ const TicketAmount = (ticketamount)=>{
           minimumDate={new Date(2000, 0, 1)}
         />
       )}
-    
     </ScrollView>
   );
 };
@@ -395,8 +400,8 @@ const styles = StyleSheet.create({
     width: "96%",
     marginTop: 5,
     fontSize: Constants.headingone,
-    fontWeight: Constants.Bold,
-    color: Constants.mainText,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.Inverse,
     paddingRight: 4,
   },
   EventTitle: {
@@ -505,16 +510,17 @@ const styles = StyleSheet.create({
   },
   ticketPriceContainer: {
     flexDirection: "column",
+    marginTop: 20,
   },
   pricefieldContainer: {
-    margin: 10,
+    marginVertical: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
   pricefield: {
     width: "71%",
-   // backgroundColor: Constants.Faded,
+    // backgroundColor: Constants.Faded,
     borderBottomLeftRadius: Constants.tinybox,
     borderTopLeftRadius: Constants.tinybox,
     margin: 4,
@@ -523,32 +529,32 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     borderWidth: 0.3,
     borderColor: Constants.Secondary,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     fontSize: Constants.headingthree,
   },
   amountfield: {
-    width: "91%",
+    width: "87%",
     //backgroundColor: Constants.Faded,
     borderRadius: Constants.tinybox,
-    margin: 4,
+    margin: 3,
     marginRight: 0,
     padding: 6,
     paddingLeft: 16,
     borderWidth: 0.3,
     borderColor: Constants.Secondary,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     fontSize: Constants.headingthree,
   },
   currencyText: {
-    width: "20%",
-    backgroundColor: Constants.Secondary,
+    width: "15%",
+    backgroundColor: Constants.Faded,
     textAlign: "center",
     padding: 10,
     borderBottomRightRadius: Constants.tinybox,
     borderTopRightRadius: Constants.tinybox,
-    color: Constants.background,
-    fontWeight: Constants.Bold,
-    borderWidth: 0.4,
+    color: Constants.Inverse,
+    fontWeight: Constants.Boldtwo,
+    borderWidth: 0.3,
     borderColor: Constants.Secondary,
   },
   TextField: {
@@ -603,15 +609,15 @@ const styles = StyleSheet.create({
   addtoEventBtn: {
     position: "absolute",
     bottom: 20,
-    right:10,
-    width:50, height:50,
+    right: 10,
+    width: 50,
+    height: 50,
     padding: 7,
     borderRadius: 50,
     margin: 20,
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
- 
   },
   btntxt: {
     fontSize: Constants.headingone,

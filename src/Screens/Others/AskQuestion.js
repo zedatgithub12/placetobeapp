@@ -29,41 +29,39 @@ const Questions = () => {
     textColor: Constants.Danger,
     background: Constants.Faded,
     show: false,
-    Icon: false,
+    Icon: "alert-circle-outline",
   });
 
   //get user information from database
   const getUserInfo = async () => {
     const controller = new AbortController();
     const signal = controller.signal;
-    var userId = await AsyncStorage.getItem("userId");
 
-    var ApiUrl = Connection.url + Connection.MetaData;
+    var userId = await AsyncStorage.getItem("userId");
+    var ApiUrl = Connection.url + Connection.MetaData + userId;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-    var data = {
-      userId: userId,
-    };
+
     //save user info into database
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(data),
       signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var resp = response[0];
-
-        if (resp.message === "succeed") {
-          var userInfo = response[0].user[0];
+        if (response.success) {
+          var userInfo = response.data;
           setName(userInfo.first_name + " " + userInfo.middle_name);
           setEmail(userInfo.email);
           setPhone(userInfo.phone);
         } else {
         }
+      })
+      .catch((error) => {
+        console.log(error);
       });
     return () => {
       controller.abort();
@@ -81,7 +79,8 @@ const Questions = () => {
       setLoader(true);
 
       // we will send user comment to server with the following code
-      var ApiUrl = Connection.url + Connection.FeedBacks;
+      var ApiUrl = Connection.url + Connection.createfeedback;
+      console.log(ApiUrl);
       var headers = {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -101,32 +100,44 @@ const Questions = () => {
       })
         .then((response) => response.json())
         .then((response) => {
-          var message = response[0].message;
-
-          if (message === "succeed") {
+          if (response.success) {
             setAlertMessage({
               ...alertMessage,
               text: "Successfully sent!",
               textColor: Constants.background,
               background: Constants.Success,
               show: true,
-              Icon: true,
+              Icon: "checkbox-marked-circle",
+            });
+            setLoader(false);
+          } else {
+            setAlertMessage({
+              ...alertMessage,
+              text: "Unable to send retry later",
+              textColor: Constants.red,
+              background: Constants.lightRed,
+              show: true,
+              Icon: "alert-circle-outline",
             });
             setLoader(false);
           }
+        })
+        .catch(() => {
+          setAlertMessage({
+            ...alertMessage,
+            text: "There is error from ourside please retry later",
+            textColor: Constants.red,
+            background: Constants.lightRed,
+            show: true,
+            Icon: "alert-circle-outline",
+          });
+          setLoader(false);
         });
-      //last edited
     }
   };
   useEffect(() => {
-    let isApiSubscribed = true;
-    if (isApiSubscribed) {
-      getUserInfo();
-    }
-
-    return () => {
-      isApiSubscribed = false;
-    };
+    getUserInfo();
+    return () => {};
   }, []);
   return (
     <ScrollView contentContainerStyle={styles.mainContainer}>
@@ -206,14 +217,18 @@ const Questions = () => {
             >
               {alertMessage.text}
             </Text>
-            {alertMessage.Icon ? (
+            {alertMessage.Icon === "alert-circle-outline" ? (
               <MaterialCommunityIcons
-                name="checkbox-marked-circle"
+                name={alertMessage.Icon}
+                size={24}
+                color={Constants.red}
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name={alertMessage.Icon}
                 size={24}
                 color={Constants.background}
               />
-            ) : (
-              <MaterialIcons name="error" size={24} color={Constants.Danger} />
             )}
           </View>
         ) : null}
@@ -344,10 +359,10 @@ const styles = StyleSheet.create({
     padding: Constants.paddTwo,
   },
   error: {
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     color: Constants.Danger,
     fontFamily: Constants.fontFam,
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     lineHeight: 25,
     marginLeft: 5,
   },

@@ -190,14 +190,13 @@ export default function App() {
       phone: user.phone,
       status: user.status,
     },
-    formOne: async (image, eventName, eventDesc, poster) => {
+    formOne: async (image, eventName, eventDesc) => {
       if (image == image && eventName == eventName && eventDesc == eventDesc) {
         setEventInfo({
           ...eventInfo,
           eventTitle: eventName,
           eventDescription: eventDesc,
           featuredImage: image,
-          imageStatus: poster,
         });
       }
     },
@@ -260,8 +259,7 @@ export default function App() {
     InputForm: {
       userId: user.userId,
       userTokens: user.userTokens,
-      FeaturedImage: eventInfo.featuredImage,
-      imageStatus: eventInfo.imageStatus,
+      poster: eventInfo.featuredImage,
       eventNamed: eventInfo.eventTitle,
       aboutEvent: eventInfo.eventDescription,
       sDate: eventInfo.startingDay,
@@ -286,7 +284,7 @@ export default function App() {
             [
               ["userId", userId],
               ["userToken", userToken],
-              ["profile", profile],
+              // ["profile", profile],
             ],
             store
           );

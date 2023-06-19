@@ -106,33 +106,30 @@ class EventSubmission extends Component {
     // state of event posting icon
 
     const PostEvent = async () => {
-      this.setState({ posting: true });
       // we retrived usertoken from async storage and store it in global scope
       let id = await AsyncStorage.getItem("userId");
-
       var userId = id;
-      var picture = (this.state.featuredImage = InputForm.FeaturedImage);
-      var name = (this.state.eventTitle = InputForm.eventNamed);
-      var about = (this.state.eventDescription = InputForm.aboutEvent);
-      var startD = (this.state.startingDay = InputForm.sDate);
-      var startT = (this.state.startingTime = InputForm.sTime);
-      var endD = (this.state.endingDay = InputForm.eDate);
-      var eTime = (this.state.endingTime = InputForm.eTime);
-      var eventOrganizers = (this.state.eventOrg = InputForm.eOrg);
-      var eventCategories = (this.state.eventCat = InputForm.eCat);
-      var eventVenuesAddress = (this.state.eventAddr = InputForm.eAddress);
-      var eventFee = (this.state.entranceFee = InputForm.TicketPrice);
-      var latitude = (this.state.locationLatitude = InputForm.mLat);
-      var longitude = (this.state.locationLongitude = InputForm.mLong);
-      var organizerPhone = (this.state.contactPhone = InputForm.cPhone);
-      var redirectUrl = (this.state.redirectLink = InputForm.url);
-      var Poster = (this.state.PosterStatus = InputForm.imageStatus);
+      var picture = InputForm.poster;
+      var name = InputForm.eventNamed;
+      var description = InputForm.aboutEvent;
+      var startD = InputForm.sDate;
+      var startT = InputForm.sTime;
+      var endD = InputForm.eDate;
+      var eTime = InputForm.eTime;
+      var eventOrganizers = InputForm.eOrg;
+      var eventCategories = InputForm.eCat;
+      var eventVenuesAddress = InputForm.eAddress;
+      var eventFee = InputForm.TicketPrice;
+      var latitude = InputForm.mLat;
+      var longitude = InputForm.mLong;
+      var organizerPhone = InputForm.cPhone;
+      var redirectUrl = InputForm.url;
 
       // event field validation
       if (
-        picture.length == 0 ||
+        picture == null ||
         name.length == 0 ||
-        about.length == 0 ||
+        description.length == 0 ||
         startD.length == 0 ||
         startT.length == 0 ||
         endD.length == 0 ||
@@ -141,60 +138,61 @@ class EventSubmission extends Component {
         eventCategories.length == 0 ||
         eventVenuesAddress.length == 0
       ) {
-        let blankField = "There is a field left blank";
+        let blankField = "Please enter all requested informations";
         errorPanel(blankField);
-        this.setState({ posting: false });
-      } else if (!Poster) {
-        let poster = "Event poster is not uploaded!";
-        errorPanel(poster);
-        this.setState({ posting: false });
       } else {
+        this.setState({ posting: true });
         // After this we initiate featch method to send user data to database
-        var InsertAPIUrl = Connection.url + Connection.AddEvent;
-        // header type for text data to be send to server
-        var headers = {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        };
+        var Api = Connection.url + Connection.AddEvent;
+        let localUri = picture.uri; // local image uri
+        let filename = localUri.split("/").pop(); // the filename is stored in filename variable
+        // Infer the type of the image
+        let match = /\.(\w+)$/.exec(filename);
+        let kind = match ? `image/${match[1]}` : `image`;
+
         // data to be stored in the database
-        var Data = {
-          userId: userId,
-          picture: picture,
-          name: name,
-          about: about,
-          startD: startD,
-          startT: startT,
-          endD: endD,
-          eTime: eTime,
-          eventOrganizers: eventOrganizers,
-          eventCategories: eventCategories,
-          eventVenuesAddress: eventVenuesAddress,
-          eventFee: eventFee,
-          latitude: latitude,
-          longitude: longitude,
-          organizerPhone: organizerPhone,
-          redirectUrl: redirectUrl,
-          status: "0",
-        };
+        const data = new FormData();
+        data.append("userId", userId);
+        data.append("picture", { picture });
+        data.append("name", name);
+        data.append("about", description);
+        data.append("startD", startD);
+        data.append("startT", startT);
+        data.append("endD", endD);
+        data.append("eTime", eTime);
+        data.append("eventOrganizers", eventOrganizers);
+        data.append("eventCategories", eventCategories);
+        data.append("eventVenuesAddress", eventVenuesAddress);
+        data.append("eventFee", eventFee);
+        data.append("latitude", latitude);
+        data.append("longitude", longitude);
+        data.append("organizerPhone", organizerPhone);
+        data.append("redirectUrl", redirectUrl);
+        data.append("status", "0");
+
         // fetch function
-        fetch(InsertAPIUrl, {
+        fetch(Api, {
           method: "POST", // method used to store data in the database
-          headers: headers, // header type which we declare on the top will be assign to headers
-          body: JSON.stringify(Data), // a data will be converted to json format
+          body: data,
         })
           .then((response) => response.json()) //check response type of the API
           .then((response) => {
-            let returnedResponse = response[0];
-            let message = returnedResponse.message;
-            if (message === "successfully Added") {
-              successModal(message);
+            console.log(response);
+            if (response.success) {
+              successModal(response.message);
               this.setState({ posting: false });
             } else {
               errorPanel(message);
               this.setState({ posting: false });
             }
           })
-          .catch((err) => {});
+          .catch((error) => {
+            this.setState({ posting: false });
+            console.error("Error posting data:", error);
+            console.error("Error name:", error.name);
+            console.error("Error message:", error.message);
+            console.error("Error stack:", error.stack);
+          });
       }
     };
 

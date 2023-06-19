@@ -32,39 +32,37 @@ function Tickets({ navigation }) {
     const controller = new AbortController();
     const signal = controller.signal;
 
+    setRefreshing(true);
+
     let id = await AsyncStorage.getItem("userId");
 
-    var ApiUrl = Connection.url + Connection.myTickets;
+    var ApiUrl = Connection.url + Connection.myTickets + id;
     var headers = {
       accept: "application/json",
       "Content-Type": "application/json",
     };
 
-    var Data = {
-      id: id,
-    };
-
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
       signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-        var ticket = response[0].Tickets;
-
-        if (message === "succeed") {
+        if (response.success) {
           setLoading(false);
-          setTickets(ticket);
+          setTickets(response.data);
+          setRefreshing(false);
         } else {
           setLoading(false);
+          setRefreshing(false);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         setLoading(false);
+        setRefreshing(false);
       });
+
     return () => {
       // cancel the request before component unmounts
       controller.abort();
@@ -85,10 +83,10 @@ function Tickets({ navigation }) {
     // featching abort controller
     // after featching events the fetching function will be aborted
     const controller = new AbortController();
-    // const signal = controller.signal;
+    const signal = controller.signal;
 
     let id = await AsyncStorage.getItem("userId");
-    var ApiUrl = Connection.url + Connection.organizerEvents;
+    var ApiUrl = Connection.url + Connection.organizerUpcomings + id;
 
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
 
@@ -97,36 +95,23 @@ function Tickets({ navigation }) {
       "Content-Type": "application/json",
     };
 
-    var Data = {
-      userId: id,
-    };
-
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        // handle success
-        var message = response[0].message;
-
-        if (message === "succeed") {
-          var todayEvents = response[0].Events;
+        if (response.success) {
+          var todayEvents = response.data;
           setUpcomingEvents(todayEvents);
           setLoadUpcoming(false);
-          setNotFound(false);
-        } else if (message === "no event") {
-          setUpcomingEvents(upcomingEvents);
-
-          setLoadUpcoming(false);
-          setNotFound(true);
         } else {
           setLoadUpcoming(false);
-          setNotFound(true);
         }
       })
       .catch(() => {
+        console.log(error);
         setLoadUpcoming(false);
       });
 
@@ -345,37 +330,30 @@ function Tickets({ navigation }) {
 
     let id = await AsyncStorage.getItem("userId");
 
-    var ApiUrl = Connection.url + Connection.myTickets;
+    var ApiUrl = Connection.url + Connection.myTickets + id;
     var headers = {
       accept: "application/json",
       "Content-Type": "application/json",
     };
 
-    var Data = {
-      id: id,
-    };
-
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
       signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-        var ticket = response[0].Tickets;
-
-        if (message === "succeed") {
+        if (response.success) {
           setLoading(false);
-          setTickets(ticket);
+          setTickets(response.data);
           setRefreshing(false);
         } else {
           setLoading(false);
           setRefreshing(false);
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
         setLoading(false);
         setRefreshing(false);
       });
@@ -476,7 +454,7 @@ function Tickets({ navigation }) {
             <FlatList
               data={filterUpcomings}
               renderItem={renderEvent}
-              keyExtractor={(item) => item.event_id}
+              keyExtractor={(item) => item.id}
               ListEmptyComponent={
                 <View style={styles.noevent}>
                   <Image
