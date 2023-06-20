@@ -405,7 +405,7 @@ const UserDetails = ({ route, navigation }) => {
             value="Male"
             status={checked === "Male" ? "checked" : "unchecked"}
             onPress={() => setChecked("Male")}
-            color={Constants.background}
+            color={Constants.Inverse}
           />
         </View>
 
@@ -415,7 +415,7 @@ const UserDetails = ({ route, navigation }) => {
             value="Female"
             status={checked === "Female" ? "checked" : "unchecked"}
             onPress={() => setChecked("Female")}
-            color={Constants.background}
+            color={Constants.Inverse}
           />
         </View>
       </View>
@@ -626,13 +626,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     borderRadius: 8,
-    padding: 10,
-    backgroundColor: Constants.primary,
+    padding: 6,
+    backgroundColor: Constants.transparentPrimary,
   },
   genderTitle: {
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     color: Constants.Inverse,
   },
   genderLabel: {
@@ -750,35 +750,35 @@ const styles = StyleSheet.create({
     borderColor: Constants.purple,
   },
   saveBtn: {
+    width: Dimensions.get("screen").width / 1.09,
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    alignSelf: "flex-end",
+    justifyContent: "center",
+    alignSelf: "center",
     marginVertical: 20,
-    padding: 8,
-    paddingHorizontal: 30,
+    padding: 10,
+    color: Constants.Inverse,
     backgroundColor: Constants.primary,
     borderRadius: Constants.tiny,
-    marginRight: 18,
-  },
-  updatepassword: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    alignSelf: "flex-end",
-    marginVertical: 20,
-    padding: 8,
-    paddingHorizontal: 30,
-    backgroundColor: Constants.primary,
-    borderRadius: Constants.tiny,
-    marginRight: 1,
   },
   saveText: {
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
-    color: Constants.background,
+    color: Constants.Inverse,
+    textAlign: "center",
   },
+  updatepassword: {
+    width: Dimensions.get("screen").width / 1.09,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginVertical: 20,
+    padding: 10,
+    color: Constants.Inverse,
+    backgroundColor: Constants.primary,
+    borderRadius: Constants.tiny,
+  },
+
   // change password section
   updatePasswords: {
     width: "94%",

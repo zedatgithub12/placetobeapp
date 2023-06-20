@@ -23,6 +23,7 @@ import {
 import { AuthContext } from "../../Components/context";
 import { Avatar, Badge, Caption, Paragraph, Title } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import InteractionInfo from "../../Components/Profile/InteractionInfo";
 import Connection from "../../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -127,59 +128,63 @@ function Profile({ navigation, props }) {
   const [updatingProfile, setupdatingProfile] = useState("loaded");
 
   const selectFeaturedImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+
       aspect: [1, 1],
       quality: 1,
     });
-    let localUri = result.uri; // local image uri
-    let filename = localUri.split("/").pop(); // the filename is stored in filename variable
+
     if (!result.cancelled) {
       setImage(result.uri);
-      setupdatingProfile("loading");
+      const base64Image = await convertImageToBase64(result.uri);
+      uploadImage(base64Image);
     }
+  };
 
-    // Infer the type of the image
-    let match = /\.(\w+)$/.exec(filename);
-    let kind = match ? `image/${match[1]}` : `image`;
+  const convertImageToBase64 = async (uri) => {
+    const base64Image = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
 
-    // Upload the image using the fetch and FormData APIs
-    const formData = new FormData();
-    // Assume "photo" is the name of the form field the server expects
-    // all image properties needed by server is going to be appended in formdata object
+    return base64Image;
+  };
 
-    formData.append("profile", { uri: localUri, name: filename, type: kind });
-    //the url which the image will be sent to
-    var ApiUrl = Connection.url + Connection.profile;
+  const uploadImage = async (base64Image) => {
+    var userId = await AsyncStorage.getItem("userId");
+    const Api = Connection.url + Connection.changeprofile + userId;
 
-    return await fetch(ApiUrl, {
-      method: "POST", //request method
-      body: formData, // data to be sent to server
+    let formData = new FormData();
+    formData.append("profile", base64Image);
+    setupdatingProfile("loading");
+    // Make REST API call to upload image
+    fetch(Api, {
+      method: "POST",
       headers: {
-        "content-type": "multipart/form-data", // header type must be 'multipart/form-data' inorder to send image to server
+        "Content-Type": "multipart/form-data",
       },
+      body: formData,
     })
-      .then((response) => response.json()) //check response type of the API
+      .then((response) => response.json())
       .then((response) => {
-        let message = response[0].message;
-
-        if (message === "successfully uploaded") {
-          updateProfile(filename);
-          setupdatingProfile(message);
+        console.log(response);
+        if (response.success) {
+          console.log("Success:", response.message);
+          setupdatingProfile("loaded");
         } else {
-          setProfileUpdate("couldn't update profile");
-          setupdatingProfile(message);
+          console.log("Fail:", response);
+          setupdatingProfile("loaded");
         }
       })
       .catch((error) => {
-        setupdatingProfile("coundn't update");
+        console.error("Error:", error);
+        console.error("Error:", error.stack);
+        setupdatingProfile("loaded");
       });
   };
 
   // variables and functions for invite friends button inside profile screen
-  var msg = "you are invited to install Place to be mobile app  ";
+  var msg = "You are invited to install Place to be mobile app  ";
   var links = Constants.appLink;
   // share the app to friends
   const onShare = async () => {
@@ -504,14 +509,14 @@ function Profile({ navigation, props }) {
             <TouchableOpacity
               //button which trigger the select Image functionality to chane profile picture
               activeOpacity={0.9}
-              onPress={() => selectFeaturedImage()}
+              onPress={selectFeaturedImage}
               style={styles.profilePicker}
             >
               <Avatar.Image
                 source={{ uri: image }}
                 size={80}
                 style={styles.profileImage}
-                onPress={() => selectFeaturedImage()}
+                onPress={selectFeaturedImage}
               />
               <View style={styles.cameraIcon}>
                 {updatingProfile === "loaded" ? (

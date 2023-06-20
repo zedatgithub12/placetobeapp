@@ -5,8 +5,8 @@ const Connection = {
   signIn: "signin",
   googleSignUp: "signup-with-google",
   googleSignIn: "signin-with-google",
-  profile: "changeprofile", // need closer look
-  updateProfile: "changeprofile", // need closer look
+  profile: "profile/", // need closer look
+  changeprofile: "changeprofile/", // need closer look
   userInfo: "user-info/",
   MetaData: "meta-info/",
   updateUserInfo: "update/",
