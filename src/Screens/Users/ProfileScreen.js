@@ -130,7 +130,7 @@ function Profile({ navigation, props }) {
   const selectFeaturedImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-
+      allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
@@ -139,15 +139,21 @@ function Profile({ navigation, props }) {
       setImage(result.uri);
       const base64Image = await convertImageToBase64(result.uri);
       uploadImage(base64Image);
+    } else {
+      setupdatingProfile("loaded");
     }
   };
 
   const convertImageToBase64 = async (uri) => {
-    const base64Image = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-
-    return base64Image;
+    try {
+      const base64Image = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return base64Image;
+    } catch {
+      setupdatingProfile("loaded");
+      console.log("There is error uploading image");
+    }
   };
 
   const uploadImage = async (base64Image) => {
@@ -160,9 +166,6 @@ function Profile({ navigation, props }) {
     // Make REST API call to upload image
     fetch(Api, {
       method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
       body: formData,
     })
       .then((response) => response.json())
@@ -170,7 +173,7 @@ function Profile({ navigation, props }) {
         console.log(response);
         if (response.success) {
           console.log("Success:", response.message);
-          setupdatingProfile("loaded");
+          setupdatingProfile("successfully uploaded");
         } else {
           console.log("Fail:", response);
           setupdatingProfile("loaded");
