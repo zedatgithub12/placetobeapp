@@ -34,7 +34,7 @@ const Filter = ({ navigation, route }) => {
   const [inputs, setInputs] = React.useState({
     submitBtn: false,
   });
-  const [search, setSearch] = React.useState();
+  const [search, setSearch] = React.useState([]);
   const [loading, setLoading] = useState(false);
   /************************************************** */
   // when user enter keys inside search box this function will be triggered
@@ -71,56 +71,45 @@ const Filter = ({ navigation, route }) => {
     // after the search button get pressed the state set to true
     const controller = new AbortController();
     const signal = controller.signal;
-    let isApiSubscribed = true;
-    var ApiUrl = Connection.url + Connection.search;
+
+    var ApiUrl = Connection.url + Connection.search + searchInput;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    var search = {
-      searchInput: searchInput,
-    };
+
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
 
     fetch(ApiUrl, {
-      method: "POST",
-      body: JSON.stringify(search),
+      method: "GET",
       headers: headers,
       signal: signal,
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
+        // handle success
 
-        if (isApiSubscribed) {
-          // handle success
-
-          if (message === "succeed") {
-            var searchResult = response[0].Filtered;
-            setSearch(searchResult);
-            setFilterData(true);
-            setLoading(true);
-            setSearching(false);
-          } else if (message === "no event") {
-            setFilterData(false);
-            setLoading(true);
-            setSearching(false);
-          } else {
-            setLoading(false);
-            setSearching(false);
-          }
+        if (response.success) {
+          setSearch(response.data);
+          setFilterData(true);
+          setLoading(true);
+          setSearching(false);
+        } else {
+          setFilterData(false);
+          setLoading(true);
+          setSearching(false);
         }
       })
       .catch((err) => {
-        setLoading(false);
+        setLoading(true);
+        setSearching(false);
       });
     return () => {
       // cancel the subscription
-      isApiSubscribed = false;
+
       controller.abort();
     };
   };
-
   /********************************************************** */
   //filter event by category
   /********************************************************** */
@@ -128,49 +117,38 @@ const Filter = ({ navigation, route }) => {
     setLoading(false);
     const controller = new AbortController();
     const signal = controller.signal;
-    let isApiSubscribed = true;
-    var ApiUrl = Connection.url + Connection.categoryFilter;
+
+    var ApiUrl = Connection.url + Connection.categoryFilter + catname;
     //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    var category = {
-      category: catname,
-    };
+
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
 
     fetch(ApiUrl, {
-      method: "POST",
-      body: JSON.stringify(category),
+      method: "GET",
       headers: headers,
       signal: signal,
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
-
-        if (isApiSubscribed) {
-          // handle success
-
-          if (message === "succeed") {
-            var searchResult = response[0].Filtered;
-            setSearch(searchResult);
-            setFilterData(true);
-            setLoading(true);
-          } else if (message === "no event") {
-            setFilterData(false);
-            setLoading(true);
-          } else {
-            setLoading(false);
-          }
+        // handle success
+        if (response.success) {
+          setSearch(response.data);
+          setFilterData(true);
+          setLoading(true);
+        } else {
+          setFilterData(false);
+          setLoading(true);
         }
       })
       .catch((err) => {
-        setLoading(false);
+        setLoading(true);
       });
     return () => {
       // cancel the subscription
-      isApiSubscribed = false;
+
       controller.abort();
     };
   };
@@ -283,7 +261,7 @@ const Filter = ({ navigation, route }) => {
   //rendered event list
   const renderedItem = ({ item }) => (
     <Events
-      Event_Id={item.event_id}
+      Event_Id={item.id}
       org_id={item.userId}
       FeaturedImage={item.event_image}
       title={item.event_name}
@@ -292,7 +270,7 @@ const Filter = ({ navigation, route }) => {
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { id: item.event_id })}
+      onPress={() => navigation.navigate("EventDetail", { id: item.id })}
     />
   );
 
@@ -384,8 +362,8 @@ const Filter = ({ navigation, route }) => {
             // List of events in extracted from database in the form JSON data
             data={search}
             renderItem={renderedItem}
-            keyExtractor={(item) => item.event_id}
-            ListEmptyComponent={() => listEmptyComponent()}
+            keyExtractor={(item) => item.id}
+            ListEmptyComponent={listEmptyComponent()}
             style={styles.filteredEventList}
             initialNumToRender={2} // Reduce initial render amount
             maxToRenderPerBatch={1} // Reduce number in each render batch

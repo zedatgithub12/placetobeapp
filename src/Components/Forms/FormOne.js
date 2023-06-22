@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import Constants from "../../constants/Constants";
 import {
@@ -30,15 +31,15 @@ const FormOne = () => {
   const { formOne } = React.useContext(AuthContext);
   //we call context function inside eventProps function
   // we assign the value we collected with eventprops function to the context function  which is -> fromOne
-  const eventProps = (image, eventName, eventDesc, status) => {
-    formOne(image, eventName, eventDesc, status);
+  const eventProps = (image, eventName, eventDesc) => {
+    formOne(image, eventName, eventDesc);
   };
   //state for image picker
   const [hasGalleryPersmission, setHasGalleryPermission] = useState(null);
   var placeholderImage = "placeholder.png"; // adde event screen featuredImage placeholder
   const placeholder = Connection.url + Connection.assets + placeholderImage;
   const [image, setImage] = useState(placeholder); //state for image which is displayed when user select image
-  const [imageName, setImageName] = useState(); // state which save the image name which is sent to server and stored inside the database
+  const [eventPoster, setEventPoster] = useState(null); //state of event poster
 
   // event content state
   const [inputs, setInputs] = useState({
@@ -73,70 +74,23 @@ const FormOne = () => {
       aspect: [1, 1],
       quality: 1,
     });
-
     // ImagePicker saves the taken photo to disk and returns a local URI to it
 
     let localUri = result.uri; // local image uri
-    let filename = localUri.split("/").pop(); // the filename is stored in filename variable
-
+    // let filename = localUri.split("/").pop(); // the filename is stored in filename variable
     //if the image selection process doesn't cancelled the statement inside the if condition is executed
     if (!result.cancelled) {
       setImage(localUri);
-      setImageName(filename);
       setInputs({
         ...inputs,
-        imageLoader: "loading",
-        imageStatus: false,
+        imageLoader: "loaded",
       });
     }
-
-    // Infer the type of the image
-    let match = /\.(\w+)$/.exec(filename);
-    let kind = match ? `image/${match[1]}` : `image`;
-
-    // Upload the image using the fetch and FormData APIs
-    const formData = new FormData();
-    // Assume "photo" is the name of the form field the server expects
-    // all image properties needed by server is going to be appended in formdata object
-    formData.append("photo", { uri: localUri, name: filename, type: kind });
-    //the url which the image will be sent to
-    var ApiUrl = Connection.url + Connection.upload;
-
-    return await fetch(ApiUrl, {
-      method: "POST", //request method
-      body: formData, // data to be sent to server
-      headers: {
-        "content-type": "multipart/form-data", // header type must be 'multipart/form-data' inorder to send image to server
-      },
-    })
-      .then((response) => response.json()) //check response type of the API
-      .then((response) => {
-        var message = response[0].message;
-        if (message === "successfully uploaded!") {
-          setInputs({
-            ...inputs,
-            imageBoarder: Constants.Success,
-            imageLoader: "loaded",
-            imageStatus: true,
-          });
-        } else if (
-          message === "Sorry, there was an error uploading your file."
-        ) {
-          setInputs({
-            ...inputs,
-            imageBoarder: Constants.Danger,
-            imageLoader: "Error Uploading",
-            imageStatus: false,
-          });
-        } else {
-          setInputs({
-            ...inputs,
-            imageBoarder: Constants.Danger,
-            imageLoader: "Loading",
-            imageStatus: false,
-          });
-        }
-      });
+    handlePosterEvent(result);
+  };
+  // we handle the event poster change from here
+  const handlePosterEvent = (file) => {
+    setEventPoster(file);
   };
 
   //function for event title textField
@@ -212,12 +166,7 @@ const FormOne = () => {
       ...inputs,
       descHelperText: "",
     });
-    eventProps(
-      imageName,
-      inputs.eventName,
-      inputs.eventDesc,
-      inputs.imageStatus
-    );
+    eventProps(eventPoster, inputs.eventName, inputs.eventDesc);
   };
 
   if (hasGalleryPersmission === false) {
@@ -242,23 +191,24 @@ const FormOne = () => {
           onBlur={() => desHideHelperText()}
         />
       </TouchableOpacity>
-
-      {inputs.imageLoader === "loading" ? (
-        <View style={styles.activityIndicator}>
-          <ActivityIndicator size="small" color={Constants.primary} />
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      ) : inputs.imageLoader === "loaded" ? (
-        <View style={styles.activityIndicator}>
-          <MaterialCommunityIcons
-            name="check-circle"
-            size={20}
-            color={Constants.Success}
-          />
-          <Text style={styles.loadingText}>Loaded</Text>
-        </View>
-      ) : null}
-
+      <View style={styles.indicatorContainer}>
+        {inputs.imageLoader === "loading" ? (
+          <View style={styles.activityIndicator}>
+            <ActivityIndicator size="small" color={Constants.primary} />
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        ) : inputs.imageLoader === "loaded" ? (
+          <View style={styles.activityIndicator}>
+            <Text style={styles.loadingText}>Loaded</Text>
+            <MaterialCommunityIcons
+              name="check-circle"
+              size={14}
+              color={Constants.Success}
+              style={{ marginTop: 2, alignItems: "center" }}
+            />
+          </View>
+        ) : null}
+      </View>
       <View
         style={[
           styles.eventTitleContainer,
@@ -439,6 +389,10 @@ const styles = StyleSheet.create({
     right: 2,
     paddingRight: 4,
   },
+  indicatorContainer: {
+    width: Dimensions.get("screen").width / 1.6,
+    alignItems: "flex-start",
+  },
   activityIndicator: {
     flexDirection: "row",
     padding: 5,
@@ -446,6 +400,9 @@ const styles = StyleSheet.create({
   loadingText: {
     marginLeft: 6,
     color: Constants.Inverse,
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Boldtwo,
+    marginRight: 3,
   },
 });
 

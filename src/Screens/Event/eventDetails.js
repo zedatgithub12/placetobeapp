@@ -60,7 +60,10 @@ const EventDetails = ({ route, navigation }) => {
   const [coords, setCoords] = useState(true);
 
   const checkCoords = (latlng) => {
-    if (latlng.address_latitude == 0 && latlng.address_longitude == 0) {
+    var latitude = latlng.address_latitude;
+    var longitude = latlng.address_latitude;
+
+    if (latitude == null && longitude == null) {
       setCoords(false);
     }
   };
@@ -71,33 +74,30 @@ const EventDetails = ({ route, navigation }) => {
   /****************************************** */
 
   const FeatchEvent = () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     if (externalLink) {
       setLoading(true);
-      var ApiUrl = Connection.url + Connection.Event;
-      //organizer id is the only data to be sent to server in order to retrive organizer data
-      var Data = {
-        eventId: externalLink,
-      };
+      var ApiUrl = Connection.url + Connection.Event + externalLink;
+
       // header type for text data to be send to server
       var headers = {
         Accept: "application/json",
         "Content-Type": "application/json",
       };
       fetch(ApiUrl, {
-        method: "POST",
+        method: "GET",
         headers: headers,
-        body: JSON.stringify(Data),
+        signal: signal,
       })
         .then((response) => response.json())
         .then((response) => {
-          let message = response[0].message;
-          let event = response[0].event;
-          let startTime = response[0].StartTime;
-          let EndTime = response[0].EndTime;
-          var start = TimeFun(startTime);
-          var end = TimeFun(EndTime);
-
-          if (message === "succeed") {
+          if (response.success) {
+            let event = response.data;
+            let startTime = response.StartTime;
+            let EndTime = response.EndTime;
+            var start = TimeFun(startTime);
+            var end = TimeFun(EndTime);
             setItem(event);
             setTime({
               ...timing,
@@ -107,63 +107,58 @@ const EventDetails = ({ route, navigation }) => {
             setLoading(false);
             checkCoords(event);
           } else {
-            //setLoading(true);
-            console.log("There is miss understanding with backend iternal");
+            setLoading(false);
           }
         })
         .catch((error) => {
-          //setLoading(true);
+          setLoading(false);
           console.log(
             "Error: there is miss understanding with backend" + error
           );
         });
     } else {
       setLoading(true);
-      var ApiUrl = Connection.url + Connection.Event;
+      var ApiUrl = Connection.url + Connection.Event + id;
       //organizer id is the only data to be sent to server in order to retrive organizer data
-      var Data = {
-        eventId: id,
-      };
+
       // header type for text data to be send to server
       var headers = {
         Accept: "application/json",
         "Content-Type": "application/json",
       };
       fetch(ApiUrl, {
-        method: "POST",
+        method: "GET",
         headers: headers,
-        body: JSON.stringify(Data),
+        signal: signal,
       })
         .then((response) => response.json())
         .then((response) => {
-          let message = response[0].message;
-          let event = response[0].event;
-          let startTime = response[0].StartTime;
-          let EndTime = response[0].EndTime;
-          var start = TimeFun(startTime);
-          var end = TimeFun(EndTime);
-
-          if (message === "succeed") {
+          if (response.success) {
+            let event = response.data;
+            let startTime = response.StartTime;
+            let EndTime = response.EndTime;
+            var start = TimeFun(startTime);
+            var end = TimeFun(EndTime);
             setItem(event);
-
             setTime({
               ...timing,
               StartTime: start,
               EndTime: end,
             });
-
             setLoading(false);
             checkCoords(event);
           } else {
-            //setLoading(true);
-            console.log("There is miss understanding with backend");
+            setLoading(false);
           }
         })
         .catch((error) => {
-          //setLoading(true);
-          console.log("Error: there is miss understanding with backend");
+          setLoading(false);
         });
     }
+
+    return () => {
+      controller.abort();
+    };
   };
   // featuredImage asset location on the server
   var featuredImageUri = Connection.url + Connection.assets;
@@ -171,7 +166,6 @@ const EventDetails = ({ route, navigation }) => {
   /********************* */
   // event bookmarking related code is writen below
   /********************* */
-
   const showToast = (message) => {
     ToastAndroid.show(message, ToastAndroid.SHORT); //message to be toasted after user clicked the bookmark button
   };
@@ -351,14 +345,14 @@ const EventDetails = ({ route, navigation }) => {
     const controller = new AbortController();
     const signal = controller.signal;
 
-    let featchOrganizer = true;
-    var followerId = await AsyncStorage.getItem("userId");
+    var uid = await AsyncStorage.getItem("userId");
+    var eventid = id ? id : externalLink;
     var ApiUrl = Connection.url + Connection.organizer;
     //organizer id is the only data to be sent to server in order to retrive organizer data
 
     var Data = {
-      eventId: id ? id : externalLink,
-      followerId: followerId,
+      eventid: eventid,
+      uid: uid,
     };
     // header type for text data to be send to server
     var headers = {
@@ -373,23 +367,19 @@ const EventDetails = ({ route, navigation }) => {
     })
       .then((response) => response.json())
       .then((response) => {
-        let message = response[0].message;
-        let follow = response[0].follow;
-        let profile = response[0].profile;
+        if (response.success) {
+          let profile = response.profile;
+          setEventOrg({
+            ...eventOrg,
+            featuredImage: profile.profile,
+            organizerName: profile.username,
+            category: profile.category,
+          });
+          setOrganizerInfo(profile);
+          setFetching(true);
 
-        if (featchOrganizer) {
-          if (message === "succeed") {
-            setEventOrg({
-              ...eventOrg,
-              featuredImage: profile.profile,
-              organizerName: profile.username,
-              category: profile.category,
-            });
-            setOrganizerInfo(profile);
-            setFetching(true);
-          } else {
-            // code goes here if you have something to return on negetive return
-          }
+          //check user follow state
+          let follow = response.follow;
           if (follow === "Following") {
             setFollow({
               ...follow,
@@ -408,10 +398,12 @@ const EventDetails = ({ route, navigation }) => {
             setFollowStatus(follow);
           }
         }
+      })
+      .catch((error) => {
+        console.log(error);
       });
     return () => {
       // cancel the subscription
-      featchOrganizer = false;
       controller.abort();
     };
   };
@@ -431,8 +423,6 @@ const EventDetails = ({ route, navigation }) => {
 
     const controller = new AbortController();
     const signal = controller.signal;
-
-    let checkFollowing = true;
     var organizerId = item.userId;
     var followerId = await AsyncStorage.getItem("userId");
     var APIUrl = Connection.url + Connection.follow;
@@ -441,8 +431,8 @@ const EventDetails = ({ route, navigation }) => {
       "Content-Type": "application/json",
     };
     var Data = {
-      organizerId: organizerId,
-      followerId: followerId,
+      oid: organizerId,
+      fid: followerId,
     };
     fetch(APIUrl, {
       method: "POST",
@@ -452,34 +442,38 @@ const EventDetails = ({ route, navigation }) => {
     })
       .then((response) => response.json())
       .then((response) => {
-        let responseMessage = response[0].message;
         // effect subscription indicator
-        if (checkFollowing) {
-          if (responseMessage === "Following") {
-            setFollow({
-              ...follow,
-              subscription: responseMessage,
-              btnDisabled: true,
-              ButtonColor: Constants.transparentPrimary,
-            });
-            setFollowProgress(false);
-            setFollowStatus(responseMessage);
-          } else {
-            setFollow({
-              ...follow,
-              subscription: responseMessage,
-              btnDisabled: false,
-              ButtonColor: Constants.primary,
-            });
-            setFollowStatus(responseMessage);
-            setFollowProgress(false);
-          }
+
+        if (response.success) {
+          setFollow({
+            ...follow,
+            subscription: response.message,
+            btnDisabled: true,
+            ButtonColor:
+              response.message === "Following"
+                ? Constants.transparentPrimary
+                : Constants.primary,
+          });
+          setFollowProgress(false);
+          setFollowStatus(response.message);
+        } else {
+          setFollow({
+            ...follow,
+            subscription: response.message,
+            btnDisabled: false,
+            ButtonColor: Constants.primary,
+          });
+          setFollowStatus(response.message);
+          setFollowProgress(false);
         }
+      })
+      .catch((error) => {
+        //  do something here
       });
 
     return () => {
       // cancel the subscription
-      checkFollowing = false;
+
       controller.abort();
     };
   };
@@ -495,37 +489,29 @@ const EventDetails = ({ route, navigation }) => {
       const controller = new AbortController();
       const signal = controller.signal;
 
-      var ApiUrl = Connection.url + Connection.eventTicket;
+      var ApiUrl = Connection.url + Connection.detailTicket + externalLink;
       var headers = {
         accept: "application/json",
         "Content-Type": "application/json",
       };
-      var Data = {
-        eventId: externalLink,
-      };
 
       fetch(ApiUrl, {
-        method: "POST",
+        method: "GET",
         headers: headers,
-        body: JSON.stringify(Data),
         signal: signal,
       })
         .then((response) => response.json())
         .then((response) => {
-          var message = response[0].message;
-          var eventTickets = response[0].tickets;
-          if (message === "succeed") {
+          if (response.success) {
+            var eventTickets = response.data;
             setTickets(eventTickets);
             setExist(true);
-          } else if (message === "no tickets") {
-            setTickets(eventTickets);
-            setExist(false);
           } else {
             setTickets();
             setExist(false);
           }
         })
-        .catch((error) => {
+        .catch(() => {
           setExist(false);
         });
 
@@ -535,38 +521,29 @@ const EventDetails = ({ route, navigation }) => {
     } else {
       const controller = new AbortController();
       const signal = controller.signal;
-
-      var ApiUrl = Connection.url + Connection.eventTicket;
+      var ApiUrl = Connection.url + Connection.detailTicket + id;
       var headers = {
         accept: "application/json",
         "Content-Type": "application/json",
       };
-      var Data = {
-        eventId: id,
-      };
 
       fetch(ApiUrl, {
-        method: "POST",
+        method: "GET",
         headers: headers,
-        body: JSON.stringify(Data),
         signal: signal,
       })
         .then((response) => response.json())
         .then((response) => {
-          var message = response[0].message;
-          var eventTickets = response[0].tickets;
-          if (message === "succeed") {
+          if (response.success) {
+            var eventTickets = response.data;
             setTickets(eventTickets);
             setExist(true);
-          } else if (message === "no tickets") {
-            setTickets(eventTickets);
-            setExist(false);
           } else {
             setTickets();
             setExist(false);
           }
         })
-        .catch((error) => {
+        .catch(() => {
           setExist(false);
         });
 
@@ -626,7 +603,7 @@ const EventDetails = ({ route, navigation }) => {
             />
           </View>
 
-          {item.cancelled === "1" ? (
+          {item.cancelled == "1" ? (
             <Animatable.View
               animation="slideInDown"
               style={styles.eventGotCancelled}
@@ -838,7 +815,7 @@ const EventDetails = ({ route, navigation }) => {
           )}
         </ScrollView>
       )}
-      {exist && item.cancelled === "0" ? (
+      {loading ? null : exist && item.cancelled == null ? (
         <Animatable.View
           animation="fadeInUpBig"
           style={[styles.ticketBtnContainer]}

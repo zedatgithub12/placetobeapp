@@ -16,9 +16,7 @@ const saveSlice = createSlice({
       // }
     },
     remove: (state, action) => {
-      state.items = state.items.filter(
-        (item) => item.event_id !== action.payload
-      );
+      state.items = state.items.filter((item) => item.id !== action.payload);
     },
   },
 });

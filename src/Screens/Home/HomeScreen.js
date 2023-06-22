@@ -28,9 +28,9 @@ import Slider from "../../Components/Slider";
 
 function Home({ navigation, ...props }) {
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
-  const [Tickets, setTickets] = useState();
+  const [Tickets, setTickets] = useState([]);
   const [ticketShimmer, setTicketShimmer] = useState(true);
-  const [events, setEvents] = useState();
+  const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
   const d = new Date();
   let Hour = d.getHours();
@@ -61,26 +61,21 @@ function Home({ navigation, ...props }) {
 
   const userProfile = async () => {
     var userId = await AsyncStorage.getItem("userId");
-    var ApiUrl = Connection.url + Connection.MetaData;
+    var ApiUrl = Connection.url + Connection.MetaData + userId;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-    var data = {
-      userId: userId,
-    };
+
     //save user info into database
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(data),
     })
       .then((response) => response.json())
       .then((response) => {
-        var resp = response[0];
-
-        if (resp.message === "succeed") {
-          var userInfo = response[0].user[0];
+        if (response.success) {
+          var userInfo = response.data;
           setUserphoto(userInfo.profile);
         } else {
           setUserphoto(userPhoto);
@@ -95,6 +90,7 @@ function Home({ navigation, ...props }) {
 
   const FeatchTickets = () => {
     var ApiUrl = Connection.url + Connection.AvailableTickets;
+
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -102,16 +98,13 @@ function Home({ navigation, ...props }) {
 
     // start Api request
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-
-        if (message === "succeed") {
-          var tickets = response[0].tickets;
-          setTickets(tickets);
+        if (response.success) {
+          setTickets(response.data);
           setTicketShimmer(false);
         } else {
           setTicketShimmer(false);
@@ -119,6 +112,7 @@ function Home({ navigation, ...props }) {
       })
       .catch((error) => {
         console.log("Error ticket featching" + error);
+        setTicketShimmer(false);
       });
   };
 
@@ -132,22 +126,20 @@ function Home({ navigation, ...props }) {
     };
 
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-        var FeaturedEvent = response[0].Events;
-        if (message === "succeed") {
-          setEvents(FeaturedEvent);
+        if (response.success) {
+          setEvents(response.data);
           setEventShimmer(false);
         } else {
-          setEventShimmer(true);
+          setEventShimmer(false);
         }
       })
       .catch((error) => {
-        setEventShimmer(true);
+        setEventShimmer(false);
       });
   };
   /********************************************************** */
@@ -267,11 +259,6 @@ function Home({ navigation, ...props }) {
     }
   };
 
-  const UserInfo = {
-    id: 88,
-    type: "events",
-    name: "place to be",
-  };
   //image to be used in notification
   const featuredImageUri =
     Connection.url + Connection.assets + "Placeholder.png";
@@ -393,6 +380,16 @@ function Home({ navigation, ...props }) {
               <TicketShimmer />
               <TicketShimmer />
             </View>
+          ) : Tickets.length == 0 ? (
+            <View
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text>There is no Tickets</Text>
+            </View>
           ) : (
             Tickets.map((item) => (
               <TicketCard
@@ -430,15 +427,21 @@ function Home({ navigation, ...props }) {
               <Listing />
               <Listing />
             </View>
-          ) : events.length === 0 ? (
-            <View>
-              <Text>No event</Text>
+          ) : events.length == 0 ? (
+            <View
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text>There is no Featured</Text>
             </View>
           ) : (
             events.map((item) => (
               <Events
-                key={item.event_id}
-                Event_Id={item.event_id}
+                key={item.id}
+                Event_Id={item.id}
                 org_id={item.userId}
                 FeaturedImage={item.event_image}
                 title={item.event_name}
@@ -448,7 +451,7 @@ function Home({ navigation, ...props }) {
                 category={CategoryColor(item.category)}
                 Price={EntranceFee(item.event_entrance_fee)}
                 onPress={() =>
-                  navigation.navigate("EventDetail", { id: item.event_id })
+                  navigation.navigate("EventDetail", { id: item.id })
                 }
               />
             ))
@@ -584,8 +587,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   ticketTitle: {
-    fontWeight: Constants.Bold,
-    fontSize: Constants.headingone,
+    fontFamily: Constants.fontFam,
+    fontWeight: Constants.Boldtwo,
+    fontSize: Constants.headingtwo,
   },
 });
 

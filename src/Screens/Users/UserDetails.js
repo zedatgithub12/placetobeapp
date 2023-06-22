@@ -11,6 +11,7 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { Caption, HelperText, Title } from "react-native-paper";
 import Constants from "../../constants/Constants";
@@ -132,10 +133,12 @@ const UserDetails = ({ route, navigation }) => {
   };
   const renderCategory = ({ item }) => (
     <TouchableOpacity
-      style={[styles.CategoryList, { backgroundColor: item.background }]}
+      style={[styles.CategoryList, {}]}
       onPress={() => OnSelectCategory(item.name, item.background)}
     >
-      <Text style={styles.catName}>{item.name}</Text>
+      <Text style={[styles.catName, { color: item.background }]}>
+        {item.name}
+      </Text>
     </TouchableOpacity>
   );
   /*************************************************** */
@@ -155,7 +158,7 @@ const UserDetails = ({ route, navigation }) => {
   const SaveUserInfo = async () => {
     setUpdating(true);
     var userId = await AsyncStorage.getItem("userId");
-    var ApiUrl = Connection.url + Connection.updateUserInfo;
+    var ApiUrl = Connection.url + Connection.updateUserInfo + userId;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -173,23 +176,23 @@ const UserDetails = ({ route, navigation }) => {
     };
     //save user info into database
     fetch(ApiUrl, {
-      method: "POST",
+      method: "PUT",
       headers: headers,
       body: JSON.stringify(data),
     })
       .then((response) => response.json())
       .then((response) => {
-        var resp = response[0];
-
-        if (resp.message === "successfully updated") {
-          var serverResponse = resp.message;
-
+        if (response.success) {
+          var serverResponse = response.message;
           setShowMesssage(true);
           setMessage(serverResponse);
           setUpdating(false);
         } else {
           setUpdating(false);
         }
+      })
+      .catch((error) => {
+        console.log(error);
       });
   };
 
@@ -334,12 +337,16 @@ const UserDetails = ({ route, navigation }) => {
       ) : null}
 
       <View style={styles.subContainerOne}>
+        <Text style={styles.label}>First name</Text>
         <TextInput
           placeholder="First Name"
           style={styles.inpuFields}
           value={MetaInfo.firstName}
           onChangeText={(val) => editFirstName(val)}
         />
+      </View>
+      <View style={styles.subContainerOne}>
+        <Text style={styles.label}>Middle name</Text>
         <TextInput
           placeholder="Middle Name"
           style={[styles.inpuFields]}
@@ -349,6 +356,7 @@ const UserDetails = ({ route, navigation }) => {
       </View>
 
       <View style={styles.subContainerTwo}>
+        <Text style={styles.label}>Last name</Text>
         <TextInput
           placeholder="Last Name"
           style={[styles.inpuFields]}
@@ -357,29 +365,14 @@ const UserDetails = ({ route, navigation }) => {
         />
       </View>
 
-      <View
-        //divider
-        style={{
-          width: "94%",
-          height: 2,
-          backgroundColor: Constants.transparentPrimary,
-          marginTop: 10,
-        }}
-      />
       {
         //third mini container which contains user birthdate
       }
-      <View style={styles.subContainerThree}>
-        <View>
-          <HelperText>Your Birth Date</HelperText>
-        </View>
+
+      <View style={styles.subContainerDate}>
+        <Text style={styles.label}>Your Birth Date</Text>
+
         <View style={styles.birthDate}>
-          <Fontisto
-            name="date"
-            size={22}
-            color={Constants.primary}
-            style={styles.dateIcon}
-          />
           <TouchableOpacity
             onPress={() => showMode("date")}
             style={styles.selectDateBtn}
@@ -412,7 +405,7 @@ const UserDetails = ({ route, navigation }) => {
             value="Male"
             status={checked === "Male" ? "checked" : "unchecked"}
             onPress={() => setChecked("Male")}
-            color={Constants.primary}
+            color={Constants.Inverse}
           />
         </View>
 
@@ -422,7 +415,7 @@ const UserDetails = ({ route, navigation }) => {
             value="Female"
             status={checked === "Female" ? "checked" : "unchecked"}
             onPress={() => setChecked("Female")}
-            color={Constants.primary}
+            color={Constants.Inverse}
           />
         </View>
       </View>
@@ -431,7 +424,7 @@ const UserDetails = ({ route, navigation }) => {
         //update username
       }
       <View style={styles.usernameUpdate}>
-        <Caption>Organizer Name</Caption>
+        <Text style={styles.label}>Organizer name</Text>
         <TextInput
           placeholder="Ex: Afromina Events"
           style={styles.username}
@@ -439,7 +432,18 @@ const UserDetails = ({ route, navigation }) => {
           onChangeText={(val) => updateUsername(val)}
         />
       </View>
-
+      {
+        //user phone number
+      }
+      <View style={styles.userPhoneNumber}>
+        <Text style={styles.label}>Phone number</Text>
+        <TextInput
+          placeholder="09********"
+          style={styles.phone}
+          value={MetaInfo.Phone}
+          onChangeText={(val) => updatePhone(val)}
+        />
+      </View>
       {
         //select category section
       }
@@ -455,6 +459,7 @@ const UserDetails = ({ route, navigation }) => {
           style={styles.catModal}
         >
           <View style={styles.Categories}>
+            <Text style={styles.modalTitle}>Category list</Text>
             <Pressable
               style={styles.closeModal}
               onPress={() => setModalVisible(!modalVisible)}
@@ -466,7 +471,6 @@ const UserDetails = ({ route, navigation }) => {
                 style={styles.closeBtn}
               />
             </Pressable>
-            <Text style={styles.modalTitle}>Category list</Text>
 
             <FlatList
               data={Category}
@@ -478,41 +482,28 @@ const UserDetails = ({ route, navigation }) => {
           </View>
         </Modal>
 
-        <Caption
-          style={{
-            marginLeft: 15,
-            marginTop: 10,
-            marginBottom: -5,
-            padding: 0,
-          }}
+        <Text
+          style={[
+            styles.label,
+            { marginLeft: 10, marginTop: 10, marginBottom: -8, padding: 0 },
+          ]}
         >
-          Select Your Prefered Category
-        </Caption>
+          Select category
+        </Text>
         <Pressable
           //Button which open the category modal
-          style={[styles.catSelector, { backgroundColor: catback }]}
+          style={[styles.catSelector, { color: catback, borderColor: catback }]}
           onPress={() => setModalVisible(true)}
         >
-          <Text style={[styles.selectedCategory]}>{category}</Text>
+          <Text style={[styles.selectedCategory, { color: catback }]}>
+            {category}
+          </Text>
           <Ionicons
             name="list-outline"
             size={22}
             color={Constants.background}
           />
         </Pressable>
-      </View>
-
-      {
-        //user phone number
-      }
-      <View style={styles.userPhoneNumber}>
-        <Caption>Phone Number</Caption>
-        <TextInput
-          placeholder="09********"
-          style={styles.phone}
-          value={MetaInfo.Phone}
-          onChangeText={(val) => updatePhone(val)}
-        />
       </View>
 
       <Pressable onPress={() => SaveUserInfo()} style={styles.saveBtn}>
@@ -522,7 +513,7 @@ const UserDetails = ({ route, navigation }) => {
           <Text style={styles.saveText}>Save</Text>
         )}
       </Pressable>
-      {googleId.length == 0 ? (
+      {googleId && (
         <View style={styles.updatePasswords}>
           <Text style={styles.changePasswordTitle}>Change Password</Text>
           <HelperText
@@ -560,7 +551,7 @@ const UserDetails = ({ route, navigation }) => {
             )}
           </Pressable>
         </View>
-      ) : null}
+      )}
     </ScrollView>
   );
 };
@@ -581,45 +572,44 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   subContainerOne: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "96%",
+    width: Dimensions.get("screen").width / 1.09,
     marginTop: 10,
     backgroundColor: Constants.Faded,
     borderRadius: Constants.tinybox,
     backgroundColor: Constants.background,
+  },
+  label: {
+    paddingVertical: 6,
+    marginTop: 3,
+    color: Constants.Inverse,
   },
   inpuFields: {
-    width: "46%",
-    backgroundColor: Constants.Faded,
-    margin: 8,
+    width: Dimensions.get("screen").width / 1.09,
     borderRadius: Constants.tinybox,
-    paddingLeft: 15,
-    padding: 5,
-    borderWidth: 0.4,
-    borderColor: Constants.purple,
+    padding: 8,
+    paddingHorizontal: 20,
+    fontSize: Constants.headingtwo,
+    borderWidth: 0.3,
+    borderColor: Constants.Inverse,
   },
   subContainerTwo: {
-    width: "96%",
     marginTop: 10,
     backgroundColor: Constants.background,
   },
-  subContainerThree: {
+  subContainerDate: {
     flexDirection: "column",
     alignSelf: "flex-start",
-    width: "45%",
     margin: 15,
     marginTop: 10,
-    paddingLeft: 5,
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.tinybox,
-    borderWidth: 0.4,
-    borderColor: Constants.purple,
   },
   birthDate: {
     flexDirection: "row",
-    margin: 10,
-    alignItems: "center",
+    marginBottom: 10,
+    borderRadius: Constants.tinybox,
+    padding: 10,
+    fontSize: Constants.headingtwo,
+    borderWidth: 0.3,
+    borderColor: Constants.Inverse,
   },
   dateIcon: {
     marginHorizontal: 15,
@@ -630,26 +620,26 @@ const styles = StyleSheet.create({
   },
   //styles for gender selector radio button
   subContainerFour: {
-    width: "96%",
+    width: Dimensions.get("screen").width / 1.09,
     flexDirection: "row",
     justifyContent: "space-around",
+    alignSelf: "center",
     alignItems: "center",
-    backgroundColor: Constants.Faded,
-    borderRadius: Constants.mediumbox,
-    padding: 10,
-    marginLeft: 10,
+    borderRadius: 8,
+    padding: 6,
+    backgroundColor: Constants.transparentPrimary,
   },
   genderTitle: {
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     color: Constants.Inverse,
   },
   genderLabel: {
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
-    color: Constants.Secondary,
+    color: Constants.Inverse,
   },
   fourOne: {
     // first view container of gender View container
@@ -675,16 +665,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "50%",
-    backgroundColor: Constants.Faded,
     padding: 10,
     margin: 10,
     borderRadius: Constants.tinybox,
+    borderWidth: 0.3,
   },
   selectedCategory: {
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
-    color: Constants.background,
+    textTransform: "capitalize",
     paddingLeft: 4,
   },
   catModal: {
@@ -714,6 +704,7 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Boldtwo,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingone,
+    color: Constants.Inverse,
   },
   catFlatlist: {
     marginTop: 60,
@@ -727,7 +718,7 @@ const styles = StyleSheet.create({
   },
   catName: {
     fontSize: Constants.headingtwo,
-    color: Constants.background,
+    paddingLeft: 4,
   },
   userPhoneNumber: {
     width: "91.5%",
@@ -735,13 +726,12 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 5,
   },
   phone: {
-    backgroundColor: Constants.Faded,
     borderRadius: Constants.tinybox,
     padding: 8,
     paddingHorizontal: 20,
     fontSize: Constants.headingtwo,
-    borderWidth: 0.4,
-    borderColor: Constants.purple,
+    borderWidth: 0.3,
+    borderColor: Constants.Inverse,
   },
 
   // username related styling
@@ -752,7 +742,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   username: {
-    backgroundColor: Constants.Faded,
     borderRadius: Constants.tinybox,
     padding: 8,
     paddingHorizontal: 20,
@@ -761,35 +750,35 @@ const styles = StyleSheet.create({
     borderColor: Constants.purple,
   },
   saveBtn: {
+    width: Dimensions.get("screen").width / 1.09,
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    alignSelf: "flex-end",
+    justifyContent: "center",
+    alignSelf: "center",
     marginVertical: 20,
-    padding: 8,
-    paddingHorizontal: 30,
+    padding: 10,
+    color: Constants.Inverse,
     backgroundColor: Constants.primary,
     borderRadius: Constants.tiny,
-    marginRight: 18,
-  },
-  updatepassword: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    alignSelf: "flex-end",
-    marginVertical: 20,
-    padding: 8,
-    paddingHorizontal: 30,
-    backgroundColor: Constants.primary,
-    borderRadius: Constants.tiny,
-    marginRight: 1,
   },
   saveText: {
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
-    color: Constants.background,
+    color: Constants.Inverse,
+    textAlign: "center",
   },
+  updatepassword: {
+    width: Dimensions.get("screen").width / 1.09,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginVertical: 20,
+    padding: 10,
+    color: Constants.Inverse,
+    backgroundColor: Constants.primary,
+    borderRadius: Constants.tiny,
+  },
+
   // change password section
   updatePasswords: {
     width: "94%",

@@ -23,6 +23,7 @@ import {
 } from "react-native-vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import { HelperText } from "react-native-paper";
 import * as Animatable from "react-native-animatable";
 
@@ -107,6 +108,7 @@ const UpdateEvent = ({ navigation, route }) => {
     errorMessage: "",
   });
 
+  const [file, setFile] = useState(null);
   const [image, setImage] = useState(featuredImageUri + item.event_image); //state for image which is displayed when user select image
   const [imageName, setImageName] = useState(item.event_image); // state which save the image name which is sent to server and stored inside the database
   const [date, setDate] = useState(new Date());
@@ -131,16 +133,17 @@ const UpdateEvent = ({ navigation, route }) => {
   /********************************************* */
   // Image Update section
   /******************************************** */
-  //we call the following function when user presses the image place holder in add event screen
+  // //we call the following function when user presses the image place holder in add event screen
   const selectFeaturedImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
 
+    console.log(result);
     // ImagePicker saves the taken photo to disk and returns a local URI to it
 
     let localUri = result.uri; // local image uri
@@ -149,49 +152,13 @@ const UpdateEvent = ({ navigation, route }) => {
     //if the image selection process doesn't cancelled the statement inside the if condition is executed
     if (!result.cancelled) {
       setImage(localUri);
-      setImageName(filename);
+
+      setFile(result);
       setInputs({
         ...inputs,
-        imageLoader: "loading",
+        imageLoader: "loaded",
       });
     }
-
-    // Infer the type of the image
-    let match = /\.(\w+)$/.exec(filename);
-    let kind = match ? `image/${match[1]}` : `image`;
-
-    // Upload the image using the fetch and FormData APIs
-    const formData = new FormData();
-    // Assume "photo" is the name of the form field the server expects
-    // all image properties needed by server is going to be appended in formdata object
-    formData.append("photo", { uri: localUri, name: filename, type: kind });
-    //the url which the image will be sent to
-    var ApiUrl = Connection.url + Connection.upload;
-
-    return await fetch(ApiUrl, {
-      method: "POST", //request method
-      body: formData, // data to be sent to server
-      headers: {
-        "content-type": "multipart/form-data", // header type must be 'multipart/form-data' inorder to send image to server
-      },
-    })
-      .then((response) => response.json()) //check response type of the API
-      .then((response) => {
-        let message = response[0].message;
-        if (message === "successfully uploaded!") {
-          setInputs({
-            ...inputs,
-            imageBoarder: Constants.Success,
-            imageLoader: "loaded",
-          });
-        } else {
-          setInputs({
-            ...inputs,
-            imageBoarder: Constants.Danger,
-            imageLoader: "loading",
-          });
-        }
-      });
   };
 
   /******************************************* */
@@ -504,42 +471,38 @@ const UpdateEvent = ({ navigation, route }) => {
 
     let userId = await AsyncStorage.getItem("userId");
 
-    var ApiUrl = Connection.url + Connection.updateEvent;
-    var headers = {
-      accept: "application/json",
-      "Content-Type": "application/json",
-    };
+    let localUri = file.uri; // local image uri
+    let filename = localUri.split("/").pop(); // the filename is stored in filename variable
 
-    var Data = {
-      eventId: item.event_id,
-      userId: userId,
-      poster: imageName,
-      title: initialValue.title,
-      organizer: initialValue.organizer,
-      SDate: initialValue.startDate,
-      STime: initialValue.startTime,
-      EDate: initialValue.endDate,
-      ETime: initialValue.endTime,
-      Address: initialValue.eventAddress,
-      fee: initialValue.price,
-      phone: initialValue.phone,
-      latitude: initialValue.latitude,
-      longitude: initialValue.longitude,
-      link: initialValue.url,
-      description: initialValue.description,
-    };
+    // data to be stored in the database
+    const data = new FormData();
+    data.append("userId", userId);
+    data.append("poster", { uri: localUri, name: filename, type: file.type });
+    data.append("title", initialValue.title);
+    data.append("organizer", initialValue.organizer);
+    data.append("SDate", initialValue.startDate);
+    data.append("STime", initialValue.startTime);
+    data.append("EDate", initialValue.endDate);
+    data.append("ETime", initialValue.endTime);
+    data.append("Address", initialValue.eventAddress);
+    data.append("fee", initialValue.price);
+    data.append("phone", initialValue.phone);
+    data.append("latitude", initialValue.latitude);
+    data.append("longitude", initialValue.longitude);
+    data.append("link", initialValue.url);
+    data.append("description", initialValue.description);
 
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-      signal: signal,
+    var Api = Connection.url + Connection.updateEvent + item.id;
+    fetch(Api, {
+      method: "put",
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      body: data,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-
-        if (message === "succeed") {
+        if (response.success) {
           setInitialValue({
             ...initialValue,
             Updating: false,
@@ -553,13 +516,10 @@ const UpdateEvent = ({ navigation, route }) => {
         }
       })
       .catch((error) => {
-        // setResponse(message);
+        console.log(error);
         setInitialValue({
           ...initialValue,
           Updating: false,
-        });
-        setInitialValue({
-          ...initialValue,
           errorContainer: true,
           errorMessage: "Error updating event!",
         });
@@ -573,16 +533,15 @@ const UpdateEvent = ({ navigation, route }) => {
   /*************************************************** */
   //Event got cancelled
   /*************************************************** */
-const checkCancellation = ()=>{
-  var status;
-   if(item.cancelled == 1){
-    status ="Cancelled";
-   }
-   else {
-    status ="Cancel Event";
-   }
-   return status;
-}
+  const checkCancellation = () => {
+    var status;
+    if (item.cancelled == 1) {
+      status = "Cancelled";
+    } else {
+      status = "Cancel Event";
+    }
+    return status;
+  };
 
   const [cancelButton, setCancelButton] = useState({
     cancelling: false,
@@ -591,6 +550,7 @@ const checkCancellation = ()=>{
     btnDisabled: false,
   });
 
+  //cancel event
   const Cancelled = async () => {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -602,8 +562,7 @@ const checkCancellation = ()=>{
     });
 
     let userId = await AsyncStorage.getItem("userId");
-
-    var ApiUrl = Connection.url + Connection.Cancelled;
+    var ApiUrl = Connection.url + Connection.Cancelled + item.id;
     var headers = {
       accept: "application/json",
       "Content-Type": "application/json",
@@ -611,20 +570,17 @@ const checkCancellation = ()=>{
 
     var Data = {
       userId: userId,
-      eventId: item.event_id,
     };
 
     fetch(ApiUrl, {
-      method: "POST",
+      method: "PUT",
       headers: headers,
       body: JSON.stringify(Data),
       signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-
-        if (message === "succeed") {
+        if (response.success) {
           setCancelButton({
             ...cancelButton,
             cancelling: false,
@@ -665,7 +621,6 @@ const checkCancellation = ()=>{
           errorContainer: true,
           errorMessage: "Error cancelling event!",
         });
-        console.log(error);
       });
 
     return () => {
@@ -713,7 +668,7 @@ const checkCancellation = ()=>{
           {inputs.imageLoader === "loading" ? (
             <View style={styles.activityIndicator}>
               <ActivityIndicator size="small" color={Constants.primary} />
-              <Text style={styles.loadingText}>Updating...</Text>
+              <Text style={styles.loadingText}>Loading...</Text>
             </View>
           ) : inputs.imageLoader === "loaded" ? (
             <View style={styles.activityIndicator}>
@@ -722,7 +677,7 @@ const checkCancellation = ()=>{
                 size={20}
                 color={Constants.Success}
               />
-              <Text style={styles.loadingText}>Updated</Text>
+              <Text style={styles.loadingText}>Loaded</Text>
             </View>
           ) : null}
         </View>
@@ -742,24 +697,20 @@ const checkCancellation = ()=>{
               {cancelButton.cancelling ? (
                 <ActivityIndicator size="small" color={Constants.red} />
               ) : (
-                <View style={{flexDirection:"row", alignItems:"center"}}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
                   {cancelButton.cancelText === "Cancelled" ? (
-                  <MaterialCommunityIcons
-                    name="cancel"
-                    size={18}
-                    color={Constants.Danger}
-                    style={{marginRight:4,}}
-                  />
-                 
-                ) : null}
-                <Text style={[styles.cancelText]}>
-                  {cancelButton.cancelText}
-                  
-                </Text>
-                
-                 </View>
+                    <MaterialCommunityIcons
+                      name="cancel"
+                      size={18}
+                      color={Constants.Danger}
+                      style={{ marginRight: 4 }}
+                    />
+                  ) : null}
+                  <Text style={[styles.cancelText]}>
+                    {cancelButton.cancelText}
+                  </Text>
+                </View>
               )}
-              
             </View>
           </TouchableNativeFeedback>
         </View>
@@ -1015,7 +966,7 @@ const checkCancellation = ()=>{
       <TouchableNativeFeedback onPress={() => EventUpdate()}>
         <View style={styles.updateButton}>
           {initialValue.Updating ? (
-            <ActivityIndicator size="small" color={Constants.light} />
+            <ActivityIndicator size="small" color={Constants.Inverse} />
           ) : (
             <Text style={styles.confirmUpdate}>Update</Text>
           )}

@@ -23,6 +23,7 @@ import {
 import { AuthContext } from "../../Components/context";
 import { Avatar, Badge, Caption, Paragraph, Title } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import InteractionInfo from "../../Components/Profile/InteractionInfo";
 import Connection from "../../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -32,7 +33,7 @@ import * as Animatable from "react-native-animatable";
 import * as Linking from "expo-linking";
 
 function Profile({ navigation, props }) {
-  const [load, setLoad] = React.useState(false);
+  const [load, setLoad] = React.useState(true);
   const { Signout } = React.useContext(AuthContext);
 
   //bookmarked item count state
@@ -127,59 +128,66 @@ function Profile({ navigation, props }) {
   const [updatingProfile, setupdatingProfile] = useState("loaded");
 
   const selectFeaturedImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
-    let localUri = result.uri; // local image uri
-    let filename = localUri.split("/").pop(); // the filename is stored in filename variable
+
     if (!result.cancelled) {
       setImage(result.uri);
-      setupdatingProfile("loading");
+      const base64Image = await convertImageToBase64(result.uri);
+      uploadImage(base64Image);
+    } else {
+      setupdatingProfile("loaded");
     }
+  };
 
-    // Infer the type of the image
-    let match = /\.(\w+)$/.exec(filename);
-    let kind = match ? `image/${match[1]}` : `image`;
+  const convertImageToBase64 = async (uri) => {
+    try {
+      const base64Image = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return base64Image;
+    } catch {
+      setupdatingProfile("loaded");
+      console.log("There is error uploading image");
+    }
+  };
 
-    // Upload the image using the fetch and FormData APIs
-    const formData = new FormData();
-    // Assume "photo" is the name of the form field the server expects
-    // all image properties needed by server is going to be appended in formdata object
+  const uploadImage = async (base64Image) => {
+    var userId = await AsyncStorage.getItem("userId");
+    const Api = Connection.url + Connection.changeprofile + userId;
 
-    formData.append("profile", { uri: localUri, name: filename, type: kind });
-    //the url which the image will be sent to
-    var ApiUrl = Connection.url + Connection.profile;
-
-    return await fetch(ApiUrl, {
-      method: "POST", //request method
-      body: formData, // data to be sent to server
-      headers: {
-        "content-type": "multipart/form-data", // header type must be 'multipart/form-data' inorder to send image to server
-      },
+    let formData = new FormData();
+    formData.append("profile", base64Image);
+    setupdatingProfile("loading");
+    // Make REST API call to upload image
+    fetch(Api, {
+      method: "POST",
+      body: formData,
     })
-      .then((response) => response.json()) //check response type of the API
+      .then((response) => response.json())
       .then((response) => {
-        let message = response[0].message;
-
-        if (message === "successfully uploaded") {
-          updateProfile(filename);
-          setupdatingProfile(message);
+        console.log(response);
+        if (response.success) {
+          console.log("Success:", response.message);
+          setupdatingProfile("successfully uploaded");
         } else {
-          setProfileUpdate("couldn't update profile");
-          setupdatingProfile(message);
+          console.log("Fail:", response);
+          setupdatingProfile("loaded");
         }
       })
       .catch((error) => {
-        setupdatingProfile("coundn't update");
+        console.error("Error:", error);
+        console.error("Error:", error.stack);
+        setupdatingProfile("loaded");
       });
   };
 
   // variables and functions for invite friends button inside profile screen
-  var msg = "you are invited to install Place to be mobile app  ";
+  var msg = "You are invited to install Place to be mobile app  ";
   var links = Constants.appLink;
   // share the app to friends
   const onShare = async () => {
@@ -209,35 +217,31 @@ function Profile({ navigation, props }) {
   //featch user information from databse
   //fetch event posted by user, followers and following
   // Event count state to b delivered to detail screen
-  const [count, setCount] = useState();
+  const [count, setCount] = useState(0);
   const featchUserInformation = async () => {
     const Controller = new AbortController();
     const Signal = Controller.signal;
 
     var fetchIt = true;
     var id = await AsyncStorage.getItem("userId");
-    var Data = {
-      id: id,
-    };
-    var ApiUrl = Connection.url + Connection.userInfo;
+
+    var ApiUrl = Connection.url + Connection.userInfo + id;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
     fetch(ApiUrl, {
-      method: "POST",
-      body: JSON.stringify(Data),
+      method: "GET",
       headers: headers,
       signal: Signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var serverResponse = response[0].message;
         if (fetchIt) {
-          if (serverResponse === "succeed") {
-            var eventPostedCount = response[0].events;
-            var followerCount = response[0].followers;
-            var followingCount = response[0].following;
+          if (response.success) {
+            var eventPostedCount = response.events;
+            var followerCount = response.followers;
+            var followingCount = response.following;
 
             setUserInfo({
               ...userInfo,
@@ -246,7 +250,7 @@ function Profile({ navigation, props }) {
               following: followingCount,
             });
             setCount(eventPostedCount);
-            setLoad(true);
+            setLoad(false);
           } else {
             setLoad(false);
           }
@@ -269,31 +273,26 @@ function Profile({ navigation, props }) {
     const signal = controller.signal;
 
     var userId = await AsyncStorage.getItem("userId");
-    var ApiUrl = Connection.url + Connection.MetaData;
+    var ApiUrl = Connection.url + Connection.MetaData + userId;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-    var data = {
-      userId: userId,
-    };
+
     //save user info into database
     fetch(ApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(data),
       signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var resp = response[0];
-
-        if (resp.message === "succeed") {
-          var userInfo = response[0].user[0];
+        if (response.success) {
+          var userInfo = response.data;
           setDetailInfo(userInfo);
           setUserData({
             ...userData,
-            userId: userInfo.userId,
+            userId: userInfo.id,
             userProfile: userInfo.profile,
             userEmail: userInfo.email,
             userName: userInfo.username,
@@ -302,9 +301,10 @@ function Profile({ navigation, props }) {
             lastName: userInfo.last_name,
           });
           setImage(Connection.url + Connection.assets + userInfo.profile);
-        } else {
-          // console.log(resp.message);
         }
+      })
+      .catch((error) => {
+        console.log(error);
       });
 
     return () => {
@@ -385,6 +385,103 @@ function Profile({ navigation, props }) {
   return (
     <ScrollView style={styles.container}>
       {load ? (
+        <SkeletonPlaceholder>
+          <View style={{ height: 270 }}>
+            <View style={{ width: "100%", height: 130, borderRadius: 5 }} />
+
+            <View
+              style={[
+                styles.profilePicker,
+                { backgroundColor: Constants.Faded },
+              ]}
+            />
+            <View
+              style={[styles.userNameShimmer, { width: 180, borderRadius: 3 }]}
+            />
+            <View
+              style={[styles.userEmailshimmer, { width: 250, borderRadius: 3 }]}
+            />
+          </View>
+
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "space-evenly",
+              marginTop: -17,
+            }}
+          >
+            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
+            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
+            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
+          </View>
+          <View style={{ width: "100%", marginLeft: 13, marginVertical: 15 }}>
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "92%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+            <View
+              style={{
+                marginLeft: 3,
+                marginTop: 16,
+                width: "32%",
+                height: 30,
+                borderRadius: 3,
+              }}
+            />
+          </View>
+        </SkeletonPlaceholder>
+      ) : (
         <View>
           {buttonShown ? (
             <TouchableNativeFeedback
@@ -415,14 +512,14 @@ function Profile({ navigation, props }) {
             <TouchableOpacity
               //button which trigger the select Image functionality to chane profile picture
               activeOpacity={0.9}
-              onPress={() => selectFeaturedImage()}
+              onPress={selectFeaturedImage}
               style={styles.profilePicker}
             >
               <Avatar.Image
                 source={{ uri: image }}
                 size={80}
                 style={styles.profileImage}
-                onPress={() => selectFeaturedImage()}
+                onPress={selectFeaturedImage}
               />
               <View style={styles.cameraIcon}>
                 {updatingProfile === "loaded" ? (
@@ -630,103 +727,6 @@ function Profile({ navigation, props }) {
             <Caption> Version 1.0.0</Caption>
           </View>
         </View>
-      ) : (
-        <SkeletonPlaceholder>
-          <View style={{ height: 270 }}>
-            <View style={{ width: "100%", height: 130, borderRadius: 5 }} />
-
-            <View
-              style={[
-                styles.profilePicker,
-                { backgroundColor: Constants.Faded },
-              ]}
-            />
-            <View
-              style={[styles.userNameShimmer, { width: 180, borderRadius: 3 }]}
-            />
-            <View
-              style={[styles.userEmailshimmer, { width: 250, borderRadius: 3 }]}
-            />
-          </View>
-
-          <View
-            style={{
-              width: "100%",
-              flexDirection: "row",
-              justifyContent: "space-evenly",
-              marginTop: -17,
-            }}
-          >
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-          </View>
-          <View style={{ width: "100%", marginLeft: 13, marginVertical: 15 }}>
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "32%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-          </View>
-        </SkeletonPlaceholder>
       )}
 
       <BottomSheet
@@ -778,7 +778,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 3,
     marginHorizontal: 16,
-    backgroundColor: Constants.background,
     borderRadius: 8,
     paddingVertical: 6,
   },
@@ -786,20 +785,20 @@ const styles = StyleSheet.create({
     color: Constants.Secondary,
   },
   optionIcon: {
-    color: Constants.primary,
+    color: Constants.Inverse,
   },
   bookmark: {
     flexDirection: "row",
     alignItems: "center",
     margin: 1,
     marginHorizontal: 16,
-    backgroundColor: Constants.background,
+
     borderRadius: 8,
     paddingVertical: 6,
   },
   settingtxt: {
     justifyContent: "center",
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     marginLeft: 15,
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,

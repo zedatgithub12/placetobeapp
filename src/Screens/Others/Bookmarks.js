@@ -92,7 +92,7 @@ function Bookmarks({ navigation }) {
               {items.map((item) => {
                 return (
                   <SavedEvent
-                    key={item.event_id}
+                    key={item.id}
                     {...item}
                     FeaturedImage={item.event_image}
                     name={item.event_name}
@@ -101,9 +101,9 @@ function Bookmarks({ navigation }) {
                     venue={item.event_address}
                     Price={EntranceFee(item.event_entrance_fee)}
                     onPress={() =>
-                      navigation.navigate("EventDetail", { id: item.event_id })
+                      navigation.navigate("EventDetail", { id: item.id })
                     }
-                    removeItem={() => dispatch(remove(item.event_id))}
+                    removeItem={() => dispatch(remove(item.id))}
                   />
                 );
               })}

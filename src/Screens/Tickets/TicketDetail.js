@@ -116,26 +116,20 @@ const TicketDetail = ({ route, navigation }) => {
     const signal = controller.signal;
 
     setIndicator(true);
-    var ApiUrl = Connection.url + Connection.Soldout;
+    var ApiUrl = Connection.url + Connection.Soldout + item.id;
     var headers = {
       accept: "application/json",
       "Content-Type": "application/json",
     };
 
-    var Data = {
-      id: item.id,
-    };
-
     fetch(ApiUrl, {
-      method: "POST",
+      method: "PUT",
       headers: headers,
-      body: JSON.stringify(Data),
+      signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
-        var message = response[0].message;
-
-        if (message === "succeed") {
+        if (response.success) {
           setTicketStatus("Sold-out");
           setTextC(3);
           setIndicator(false);

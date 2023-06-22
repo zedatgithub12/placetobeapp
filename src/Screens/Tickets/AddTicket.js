@@ -146,7 +146,7 @@ const AddTicket = ({ route, navigation }) => {
 
       var Data = {
         userId: id,
-        eventId: item.event_id,
+        eventId: item.id,
         eventName: item.event_name,
         eventImage: item.event_image,
         type: category,
@@ -162,14 +162,12 @@ const AddTicket = ({ route, navigation }) => {
       })
         .then((response) => response.json())
         .then((response) => {
-          var message = response[0].message;
+          console.log(response);
 
-          if (message === "succeed") {
+          if (response.success) {
             navigation.navigate("Ticket Added");
-          } else if (message === "exist") {
-            setErrorMessage("This ticket is already added");
           } else {
-            setErrorMessage("you cannot add ticket now retry later!");
+            setErrorMessage(response.message);
           }
         })
         .catch((error) => {
@@ -515,8 +513,8 @@ const styles = StyleSheet.create({
     borderRadius: Constants.tiny,
   },
   catName: {
-    fontSize: Constants.headingtwo,
-    color: Constants.Secondary,
+    fontSize: Constants.headingthree,
+    color: Constants.Inverse,
     marginLeft: 6,
   },
   ticketListItem: {

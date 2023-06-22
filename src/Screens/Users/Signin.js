@@ -100,7 +100,7 @@ export default function Signin({ navigation }) {
       };
 
       var Data = {
-        Email: Email,
+        email: Email,
         password: password,
       };
       fetch(InserAPIURL, {
@@ -110,21 +110,19 @@ export default function Signin({ navigation }) {
       })
         .then((response) => response.json())
         .then((response) => {
-          var resp = response[0];
-
-          if (resp.message === "succeed") {
-            var userId = response[0].userId;
-            var userToken = response[0].userToken;
-            var userEmail = response[0].email;
-            var profile = response[0].profile;
-            var username = response[0].username;
-            var First_Name = response[0].First_Name;
-            var Middle_Name = response[0].Middle_Name;
-            var lastName = response[0].lastName;
-            var gender = response[0].gender;
-            var category = response[0].category;
-            var phone = response[0].phone;
-            var status = response[0].status;
+          if (response.success) {
+            var userId = JSON.stringify(response.data.id);
+            var userToken = response.access_token;
+            var userEmail = response.data.email;
+            var profile = response.data.profile;
+            var username = response.data.username;
+            var First_Name = response.data.First_Name;
+            var Middle_Name = response.data.Middle_Name;
+            var lastName = response.data.lastName;
+            var gender = response.data.gender;
+            var category = response.data.category;
+            var phone = response.data.phone;
+            var status = response.data.status;
 
             loginState(
               userId,
@@ -147,7 +145,7 @@ export default function Signin({ navigation }) {
             setData({
               ...data,
               isValidEmail: false,
-              email_error: resp.message,
+              email_error: response.message,
             });
             setLoading(false);
           }

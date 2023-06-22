@@ -5,6 +5,8 @@ import {
   StyleSheet,
   Image,
   TouchableNativeFeedback,
+  Pressable,
+  Dimensions,
 } from "react-native";
 import Constants from "../../constants/Constants";
 import {
@@ -34,7 +36,7 @@ const OrganizerEvents = ({
   const featuredImageUri = Connection.url + Connection.assets;
 
   return (
-    <TouchableNativeFeedback onPress={onPress} style={styles.lists}>
+    <Pressable onPress={onPress} style={styles.lists}>
       <View style={styles.EventContainer}>
         <View style={styles.ImageContainer}>
           <Image
@@ -117,7 +119,7 @@ const OrganizerEvents = ({
           </View>
         )}
       </View>
-    </TouchableNativeFeedback>
+    </Pressable>
   );
 };
 
