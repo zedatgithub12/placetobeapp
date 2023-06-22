@@ -75,50 +75,10 @@ function Profile({ navigation, props }) {
     return <Text> No access to internal Storage</Text>;
   }
   //Toast message state when user change their profile
-  const [profileUpdate, setProfileUpdate] = useState("updated!");
+  const [profileUpdate, setProfileUpdate] = useState("Profile Updated!");
   //toast message for profile update
   const showToast = () => {
     ToastAndroid.show(profileUpdate, ToastAndroid.SHORT);
-  };
-  //update profile Function
-  const updateProfile = (pictureName) => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    var userIdentity = userData.userId; //variable containing user id
-    var profileName = pictureName; //profile name to be stored in the database
-
-    var Url = Connection.url + Connection.updateProfile;
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    var data = {
-      userIdentity: userIdentity,
-      profileName: profileName,
-    };
-    fetch(Url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(data),
-      signal: signal,
-    })
-      .then((response) => response.json()) //check response type of the API
-      .then((response) => {
-        var responseMessage = response[0].message;
-
-        if (responseMessage === "Updated") {
-          setProfileUpdate(responseMessage);
-          showToast();
-        } else {
-          setImage(Connection.url + Connection.assets + userData.userProfile);
-          setProfileUpdate(responseMessage);
-        }
-      });
-    return () => {
-      // cancel the request before component unmounts
-      controller.abort();
-    };
   };
 
   /********************************************* */
@@ -128,40 +88,40 @@ function Profile({ navigation, props }) {
   const [updatingProfile, setupdatingProfile] = useState("loaded");
 
   const selectFeaturedImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-      setImage(result.uri);
-      const base64Image = await convertImageToBase64(result.uri);
-      uploadImage(base64Image);
-    } else {
-      setupdatingProfile("loaded");
-    }
-  };
-
-  const convertImageToBase64 = async (uri) => {
     try {
-      const base64Image = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
       });
-      return base64Image;
-    } catch {
-      setupdatingProfile("loaded");
-      console.log("There is error uploading image");
+
+      if (!result.cancelled && result.uri) {
+        setImage(result.uri);
+        if (!result.cancelled && result.uri) {
+          setImage(result.uri);
+          uploadImage(result.uri);
+        } else {
+          console.log("Error: No image selected");
+        }
+      }
+    } catch (error) {
+      console.log("Error: ", error);
     }
   };
 
-  const uploadImage = async (base64Image) => {
+  const uploadImage = async (uri) => {
     var userId = await AsyncStorage.getItem("userId");
     const Api = Connection.url + Connection.changeprofile + userId;
 
+    const fileType = uri.substring(uri.lastIndexOf(".") + 1);
     let formData = new FormData();
-    formData.append("profile", base64Image);
+    formData.append("profile", {
+      uri: uri,
+      name: `image.${fileType}`,
+      type: "image/jpeg",
+    });
+    console.log(fileType);
     setupdatingProfile("loading");
     // Make REST API call to upload image
     fetch(Api, {
@@ -174,6 +134,7 @@ function Profile({ navigation, props }) {
         if (response.success) {
           console.log("Success:", response.message);
           setupdatingProfile("successfully uploaded");
+          showToast();
         } else {
           console.log("Fail:", response);
           setupdatingProfile("loaded");

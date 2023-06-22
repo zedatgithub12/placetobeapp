@@ -46,9 +46,9 @@ const Events = ({
               size={13}
               style={styles.eventIcons}
             />
-            <HelperText style={styles.EventDate}>
+            <Text style={styles.EventDate}>
               {date} ({time})
-            </HelperText>
+            </Text>
           </View>
           <View style={styles.sectionTwo}>
             <View //venue name container
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
   ContainerTwo: {
     width: "68%",
     padding: 4,
+    paddingTop: 0,
     marginLeft: 5,
   },
   sectionOne: {
@@ -118,18 +119,20 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
     color: Constants.Inverse,
+    textTransform: "capitalize",
   },
   eventIcons: {
     padding: 3,
+    marginTop: 5,
     color: Constants.primary,
   },
   //flatlist event date styles
   EventDate: {
-    color: Constants.Secondary,
-    fontFamily: Constants.fontFam,
-    fontWeight: Constants.Boldtwo,
-    paddingLeft: 0,
     marginLeft: 2,
+    marginTop: 5,
+    color: Constants.Inverse,
+    fontFamily: Constants.fontFam,
+    fontSize: Constants.headingthree,
   },
   // venue container style
   venueContainer: {
@@ -140,8 +143,11 @@ const styles = StyleSheet.create({
   // event venue text style
   EventVenue: {
     marginLeft: 4,
+    marginVertical: 3,
     color: Constants.Inverse,
     fontFamily: Constants.fontFam,
+    fontSize: Constants.headingthree,
+    textTransform: "capitalize",
   },
   // map marker for event venue name
   VenueIcon: {
@@ -153,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     backgroundColor: Constants.transparentPrimary,
-    marginTop: 5,
+    marginTop: 6,
     paddingVertical: 2,
     paddingHorizontal: 8,
     borderRadius: Constants.tinybox,
