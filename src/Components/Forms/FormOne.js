@@ -67,6 +67,9 @@ const FormOne = () => {
 
   //we call the following function when user presses the image place holder in add event screen
   const selectFeaturedImage = async () => {
+    if (hasGalleryPersmission === false) {
+      return <Text> No access to internal Storage</Text>;
+    }
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -75,12 +78,8 @@ const FormOne = () => {
       quality: 1,
     });
     // ImagePicker saves the taken photo to disk and returns a local URI to it
-
-    let localUri = result.uri; // local image uri
-    // let filename = localUri.split("/").pop(); // the filename is stored in filename variable
-    //if the image selection process doesn't cancelled the statement inside the if condition is executed
-    if (!result.cancelled) {
-      setImage(localUri);
+    if (!result.cancelled && result.uri) {
+      setImage(result.uri);
       setInputs({
         ...inputs,
         imageLoader: "loaded",

@@ -24,6 +24,7 @@ import { AuthContext } from "../../Components/context";
 import { Avatar, Badge, Caption, Paragraph, Title } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import * as ImageManipulator from "expo-image-manipulator";
 import InteractionInfo from "../../Components/Profile/InteractionInfo";
 import Connection from "../../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -31,6 +32,7 @@ import { useSelector, useDispatch } from "react-redux";
 import BottomSheet from "react-native-simple-bottom-sheet";
 import * as Animatable from "react-native-animatable";
 import * as Linking from "expo-linking";
+import p2bavatar from "../../assets/images/p2bavatar.png";
 
 function Profile({ navigation, props }) {
   const [load, setLoad] = React.useState(true);
@@ -38,11 +40,17 @@ function Profile({ navigation, props }) {
 
   //bookmarked item count state
   const { items } = useSelector((state) => state.cart);
+  const [detailInfo, setDetailInfo] = useState();
+  const [hasGalleryPersmission, setHasGalleryPermission] = useState(null);
+  const [updatingProfile, setupdatingProfile] = useState("camera");
+  const [buttonShown, setButtonShown] = useState(false);
+  const [count, setCount] = useState(0);
 
-  /*************************************************** */
-  //users meta informations to be displayed in the profile screen
-  /************************************************** */
-
+  const [userInfo, setUserInfo] = React.useState({
+    eventPosted: "0",
+    followers: "0",
+    following: "0",
+  });
   const [userData, setUserData] = React.useState({
     userId: "",
     userEmail: "",
@@ -52,42 +60,24 @@ function Profile({ navigation, props }) {
     middleName: "",
     lastName: "",
   });
-  //state of user information to be passed to detail screen
-  const [detailInfo, setDetailInfo] = useState();
-  /************************************************** */
-  // count of Event user Posted, count of followers and count of organizer user following
-  /************************************************** */
-  const [userInfo, setUserInfo] = React.useState({
-    eventPosted: "0",
-    followers: "0",
-    following: "0",
-  });
-  // state, variable and methods for work with profile picture
-  const [hasGalleryPersmission, setHasGalleryPermission] = useState(null);
-
-  // user profile placeholder
 
   const [image, setImage] = useState(
     Connection.url + Connection.assets + userData.userProfile
   );
-  //ask the divice for permission
-  if (hasGalleryPersmission === false) {
-    return <Text> No access to internal Storage</Text>;
-  }
-  //Toast message state when user change their profile
-  const [profileUpdate, setProfileUpdate] = useState("Profile Updated!");
   //toast message for profile update
-  const showToast = () => {
-    ToastAndroid.show(profileUpdate, ToastAndroid.SHORT);
+  const showToast = (message) => {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
   };
 
   /********************************************* */
   // we select user profile here
   /******************************************* */
 
-  const [updatingProfile, setupdatingProfile] = useState("loaded");
-
   const selectFeaturedImage = async () => {
+    //ask the divice for permission
+    if (hasGalleryPersmission === false) {
+      return <Text> No access to internal Storage</Text>;
+    }
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -98,53 +88,73 @@ function Profile({ navigation, props }) {
 
       if (!result.cancelled && result.uri) {
         setImage(result.uri);
-        if (!result.cancelled && result.uri) {
-          setImage(result.uri);
-          uploadImage(result.uri);
-        } else {
-          console.log("Error: No image selected");
-        }
+        uploadImage(result.uri);
+      } else {
+        console.log("Error: No image selected");
       }
     } catch (error) {
       console.log("Error: ", error);
     }
   };
 
-  const uploadImage = async (uri) => {
+  const uploadImage = async (image) => {
     var userId = await AsyncStorage.getItem("userId");
     const Api = Connection.url + Connection.changeprofile + userId;
 
+    const imageuri =
+      Platform.OS === "android" ? image : image.replace("file://", "");
+
+    const manipResult = await ImageManipulator.manipulateAsync(
+      imageuri,
+      [{ resize: { width: 800, height: 800 } }],
+      { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+    );
+
+    const uri = manipResult.uri;
     const fileType = uri.substring(uri.lastIndexOf(".") + 1);
-    let formData = new FormData();
+
+    const checkFileSize = async (fileURI) => {
+      const fileInfo = await FileSystem.getInfoAsync(fileURI);
+      if (!fileInfo.size) return false;
+      const sizeInMb = fileInfo.size / 1024 / 1024;
+      return sizeInMb.toFixed(2);
+    };
+
+    const size = await checkFileSize(uri);
+
+    const formData = new FormData();
     formData.append("profile", {
       uri: uri,
       name: `image.${fileType}`,
-      type: "image/jpeg",
+      type: `image/${fileType}`,
     });
-    console.log(fileType);
-    setupdatingProfile("loading");
-    // Make REST API call to upload image
-    fetch(Api, {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        console.log(response);
-        if (response.success) {
-          console.log("Success:", response.message);
-          setupdatingProfile("successfully uploaded");
-          showToast();
-        } else {
-          console.log("Fail:", response);
-          setupdatingProfile("loaded");
-        }
+
+    if (size > 10.0) {
+      showToast("Max image size is reached!");
+      setupdatingProfile("camera");
+      setImage(Connection.url + Connection.assets + userData.userProfile);
+    } else {
+      setupdatingProfile("loading");
+      fetch(Api, {
+        method: "POST",
+        headers: { "Content-Type": "multipart/form-data" },
+        body: formData,
       })
-      .catch((error) => {
-        console.error("Error:", error);
-        console.error("Error:", error.stack);
-        setupdatingProfile("loaded");
-      });
+        .then((response) => response.json())
+        .then((response) => {
+          if (response.success) {
+            setupdatingProfile("done");
+            showToast("Profile Updated!");
+          } else {
+            setupdatingProfile("camera");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          console.error("Error:", error.stack);
+          setupdatingProfile("camera");
+        });
+    }
   };
 
   // variables and functions for invite friends button inside profile screen
@@ -178,7 +188,7 @@ function Profile({ navigation, props }) {
   //featch user information from databse
   //fetch event posted by user, followers and following
   // Event count state to b delivered to detail screen
-  const [count, setCount] = useState(0);
+
   const featchUserInformation = async () => {
     const Controller = new AbortController();
     const Signal = Controller.signal;
@@ -274,9 +284,6 @@ function Profile({ navigation, props }) {
   };
   // bottom sheet reference
   const panelRef = useRef(null);
-
-  //check for update button function
-  const [buttonShown, setButtonShown] = useState(false);
 
   const updateButton = () => {
     const controller = new AbortController();
@@ -444,25 +451,6 @@ function Profile({ navigation, props }) {
         </SkeletonPlaceholder>
       ) : (
         <View>
-          {buttonShown ? (
-            <TouchableNativeFeedback
-              onPress={() => Linking.openURL(Constants.appLink)}
-              style={{ alignItems: "center" }}
-            >
-              <Animatable.View
-                animation="slideInRight"
-                style={styles.updateButton}
-              >
-                <MaterialCommunityIcons
-                  name="arrow-up-bold-circle"
-                  size={20}
-                  style={styles.updateIcon}
-                />
-                <Text style={styles.updateText}>Update Available</Text>
-              </Animatable.View>
-            </TouchableNativeFeedback>
-          ) : null}
-
           <View style={styles.profileContainer}>
             <LinearGradient
               // Button Linear Gradient
@@ -477,13 +465,13 @@ function Profile({ navigation, props }) {
               style={styles.profilePicker}
             >
               <Avatar.Image
-                source={{ uri: image }}
+                source={image ? { uri: image } : p2bavatar}
                 size={80}
                 style={styles.profileImage}
                 onPress={selectFeaturedImage}
               />
               <View style={styles.cameraIcon}>
-                {updatingProfile === "loaded" ? (
+                {updatingProfile === "camera" ? (
                   <MaterialCommunityIcons
                     name="camera"
                     size={20}
@@ -491,7 +479,7 @@ function Profile({ navigation, props }) {
                   />
                 ) : updatingProfile === "loading" ? (
                   <ActivityIndicator size="small" color={Constants.Success} />
-                ) : updatingProfile === "successfully uploaded" ? (
+                ) : updatingProfile === "done" ? (
                   <MaterialCommunityIcons
                     name="check-circle"
                     size={20}
@@ -687,6 +675,24 @@ function Profile({ navigation, props }) {
           <View style={styles.versioning}>
             <Caption> Version 1.0.0</Caption>
           </View>
+          {buttonShown && (
+            <TouchableNativeFeedback
+              onPress={() => Linking.openURL(Constants.appLink)}
+              style={{ alignItems: "center" }}
+            >
+              <Animatable.View
+                animation="slideInRight"
+                style={styles.updateButton}
+              >
+                <MaterialCommunityIcons
+                  name="arrow-up-bold-circle"
+                  size={20}
+                  style={styles.updateIcon}
+                />
+                <Text style={styles.updateText}>Update Available</Text>
+              </Animatable.View>
+            </TouchableNativeFeedback>
+          )}
         </View>
       )}
 

@@ -109,7 +109,7 @@ class EventSubmission extends Component {
       // we retrived usertoken from async storage and store it in global scope
       let id = await AsyncStorage.getItem("userId");
       var userId = id;
-      var picture = InputForm.poster;
+      var picture = InputForm.poster.uri;
       var name = InputForm.eventNamed;
       var description = InputForm.aboutEvent;
       var startD = InputForm.sDate;
@@ -124,7 +124,6 @@ class EventSubmission extends Component {
       var longitude = InputForm.mLong;
       var organizerPhone = InputForm.cPhone;
       var redirectUrl = InputForm.url;
-
       // event field validation
       if (
         picture == null ||
@@ -144,16 +143,18 @@ class EventSubmission extends Component {
         this.setState({ posting: true });
         // After this we initiate featch method to send user data to database
         var Api = Connection.url + Connection.AddEvent;
-        let localUri = picture.uri; // local image uri
-        let filename = localUri.split("/").pop(); // the filename is stored in filename variable
-        // Infer the type of the image
-        let match = /\.(\w+)$/.exec(filename);
-        let kind = match ? `image/${match[1]}` : `image`;
+        const uri =
+          Platform.OS === "android" ? picture : picture.replace("file://", "");
+        const fileType = uri.substring(uri.lastIndexOf(".") + 1);
 
         // data to be stored in the database
         const data = new FormData();
         data.append("userId", userId);
-        data.append("picture", { picture });
+        data.append("picture", {
+          uri: uri,
+          name: `image.${fileType}`,
+          type: `image/${fileType}`,
+        });
         data.append("name", name);
         data.append("about", description);
         data.append("startD", startD);
