@@ -413,14 +413,9 @@ const FormThree = () => {
           onPress={(data, details) =>
             Coordinates(data.description, details.geometry.location)
           }
-          // onPress={(data, details) =>
-          //   console.log(data.structured_formatting.main_text, details)
-          // }
           keepResultsAfterBlur={true}
           returnKeyType={"default"}
           autoFocus={false}
-          fetchDetails={true}
-          disableScroll={false}
           enablePoweredByContainer={false}
           minLength={2}
           nearbyPlacesAPI="GooglePlacesSearch"

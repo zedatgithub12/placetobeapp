@@ -27,11 +27,11 @@ import * as Animatable from "react-native-animatable";
 const UserDetails = ({ route, navigation }) => {
   const { detailInfo } = route.params;
   const [MetaInfo, setMetaInfo] = React.useState({
-    firstName: detailInfo.first_name,
-    middleName: detailInfo.middle_name,
-    lastName: detailInfo.last_name,
-    userName: detailInfo.username,
-    Phone: detailInfo.phone,
+    firstName: detailInfo.first_name ? detailInfo.first_name : "",
+    middleName: detailInfo.middle_name ? detailInfo.middle_name : "",
+    lastName: detailInfo.last_name ? detailInfo.last_name : "",
+    userName: detailInfo.username ? detailInfo.username : "",
+    Phone: detailInfo.phone ? detailInfo.phone : "",
     oldPassword: "",
     password: "",
     confirmPassword: "",
