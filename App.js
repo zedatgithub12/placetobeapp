@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { theme } from "./src/themes";
 //import Organizers from "./Screens/Organizers";
 import { Caption } from "react-native-paper";
 import Constants from "./src/constants/Constants";
@@ -412,6 +413,7 @@ export default function App() {
       <PersistGate loading={null} persistor={persistor}>
         <AuthContext.Provider value={authContext}>
           <NavigationContainer
+            theme={theme}
             linking={Linkings}
             fallback={
               <View style={styles.loader}>

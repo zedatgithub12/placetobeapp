@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  StatusBar,
   View,
   StyleSheet,
   Text,
@@ -7,49 +8,44 @@ import {
   Image,
   Dimensions,
   ScrollView,
-  Pressable,
-  ActivityIndicator,
+  FlatList,
 } from "react-native";
+import NetInfo from "@react-native-community/netinfo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { Divider } from "react-native-paper";
 import { AuthContext } from "../../Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Connection from "../../constants/connection";
+import Connection from "../../api";
 import Categories from "../../Components/Categories/CategoryListing";
-import Category from "../../dummies/Category";
-import TicketCard from "../../Components/Tickets/TicketCard";
-import TicketShimmer from "../../Components/Tickets/Skeleton/TicketShimmer";
+import Category from "../../data/Category";
 import Events from "../../Components/Events/Events";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
 import { LocalNotification } from "../../Utils/localPushController";
 import Slider from "../../Components/Slider";
+import NoConnection from "../../handlers/connection";
+import { useTheme } from "@react-navigation/native";
+import Loader from "../../ui-components/ActivityIndicator";
+import { HelperText } from "react-native-paper";
+import {
+  DateFormater,
+  TimeFormater,
+  CategoryColor,
+  EntranceFee,
+} from "../../Utils/functions";
 
 function Home({ navigation, ...props }) {
+  const { theme } = useTheme();
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
-  const [Tickets, setTickets] = useState([]);
-  const [ticketShimmer, setTicketShimmer] = useState(true);
+
+  const [loading, setLoading] = useState(false);
+  const [connection, setConnection] = useState(true);
+  const [retry, setRetry] = useState(false);
+  const [active, setActive] = useState("All");
   const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
-  const d = new Date();
-  let Hour = d.getHours();
-  let minute = d.getMinutes();
-
-  // notification arrival time in human readable format
-  const ArrivalTime = () => {
-    var time;
-    if (Hour > 12) {
-      time = Hour - 12 + ":" + minute + " pm";
-    } else if (Hour == 12) {
-      time = Hour + ":" + minute + " pm";
-    } else {
-      time = Hour + ":" + minute + " am";
-    }
-
-    return time;
-  };
-
+  const [filteredEvent, setFilteredEvent] = useState([]);
   // check if the profile got updated and update the top right profile indicator
   const profile = () => {
     navigation.navigate("Profile");
@@ -87,7 +83,6 @@ function Home({ navigation, ...props }) {
   };
 
   //featch available tickets
-
   const FeatchTickets = () => {
     var ApiUrl = Connection.url + Connection.AvailableTickets;
 
@@ -119,7 +114,7 @@ function Home({ navigation, ...props }) {
   // featch Featured events
   //featured events are the event which have high priority or value of number 1 in databse table
   const FeatchEvents = () => {
-    var ApiUrl = Connection.url + Connection.FeaturedEvent;
+    var ApiUrl = Connection.url + Connection.events;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -142,129 +137,98 @@ function Home({ navigation, ...props }) {
         setEventShimmer(false);
       });
   };
-  /********************************************************** */
-  //date function which perform date format conversion and return the suitable format for frontend
-  /********************************************************** */
-  const DateFun = (startingDate) => {
-    var date = new Date(startingDate);
-    let day = date.getDay();
-    let month = date.getMonth();
-    let happeningDay = date.getDate();
 
-    // return weekname
-    var weekday = new Array(7);
-    weekday[1] = "Mon, ";
-    weekday[2] = "Tue, ";
-    weekday[3] = "Wed, ";
-    weekday[4] = "Thu, ";
-    weekday[5] = "Fri, ";
-    weekday[6] = "Sat, ";
-    weekday[0] = "Sun, ";
+  // const filteredData = events.filter((event) => {
+  //   let isMatch = true;
+  //   if (categoryFilter !== "Category") {
+  //     isMatch = isMatch && event.category === categoryFilter;
+  //   }
+  //   return isMatch;
+  // });
 
-    //an array of month name
-    var monthName = new Array(12);
-    monthName[1] = "Jan";
-    monthName[2] = "Feb";
-    monthName[3] = "Mar";
-    monthName[4] = "Apr";
-    monthName[5] = "May";
-    monthName[6] = "Jun";
-    monthName[7] = "Jul";
-    monthName[8] = "Aug";
-    monthName[9] = "Sep";
-    monthName[10] = "Oct";
-    monthName[11] = "Nov";
-    monthName[12] = "Dec";
-
-    return weekday[day] + monthName[month + 1] + " " + happeningDay;
-  };
-  const TimeFun = (eventTime) => {
-    var time = eventTime;
-    var result = time.slice(0, 2);
-    var minute = time.slice(3, 5);
-    var globalTime;
-    var postMeridian;
-    var separator = ":";
-    if (result > 12) {
-      postMeridian = result - 12;
-      globalTime = "PM";
+  const handleCategoryClick = (categoryname, type) => {
+    setActive(categoryname);
+    if (active === "All") {
+      renderAll();
     } else {
-      postMeridian = result;
-      globalTime = "AM";
+      renderFilter(categoryname, type);
     }
-
-    return postMeridian + separator + minute + " " + globalTime;
   };
-  const EntranceFee = (price) => {
-    var eventPrice;
-    var free = "Free";
-    var currency = " ETB";
-    if (price != 0) {
-      eventPrice = price + currency;
+
+  /****************************************
+   * Render events those the category is "All"
+   */
+  const renderAll = () => {
+    return;
+  };
+
+  /****************************************
+   * Render events those the category is other than "All"
+   */
+  const renderFilter = (category, type) => {
+    if (type === "status") {
+      statusFilter(category);
+    } else if (type === "filter") {
+      const filteredData = events.filter((event) => event.priority === 1);
+      setFilteredEvent(filteredData);
+    } else if (type === "category") {
+      const filteredData = events.filter(
+        (event) => event.category === category
+      );
+      setFilteredEvent(filteredData);
+    }
+  };
+
+  /*******************************************
+   * Filter event in status
+   * the status are
+   * Happening, This week, Upcoming
+   */
+
+  const statusFilter = (category) => {
+    if (category === "This week") {
+      //filter events in this week
+    } else if (category === "Upcoming") {
+      //filter upcoming events
     } else {
-      eventPrice = free;
-    }
-    return eventPrice;
-  };
-  // events category color
-  const CategoryColor = (category) => {
-    var color;
-    switch (category) {
-      case "Entertainment":
-        color = "#007bc2";
-        break;
-      case "Travelling":
-        color = "#0c790c";
-        break;
-
-      case "Cinema & Theater":
-        color = "#00e8e0";
-        break;
-
-      case "Community":
-        color = "#F96666";
-        break;
-      case "Trade Fairs & Expo":
-        color = "#f57a00";
-        break;
-      case "Nightlife":
-        color = "#472D2D";
-        break;
-      case "Professional":
-        color = "#2c2e27";
-        break;
-      case "Shopping":
-        color = "#9306c2";
-        break;
-      case "Sport":
-        color = "#ff0571";
-        break;
-      case "Others":
-        color = "#e8b200";
-        break;
-      default:
-        color = "#ffbb00";
-    }
-    return color;
-  };
-
-  // check if there is discount on ticket price and let them know there is discount
-  const discount = (current, origional) => {
-    var discount = origional - current;
-
-    if (discount > 0) {
-      return origional + " Birr";
-    } else {
-      return discount;
+      //filter events happening today
     }
   };
+  // render item in flatlist format
+  const renderItem = ({ item }) => (
+    <Events
+      Event_Id={item.id}
+      org_id={item.userId}
+      FeaturedImage={item.event_image}
+      title={item.event_name}
+      date={DateFormater(item.start_date)}
+      time={TimeFormater(item.start_time)}
+      venue={item.event_address}
+      category={CategoryColor(item.category)}
+      Price={EntranceFee(item.event_entrance_fee)}
+      onPress={() => navigation.navigate("EventDetail", { id: item.id })}
+    />
+  );
 
-  //image to be used in notification
-  const featuredImageUri =
-    Connection.url + Connection.assets + "Placeholder.png";
-  const NotificationIcon = Connection.url + Connection.assets + "favicon.png";
+  // //image to be used in notification
+  // const featuredImageUri =
+  //   Connection.url + Connection.assets + "Placeholder.png";
+  // const NotificationIcon = Connection.url + Connection.assets + "favicon.png";
 
-  const [shown, setShown] = useState(true);
+  useEffect(() => {
+    const InternetConnection = async () => {
+      const networkState = await NetInfo.fetch();
+      setConnection(networkState.isConnected);
+    };
+    InternetConnection();
+
+    const subscription = NetInfo.addEventListener(async (state) => {
+      setConnection(state.isConnected);
+    });
+    return () => {
+      subscription();
+    };
+  }, [retry]);
 
   useEffect(() => {
     userInfoFunction();
@@ -278,23 +242,27 @@ function Home({ navigation, ...props }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <StatusBar backgroundColor={theme.primary.main} barStyle="dark-content" />
+      <View>
         <View
           //to component container
           // profile avatar, App name and serach is included inside the component
-          style={styles.headers}
+          style={[styles.headers, { backgroundColor: theme.background.main }]}
         >
           <View style={styles.brands}>
             <Image
               source={require("../../assets/images/homebranding.png")}
               resizeMode="cover"
-              style={{ width: 152, height: 70 }}
+              style={{ width: 130, height: 60 }}
             />
           </View>
 
           <TouchableOpacity
             activeOpacity={0.8}
-            style={styles.searchBtn}
+            style={[
+              styles.searchBtn,
+              { backgroundColor: theme.background.faded },
+            ]}
             onPress={() => navigation.push("Eventcat")}
           >
             <Ionicons
@@ -333,150 +301,108 @@ function Home({ navigation, ...props }) {
         </View>
 
         <View style={styles.homeSection2}>
-          <Divider style={{ color: Constants.background }} />
-
-          {shown ? (
-            <ScrollView contentContainerStyle={{ minHeight: 180 }}>
-              {/* promo slide component  */}
-              <Slider />
-
-              <View>
-                <ScrollView
-                  horizontal
-                  contentContainerStyle={styles.categories}
-                  showsHorizontalScrollIndicator={false}
-                >
-                  {Category.map((item) => (
-                    <Categories
-                      key={item.id}
-                      icon={item.icon}
-                      category={item.name}
-                      color={item.background}
-                      onPress={() => navigation.push("Filter", { item })}
-                    />
-                  ))}
-                </ScrollView>
-              </View>
-            </ScrollView>
-          ) : null}
-        </View>
-
-        <View style={styles.availableTickets}>
-          <Text style={styles.ticketTitle}>Available Tickets</Text>
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            marginLeft: 8,
-            paddingRight: 12,
-          }}
-        >
-          {ticketShimmer ? (
-            <View style={{ flexDirection: "row" }}>
-              <TicketShimmer />
-              <TicketShimmer />
-              <TicketShimmer />
-              <TicketShimmer />
-            </View>
-          ) : Tickets.length == 0 ? (
-            <View
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text>There is no Tickets</Text>
-            </View>
-          ) : (
-            Tickets.map((item) => (
-              <TicketCard
-                key={item.id}
-                picture={item.event_image}
-                title={item.event_name}
-                type={item.tickettype}
-                price={item.currentprice}
-                discount={discount(item.currentprice, item.origionalprice)}
-                EventName={() =>
-                  navigation.navigate("EventDetail", { id: item.event_id })
-                }
-                onPress={() => navigation.navigate("TicketScreen", { item })}
-              />
-            ))
-          )}
-        </ScrollView>
-
-        <View style={styles.availableTickets}>
-          <Text style={styles.ticketTitle}>Featured Events</Text>
-          <Pressable>
-            <Ionicons
-              onPress={() => navigation.navigate("Events")}
-              name="md-grid-outline"
-              size={18}
-              color={Constants.Inverse}
-            />
-          </Pressable>
-        </View>
-
-        <View style={{ marginBottom: 55 }}>
-          {eventShimmer ? (
+          <ScrollView contentContainerStyle={{ minHeight: 40 }}>
             <View>
-              <Listing />
-              <Listing />
-              <Listing />
+              <ScrollView
+                horizontal
+                contentContainerStyle={styles.categories}
+                showsHorizontalScrollIndicator={false}
+              >
+                {Category.map((item, index) => (
+                  <Categories
+                    key={index}
+                    icon={item.icon}
+                    category={item.name}
+                    border={item.color}
+                    background={
+                      active === item.name ? item.color : theme.background.main
+                    }
+                    color={
+                      active === item.name
+                        ? Constants.background
+                        : Constants.Inverse
+                    }
+                    onPress={() => handleCategoryClick(item.name, item.type)}
+                  />
+                ))}
+              </ScrollView>
             </View>
-          ) : events.length == 0 ? (
-            <View
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text>There is no Featured</Text>
+          </ScrollView>
+        </View>
+
+        <View style={styles.sectionthree}>
+          {connection ? (
+            <View>
+              {active === "All" ? (
+                <ScrollView contentContainerStyle={styles.categories}>
+                  {loading ? (
+                    <Loader size="small" />
+                  ) : (
+                    <View>
+                      <Text>{active}</Text>
+                    </View>
+                  )}
+                </ScrollView>
+              ) : (
+                <View>
+                  {loading ? (
+                    <Loader size="small" />
+                  ) : (
+                    <FlatList
+                      // List of events in extracted from database in the form JSON data
+                      data={filteredEvent}
+                      renderItem={renderItem}
+                      keyExtractor={(item) => item.id}
+                      nestedScrollEnabled
+                      initialNumToRender={2} // Reduce initial render amount
+                      maxToRenderPerBatch={1} // Reduce number in each render batch
+                      updateCellsBatchingPeriod={100} // Increase time between renders
+                      windowSize={7} // Reduce the window size
+                      ListEmptyComponent={
+                        <View style={styles.container}>
+                          <Image
+                            source={require("../../assets/images/NotFound.png")}
+                            resizeMode="contain"
+                            style={styles.notFound}
+                          />
+                          <Text style={styles.emptyMessageStyle}>
+                            We don't have event for today!
+                          </Text>
+                          <HelperText style={{ alignSelf: "center" }}>
+                            Check events of the week
+                          </HelperText>
+                        </View>
+                      }
+                    />
+                  )}
+                </View>
+              )}
             </View>
           ) : (
-            events.map((item) => (
-              <Events
-                key={item.id}
-                Event_Id={item.id}
-                org_id={item.userId}
-                FeaturedImage={item.event_image}
-                title={item.event_name}
-                date={DateFun(item.start_date)}
-                time={TimeFun(item.start_time)}
-                venue={item.event_address}
-                category={CategoryColor(item.category)}
-                Price={EntranceFee(item.event_entrance_fee)}
-                onPress={() =>
-                  navigation.navigate("EventDetail", { id: item.id })
-                }
-              />
-            ))
+            <View style={{ height: Dimensions.get("screen").height / 1.2 }}>
+              <NoConnection onPress={() => setRetry(!retry)} />
+            </View>
           )}
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fcfcfc",
+    backgroundColor: "#f3f3f3",
   },
   headers: {
-    width: "95%",
+    width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingLeft: 10,
-    paddingTop: Constants.paddTwo,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     alignSelf: "center",
     marginBottom: 10,
     position: "absolute",
-    top: 0,
     zIndex: 1000,
   },
   SearchFieldContainer: {
@@ -490,7 +416,6 @@ const styles = StyleSheet.create({
   brands: {
     flexDirection: "row",
     alignItems: "center",
-
     width: "76%",
   },
   SearchField: {
@@ -572,24 +497,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   homeSection2: {
-    marginTop: 80,
+    marginTop: 68,
   },
   categories: {
     paddingHorizontal: 6,
   },
-  availableTickets: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    margin: 4,
-    marginTop: 10,
+  sectionthree: {},
+  notFound: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
   },
-  ticketTitle: {
-    fontFamily: Constants.fontFam,
-    fontWeight: Constants.Boldtwo,
-    fontSize: Constants.headingtwo,
+  emptyMessageStyle: {
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Bold,
+    color: Constants.Secondary,
+    alignSelf: "center",
+    justifyContent: "center",
+  },
+  listEnd: {
+    padding: 20,
+    backgroundColor: Constants.transparentPrimary,
+    marginTop: 5,
+    margin: 5,
+    borderRadius: Constants.tinybox,
+    marginBottom: 62,
   },
 });
 

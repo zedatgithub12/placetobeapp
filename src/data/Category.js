@@ -1,37 +1,37 @@
 const Category = [
   {
     id: "13",
-    type: "filter",
+    type: "all",
     name: "All",
-    color: "#007bc2",
+    color: "#222222",
     icon: "emoticon-happy-outline",
   },
   {
     id: "14",
     type: "filter",
     name: "Featured",
-    color: "#007bc2",
+    color: "#222222",
     icon: "emoticon-happy-outline",
   },
   {
     id: "15",
     type: "status",
     name: "Happening",
-    color: "#007bc2",
+    color: "#222222",
     icon: "emoticon-happy-outline",
   },
   {
     id: "16",
     type: "status",
     name: "This week",
-    color: "#007bc2",
+    color: "#222222",
     icon: "emoticon-happy-outline",
   },
   {
     id: "17",
     type: "status",
     name: "Upcoming",
-    color: "#007bc2",
+    color: "#222222",
     icon: "emoticon-happy-outline",
   },
   {

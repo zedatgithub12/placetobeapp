@@ -13,6 +13,7 @@ import EventSubmission from "../Event/SubmitEvent";
 import Notifications from "../Notifications/Notifications";
 import Events from "../Event/Events";
 import UserTickets from "../Tickets/userTickets";
+import Bookmarks from "../Others/Bookmarks";
 const Tab = createBottomTabNavigator();
 
 function TabNav({ navigation }) {
@@ -46,8 +47,8 @@ function TabNav({ navigation }) {
         }}
       />
       <Tab.Screen
-        name="Events"
-        component={Events}
+        name="Bookmarks"
+        component={Bookmarks}
         options={{
           headerTitleAlign: "center",
           headerStyle: {
@@ -56,33 +57,13 @@ function TabNav({ navigation }) {
           headerTintColor: Constants.Inverse,
 
           tabBarIcon: ({ focused, color }) => (
-            <SimpleLineIcons name="calendar" size={21} color={color} />
+            <Ionicons name="heart-outline" size={24} color={color} />
           ),
           tabBarActiveTintColor: Constants.primary,
           tabBarInactiveTintColor: Constants.Inverse,
         }}
       />
 
-      <Tab.Screen
-        name="Add Event"
-        component={EventSubmission}
-        options={{
-          headerTitleAlign: "center",
-          headerStyle: {
-            backgroundColor: Constants.primary,
-          },
-          headerTintColor: Constants.Inverse,
-          tabBarLabel: "Add Event",
-
-          tabBarIcon: ({ focused, color }) => (
-            <SimpleLineIcons name="plus" size={24} color={color} />
-          ),
-          // tabBarButton: (props) => <AddEvent {...props} />,
-
-          tabBarActiveTintColor: Constants.primary,
-          tabBarInactiveTintColor: Constants.Inverse,
-        }}
-      />
       <Tab.Screen
         name="Tickets"
         component={UserTickets}
