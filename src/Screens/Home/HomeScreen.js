@@ -9,6 +9,7 @@ import {
   Dimensions,
   ScrollView,
   FlatList,
+  TouchableNativeFeedback,
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -34,18 +35,25 @@ import {
   CategoryColor,
   EntranceFee,
 } from "../../Utils/functions";
+import EventCounter from "./components/counter";
 
 function Home({ navigation, ...props }) {
   const { theme } = useTheme();
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
   const [active, setActive] = useState("All");
   const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
   const [filteredEvent, setFilteredEvent] = useState([]);
+  // state of event in the homepage
+  const [featured, setFeatured] = useState([]);
+  const [happening, setHappening] = useState([]);
+  const [thisWeek, setThisWeek] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
+
   // check if the profile got updated and update the top right profile indicator
   const profile = () => {
     navigation.navigate("Profile");
@@ -82,38 +90,11 @@ function Home({ navigation, ...props }) {
       });
   };
 
-  //featch available tickets
-  const FeatchTickets = () => {
-    var ApiUrl = Connection.url + Connection.AvailableTickets;
-
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-
-    // start Api request
-    fetch(ApiUrl, {
-      method: "GET",
-      headers: headers,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.success) {
-          setTickets(response.data);
-          setTicketShimmer(false);
-        } else {
-          setTicketShimmer(false);
-        }
-      })
-      .catch((error) => {
-        console.log("Error ticket featching" + error);
-        setTicketShimmer(false);
-      });
-  };
-
   // featch Featured events
   //featured events are the event which have high priority or value of number 1 in databse table
   const FeatchEvents = () => {
+    setLoading(true);
+
     var ApiUrl = Connection.url + Connection.events;
     var headers = {
       Accept: "application/json",
@@ -129,22 +110,17 @@ function Home({ navigation, ...props }) {
         if (response.success) {
           setEvents(response.data);
           setEventShimmer(false);
+          setLoading(false);
         } else {
           setEventShimmer(false);
+          setLoading(false);
         }
       })
       .catch((error) => {
         setEventShimmer(false);
+        setLoading(false);
       });
   };
-
-  // const filteredData = events.filter((event) => {
-  //   let isMatch = true;
-  //   if (categoryFilter !== "Category") {
-  //     isMatch = isMatch && event.category === categoryFilter;
-  //   }
-  //   return isMatch;
-  // });
 
   const handleCategoryClick = (categoryname, type) => {
     setActive(categoryname);
@@ -153,13 +129,6 @@ function Home({ navigation, ...props }) {
     } else {
       renderFilter(categoryname, type);
     }
-  };
-
-  /****************************************
-   * Render events those the category is "All"
-   */
-  const renderAll = () => {
-    return;
   };
 
   /****************************************
@@ -188,11 +157,51 @@ function Home({ navigation, ...props }) {
   const statusFilter = (category) => {
     if (category === "This week") {
       //filter events in this week
+      var Api = Connection.url + Connection.WeekEvents;
+      fetchEvent(Api);
     } else if (category === "Upcoming") {
       //filter upcoming events
-    } else {
+      var Api = Connection.url + Connection.UpcomingEvents;
+      fetchEvent(Api);
+    } else if (category === "Happening") {
       //filter events happening today
+      var Api = Connection.url + Connection.TodayEvents;
+      fetchEvent(Api);
     }
+  };
+
+  const fetchEvent = (Api) => {
+    setLoading(true);
+
+    fetch(Api, {
+      method: "GET",
+    })
+      .then((response) => response.json()) //check response type of the API
+      .then((response) => {
+        if (response.success) {
+          setFilteredEvent(response.data);
+          setLoading(false);
+          renderAll();
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+      });
+  };
+
+  /****************************************
+   * Render events those the category is "All"
+   */
+  const renderAll = () => {
+    const featured_event = events.filter((event) => event.priority === 1);
+    setFeatured(featured_event);
+
+    const happening_event = events.filter((event) => event.priority === 1);
+    setHappening(happening_event);
+
+    return;
   };
   // render item in flatlist format
   const renderItem = ({ item }) => (
@@ -233,8 +242,8 @@ function Home({ navigation, ...props }) {
   useEffect(() => {
     userInfoFunction();
     userProfile();
-    FeatchTickets();
     FeatchEvents();
+
     return () => {};
   }, [logged]);
 
@@ -339,7 +348,30 @@ function Home({ navigation, ...props }) {
                     <Loader size="small" />
                   ) : (
                     <View>
-                      <Text>{active}</Text>
+                      {featured.map((item, index) => (
+                        <Events
+                          key={index}
+                          Event_Id={item.id}
+                          org_id={item.userId}
+                          FeaturedImage={item.event_image}
+                          title={item.event_name}
+                          date={DateFormater(item.start_date)}
+                          time={TimeFormater(item.start_time)}
+                          venue={item.event_address}
+                          category={CategoryColor(item.category)}
+                          Price={EntranceFee(item.event_entrance_fee)}
+                          onPress={() =>
+                            navigation.navigate("EventDetail", { id: item.id })
+                          }
+                        />
+                      ))}
+
+                      {featured.length > 5 && (
+                        <EventCounter
+                          events={featured}
+                          onPress={() => alert("clicked")}
+                        />
+                      )}
                     </View>
                   )}
                 </ScrollView>

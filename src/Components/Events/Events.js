@@ -84,21 +84,20 @@ const Events = ({
 const styles = StyleSheet.create({
   EventContainer: {
     flexDirection: "row",
-    width: "96%",
-    padding: 5,
-    marginTop: 2,
+    width: "100%",
+
+    marginTop: 4,
     borderRadius: 4,
     alignSelf: "center",
     backgroundColor: Constants.background,
     borderRightWidth: 5,
   },
-  ImageContainer: {
-    padding: 2,
-  },
+  ImageContainer: {},
   FeaturedImagestyle: {
-    width: 90,
-    height: 100,
-    borderRadius: Constants.tiny,
+    width: 100,
+    height: 106,
+    borderBottomLeftRadius: Constants.medium,
+    borderTopLeftRadius: Constants.medium,
   },
   ContainerTwo: {
     width: "68%",

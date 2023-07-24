@@ -29,8 +29,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     padding: 6,
     paddingHorizontal: 10,
-    borderRadius: 4,
-    borderWidth: 0.4,
+    borderRadius: 6,
   },
   categoryText: {
     fontWeight: "600",

@@ -1,6 +1,6 @@
 const Connection = {
   //url: "http://app.p2b-ethiopia.com/placetobe/",
-  url: "http://192.168.100.3:8000/api/",
+  url: "http://192.168.0.5:8000/api/",
   signUp: "signup",
   signIn: "signin",
   googleSignUp: "signup-with-google",
