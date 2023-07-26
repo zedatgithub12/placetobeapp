@@ -1,6 +1,8 @@
 //import liraries
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import Preferences from "../../../preferences";
+import Constants from "../../../constants/Constants";
 
 // create a component
 const EventCounter = ({ events, onPress }) => {
@@ -12,7 +14,9 @@ const EventCounter = ({ events, onPress }) => {
         onPress={onPress}
       >
         <View>
-          <Text>5 of {events.length}</Text>
+          <Text style={{ fontSize: Constants.textSize, paddingRight: 8 }}>
+            {Preferences.listedEvent} of {events.length}
+          </Text>
         </View>
       </TouchableOpacity>
     </View>

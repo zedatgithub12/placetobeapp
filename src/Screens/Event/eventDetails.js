@@ -9,13 +9,17 @@ import {
   Pressable,
   ActivityIndicator,
   ToastAndroid,
+  TouchableNativeFeedback,
+  Dimensions,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Ionicons,
   Entypo,
   MaterialCommunityIcons,
+  Feather,
+  SimpleLineIcons,
+  AntDesign,
 } from "react-native-vector-icons";
 import Constants from "../../constants/Constants";
 import DetailContent from "../../Components/Events/EventContent";
@@ -36,8 +40,10 @@ import MapView, {
 } from "react-native-maps";
 // import MapView from "react-native-maps";
 import { Marker } from "react-native-maps";
+import { useTheme } from "@react-navigation/native";
 
 const EventDetails = ({ route, navigation }) => {
+  const { theme } = useTheme();
   const params = route.params || {};
   const { id, externalLink } = params; // an event item received from homepage flatlist will passed to this screen through route params
   const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
@@ -572,7 +578,7 @@ const EventDetails = ({ route, navigation }) => {
   }, [externalLink]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Constants.background }}>
+    <View style={{ flex: 1, backgroundColor: theme.background.faded }}>
       {loading ? (
         <View>
           <DetailShimmer />
@@ -580,27 +586,87 @@ const EventDetails = ({ route, navigation }) => {
       ) : (
         <ScrollView
           scrollEventThrottle={16}
-          style={{ backgroundColor: Constants.background }}
+          style={{ backgroundColor: theme.background.faded }}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.featuredImageContainer}>
-            <TouchableOpacity
-              style={styles.backArrow} // back arrow button style
-              onPress={() => navigation.goBack()}
+          <View style={styles.containerOne}>
+            <View
+              style={[
+                styles.featuredImageContainer,
+                { backgroundColor: "#fff" },
+              ]}
             >
-              <Ionicons
-                name="arrow-back-sharp"
-                size={25}
-                //back arrow icon
+              <Image
+                //Featured Image of the event
+                source={{ uri: featuredImageUri + item.event_image }} //featured image source
+                resizeMode="cover"
+                style={styles.image} //featured image styles
               />
-            </TouchableOpacity>
-            <Image
-              //Featured Image of the event
+            </View>
 
-              source={{ uri: featuredImageUri + item.event_image }} //featured image source
-              resizeMode="cover"
-              style={styles.image} //featured image styles
-            />
+            <View style={styles.actionbuttons}>
+              {logged && bookmarked ? (
+                <TouchableNativeFeedback
+                  //bookmark button beside event title
+                  disabled={bookmarkBtn}
+                  activeOpacity={0.7}
+                  style={styles.bookmarkButton}
+                  onPress={() => bookmarkEvent()}
+                >
+                  <Feather
+                    name="bookmark"
+                    size={18}
+                    color={bookmarkBtnColor}
+                    style={styles.bookmarkIcon}
+                  />
+                </TouchableNativeFeedback>
+              ) : (
+                <TouchableNativeFeedback
+                  //bookmark button beside event title
+                  activeOpacity={0.7}
+                  style={styles.bookmarkButton}
+                  onPress={() => SignInAlert()}
+                >
+                  <Ionicons
+                    name="bookmark"
+                    size={18}
+                    color={bookmarkBtnColor}
+                    style={styles.bookmarkIcon}
+                  />
+                </TouchableNativeFeedback>
+              )}
+
+              <TouchableNativeFeedback
+                style={styles.sharekButton}
+                onPress={() => ShareEvent(item.event_id)}
+              >
+                <AntDesign name="sharealt" size={18} style={styles.shareIcon} />
+              </TouchableNativeFeedback>
+              <TouchableNativeFeedback>
+                <Feather
+                  name="phone"
+                  size={18}
+                  color={bookmarkBtnColor}
+                  style={styles.bookmarkIcon}
+                />
+              </TouchableNativeFeedback>
+              <TouchableNativeFeedback>
+                <Feather
+                  name="link"
+                  size={18}
+                  color={bookmarkBtnColor}
+                  style={styles.bookmarkIcon}
+                />
+              </TouchableNativeFeedback>
+              <TouchableNativeFeedback>
+                <SimpleLineIcons
+                  name="direction"
+                  size={18}
+                  color={bookmarkBtnColor}
+                  style={styles.bookmarkIcon}
+                />
+              </TouchableNativeFeedback>
+            </View>
           </View>
 
           {item.cancelled == "1" ? (
@@ -618,68 +684,73 @@ const EventDetails = ({ route, navigation }) => {
             </Animatable.View>
           ) : null}
 
-          <View style={styles.EventTitle}>
-            <Text
-              numberOfLines={1}
-              style={[styles.eventName]} // event name on event detail section
-            >
-              {item.event_name}
-            </Text>
-
-            <View style={styles.actionButton}>
-              {logged && bookmarked ? (
-                <TouchableOpacity
-                  //bookmark button beside event title
-                  disabled={bookmarkBtn}
-                  activeOpacity={0.7}
-                  style={styles.bookmarkButton}
-                  onPress={() => bookmarkEvent()}
-                >
-                  <Ionicons
-                    name="bookmark"
-                    size={18}
-                    color={bookmarkBtnColor}
-                    style={styles.bookmarkIcon}
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  //bookmark button beside event title
-                  activeOpacity={0.7}
-                  style={styles.bookmarkButton}
-                  onPress={() => SignInAlert()}
-                >
-                  <Ionicons
-                    name="bookmark"
-                    size={18}
-                    color={bookmarkBtnColor}
-                    style={styles.bookmarkIcon}
-                  />
-                </TouchableOpacity>
-              )}
-
-              <TouchableOpacity
-                style={styles.sharekButton}
-                activeOpacity={0.7}
-                onPress={() => ShareEvent(item.event_id)}
-
-                // share event button
+          <View
+            style={{ marginTop: 6, backgroundColor: theme.background.main }}
+          >
+            <View style={styles.EventTitle}>
+              <Text
+                numberOfLines={2}
+                style={[styles.eventName]} // event name on event detail section
               >
-                <Entypo name="share" size={18} style={styles.shareIcon} />
-              </TouchableOpacity>
+                {item.event_name}
+              </Text>
+
+              <View style={styles.actionButton}>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <Ionicons name="heart" size={16} color={theme.danger.main} />
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "500",
+                      marginHorizontal: 3,
+                    }}
+                  >
+                    345
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <AntDesign name="star" size={16} color={theme.primary[600]} />
+
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "700",
+                      marginHorizontal: 3,
+                    }}
+                  >
+                    5.0
+                  </Text>
+                </View>
+              </View>
             </View>
+
+            <DetailContent
+              StartDate={DateFun(item.start_date)}
+              StartTime={timing.StartTime}
+              EndDate={DateFun(item.end_date)}
+              EndTime={timing.EndTime}
+              Price={item.event_entrance_fee}
+              Venues={item.event_address}
+              phone={item.contact_phone}
+              isCancelled={item.cancelled}
+            />
           </View>
 
-          <DetailContent
-            StartDate={DateFun(item.start_date)}
-            StartTime={timing.StartTime}
-            EndDate={DateFun(item.end_date)}
-            EndTime={timing.EndTime}
-            Price={item.event_entrance_fee}
-            Venues={item.event_address}
-            phone={item.contact_phone}
-            isCancelled={item.cancelled}
-          />
           <View style={styles.descDescription}>
             <Text style={styles.descTitle}> Description</Text>
 
@@ -829,43 +900,47 @@ const EventDetails = ({ route, navigation }) => {
           </TouchableOpacity>
         </Animatable.View>
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 };
 const styles = StyleSheet.create({
-  backArrow: {
-    position: "absolute",
-    top: 5,
-    zIndex: 2,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 20,
-    marginTop: 8,
-    marginBottom: 8,
-    backgroundColor: Constants.background,
-    height: 40,
-    width: 40,
-    borderRadius: 50,
-    elevation: 2,
-  },
-  // Featurd Image style
-  image: {
-    flex: 1,
-    width: "100%",
-    height: 350,
-
-    borderWidth: 2,
-    borderRadius: 20,
+  containerOne: {
+    width: Dimensions.get("screen").width,
+    height: Dimensions.get("screen").height / 2.6,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   //featured Image Container Styling
   featuredImageContainer: {
-    flex: 1,
+    padding: 10,
     justifyContent: "center",
-    alignSelf: "center",
-    width: "96%",
-    height: "90%",
+    width: "80%",
+    height: "100%",
+    borderTopEndRadius: 6,
+    borderBottomEndRadius: 6,
   },
-
+  // Featurd Image style
+  image: {
+    width: "100%",
+    height: "100%",
+    alignSelf: "center",
+    borderWidth: 2,
+    borderRadius: 8,
+  },
+  //the style of buttons beside the event poster at the top the page
+  actionbuttons: {
+    width: "18%",
+    height: "100%",
+    marginLeft: 4,
+    backgroundColor: "#fff",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    borderTopStartRadius: 6,
+    borderBottomStartRadius: 6,
+  },
   // organizers section styling
   organizersSection: {
     justifyContent: "center",
@@ -885,7 +960,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "center",
   },
-  // organizer name style
+  // organizer na,me style
   orgName: {
     fontSize: Constants.headingone,
     fontWeight: Constants.Boldtwo,
@@ -934,7 +1009,6 @@ const styles = StyleSheet.create({
     paddingRight: 5,
   },
   EventTitle: {
-    flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -942,21 +1016,17 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   actionButton: {
-    position: "absolute",
-    right: 5,
-    top: 0,
-    width: "20%",
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
+    paddingTop: 1,
   },
   eventName: {
-    width: "79%",
-    marginTop: 5,
+    width: "70%",
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
-
-    paddingRight: 4,
+    paddingRight: 8,
+    color: Constants.Inverse,
   },
   bookmarkButton: {
     borderRadius: 50,
@@ -972,23 +1042,24 @@ const styles = StyleSheet.create({
     backgroundColor: Constants.Faded,
   },
   descDescription: {
-    flex: 2,
     margin: 10,
     marginLeft: 20,
+    marginTop: 16,
   },
   descTitle: {
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
     color: Constants.Inverse,
-    paddingLeft: 2,
+    marginBottom: 4,
   },
   desctext: {
     margin: 5,
-    marginLeft: 10,
+    marginRight: 10,
     fontFamily: Constants.fontFam,
     fontSize: 14,
-    fontWeight: Constants.Boldtwo,
-    color: Constants.Inverse,
+    lineHeight: 24,
+    textAlign: "justify",
+    color: Constants.mainText,
   },
   mapContainer: {
     alignItems: "center",
@@ -1057,11 +1128,11 @@ const styles = StyleSheet.create({
     color: Constants.textColor,
   },
   ReadMore: {
+    fontSize: Constants.headingthree,
     fontWeight: Constants.Bold,
-    color: Constants.purple,
-    padding: 6,
-    marginLeft: 6,
     fontStyle: "italic",
+    color: Constants.Inverse,
+    padding: 6,
   },
   orgConatinerShimmer: {
     justifyContent: "center",

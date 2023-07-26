@@ -117,7 +117,13 @@ const Routes = () => {
       <Stack.Screen
         name="EventDetail"
         component={EventDetails}
-        options={{ headerShown: false }}
+        options={{
+          headerStyle: {
+            backgroundColor: Constants.primary,
+          },
+
+          headerShadowVisible: false,
+        }}
       />
 
       <Stack.Screen

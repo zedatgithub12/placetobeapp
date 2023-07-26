@@ -5,7 +5,7 @@ import Connection from "../../constants/connection";
 
 // slider a component
 const Slider = () => {
-  var placeHoldersImage = "placeholders.jpg";
+  var placeHoldersImage = "placeholder.png";
 
   const PlaceholderImages = [
     {
@@ -59,10 +59,8 @@ const Slider = () => {
       })
         .then((response) => response.json())
         .then((response) => {
-          var message = response[0].message;
-
-          if (message === "succeed") {
-            var featuredImages = response[0].images;
+          if (response.success) {
+            var featuredImages = response.data;
 
             setImage(featuredImages);
           } else {
@@ -134,30 +132,25 @@ const Slider = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     borderRadius: 12,
   },
 
   box: {
     flexDirection: "row",
     width: Dimensions.get("screen").width,
-    height: 110,
-    justifyContent: "center",
+    height: 120,
     alignItems: "center",
-    marginTop: 8,
-    marginBottom: 6,
-    paddingHorizontal: 10,
-
-    borderRadius: 12,
+    justifyContent: "center",
+    borderRadius: 20,
+    marginVertical: 2,
   },
   image: {
-    width: "100%",
+    width: "92%",
     height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
     borderRadius: 12,
-    backgroundColor: "#eee",
+    backgroundColor: "#fff",
     resizeMode: "contain",
   },
 
@@ -170,7 +163,7 @@ const styles = StyleSheet.create({
     width: 9,
     height: 9,
     borderRadius: 5,
-    backgroundColor: "#ccc",
+    backgroundColor: "#f3f3f3",
     marginHorizontal: 5,
   },
   activeDot: {

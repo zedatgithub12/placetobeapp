@@ -84,17 +84,16 @@ const Events = ({
 const styles = StyleSheet.create({
   EventContainer: {
     flexDirection: "row",
-    width: "100%",
-
+    width: "97%",
     marginTop: 4,
-    borderRadius: 4,
     alignSelf: "center",
     backgroundColor: Constants.background,
-    borderRightWidth: 5,
+    borderRightWidth: 3,
+    marginHorizontal: 12,
   },
   ImageContainer: {},
   FeaturedImagestyle: {
-    width: 100,
+    width: 106,
     height: 106,
     borderBottomLeftRadius: Constants.medium,
     borderTopLeftRadius: Constants.medium,
@@ -128,10 +127,11 @@ const styles = StyleSheet.create({
   //flatlist event date styles
   EventDate: {
     marginLeft: 2,
-    marginTop: 5,
+    marginTop: 3,
     color: Constants.Inverse,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingthree,
+    fontWeight: Constants.Boldtwo,
   },
   // venue container style
   venueContainer: {

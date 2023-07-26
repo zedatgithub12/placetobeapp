@@ -34,8 +34,11 @@ import {
   TimeFormater,
   CategoryColor,
   EntranceFee,
+  getCurrentDate,
+  formattedDate,
 } from "../../Utils/functions";
 import EventCounter from "./components/counter";
+import Preferences from "../../preferences";
 
 function Home({ navigation, ...props }) {
   const { theme } = useTheme();
@@ -53,6 +56,8 @@ function Home({ navigation, ...props }) {
   const [happening, setHappening] = useState([]);
   const [thisWeek, setThisWeek] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
+
+  const today = getCurrentDate();
 
   // check if the profile got updated and update the top right profile indicator
   const profile = () => {
@@ -198,11 +203,72 @@ function Home({ navigation, ...props }) {
     const featured_event = events.filter((event) => event.priority === 1);
     setFeatured(featured_event);
 
-    const happening_event = events.filter((event) => event.priority === 1);
+    const happening_event = events.filter(
+      (event) => event.start_date <= today && event.end_date >= today
+    );
     setHappening(happening_event);
 
-    return;
+    const upcoming_event = events.filter(
+      (event) => event.start_date <= today && event.end_date >= today
+    );
+    setUpcoming(upcoming_event);
   };
+
+  const weekEvents = () => {
+    const this_weekevents = events.filter((event) => {
+      const currentDate = new Date();
+      // Get the start and end dates of the week
+      const startOfWeek = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate() - currentDate.getDay()
+      );
+      const endOfWeek = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate() + (6 - currentDate.getDay())
+      );
+      // Convert the event's start and end dates to Date objects
+      const eventStartDate = new Date(formattedDate(event.start_date));
+      const eventEndDate = new Date(formattedDate(event.end_date));
+
+      // Check if the event's start date is within the current week
+      const isStartDateValid =
+        eventStartDate >= startOfWeek && eventStartDate <= endOfWeek;
+
+      // Check if the event's end date is within the current week
+      const isEndDateValid =
+        eventEndDate >= startOfWeek && eventEndDate <= endOfWeek;
+
+      // Return true only if all conditions are met
+      return isStartDateValid && isEndDateValid;
+    });
+
+    setThisWeek(this_weekevents);
+  };
+
+  const upcomingEvents = () => {
+    const upcomings = events.filter((event) => {
+      const currentDate = new Date();
+
+      const endOfWeek = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate() + (6 - currentDate.getDay())
+      );
+      // Convert the event's start and end dates to Date objects
+      const eventStartDate = new Date(formattedDate(event.start_date));
+
+      // Check if the event's start date is after the end of the current week
+      const isStartDateValid = eventStartDate > endOfWeek;
+
+      // Return true only if all conditions are met
+      return isStartDateValid;
+    });
+
+    setUpcoming(upcomings);
+  };
+
   // render item in flatlist format
   const renderItem = ({ item }) => (
     <Events
@@ -243,7 +309,8 @@ function Home({ navigation, ...props }) {
     userInfoFunction();
     userProfile();
     FeatchEvents();
-
+    weekEvents();
+    upcomingEvents();
     return () => {};
   }, [logged]);
 
@@ -341,13 +408,13 @@ function Home({ navigation, ...props }) {
 
         <View style={styles.sectionthree}>
           {connection ? (
-            <View>
+            <View style={styles.homescrollview}>
               {active === "All" ? (
-                <ScrollView contentContainerStyle={styles.categories}>
-                  {loading ? (
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {featured.length > 0 && loading ? (
                     <Loader size="small" />
                   ) : (
-                    <View>
+                    <View style={{ marginVertical: 5 }}>
                       {featured.map((item, index) => (
                         <Events
                           key={index}
@@ -366,10 +433,124 @@ function Home({ navigation, ...props }) {
                         />
                       ))}
 
-                      {featured.length > 5 && (
+                      {featured.length > Preferences.listedEvent && (
                         <EventCounter
                           events={featured}
-                          onPress={() => alert("clicked")}
+                          onPress={() =>
+                            handleCategoryClick("Featured", "filter")
+                          }
+                        />
+                      )}
+                    </View>
+                  )}
+                  <Slider />
+
+                  {/* Happening event listing */}
+                  {happening.length > 0 && loading ? (
+                    <Loader size="small" />
+                  ) : (
+                    <View>
+                      <View style={{ paddingVertical: 2 }}>
+                        <Text style={styles.title}>Happening</Text>
+                      </View>
+                      {happening.map((item, index) => (
+                        <Events
+                          key={index}
+                          Event_Id={item.id}
+                          org_id={item.userId}
+                          FeaturedImage={item.event_image}
+                          title={item.event_name}
+                          date={DateFormater(item.start_date)}
+                          time={TimeFormater(item.start_time)}
+                          venue={item.event_address}
+                          category={CategoryColor(item.category)}
+                          Price={EntranceFee(item.event_entrance_fee)}
+                          onPress={() =>
+                            navigation.navigate("EventDetail", { id: item.id })
+                          }
+                        />
+                      ))}
+
+                      {happening.length > Preferences.listedEvent && (
+                        <EventCounter
+                          events={happening}
+                          onPress={() =>
+                            handleCategoryClick("Happening", "status")
+                          }
+                        />
+                      )}
+                    </View>
+                  )}
+
+                  {/* This week event listing */}
+                  {thisWeek.length > 0 && loading ? (
+                    <Loader size="small" />
+                  ) : (
+                    <View>
+                      <View style={{ paddingVertical: 2 }}>
+                        <Text style={styles.title}>This Week</Text>
+                      </View>
+                      {thisWeek.map((item, index) => (
+                        <Events
+                          key={index}
+                          Event_Id={item.id}
+                          org_id={item.userId}
+                          FeaturedImage={item.event_image}
+                          title={item.event_name}
+                          date={DateFormater(item.start_date)}
+                          time={TimeFormater(item.start_time)}
+                          venue={item.event_address}
+                          category={CategoryColor(item.category)}
+                          Price={EntranceFee(item.event_entrance_fee)}
+                          onPress={() =>
+                            navigation.navigate("EventDetail", { id: item.id })
+                          }
+                        />
+                      ))}
+
+                      {thisWeek.length > Preferences.listedEvent && (
+                        <EventCounter
+                          events={thisWeek}
+                          onPress={() =>
+                            handleCategoryClick("This Week", "status")
+                          }
+                        />
+                      )}
+                    </View>
+                  )}
+
+                  {/* upcoming event listing */}
+                  {upcoming.length > 0 && loading ? (
+                    <Loader size="small" />
+                  ) : (
+                    <View>
+                      <View style={{ paddingVertical: 2 }}>
+                        <Text style={styles.title}>Upcomings</Text>
+                      </View>
+                      {upcoming.map((item, index) => (
+                        <Events
+                          key={index}
+                          Event_Id={item.id}
+                          org_id={item.userId}
+                          FeaturedImage={item.event_image}
+                          title={item.event_name}
+                          date={DateFormater(item.start_date)}
+                          time={TimeFormater(item.start_time)}
+                          venue={item.event_address}
+                          category={CategoryColor(item.category)}
+                          Price={EntranceFee(item.event_entrance_fee)}
+                          onPress={() =>
+                            navigation.navigate("EventDetail", { id: item.id })
+                          }
+                        />
+                      ))}
+
+                      {upcoming.length > Preferences.listedEvent && (
+                        <EventCounter
+                          events={upcoming}
+                          onPress={() =>
+                            handleCategoryClick("Upcoming", "status")
+                          }
                         />
                       )}
                     </View>
@@ -531,8 +712,8 @@ const styles = StyleSheet.create({
   homeSection2: {
     marginTop: 68,
   },
-  categories: {
-    paddingHorizontal: 6,
+  homescrollview: {
+    marginBottom: 55,
   },
   sectionthree: {},
   notFound: {
@@ -554,6 +735,13 @@ const styles = StyleSheet.create({
     margin: 5,
     borderRadius: Constants.tinybox,
     marginBottom: 62,
+  },
+  title: {
+    fontSize: Constants.headingone,
+    fontWeight: Constants.Boldtwo,
+    marginLeft: 10,
+    marginTop: 6,
+    marginBottom: 2,
   },
 });
 
