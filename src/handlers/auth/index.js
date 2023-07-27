@@ -16,7 +16,7 @@ const NotLoggedIn = ({ ...props }) => {
           color={Constants.Secondary}
         />
 
-        <Title style={styles.prompttxt}>Please Login First!</Title>
+        <Title style={styles.prompttxt}>Please sign in first</Title>
         <Paragraph style={styles.helperText}>{props.helpertext}</Paragraph>
 
         <View style={styles.actionBtns}>

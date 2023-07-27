@@ -11,11 +11,11 @@ import {
   ToastAndroid,
   TouchableNativeFeedback,
   Dimensions,
+  Button,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import {
   Ionicons,
-  Entypo,
   MaterialCommunityIcons,
   Feather,
   SimpleLineIcons,
@@ -41,6 +41,7 @@ import MapView, {
 // import MapView from "react-native-maps";
 import { Marker } from "react-native-maps";
 import { useTheme } from "@react-navigation/native";
+import Rating from "../../Components/Events/Rating";
 
 const EventDetails = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -54,6 +55,23 @@ const EventDetails = ({ route, navigation }) => {
   //item as value from database
   const [item, setItem] = useState({});
   const [loading, setLoading] = useState(true);
+
+  const [ratingVisible, setRatingVisible] = useState(false);
+  const [currentRating, setCurrentRating] = useState(0);
+
+  const Rated = (value) => {
+    setCurrentRating(value);
+    setRatingVisible(true);
+  };
+
+  const handleRatingClose = () => {
+    setRatingVisible(false);
+  };
+
+  const handleSubmitFeedback = (rating, review) => {
+    // Make API call to store the feedback
+    console.log("Submitting feedback:", rating, review);
+  };
 
   const [timing, setTime] = useState({
     StartTime: "",
@@ -705,7 +723,6 @@ const EventDetails = ({ route, navigation }) => {
                     marginRight: 10,
                   }}
                 >
-                  <Ionicons name="heart" size={16} color={theme.danger.main} />
                   <Text
                     style={{
                       fontSize: 16,
@@ -722,19 +739,22 @@ const EventDetails = ({ route, navigation }) => {
                     flexDirection: "row",
                     justifyContent: "center",
                     alignItems: "center",
+                    borderLeftWidth: 0.4,
+                    borderColor: theme.dark[300],
+                    paddingLeft: 10,
                   }}
                 >
-                  <AntDesign name="star" size={16} color={theme.primary[600]} />
-
                   <Text
                     style={{
                       fontSize: 16,
-                      fontWeight: "700",
+                      fontWeight: Constants.Boldtwo,
                       marginHorizontal: 3,
+                      color: theme.dark.main,
                     }}
                   >
-                    5.0
+                    4.7
                   </Text>
+                  <AntDesign name="star" size={14} color={theme.primary.main} />
                 </View>
               </View>
             </View>
@@ -768,8 +788,46 @@ const EventDetails = ({ route, navigation }) => {
             ) : null}
           </View>
 
-          {coords ? (
-            <View style={styles.mapContainer}>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.ratingTitle}> Rate this event</Text>
+            <Text style={styles.ratingHelper} numberOfLines={1}>
+              Tell others what you think
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                marginVertical: 9,
+                marginLeft: 2,
+                width: Dimensions.get("screen").width / 2,
+                justifyContent: "space-between",
+              }}
+            >
+              {[1, 2, 3, 4, 5].map((value) => (
+                <TouchableOpacity key={value} onPress={() => Rated(value)}>
+                  <AntDesign
+                    name={currentRating >= value ? "star" : "staro"}
+                    size={24}
+                    color={theme.primary.main}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Rating
+              visible={ratingVisible}
+              onClose={handleRatingClose}
+              currentRating={currentRating}
+              onSubmitFeedback={handleSubmitFeedback}
+            />
+          </View>
+
+          {coords && (
+            <View
+              style={[
+                styles.mapContainer,
+                { backgroundColor: theme.background.main },
+              ]}
+            >
               <View style={styles.mapInfo}>
                 <Text style={styles.location}>Location</Text>
                 <Text style={styles.venueOnMap} numberOfLines={1}>
@@ -777,7 +835,7 @@ const EventDetails = ({ route, navigation }) => {
                 </Text>
               </View>
 
-              <View style={styles.mapParent}>
+              <View style={[styles.mapParent]}>
                 <MapView
                   provider={PROVIDER_GOOGLE}
                   mapType="standard"
@@ -810,11 +868,11 @@ const EventDetails = ({ route, navigation }) => {
                 </MapView>
               </View>
             </View>
-          ) : null}
+          )}
 
-          {featching ? (
+          {featching && (
             <View
-              style={styles.organizersSection}
+              style={[styles.organizersSection]}
               //organizers section container, which contains
               // Organizers profile, name, Category and subscription button
             >
@@ -828,7 +886,10 @@ const EventDetails = ({ route, navigation }) => {
               >
                 <Image
                   source={{ uri: featuredImageUri + eventOrg.featuredImage }}
-                  style={styles.organizerProfile}
+                  style={[
+                    styles.organizerProfile,
+                    { borderColor: theme.background.main },
+                  ]}
                   resizeMode="contain"
                 />
               </Pressable>
@@ -849,7 +910,7 @@ const EventDetails = ({ route, navigation }) => {
                   {eventOrg.category}
                 </Text>
               </Pressable>
-              {logged ? (
+              {/* {logged && (
                 <TouchableOpacity
                   // follow organizers button
 
@@ -871,18 +932,10 @@ const EventDetails = ({ route, navigation }) => {
                     </Text>
                   )}
                 </TouchableOpacity>
-              ) : null}
+              )} */}
+
               {/* <MapView style={styles.map} /> */}
             </View>
-          ) : (
-            <SkeletonPlaceholder>
-              <View style={styles.orgConatinerShimmer}>
-                <View style={styles.orgProfileShimmer} />
-                <View style={styles.orgNameShimmer} />
-                <View style={styles.orgCategoryShimmer} />
-                <View style={styles.orgButtonShimmer} />
-              </View>
-            </SkeletonPlaceholder>
           )}
         </ScrollView>
       )}
@@ -943,35 +996,37 @@ const styles = StyleSheet.create({
   },
   // organizers section styling
   organizersSection: {
-    justifyContent: "center",
+    width: Dimensions.get("screen").width,
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    alignSelf: "center",
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   //organizers profile styling
   organizerProfile: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    borderWidth: 0.5,
-    borderColor: Constants.primary,
+    borderWidth: 2,
+    marginHorizontal: 20,
   },
   //organizer information section style
   orgInfoContainer: {
-    justifyContent: "center",
     alignSelf: "center",
   },
   // organizer na,me style
   orgName: {
-    fontSize: Constants.headingone,
-    fontWeight: Constants.Boldtwo,
-    color: Constants.mainText,
-    marginTop: 2,
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Bold,
+    color: Constants.Inverse,
   },
   // organizer operation category style
   orgCategory: {
-    fontWeight: Constants.Boldtwo,
-    color: Constants.mainTwo,
-    alignSelf: "center",
+    fontFamily: Constants.fontFam,
+    fontSize: Constants.thirty,
+    color: Constants.Inverse,
+    textTransform: "capitalize",
   },
   // follow button style
   orgFollowBtn: {
@@ -1043,14 +1098,13 @@ const styles = StyleSheet.create({
   },
   descDescription: {
     margin: 10,
-    marginLeft: 20,
     marginTop: 16,
   },
   descTitle: {
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
     color: Constants.Inverse,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   desctext: {
     margin: 5,
@@ -1061,19 +1115,35 @@ const styles = StyleSheet.create({
     textAlign: "justify",
     color: Constants.mainText,
   },
+  ratingContainer: {
+    margin: 10,
+    marginVertical: 16,
+  },
+  ratingTitle: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Bold,
+    color: Constants.Inverse,
+  },
+  ratingHelper: {
+    fontFamily: Constants.fontFam,
+    fontSize: Constants.thirty,
+    color: Constants.Inverse,
+    marginLeft: 5,
+  },
+
   mapContainer: {
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
-    width: "98%",
-    height: 450,
-    paddingTop: 5,
+    width: "100%",
+    height: 440,
+    borderRadius: 8,
   },
   mapInfo: {
     flexDirection: "column",
     alignSelf: "flex-start",
-    paddingLeft: 20,
-    marginVertical: 10,
+    paddingLeft: 16,
+    marginBottom: 10,
   },
   location: {
     fontSize: Constants.headingtwo,
@@ -1086,12 +1156,11 @@ const styles = StyleSheet.create({
     color: Constants.Inverse,
   },
   mapParent: {
-    width: "90%",
-    height: "80%",
+    width: "94%",
+    height: "78%",
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
-    marginBottom: 6,
     overflow: "hidden",
   },
   map: {
