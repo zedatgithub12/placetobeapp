@@ -58,7 +58,6 @@ function Home({ navigation, ...props }) {
   const [upcoming, setUpcoming] = useState([]);
 
   const today = getCurrentDate();
-
   // check if the profile got updated and update the top right profile indicator
   const profile = () => {
     navigation.navigate("Profile");

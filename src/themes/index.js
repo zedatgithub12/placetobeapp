@@ -7,13 +7,25 @@ export const theme = {
     background: {
       main: "#ffffff",
       faded: "#f3f3f3",
+
+      50: "#ffffff",
+      100: "#efefef",
+      200: "#dcdcdc",
+      300: "#bdbdbd",
+      400: "#989898",
+      500: "#7c7c7c",
+      600: "#656565",
+      700: "#525252",
+      800: "#464646",
+      900: "#3d3d3d",
+      950: "#292929",
     },
     primary: {
       50: "#fffeea",
       100: "#fffac5",
       200: "#fff685",
-      300: "#ffea46",
-      400: "#ffdb1b",
+      light: "#ffea46",
+      regular: "#ffdb1b",
       main: "#ffbb00",
       600: "#e29000",
       700: "#bb6502",
@@ -21,7 +33,9 @@ export const theme = {
       900: "#7c400b",
       950: "#482100",
     },
-
+    buttons: {
+      main: "#0075FF",
+    },
     success: {
       main: "#5cb85c",
     },
@@ -38,7 +52,7 @@ export const theme = {
       50: "#f7f7f7",
       100: "#e3e3e3",
       200: "#c8c8c8",
-      300: "#a4a4a4",
+      light: "#a4a4a4",
       400: "#818181",
       main: "#292b2c",
       600: "#515151",

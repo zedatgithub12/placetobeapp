@@ -82,7 +82,7 @@ export default function App() {
     redirectLink: "",
     imageStatus: false,
   });
-  const [user, setUser] = React.useState({
+  const [user, setUser] = useState({
     userId: "",
     userTokens: "",
     userEmail: "",

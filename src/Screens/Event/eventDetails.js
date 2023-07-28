@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  ScrollView,
   View,
   Text,
   TouchableOpacity,
@@ -7,13 +8,10 @@ import {
   Image,
   Alert,
   Pressable,
-  ActivityIndicator,
   ToastAndroid,
-  TouchableNativeFeedback,
   Dimensions,
-  Button,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+
 import {
   Ionicons,
   MaterialCommunityIcons,
@@ -30,24 +28,22 @@ import * as FileSystem from "expo-file-system";
 import { useSelector, useDispatch } from "react-redux";
 import { bookmarkItem, remove } from "../../Reducer/saveSlice";
 import Share from "react-native-share";
-import SkeletonPlaceholder from "react-native-skeleton-placeholder";
+import call from "react-native-phone-call";
 import * as Animatable from "react-native-animatable";
 import DetailShimmer from "../../Components/Events/Skeleton/DetailShimmer";
-import MapView, {
-  PROVIDER_GOOGLE,
-  GoogleMaps,
-  Callout,
-} from "react-native-maps";
+import MapView, { PROVIDER_GOOGLE, Callout } from "react-native-maps";
 // import MapView from "react-native-maps";
 import { Marker } from "react-native-maps";
 import { useTheme } from "@react-navigation/native";
 import Rating from "../../Components/Events/Rating";
+import RelatedEvent from "../../Components/Events/related";
+import { Typography } from "../../themes/typography";
 
 const EventDetails = ({ route, navigation }) => {
   const { theme } = useTheme();
   const params = route.params || {};
   const { id, externalLink } = params; // an event item received from homepage flatlist will passed to this screen through route params
-  const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
+  const { userStatus } = React.useContext(AuthContext); //wether user is loged or not status is retrieved from our context
   const logged = userStatus.logged;
   //dispatch bookmarking item
   const dispatch = useDispatch();
@@ -55,9 +51,18 @@ const EventDetails = ({ route, navigation }) => {
   //item as value from database
   const [item, setItem] = useState({});
   const [loading, setLoading] = useState(true);
-
   const [ratingVisible, setRatingVisible] = useState(false);
   const [currentRating, setCurrentRating] = useState(0);
+
+  const MakeCall = (phone) => {
+    const args = {
+      number: phone, // String value with the number to call
+      prompt: false, // Optional boolean property. Determines if the user should be prompted prior to the call
+      skipCanOpen: true, // Skip the canOpenURL check
+    };
+
+    call(args);
+  };
 
   const Rated = (value) => {
     setCurrentRating(value);
@@ -195,13 +200,13 @@ const EventDetails = ({ route, navigation }) => {
   };
 
   const [bookmarkBtn, setBookmarkBtn] = useState(false);
-  const [bookmarkBtnColor, setBookmarkBtnColor] = useState(Constants.Inverse);
+  const [bookmarkBtnColor, setBookmarkBtnColor] = useState(theme.dark.main);
 
   const bookmarkEvent = () => {
     const find = items.find((event) => event.event_id === item.event_id);
     if (find) {
       //setBookmarkBtn(true);
-      setBookmarkBtnColor(Constants.Secondary);
+      setBookmarkBtnColor(theme.primary.main);
       dispatch(remove(item.event_id));
       showToast("Unsaved!");
     } else {
@@ -577,11 +582,6 @@ const EventDetails = ({ route, navigation }) => {
     }
   };
 
-  const [orders, setOrders] = useState({
-    first: false,
-    second: false,
-  });
-
   //we call useeffect hook once the component get mounted
   useEffect(() => {
     var isSubcribed = true;
@@ -596,7 +596,13 @@ const EventDetails = ({ route, navigation }) => {
   }, [externalLink]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.background.faded }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.background.faded,
+        paddingBottom: exist ? 60 : 20,
+      }}
+    >
       {loading ? (
         <View>
           <DetailShimmer />
@@ -611,7 +617,7 @@ const EventDetails = ({ route, navigation }) => {
             <View
               style={[
                 styles.featuredImageContainer,
-                { backgroundColor: "#fff" },
+                { backgroundColor: theme.background.main },
               ]}
             >
               <Image
@@ -624,11 +630,14 @@ const EventDetails = ({ route, navigation }) => {
 
             <View style={styles.actionbuttons}>
               {logged && bookmarked ? (
-                <TouchableNativeFeedback
+                <TouchableOpacity
                   //bookmark button beside event title
                   disabled={bookmarkBtn}
                   activeOpacity={0.7}
-                  style={styles.bookmarkButton}
+                  style={[
+                    styles.bookmarkButton,
+                    { backgroundColor: theme.background.main },
+                  ]}
                   onPress={() => bookmarkEvent()}
                 >
                   <Feather
@@ -637,12 +646,15 @@ const EventDetails = ({ route, navigation }) => {
                     color={bookmarkBtnColor}
                     style={styles.bookmarkIcon}
                   />
-                </TouchableNativeFeedback>
+                </TouchableOpacity>
               ) : (
-                <TouchableNativeFeedback
+                <TouchableOpacity
                   //bookmark button beside event title
                   activeOpacity={0.7}
-                  style={styles.bookmarkButton}
+                  style={[
+                    styles.bookmarkButton,
+                    { backgroundColor: theme.background.main },
+                  ]}
                   onPress={() => SignInAlert()}
                 >
                   <Ionicons
@@ -651,39 +663,71 @@ const EventDetails = ({ route, navigation }) => {
                     color={bookmarkBtnColor}
                     style={styles.bookmarkIcon}
                   />
-                </TouchableNativeFeedback>
+                </TouchableOpacity>
               )}
 
-              <TouchableNativeFeedback
-                style={styles.sharekButton}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.bookmarkButton,
+                  { backgroundColor: theme.background.main },
+                ]}
                 onPress={() => ShareEvent(item.event_id)}
               >
                 <AntDesign name="sharealt" size={18} style={styles.shareIcon} />
-              </TouchableNativeFeedback>
-              <TouchableNativeFeedback>
-                <Feather
-                  name="phone"
-                  size={18}
-                  color={bookmarkBtnColor}
-                  style={styles.bookmarkIcon}
-                />
-              </TouchableNativeFeedback>
-              <TouchableNativeFeedback>
-                <Feather
-                  name="link"
-                  size={18}
-                  color={bookmarkBtnColor}
-                  style={styles.bookmarkIcon}
-                />
-              </TouchableNativeFeedback>
-              <TouchableNativeFeedback>
-                <SimpleLineIcons
-                  name="direction"
-                  size={18}
-                  color={bookmarkBtnColor}
-                  style={styles.bookmarkIcon}
-                />
-              </TouchableNativeFeedback>
+              </TouchableOpacity>
+
+              {item.contact_phone && (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={[
+                    styles.bookmarkButton,
+                    { backgroundColor: theme.background.main },
+                  ]}
+                  onPress={() => MakeCall(item.contact_phone)}
+                >
+                  <Feather
+                    name="phone"
+                    size={18}
+                    color={bookmarkBtnColor}
+                    style={styles.bookmarkIcon}
+                  />
+                </TouchableOpacity>
+              )}
+
+              {item.redirectUrl && (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={[
+                    styles.bookmarkButton,
+                    { backgroundColor: theme.background.main },
+                  ]}
+                >
+                  <Feather
+                    name="link"
+                    size={18}
+                    color={bookmarkBtnColor}
+                    style={styles.bookmarkIcon}
+                  />
+                </TouchableOpacity>
+              )}
+
+              {item.address_latitude && item.address_longitude && (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={[
+                    styles.bookmarkButton,
+                    { backgroundColor: theme.background.main },
+                  ]}
+                >
+                  <SimpleLineIcons
+                    name="direction"
+                    size={18}
+                    color={bookmarkBtnColor}
+                    style={styles.bookmarkIcon}
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
@@ -702,9 +746,7 @@ const EventDetails = ({ route, navigation }) => {
             </Animatable.View>
           ) : null}
 
-          <View
-            style={{ marginTop: 6, backgroundColor: theme.background.main }}
-          >
+          <View style={{ marginTop: 6 }}>
             <View style={styles.EventTitle}>
               <Text
                 numberOfLines={2}
@@ -818,16 +860,12 @@ const EventDetails = ({ route, navigation }) => {
               onClose={handleRatingClose}
               currentRating={currentRating}
               onSubmitFeedback={handleSubmitFeedback}
+              event={item}
             />
           </View>
 
           {coords && (
-            <View
-              style={[
-                styles.mapContainer,
-                { backgroundColor: theme.background.main },
-              ]}
-            >
+            <View style={[styles.mapContainer]}>
               <View style={styles.mapInfo}>
                 <Text style={styles.location}>Location</Text>
                 <Text style={styles.venueOnMap} numberOfLines={1}>
@@ -871,46 +909,74 @@ const EventDetails = ({ route, navigation }) => {
           )}
 
           {featching && (
-            <View
-              style={[styles.organizersSection]}
-              //organizers section container, which contains
-              // Organizers profile, name, Category and subscription button
-            >
-              <Pressable
-                onPress={() =>
-                  navigation.navigate("Organizer Detail", {
-                    organizerInfo,
-                    followStatus,
-                  })
-                }
+            <View style={{ backgroundColor: theme.background[100] }}>
+              <View style={styles.RelatedEventContainer}>
+                <Text style={styles.ratingTitle}> Event Organizer</Text>
+              </View>
+
+              <View
+                style={[styles.organizersSection]}
+                //organizers section container, which contains
+                // Organizers profile, name, Category and subscription button
               >
-                <Image
-                  source={{ uri: featuredImageUri + eventOrg.featuredImage }}
-                  style={[
-                    styles.organizerProfile,
-                    { borderColor: theme.background.main },
-                  ]}
-                  resizeMode="contain"
-                />
-              </Pressable>
-              <Pressable
-                // organizers name and operation category will be listed inside this component
-                style={styles.orgInfoContainer}
-                onPress={() =>
-                  navigation.navigate("Organizer Detail", {
-                    organizerInfo,
-                    followStatus,
-                  })
-                }
-              >
-                <Text style={styles.orgName}>{eventOrg.organizerName}</Text>
-                <Text
-                  style={styles.orgCategory} //organizers operation field or category
+                <Pressable
+                  onPress={() =>
+                    navigation.navigate("Organizer Detail", {
+                      organizerInfo,
+                      followStatus,
+                    })
+                  }
                 >
-                  {eventOrg.category}
-                </Text>
-              </Pressable>
-              {/* {logged && (
+                  <Image
+                    source={{ uri: featuredImageUri + eventOrg.featuredImage }}
+                    style={[
+                      styles.organizerProfile,
+                      { borderColor: theme.background.main },
+                    ]}
+                    resizeMode="contain"
+                  />
+                </Pressable>
+                <Pressable
+                  // organizers name and operation category will be listed inside this component
+                  style={styles.orgInfoContainer}
+                  onPress={() =>
+                    navigation.navigate("Organizer Detail", {
+                      organizerInfo,
+                      followStatus,
+                    })
+                  }
+                >
+                  <Text
+                    style={{
+                      fontSize: Constants.headingtwo,
+                      fontWeight: Typography.weight.semiBold,
+                      color: Constants.Inverse,
+                    }}
+                  >
+                    {eventOrg.organizerName}
+                  </Text>
+                  <Text
+                    style={styles.orgCategory} //organizers operation field or category
+                  >
+                    {eventOrg.category}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: Constants.fontFam,
+                      fontSize: Constants.thirty,
+                      fontWeight: Typography.weight.bold,
+                      color: Constants.Inverse,
+                    }} //organizers operation field or category
+                  >
+                    4.9{" "}
+                    <AntDesign
+                      name="star"
+                      size={14}
+                      color={theme.primary.main}
+                    />
+                  </Text>
+                </Pressable>
+                {/* {logged && (
                 <TouchableOpacity
                   // follow organizers button
 
@@ -933,13 +999,48 @@ const EventDetails = ({ route, navigation }) => {
                   )}
                 </TouchableOpacity>
               )} */}
-
-              {/* <MapView style={styles.map} /> */}
+              </View>
             </View>
           )}
+
+          <View style={styles.RelatedEventContainer}>
+            <Text style={styles.ratingTitle}> Related events</Text>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.dark.main,
+                  fontFamily: Typography.family,
+                  fontSize: Typography.size.headingthree,
+
+                  textTransform: "capitalize",
+                  padding: 4,
+                }}
+                numberOfLines={1}
+              >
+                {item.category}
+              </Text>
+            </View>
+          </View>
+
+          <ScrollView horizontal>
+            <RelatedEvent
+              picture={item.event_image}
+              name={item.event_name}
+              date={item.start_date}
+              onPress={() =>
+                navigation.navigate("EventDetail", { id: item.id })
+              }
+            />
+          </ScrollView>
         </ScrollView>
       )}
-      {loading ? null : exist && item.cancelled == null ? (
+      {exist && item.cancelled == null && (
         <Animatable.View
           animation="fadeInUpBig"
           style={[styles.ticketBtnContainer]}
@@ -952,7 +1053,7 @@ const EventDetails = ({ route, navigation }) => {
             <Text style={styles.ticketTxt}> Buy Ticket</Text>
           </TouchableOpacity>
         </Animatable.View>
-      ) : null}
+      )}
     </View>
   );
 };
@@ -986,10 +1087,9 @@ const styles = StyleSheet.create({
     width: "18%",
     height: "100%",
     marginLeft: 4,
-    backgroundColor: "#fff",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-evenly",
+
     alignItems: "center",
     borderTopStartRadius: 6,
     borderBottomStartRadius: 6,
@@ -1005,9 +1105,9 @@ const styles = StyleSheet.create({
   },
   //organizers profile styling
   organizerProfile: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     borderWidth: 2,
     marginHorizontal: 20,
   },
@@ -1068,7 +1168,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     margin: 10,
-    paddingLeft: 10,
+    paddingLeft: 5,
   },
   actionButton: {
     flexDirection: "row",
@@ -1085,9 +1185,9 @@ const styles = StyleSheet.create({
   },
   bookmarkButton: {
     borderRadius: 50,
-    padding: 8,
+    padding: 14,
     margin: 5,
-    backgroundColor: Constants.Faded,
+    marginVertical: 8,
   },
   bookmarkIcon: {},
   sharekButton: {
@@ -1162,6 +1262,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 10,
     overflow: "hidden",
+    borderWidth: 1.5,
+    borderColor: "#fff",
   },
   map: {
     width: "100%",
@@ -1241,6 +1343,11 @@ const styles = StyleSheet.create({
     padding: Constants.padd,
     paddingHorizontal: 20,
     margin: 10,
+  },
+  RelatedEventContainer: {
+    margin: 10,
+    marginTop: 16,
+    marginBottom: 5,
   },
 });
 export default EventDetails;

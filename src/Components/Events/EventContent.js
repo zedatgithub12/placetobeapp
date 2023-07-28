@@ -111,7 +111,7 @@ const DetailContent = ({ ...props }) => {
       </View>
 
       {/* call button */}
-      {props.phone == null ? null : (
+      {props.phone && (
         <View>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -139,7 +139,7 @@ const DetailContent = ({ ...props }) => {
 };
 const styles = StyleSheet.create({
   topContent: {
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     paddingBottom: 10,
   },
   subContainer: {
