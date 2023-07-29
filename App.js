@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { theme } from "./src/themes";
@@ -26,6 +27,7 @@ import Geolocation from "@react-native-community/geolocation";
 import { LocalNotification } from "./src/Utils/localPushController";
 import RemotePushController from "./src/Utils/RemotePushController";
 import Routes from "./src/routes";
+import PopupAds from "./src/Components/Ads/popup";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
@@ -97,6 +99,8 @@ export default function App() {
     status: "",
     logged: false,
   });
+
+  const [showModal, setShowModal] = useState(false);
 
   const loginReducer = (prevState, action) => {
     switch (action.type) {
@@ -377,13 +381,19 @@ export default function App() {
 
       dispatch({ type: "REGISTER", token: userToken });
     }, 4000);
+    const timer = setTimeout(() => {
+      setShowModal(true);
+    }, 8000);
+
     NetInfo.fetch().then((state) => {
       if (state.isConnected) {
         setConnectionState(true);
       }
     });
 
-    return () => {};
+    return () => {
+      clearTimeout(timer);
+    };
   }, [retry]);
 
   //activity indicator which is going to be shown and the opening of app
@@ -447,6 +457,8 @@ export default function App() {
                 </TouchableOpacity>
               </View>
             )}
+
+            
           </NavigationContainer>
         </AuthContext.Provider>
       </PersistGate>

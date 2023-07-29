@@ -10,6 +10,7 @@ import {
   Pressable,
   ToastAndroid,
   Dimensions,
+  Linking,
 } from "react-native";
 
 import {
@@ -53,7 +54,7 @@ const EventDetails = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [ratingVisible, setRatingVisible] = useState(false);
   const [currentRating, setCurrentRating] = useState(0);
-
+  const [mapOpen, setMapOpen] = useState(true);
   const MakeCall = (phone) => {
     const args = {
       number: phone, // String value with the number to call
@@ -94,6 +95,43 @@ const EventDetails = ({ route, navigation }) => {
 
     if (latitude == null && longitude == null) {
       setCoords(false);
+    }
+  };
+
+  const createMapLink = (latitude, longitude) => {
+    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    return mapUrl;
+  };
+
+  const getDirection = async (latitude, longitude) => {
+    const mapLink = createMapLink(latitude, longitude);
+
+    try {
+      const supported = await Linking.canOpenURL(mapLink);
+
+      if (supported) {
+        await Linking.openURL(mapLink);
+      } else {
+        showToast("No application found to handle the URL.");
+      }
+    } catch (error) {
+      showToast("An error occurred while opening the link:");
+    }
+  };
+
+  //open redirect url in the homepage
+  const openLink = async (url) => {
+    // Check if the URL starts with 'http://' or 'https://'
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      // Add the 'http://' prefix if missing
+      url = "http://" + url;
+    }
+
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      showToast("Error opening URL");
+      // Handle the error here (e.g., show an error message to the user)
     }
   };
 
@@ -689,7 +727,7 @@ const EventDetails = ({ route, navigation }) => {
                   <Feather
                     name="phone"
                     size={18}
-                    color={bookmarkBtnColor}
+                    color={theme.dark.main}
                     style={styles.bookmarkIcon}
                   />
                 </TouchableOpacity>
@@ -697,6 +735,7 @@ const EventDetails = ({ route, navigation }) => {
 
               {item.redirectUrl && (
                 <TouchableOpacity
+                  onPress={() => openLink(item.redirectUrl)}
                   activeOpacity={0.7}
                   style={[
                     styles.bookmarkButton,
@@ -706,7 +745,7 @@ const EventDetails = ({ route, navigation }) => {
                   <Feather
                     name="link"
                     size={18}
-                    color={bookmarkBtnColor}
+                    color={theme.dark.main}
                     style={styles.bookmarkIcon}
                   />
                 </TouchableOpacity>
@@ -719,11 +758,14 @@ const EventDetails = ({ route, navigation }) => {
                     styles.bookmarkButton,
                     { backgroundColor: theme.background.main },
                   ]}
+                  onPress={() =>
+                    getDirection(item.address_latitude, item.address_longitude)
+                  }
                 >
                   <SimpleLineIcons
                     name="direction"
                     size={18}
-                    color={bookmarkBtnColor}
+                    color={theme.dark.main}
                     style={styles.bookmarkIcon}
                   />
                 </TouchableOpacity>
@@ -808,6 +850,9 @@ const EventDetails = ({ route, navigation }) => {
               EndTime={timing.EndTime}
               Price={item.event_entrance_fee}
               Venues={item.event_address}
+              direction={() =>
+                getDirection(item.address_latitude, item.address_longitude)
+              }
               phone={item.contact_phone}
               isCancelled={item.cancelled}
             />
@@ -865,46 +910,83 @@ const EventDetails = ({ route, navigation }) => {
           </View>
 
           {coords && (
-            <View style={[styles.mapContainer]}>
-              <View style={styles.mapInfo}>
-                <Text style={styles.location}>Location</Text>
-                <Text style={styles.venueOnMap} numberOfLines={1}>
-                  {item.event_address}
-                </Text>
+            <View
+              style={[
+                styles.mapContainer,
+                { width: "100%", height: mapOpen ? 440 : 80 },
+              ]}
+            >
+              <View
+                style={{
+                  width: Dimensions.get("screen").width,
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <View style={styles.mapInfo}>
+                  <Text style={styles.location}>Map</Text>
+                  <Text style={styles.venueOnMap} numberOfLines={1}>
+                    {item.event_address}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.6}
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    marginRight: 14,
+                    padding: 4,
+                    backgroundColor: theme.dark[100],
+                  }}
+                  onPress={() => setMapOpen(!mapOpen)}
+                >
+                  <AntDesign
+                    name={mapOpen ? "down" : "right"}
+                    size={16}
+                    color={theme.dark.main}
+                  />
+                </TouchableOpacity>
               </View>
 
-              <View style={[styles.mapParent]}>
-                <MapView
-                  provider={PROVIDER_GOOGLE}
-                  mapType="standard"
-                  userInterfaceStyle="dark"
-                  minZoomLevel={16}
-                  maxZoomLevel={20}
-                  loadingEnabled={true}
-                  loadingBackgroundColor={Constants.Faded}
-                  loadingIndicatorColor={Constants.primary}
-                  tintColor={Constants.primary}
-                  userLocationCalloutEnabled={true}
-                  style={[styles.map]}
-                  initialRegion={{
-                    latitude: parseFloat(item.address_latitude),
-                    longitude: parseFloat(item.address_longitude),
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
-                  }}
-                >
-                  <Marker
-                    coordinate={{
+              {mapOpen && (
+                <View style={[styles.mapParent]}>
+                  <MapView
+                    provider={PROVIDER_GOOGLE}
+                    mapType="standard"
+                    userInterfaceStyle="dark"
+                    loadingEnabled={true}
+                    loadingBackgroundColor={Constants.Faded}
+                    loadingIndicatorColor={Constants.primary}
+                    tintColor={Constants.primary}
+                    userLocationCalloutEnabled={true}
+                    scrollEnabled={false}
+                    style={[styles.map]}
+                    initialRegion={{
                       latitude: parseFloat(item.address_latitude),
                       longitude: parseFloat(item.address_longitude),
+                      latitudeDelta: 0.0922,
+                      longitudeDelta: 0.0421,
                     }}
-                    image={{
-                      uri: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngwing.com%2Fen%2Fsearch%3Fq%3Dmap%2BMarker&psig=AOvVaw1sWuU_lBSs-5sii34I1Nz_&ust=1676116422134000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCLDxkLXyiv0CFQAAAAAdAAAAABAF",
-                    }}
-                  />
-                  <Callout tooltip={true} />
-                </MapView>
-              </View>
+                  >
+                    <Marker
+                      coordinate={{
+                        latitude: parseFloat(item.address_latitude),
+                        longitude: parseFloat(item.address_longitude),
+                      }}
+                      image={{
+                        uri: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngwing.com%2Fen%2Fsearch%3Fq%3Dmap%2BMarker&psig=AOvVaw1sWuU_lBSs-5sii34I1Nz_&ust=1676116422134000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCLDxkLXyiv0CFQAAAAAdAAAAABAF",
+                      }}
+                    />
+                    <Callout tooltip={true} />
+                  </MapView>
+                </View>
+              )}
             </View>
           )}
 
@@ -1235,13 +1317,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
-    width: "100%",
-    height: 440,
+
     borderRadius: 8,
   },
   mapInfo: {
     flexDirection: "column",
-    alignSelf: "flex-start",
     paddingLeft: 16,
     marginBottom: 10,
   },

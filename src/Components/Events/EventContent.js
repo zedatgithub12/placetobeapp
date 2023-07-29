@@ -30,9 +30,6 @@ const DetailContent = ({ ...props }) => {
     call(args);
   };
 
-  var location = props.Venues;
-  var replacedSpaces = location.split(" ").join("+");
-
   return (
     <View
       style={styles.topContent} //event detail text content container component
@@ -70,11 +67,7 @@ const DetailContent = ({ ...props }) => {
       <TouchableOpacity
         activeOpacity={0.7}
         style={styles.subContainer}
-        onPress={() =>
-          Linking.openURL(
-            "https://www.google.com/maps/search/?api=1&query=" + replacedSpaces
-          )
-        }
+        onPress={props.direction}
       >
         <MaterialCommunityIcons
           name="map-marker-radius"

@@ -29,13 +29,14 @@ const Rating = ({
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const handleSubmitReview = () => {
-    // Handle the submission of the review here
-    console.log("Rating:", currentRating);
-    console.log("Review:", review);
     onSubmitFeedback(currentRating, review);
     setModalVisible(false);
     onClose();
     showToast("Successfully Rated!");
+  };
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    onClose();
   };
 
   return (
@@ -60,7 +61,7 @@ const Rating = ({
               }}
             >
               <TouchableOpacity
-                onPress={handleSubmitReview}
+                onPress={handleCloseModal}
                 style={{ padding: 6 }}
               >
                 <AntDesign name="close" size={18} color={theme.dark.main} />
@@ -78,7 +79,7 @@ const Rating = ({
                 {event.event_name}
               </Text>
 
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleSubmitReview}>
                 <Text
                   style={{
                     fontFamily: Typography.family,
