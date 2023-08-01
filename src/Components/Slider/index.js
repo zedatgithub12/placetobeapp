@@ -1,6 +1,13 @@
 //import liraries
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, Image, ScrollView, Dimensions } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  ScrollView,
+  Dimensions,
+  Pressable,
+} from "react-native";
 import Connection from "../../constants/connection";
 
 // slider a component
@@ -104,13 +111,13 @@ const Slider = () => {
           setCurrentImageIndex(index);
         }}
       >
-        {Images.map((image, index) => (
-          <View key={index} style={styles.box}>
+        {Images.map((Ads, index) => (
+          <Pressable key={index} style={styles.box} onPress={()=> alert(Ads.id)}>
             <Image
-              source={{ uri: Connection.url + Connection.assets + image.image }}
+              source={{ uri: Connection.url + Connection.assets + Ads.image }}
               style={styles.image}
             />
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
       <View style={styles.pagination}>
@@ -134,16 +141,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 12,
+    borderRadius: 8,
+    marginVertical: 5,
   },
 
   box: {
     flexDirection: "row",
     width: Dimensions.get("screen").width,
-    height: 120,
+    height: 110,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 20,
+    borderRadius: 6,
     marginVertical: 2,
   },
   image: {
@@ -157,17 +165,17 @@ const styles = StyleSheet.create({
   pagination: {
     flexDirection: "row",
     position: "absolute",
-    bottom: 10,
+    bottom: 9,
   },
   paginationDot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: "#f3f3f3",
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: "#ffbb00",
+    backgroundColor: "#e29000",
   },
 });
 //make this component available to the app

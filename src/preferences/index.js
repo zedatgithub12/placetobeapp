@@ -1,5 +1,5 @@
 const Preferences = {
-  listedEvent: 0,
+  listedEvent: 5,
 };
 
 export default Preferences;

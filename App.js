@@ -28,6 +28,7 @@ import { LocalNotification } from "./src/Utils/localPushController";
 import RemotePushController from "./src/Utils/RemotePushController";
 import Routes from "./src/routes";
 import PopupAds from "./src/Components/Ads/popup";
+import SlideUp from "./src/Components/Ads/slideup";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
@@ -62,6 +63,9 @@ export default function App() {
   const initialLoginState = {
     isLoading: true,
   };
+
+  const [showPopUpAds, setShowPopupAds] = useState(true);
+  const [showSlideAds, setShowSlideAds] = useState(true);
 
   //a constant which store a state of event field input datas
   // the information collected from all input field will be store here
@@ -99,8 +103,6 @@ export default function App() {
     status: "",
     logged: false,
   });
-
-  const [showModal, setShowModal] = useState(false);
 
   const loginReducer = (prevState, action) => {
     switch (action.type) {
@@ -380,10 +382,10 @@ export default function App() {
       }
 
       dispatch({ type: "REGISTER", token: userToken });
-    }, 4000);
+    }, 2000);
     const timer = setTimeout(() => {
-      setShowModal(true);
-    }, 8000);
+      setShowPopupAds(true);
+    }, 30000);
 
     NetInfo.fetch().then((state) => {
       if (state.isConnected) {
@@ -458,7 +460,16 @@ export default function App() {
               </View>
             )}
 
-            
+            <PopupAds
+              showModal={showPopUpAds}
+              positiveAction={() => alert("positive")}
+            />
+            {showSlideAds && (
+              <SlideUp
+                slideUpPressed={() => alert("don't touch me")}
+                onClose={() => setShowSlideAds(false)}
+              />
+            )}
           </NavigationContainer>
         </AuthContext.Provider>
       </PersistGate>

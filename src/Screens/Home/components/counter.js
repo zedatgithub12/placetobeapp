@@ -3,11 +3,23 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Preferences from "../../../preferences";
 import Constants from "../../../constants/Constants";
+import { useTheme } from "@react-navigation/native";
 
-// create a component
+// event listing footer component for homepage
 const EventCounter = ({ events, onPress }) => {
+  const { theme } = useTheme();
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.primary.light,
+          marginHorizontal: 5,
+          borderBottomLeftRadius: 12,
+          borderBottomLeftRadius: 12,
+        },
+      ]}
+    >
       <TouchableOpacity
         activeOpacity={0.5}
         style={styles.btn}

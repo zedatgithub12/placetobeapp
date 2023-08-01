@@ -9,13 +9,11 @@ import {
   Dimensions,
   ScrollView,
   FlatList,
-  TouchableNativeFeedback,
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../../constants/Constants";
-import { Ionicons, MaterialIcons } from "react-native-vector-icons";
-import { Divider } from "react-native-paper";
+import { Ionicons } from "react-native-vector-icons";
 import { AuthContext } from "../../Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../../api";
@@ -39,6 +37,10 @@ import {
 } from "../../Utils/functions";
 import EventCounter from "./components/counter";
 import Preferences from "../../preferences";
+import NativeAdsOne from "../../Components/Ads/nativeAd1";
+import SlideUp from "../../Components/Ads/slideup";
+import HeaderAds from "../../Components/Ads/headerAds";
+import TitleContainer from "./components/header";
 
 function Home({ navigation, ...props }) {
   const { theme } = useTheme();
@@ -48,6 +50,7 @@ function Home({ navigation, ...props }) {
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
   const [active, setActive] = useState("All");
+  const [showNativeAd, setShowNativeAd] = useState(false);
   const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
   const [filteredEvent, setFilteredEvent] = useState([]);
@@ -410,10 +413,9 @@ function Home({ navigation, ...props }) {
             <View style={styles.homescrollview}>
               {active === "All" ? (
                 <ScrollView showsVerticalScrollIndicator={false}>
-                  {featured.length > 0 && loading ? (
-                    <Loader size="small" />
-                  ) : (
-                    <View style={{ marginVertical: 5 }}>
+                  {featured.length > 0 && (
+                    <View>
+                      <TitleContainer title="Featured Events" />
                       {featured.map((item, index) => (
                         <Events
                           key={index}
@@ -445,13 +447,9 @@ function Home({ navigation, ...props }) {
                   <Slider />
 
                   {/* Happening event listing */}
-                  {happening.length > 0 && loading ? (
-                    <Loader size="small" />
-                  ) : (
+                  {happening.length > 0 && (
                     <View>
-                      <View style={{ paddingVertical: 2 }}>
-                        <Text style={styles.title}>Happening</Text>
-                      </View>
+                      <TitleContainer title="Happening" />
                       {happening.map((item, index) => (
                         <Events
                           key={index}
@@ -482,13 +480,9 @@ function Home({ navigation, ...props }) {
                   )}
 
                   {/* This week event listing */}
-                  {thisWeek.length > 0 && loading ? (
-                    <Loader size="small" />
-                  ) : (
+                  {thisWeek.length > 0 && (
                     <View>
-                      <View style={{ paddingVertical: 2 }}>
-                        <Text style={styles.title}>This Week</Text>
-                      </View>
+                      <TitleContainer title="This Week" />
                       {thisWeek.map((item, index) => (
                         <Events
                           key={index}
@@ -519,13 +513,10 @@ function Home({ navigation, ...props }) {
                   )}
 
                   {/* upcoming event listing */}
-                  {upcoming.length > 0 && loading ? (
-                    <Loader size="small" />
-                  ) : (
+                  {upcoming.length > 0 && (
                     <View>
-                      <View style={{ paddingVertical: 2 }}>
-                        <Text style={styles.title}>Upcomings</Text>
-                      </View>
+                      <TitleContainer title="Upcoming" />
+
                       {upcoming.map((item, index) => (
                         <Events
                           key={index}
@@ -554,6 +545,18 @@ function Home({ navigation, ...props }) {
                       )}
                     </View>
                   )}
+
+                  <View
+                    style={{
+                      paddingTop: 20,
+                      height: Dimensions.get("screen").height / 1.6,
+                    }}
+                  >
+                    <NativeAdsOne
+                      showAds={true}
+                      PositiveAction={() => alert("Yeah press me")}
+                    />
+                  </View>
                 </ScrollView>
               ) : (
                 <View>
@@ -570,6 +573,13 @@ function Home({ navigation, ...props }) {
                       maxToRenderPerBatch={1} // Reduce number in each render batch
                       updateCellsBatchingPeriod={100} // Increase time between renders
                       windowSize={7} // Reduce the window size
+                      ListHeaderComponent={
+                        showNativeAd && (
+                          <HeaderAds
+                            PositiveAction={() => alert("leran more clicked")}
+                          />
+                        )
+                      }
                       ListEmptyComponent={
                         <View style={styles.container}>
                           <Image
@@ -711,10 +721,19 @@ const styles = StyleSheet.create({
   homeSection2: {
     marginTop: 68,
   },
+  sectionthree: {
+    marginBottom: 48,
+  },
   homescrollview: {
     marginBottom: 55,
   },
-  sectionthree: {},
+  title: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    marginLeft: 10,
+    marginTop: 6,
+    marginBottom: 2,
+  },
   notFound: {
     width: "100%",
     height: 200,
@@ -726,21 +745,6 @@ const styles = StyleSheet.create({
     color: Constants.Secondary,
     alignSelf: "center",
     justifyContent: "center",
-  },
-  listEnd: {
-    padding: 20,
-    backgroundColor: Constants.transparentPrimary,
-    marginTop: 5,
-    margin: 5,
-    borderRadius: Constants.tinybox,
-    marginBottom: 62,
-  },
-  title: {
-    fontSize: Constants.headingone,
-    fontWeight: Constants.Boldtwo,
-    marginLeft: 10,
-    marginTop: 6,
-    marginBottom: 2,
   },
 });
 

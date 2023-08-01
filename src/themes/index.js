@@ -24,7 +24,7 @@ export const theme = {
       50: "#fffeea",
       100: "#fffac5",
       200: "#fff685",
-      light: "#ffea46",
+      light: "#FFF5DA",
       regular: "#ffdb1b",
       main: "#ffbb00",
       600: "#e29000",
