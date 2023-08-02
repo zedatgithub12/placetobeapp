@@ -1,7 +1,7 @@
 //import liraries
 import { useTheme } from "@react-navigation/native";
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { Typography } from "../../../themes/typography";
 
 // header of events segmentation made in the homepage
@@ -10,6 +10,7 @@ const TitleContainer = ({ title }) => {
   return (
     <View
       style={{
+        width: Dimensions.get("screen").width / 2.8,
         backgroundColor: theme.primary.main,
         marginTop: 10,
         marginHorizontal: 5,
@@ -24,7 +25,7 @@ const TitleContainer = ({ title }) => {
           {
             color: theme.dark.main,
             fontSize: Typography.size.headingtwo,
-            fontWeight: Typography.weight.medium,
+            fontWeight: Typography.weight.regular,
           },
         ]}
       >
@@ -38,7 +39,6 @@ const TitleContainer = ({ title }) => {
 const styles = StyleSheet.create({
   title: {
     marginLeft: 10,
-    marginTop: 6,
     marginBottom: 2,
   },
 });

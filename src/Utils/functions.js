@@ -120,6 +120,59 @@ export const CategoryColor = (category) => {
   }
   return color;
 };
+// ticket status
+export const Status = (Tstatus) => {
+  var ticketStatus;
+
+  switch (Tstatus) {
+    case 0:
+      ticketStatus = "Pending";
+      break;
+
+    case 1:
+      ticketStatus = "Upcoming";
+      break;
+
+    case 2:
+      ticketStatus = "Attended";
+      break;
+
+    case 3:
+      ticketStatus = "Expired";
+      break;
+
+    default:
+      ticketStatus = "Cancelled";
+  }
+  return ticketStatus;
+};
+
+//status text color
+export const StatusText = (textColor) => {
+  var StatusColor;
+
+  switch (textColor) {
+    case 0:
+      StatusColor = "#787878";
+      break;
+
+    case 1:
+      StatusColor = "#0075FF";
+      break;
+
+    case 2:
+      StatusColor = "#ff3d4d";
+      break;
+
+    case 3:
+      StatusColor = "#787878";
+      break;
+
+    default:
+      StatusColor = "#787878";
+  }
+  return StatusColor;
+};
 
 // check if there is discount on ticket price and let them know there is discount
 export const discount = (current, origional) => {

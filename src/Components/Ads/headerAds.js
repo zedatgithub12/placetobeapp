@@ -1,5 +1,5 @@
 //import liraries
-import React, { Component } from "react";
+import React from "react";
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
@@ -10,8 +10,16 @@ import { Typography } from "../../themes/typography";
 const HeaderAds = ({ showAds, Ad, PositiveAction, CloseAds }) => {
   const { theme } = useTheme();
   return (
-    <View
-      style={[styles.EventContainer, { backgroundColor: theme.primary.light }]}
+    <Pressable
+      onPress={PositiveAction}
+      style={[
+        styles.EventContainer,
+        {
+          backgroundColor: theme.primary.light,
+          borderTopLeftRadius: 8,
+          borderBottomLeftRadius: 8,
+        },
+      ]}
     >
       <View style={styles.ImageContainer}>
         <Image
@@ -38,69 +46,71 @@ const HeaderAds = ({ showAds, Ad, PositiveAction, CloseAds }) => {
           You can't rush the moment
         </Text>
 
-        <View>
+        <View
+          style={{ flexDirection: "column", justifyContent: "space-between" }}
+        >
           <Text
             style={{
               padding: 4,
               fontFamily: Typography.family,
               fontSize: Typography.size.headingthree,
               fontWeight: Typography.weight.medium,
-              lineHeight: 20,
+              lineHeight: 16,
               color: theme.dark[600],
             }}
           >
             Cards are a great way to display information
           </Text>
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <Pressable onPress={PositiveAction}>
-              <Text
-                style={{
-                  padding: 4,
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.headingthree,
-                  fontWeight: Typography.weight.bold,
-                  lineHeight: 20,
-                  color: theme.buttons.main,
-                }}
-              >
-                Learn more
-              </Text>
-            </Pressable>
-
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            width: "100%",
+            position: "absolute",
+            bottom: 4,
+            paddingHorizontal: 4,
+          }}
+        >
+          <Pressable onPress={PositiveAction}>
             <Text
               style={{
-                position: "absolute",
-                right: 0,
-                bottom: 0,
-                paddingHorizontal: 4,
                 fontFamily: Typography.family,
-                fontSize: Typography.size.textSize,
-                fontWeight: Typography.weight.semiBold,
-                color: theme.dark.main,
+                fontSize: Typography.size.headingthree,
+                fontWeight: Typography.weight.bold,
+                lineHeight: 20,
+                color: theme.buttons.main,
+                marginLeft: 4,
+                bottom: 0,
               }}
             >
-              Ads
+              Learn more
             </Text>
-          </View>
+          </Pressable>
+
+          <Text
+            style={{
+              position: "absolute",
+              right: 0,
+              bottom: 0,
+              paddingHorizontal: 4,
+              fontFamily: Typography.family,
+              fontSize: Typography.size.textSize,
+              fontWeight: Typography.weight.semiBold,
+              color: theme.dark.main,
+            }}
+          >
+            Ads
+          </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
 // define your styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   EventContainer: {
     flexDirection: "row",
     width: "97%",

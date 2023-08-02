@@ -7,6 +7,7 @@ export const theme = {
     background: {
       main: "#ffffff",
       faded: "#f3f3f3",
+      darker: "f1f1f1",
 
       50: "#ffffff",
       100: "#efefef",

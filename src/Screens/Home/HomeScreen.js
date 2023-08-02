@@ -50,7 +50,7 @@ function Home({ navigation, ...props }) {
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
   const [active, setActive] = useState("All");
-  const [showNativeAd, setShowNativeAd] = useState(false);
+  const [showNativeAd, setShowNativeAd] = useState(true);
   const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
   const [filteredEvent, setFilteredEvent] = useState([]);
@@ -319,12 +319,14 @@ function Home({ navigation, ...props }) {
   const logged = userStatus.logged;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background.darker }]}
+    >
       <StatusBar backgroundColor={theme.primary.main} barStyle="dark-content" />
       <View>
         <View
           //to component container
-          // profile avatar, App name and serach is included inside the component
+          // profile avatar, App name and search is included inside the component
           style={[styles.headers, { backgroundColor: theme.background.main }]}
         >
           <View style={styles.brands}>
@@ -613,7 +615,6 @@ function Home({ navigation, ...props }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3f3f3",
   },
   headers: {
     width: "100%",

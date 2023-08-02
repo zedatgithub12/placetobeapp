@@ -91,10 +91,10 @@ const PopupAds = ({ showModal, ad, positiveAction }) => {
                 {
                   padding: 4,
                   fontFamily: Typography.family,
-                  fontSize: Typography.size.headingtwo,
-                  fontWeight: Typography.weight.medium,
+                  fontSize: Typography.size.headingthree,
+                  fontWeight: Typography.weight.regular,
                   lineHeight: 20,
-                  color: theme.dark[600],
+                  color: theme.dark[800],
                 },
               ]}
             >

@@ -18,6 +18,8 @@ import { AuthContext } from "./src/Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "./src/store/store";
 import { Provider } from "react-redux";
+import { Provider as PaperProvider } from "react-native-paper";
+
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import * as Linking from "expo-linking";
@@ -422,57 +424,59 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <AuthContext.Provider value={authContext}>
-          <NavigationContainer
-            theme={theme}
-            linking={Linkings}
-            fallback={
-              <View style={styles.loader}>
-                <ActivityIndicator color={Constants.primary} size="large" />
-                <RemotePushController />
-              </View>
-            }
-          >
-            <StatusBar style={Constants.Inverse} />
-            {connectionState ? (
-              <Routes />
-            ) : (
-              <View style={styles.noConnection}>
-                <Image
-                  source={require("./src/assets/images/connect.png")}
-                  style={styles.connImage}
-                  resizeMode="contain"
-                />
-                <Image
-                  source={require("./src/assets/images/icon.png")}
-                  style={styles.icon}
-                  resizeMode="contain"
-                />
-                <Text>No Connection</Text>
-                <Caption>Please Check your internet connection</Caption>
-                <TouchableOpacity
-                  onPress={() => Referesh()}
-                  style={styles.eventsBtn}
-                >
-                  <Text style={styles.eventstxt}>Retry</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+      <PaperProvider>
+        <PersistGate loading={null} persistor={persistor}>
+          <AuthContext.Provider value={authContext}>
+            <NavigationContainer
+              theme={theme}
+              linking={Linkings}
+              fallback={
+                <View style={styles.loader}>
+                  <ActivityIndicator color={Constants.primary} size="large" />
+                  <RemotePushController />
+                </View>
+              }
+            >
+              <StatusBar style={Constants.Inverse} />
+              {connectionState ? (
+                <Routes />
+              ) : (
+                <View style={styles.noConnection}>
+                  <Image
+                    source={require("./src/assets/images/connect.png")}
+                    style={styles.connImage}
+                    resizeMode="contain"
+                  />
+                  <Image
+                    source={require("./src/assets/images/icon.png")}
+                    style={styles.icon}
+                    resizeMode="contain"
+                  />
+                  <Text>No Connection</Text>
+                  <Caption>Please Check your internet connection</Caption>
+                  <TouchableOpacity
+                    onPress={() => Referesh()}
+                    style={styles.eventsBtn}
+                  >
+                    <Text style={styles.eventstxt}>Retry</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
 
-            <PopupAds
-              showModal={showPopUpAds}
-              positiveAction={() => alert("positive")}
-            />
-            {showSlideAds && (
-              <SlideUp
-                slideUpPressed={() => alert("don't touch me")}
-                onClose={() => setShowSlideAds(false)}
+              <PopupAds
+                showModal={showPopUpAds}
+                positiveAction={() => alert("positive")}
               />
-            )}
-          </NavigationContainer>
-        </AuthContext.Provider>
-      </PersistGate>
+              {showSlideAds && (
+                <SlideUp
+                  slideUpPressed={() => alert("don't touch me")}
+                  onClose={() => setShowSlideAds(false)}
+                />
+              )}
+            </NavigationContainer>
+          </AuthContext.Provider>
+        </PersistGate>
+      </PaperProvider>
     </Provider>
   );
 }
