@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   noTicketContainer: {
     flex: 1,
     width: "80%",
-    height: Dimensions.get("screen").height/1.6,
+    height: Dimensions.get("screen").height / 1.6,
     alignItems: "center",
     alignSelf: "center",
     justifyContent: "center",
@@ -36,9 +36,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   prompttxt: {
-    fontSize: Constants.headingone,
+    fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
     marginTop: 10,
+    color: Constants.Inverse,
   },
 });
 

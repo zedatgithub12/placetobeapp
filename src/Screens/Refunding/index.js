@@ -12,27 +12,33 @@ import { Typography } from "../../themes/typography";
 import Terms from "../../Utils/Terms";
 import Constants from "../../constants/Constants";
 import { P2bAnimatedBtn } from "../../ui-components/Button";
-import Connection from "../../constants/connection";
 import { AuthContext } from "../../Components/context";
 import NotLoggedIn from "../../handlers/auth";
+import Connection from "../../api";
+import { showToast } from "../../Utils/Toast";
+import Loader from "../../ui-components/ActivityIndicator";
 
 // create ticket refunding a component
-const RefundingRequest = ({ navigation }) => {
+const RefundingRequest = () => {
   const { theme } = useTheme();
   const [reason, setReason] = useState("");
-  const { userStatus } = useContext(AuthContext);
-  const logged = false;
+  const { ticketid } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
-  const [sold, setSold] = useState([]);
+  const [sold, setSold] = useState();
 
   const FeatchTicket = async () => {
     const controller = new AbortController();
     const signal = controller.signal;
-
     var userId = await AsyncStorage.getItem("userId");
 
-    var APIUrl = Connection.url + Connection.boughtTickets + userId;
+    var APIUrl =
+      Connection.url +
+      Connection.singleTicket +
+      userId +
+      `?ticketid=${ticketid}`;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -48,9 +54,16 @@ const RefundingRequest = ({ navigation }) => {
         if (response.success) {
           var ticket = response.data;
           setSold(ticket);
+          setLoading(false);
+        } else {
+          showToast("Retry later");
+          setLoading(false);
         }
       })
-      .catch((error) => {});
+      .catch((error) => {
+        showToast("Error retriving ticket");
+        setLoading(false);
+      });
 
     return () => {
       controller.abort();
@@ -80,15 +93,71 @@ const RefundingRequest = ({ navigation }) => {
 
     return () => {};
   }, [connection]);
+
+  const handleSubmit = () => {
+    setSubmitting(true);
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    var APIUrl = Connection.url + Connection.requestRrefunding;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    fetch(APIUrl, {
+      method: "GET",
+      headers: headers,
+      signal: signal,
+    })
+      .then((reponse) => reponse.json())
+      .then((response) => {
+        if (response.success) {
+          showToast("Successfully submitted!");
+          setSubmitting(false);
+        } else {
+          showToast("Cannot submit, Retry later");
+          setSubmitting(false);
+        }
+      })
+      .catch((error) => {
+        showToast("Error submitting request");
+        setSubmitting(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  };
+
   return (
     <View
       style={[styles.container, { backgroundColor: theme.background.darker }]}
     >
-      {logged ? (
-        connection ? (
+      {connection ? (
+        loading ? (
+          <Loader size="large" />
+        ) : sold ? (
           <>
             <PlacetobeCard title="Ticket Info">
-              <Text>Hey There</Text>
+              <View style={styles.secondcontents}>
+                <Text style={styles.leftside}>Ticket Name</Text>
+                <Text style={styles.rightside}>{sold.event_name}</Text>
+              </View>
+              <View style={styles.secondcontents}>
+                <Text style={styles.leftside}>Type</Text>
+                <Text style={styles.rightside}>{sold.tickettype}</Text>
+              </View>
+              <View style={styles.secondcontents}>
+                <Text style={styles.leftside}>Quantity</Text>
+                <Text style={styles.rightside}>{parseInt(sold.quantity)}</Text>
+              </View>
+              <View style={styles.secondcontents}>
+                <Text style={styles.leftside}>Total</Text>
+                <Text style={styles.rightside}>
+                  {parseInt(sold.quantity) * parseInt(sold.price)} Birr
+                </Text>
+              </View>
             </PlacetobeCard>
             <PlacetobeCard title="Refunding Reason">
               <TextInput
@@ -109,18 +178,18 @@ const RefundingRequest = ({ navigation }) => {
             <P2bAnimatedBtn
               title="Submit Request"
               animation="fadeInUpBig"
-              onPress={() => alert("submitting...")}
+              isSubmitting={submitting}
+              onPress={() => handleSubmit()}
             />
           </>
         ) : (
-          <NoConnection onPress={() => setRetry(!retry)} />
+          <NoTicket
+            title="You don't have upcoming event tickets"
+            helpertext=""
+          />
         )
       ) : (
-        <NotLoggedIn
-          helpertext="You should have to login first to view your tickets"
-          signUp={() => navigation.navigate("SignUp")}
-          signIn={() => navigation.navigate("SignIn")}
-        />
+        <NoConnection onPress={() => setRetry(!retry)} />
       )}
     </View>
   );
@@ -130,6 +199,25 @@ const RefundingRequest = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  secondcontents: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+
+    marginVertical: 8,
+  },
+  leftside: {
+    fontWeight: Constants.Boldtwo,
+    fontSize: Constants.headingtwo,
+    fontFamily: Constants.fontFam,
+    color: Constants.Inverse,
+  },
+  rightside: {
+    textTransform: "capitalize",
+    fontFamily: Constants.fontFam,
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Bold,
+    color: Constants.Inverse,
   },
   ticketBtnContainer: {
     position: "absolute",

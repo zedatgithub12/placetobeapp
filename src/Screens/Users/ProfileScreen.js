@@ -7,13 +7,12 @@ import {
   Share,
   ScrollView,
   ToastAndroid,
-  Image,
+  Alert,
   Pressable,
   TouchableNativeFeedback,
   ActivityIndicator,
 } from "react-native";
-import SkeletonPlaceholder from "react-native-skeleton-placeholder";
-import { LinearGradient } from "expo-linear-gradient";
+
 import Constants from "../../constants/Constants";
 import {
   Ionicons,
@@ -21,25 +20,26 @@ import {
   MaterialIcons,
 } from "react-native-vector-icons";
 import { AuthContext } from "../../Components/context";
-import { Avatar, Badge, Caption, Paragraph, Title } from "react-native-paper";
+import { Avatar, Caption, Divider, Paragraph, Title } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
-import InteractionInfo from "../../Components/Profile/InteractionInfo";
 import Connection from "../../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useSelector, useDispatch } from "react-redux";
 import BottomSheet from "react-native-simple-bottom-sheet";
 import * as Animatable from "react-native-animatable";
 import * as Linking from "expo-linking";
 import p2bavatar from "../../assets/images/p2bavatar.png";
+import ProfileShimmer from "./Skeletons/profilepage";
+import { useTheme } from "@react-navigation/native";
+import { Typography } from "../../themes/typography";
+import LogoutDialog from "./components/logout";
 
 function Profile({ navigation, props }) {
+  const { theme } = useTheme();
   const [load, setLoad] = React.useState(true);
   const { Signout } = React.useContext(AuthContext);
 
-  //bookmarked item count state
-  const { items } = useSelector((state) => state.cart);
   const [detailInfo, setDetailInfo] = useState();
   const [hasGalleryPersmission, setHasGalleryPermission] = useState(null);
   const [updatingProfile, setupdatingProfile] = useState("camera");
@@ -350,114 +350,46 @@ function Profile({ navigation, props }) {
     };
   }, []);
 
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+  const handleCancel = () => {
+    setDialogVisible(false);
+  };
+
+  const handleLogout = () => {
+    setDialogVisible(false);
+    userLoggedOut();
+  };
+
+  // loggout function
+  const Logout = () =>
+    Alert.alert(
+      "Are you sure you want to logout?",
+      "This action will log you out of the application.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => userLoggedOut(),
+          style: "destructive",
+        },
+      ]
+    );
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={{ backgroundColor: theme.background.darker }}>
       {load ? (
-        <SkeletonPlaceholder>
-          <View style={{ height: 270 }}>
-            <View style={{ width: "100%", height: 130, borderRadius: 5 }} />
-
-            <View
-              style={[
-                styles.profilePicker,
-                { backgroundColor: Constants.Faded },
-              ]}
-            />
-            <View
-              style={[styles.userNameShimmer, { width: 180, borderRadius: 3 }]}
-            />
-            <View
-              style={[styles.userEmailshimmer, { width: 250, borderRadius: 3 }]}
-            />
-          </View>
-
-          <View
-            style={{
-              width: "100%",
-              flexDirection: "row",
-              justifyContent: "space-evenly",
-              marginTop: -17,
-            }}
-          >
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-            <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-          </View>
-          <View style={{ width: "100%", marginLeft: 13, marginVertical: 15 }}>
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "92%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 3,
-                marginTop: 16,
-                width: "32%",
-                height: 30,
-                borderRadius: 3,
-              }}
-            />
-          </View>
-        </SkeletonPlaceholder>
+        <ProfileShimmer />
       ) : (
         <View>
-          <View style={styles.profileContainer}>
-            <LinearGradient
-              // Button Linear Gradient
-              colors={[Constants.primary, Constants.primary, Constants.primary]}
-              style={styles.coverImageContainer}
-            ></LinearGradient>
-
+          <View
+            style={[
+              styles.profileContainer,
+              { backgroundColor: theme.primary.main },
+            ]}
+          >
             <TouchableOpacity
               //button which trigger the select Image functionality to chane profile picture
               activeOpacity={0.9}
@@ -474,68 +406,82 @@ function Profile({ navigation, props }) {
                 {updatingProfile === "camera" ? (
                   <MaterialCommunityIcons
                     name="camera"
-                    size={20}
-                    color="#636363"
+                    size={18}
+                    color={theme.dark[400]}
                   />
                 ) : updatingProfile === "loading" ? (
                   <ActivityIndicator size="small" color={Constants.Success} />
                 ) : updatingProfile === "done" ? (
                   <MaterialCommunityIcons
                     name="check-circle"
-                    size={20}
+                    size={18}
                     color={Constants.Success}
                   />
                 ) : (
                   <MaterialCommunityIcons
                     name="information"
-                    size={20}
+                    size={18}
                     color={Constants.Danger}
                   />
                 )}
               </View>
             </TouchableOpacity>
 
-            <View
-              //username and user email address container
-              style={styles.txtContent}
-            >
+            <View style={styles.txtContent}>
               <View style={{ alignSelf: "center", alignItems: "center" }}>
-                <Title>{userData.userName}</Title>
-                <Paragraph>{userData.userEmail}</Paragraph>
+                <Text
+                  style={{
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.headingone,
+                    fontWeight: Typography.weight.bold,
+                    paddingHorizontal: 6,
+                  }}
+                >
+                  {userData.userName}
+                </Text>
               </View>
-              <InteractionInfo
-                Events={userInfo.eventPosted}
-                getData={() => navigation.navigate("yourEvents")}
-                followerCountPressed={() => navigation.navigate("Followers")}
-                followingCountPressed={() => navigation.navigate("Following")}
-                Followers={userInfo.followers}
-                Following={userInfo.following}
-              />
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Following")}
+                activeOpacity={0.9}
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  margin: 4,
+                  padding: 3,
+                  paddingTop: 2,
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.headingtwo,
+                    fontWeight: Typography.weight.bold,
+                    paddingHorizontal: 6,
+                  }}
+                >
+                  {userInfo.following}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.headingtwo,
+                    fontWeight: Typography.weight.medium,
+                  }}
+                >
+                  Following
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.setContainer}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("My Tickets")}
-              style={styles.Settings} //share app with your friends
-            >
-              <View style={styles.iconbackground}>
-                <MaterialCommunityIcons
-                  name="ticket"
-                  size={20}
-                  style={styles.optionIcon}
-                />
-              </View>
-              <Text style={styles.settingtxt}>My Tickets</Text>
-
-              <MaterialIcons
-                name="keyboard-arrow-right"
-                size={24}
-                style={[styles.rightarrow, { position: "absolute", right: 10 }]}
-              />
-            </TouchableOpacity>
-
+          <View
+            style={[
+              styles.setContainer,
+              { backgroundColor: theme.background.darker },
+            ]}
+          >
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.Settings}
@@ -547,7 +493,7 @@ function Profile({ navigation, props }) {
                 <MaterialCommunityIcons
                   name="account-cog"
                   size={22}
-                  style={styles.optionIcon}
+                  style={{ color: theme.dark[600] }}
                 />
               </View>
               <Text style={styles.settingtxt}>Account Settings</Text>
@@ -557,26 +503,6 @@ function Profile({ navigation, props }) {
                 style={[styles.rightarrow, { position: "absolute", right: 10 }]}
               />
             </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.bookmark}
-              onPress={() => navigation.navigate("Bookmarks")}
-            >
-              <View style={styles.iconbackground}>
-                <Ionicons name="bookmark" size={20} style={styles.optionIcon} />
-              </View>
-              <Text style={styles.settingtxt}>Bookmarks</Text>
-              {items.length !== 0 ? (
-                <Badge style={styles.badgeStyle}>{items.length}</Badge>
-              ) : null}
-              <MaterialIcons
-                name="keyboard-arrow-right"
-                size={24}
-                style={[styles.rightarrow, { position: "absolute", right: 10 }]}
-              />
-            </TouchableOpacity>
-
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={onShare}
@@ -586,7 +512,7 @@ function Profile({ navigation, props }) {
                 <Ionicons
                   name="share-social-sharp"
                   size={20}
-                  style={styles.optionIcon}
+                  style={{ color: theme.dark[600] }}
                 />
               </View>
               <Text style={styles.settingtxt}>Invite Friends</Text>
@@ -596,7 +522,6 @@ function Profile({ navigation, props }) {
                 style={[styles.rightarrow, { position: "absolute", right: 10 }]}
               />
             </TouchableOpacity>
-
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.Settings}
@@ -610,7 +535,7 @@ function Profile({ navigation, props }) {
                 <MaterialCommunityIcons
                   name="security"
                   size={23}
-                  style={styles.optionIcon}
+                  style={{ color: theme.dark[600] }}
                 />
               </View>
               <Text style={styles.settingtxt}>Privacy Policy</Text>
@@ -620,7 +545,6 @@ function Profile({ navigation, props }) {
                 style={[styles.rightarrow, { position: "absolute", right: 10 }]}
               />
             </TouchableOpacity>
-
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.Settings}
@@ -630,7 +554,7 @@ function Profile({ navigation, props }) {
                 <MaterialCommunityIcons
                   name="message-question"
                   size={20}
-                  style={styles.optionIcon}
+                  style={{ color: theme.dark[600] }}
                 />
               </View>
               <Text style={styles.settingtxt}>Ask Question</Text>
@@ -640,7 +564,6 @@ function Profile({ navigation, props }) {
                 style={[styles.rightarrow, { position: "absolute", right: 10 }]}
               />
             </TouchableOpacity>
-
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.Settings}
@@ -649,11 +572,11 @@ function Profile({ navigation, props }) {
               <View style={styles.iconbackground}>
                 <MaterialCommunityIcons
                   name="information"
-                  size={25}
-                  style={styles.optionIcon}
+                  size={24}
+                  style={{ color: theme.dark[600] }}
                 />
               </View>
-              <Text style={styles.settingtxt}>About</Text>
+              <Text style={styles.settingtxt}>About us</Text>
               <MaterialIcons
                 name="keyboard-arrow-right"
                 size={24}
@@ -664,16 +587,20 @@ function Profile({ navigation, props }) {
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.logoutbtn}
-              onPress={() => panelRef.current.togglePanel()}
+              onPress={() => setDialogVisible(true)}
             >
               <View style={styles.iconbackground}>
-                <Ionicons name="log-out" size={20} style={styles.optionIcon} />
+                <Ionicons
+                  name="log-out"
+                  size={24}
+                  style={{ color: theme.dark[600] }}
+                />
               </View>
               <Text style={styles.settingtxt}>Log-out</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.versioning}>
-            <Caption> Version 1.0.0</Caption>
+            <Caption> Version 1.0.1</Caption>
           </View>
           {buttonShown && (
             <TouchableNativeFeedback
@@ -695,49 +622,29 @@ function Profile({ navigation, props }) {
           )}
         </View>
       )}
-
-      <BottomSheet
-        sliderMinHeight={0}
-        ref={(ref) => (panelRef.current = ref)}
-        isOpen={false}
-        innerContentStyle={styles.bottomsheetstyle}
-      >
-        <Text style={styles.sheetTitle}>You are logging Out!</Text>
-        <Caption>Are you sure?</Caption>
-
-        <View style={styles.actionBtn}>
-          <Pressable
-            style={styles.Cancelbtn}
-            onPress={() => panelRef.current.togglePanel()}
-          >
-            <Text>Cancel</Text>
-          </Pressable>
-
-          <Pressable style={styles.YesBtn} onPress={() => userLoggedOut()}>
-            <Text>Yes</Text>
-          </Pressable>
-        </View>
-      </BottomSheet>
+      <LogoutDialog
+        visible={dialogVisible}
+        onCancel={handleCancel}
+        onLogout={handleLogout}
+      />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Constants.Faded,
-  },
   setContainer: {
     flex: 2,
-    marginTop: -30,
+    margin: 12,
+    marginHorizontal: 0,
+    borderRadius: 10,
+    borderWidth: 0.2,
+    borderColor: Constants.Faded,
   },
   iconbackground: {
     justifyContent: "center",
     alignItems: "center",
-    //  backgroundColor: Constants.Faded,
     padding: 8,
     borderRadius: 10,
-
     marginLeft: 5,
   },
   Settings: {
@@ -751,55 +658,29 @@ const styles = StyleSheet.create({
   rightarrow: {
     color: Constants.Secondary,
   },
-  optionIcon: {
-    color: Constants.Inverse,
-  },
-  bookmark: {
-    flexDirection: "row",
-    alignItems: "center",
-    margin: 1,
-    marginHorizontal: 16,
 
-    borderRadius: 8,
-    paddingVertical: 6,
-  },
   settingtxt: {
     justifyContent: "center",
     fontSize: Constants.headingthree,
     marginLeft: 15,
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
+    color: Constants.Inverse,
   },
   horizontalline: {
     backgroundColor: Constants.background,
     height: 1,
     margin: 10,
   },
-  backArrow: {
-    position: "absolute",
-    top: 4,
-    zIndex: 2,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 20,
-    marginTop: 38,
-    marginBottom: 8,
-    backgroundColor: Constants.background,
-    borderRadius: 50,
-    elevation: 1,
-    padding: 6,
-  },
+
   profileContainer: {
-    flex: 1,
     position: "relative",
-    backgroundColor: Constants.Faded,
     justifyContent: "center",
     width: "100%",
-    height: 320,
+    paddingTop: 24,
   },
   coverImageContainer: {
     width: "100%",
-    height: 110,
     backgroundColor: Constants.primary,
     justifyContent: "center",
     alignItems: "center",
@@ -808,7 +689,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
-    bottom: 2,
+    bottom: 3,
     right: 0,
     backgroundColor: Constants.background,
     padding: 6,
@@ -823,18 +704,16 @@ const styles = StyleSheet.create({
   },
 
   profilePicker: {
-    top: -45,
     backgroundColor: Constants.Faded,
     width: 88,
     height: 88,
     alignSelf: "center",
-    borderRadius: 43,
+    borderRadius: 44,
     padding: 3.8,
     elevation: 2,
     shadowColor: Constants.Secondary,
   },
   txtContent: {
-    top: -55,
     marginTop: 5,
     margin: 4,
     padding: 5,
@@ -849,59 +728,15 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingthree,
     marginLeft: 15,
   },
-  userNameShimmer: {
-    top: -48,
-    margin: 15,
-    padding: 10,
-    alignSelf: "center",
-  },
-  userEmailshimmer: {
-    top: -68,
-    margin: 15,
-    padding: 8,
-    alignSelf: "center",
-  },
+
   logoutbtn: {
     flexDirection: "row",
     alignItems: "center",
     margin: 5,
-    marginLeft: 22,
-    marginBottom: 70,
+    marginLeft: 18,
     // backgroundColor: Constants.primary
   },
 
-  bottomsheetstyle: {
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 20,
-  },
-  sheetTitle: {
-    color: Constants.Inverse,
-    fontWeight: Constants.Bold,
-    fontSize: Constants.headingone,
-  },
-  actionBtn: {
-    width: "60%",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    marginVertical: 40,
-  },
-  Cancelbtn: {
-    backgroundColor: Constants.Faded,
-    padding: 6,
-    paddingHorizontal: 20,
-    borderRadius: Constants.tiny,
-  },
-  YesBtn: {
-    width: "40%",
-    backgroundColor: Constants.primary,
-    padding: 6,
-    paddingHorizontal: 20,
-    borderRadius: Constants.tiny,
-    alignItems: "center",
-  },
   updateButton: {
     position: "absolute",
     bottom: 10,
@@ -926,7 +761,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   versioning: {
-    marginTop: -20,
+    marginTop: 12,
     marginBottom: 30,
     marginLeft: 28,
   },

@@ -1,5 +1,5 @@
 //import liraries
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -16,26 +16,37 @@ import { useTheme } from "@react-navigation/native";
 import { Typography } from "../../themes/typography";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import { DateFormater, Status, StatusText } from "../../Utils/functions";
+import { AuthContext } from "../../Components/context";
 
-// create a component
+function Simple(item) {
+  const { theme } = useTheme();
+  return (
+    <SvgQRCode
+      value={Connection.url + item.id}
+      size={180}
+      enableLinearGradient={true}
+      linearGradient={[theme.primary[700], theme.dark.main]}
+    />
+  );
+}
+
 const BoughtDetail = ({ navigation, route }) => {
   const item = route.params;
-  function Simple() {
-    return (
-      <SvgQRCode
-        value={Connection.url + item.id}
-        size={180}
-        enableLinearGradient={true}
-        linearGradient={[theme.primary[700], theme.dark.main]}
-      />
-    );
-  }
   const { theme } = useTheme();
+  const { SelectedTicket } = useContext(AuthContext);
+  const setID = (id) => {
+    SelectedTicket(id);
+  };
+  useEffect(() => {
+    setID(item.id);
+
+    return () => {};
+  }, []);
 
   return (
     <ScrollView style={{ backgroundColor: theme.background.darker }}>
       <View style={styles.qrcodecontainer}>
-        <Simple />
+        <Simple item={item} />
       </View>
 
       <View

@@ -68,7 +68,7 @@ export default function App() {
 
   const [showPopUpAds, setShowPopupAds] = useState(true);
   const [showSlideAds, setShowSlideAds] = useState(true);
-
+  const [selectedTicket, setSelectedTicket] = useState(0);
   //a constant which store a state of event field input datas
   // the information collected from all input field will be store here
   // the state is going to be updated inside the context function which trigger the value from the component
@@ -360,6 +360,12 @@ export default function App() {
 
       dispatch({ type: "LOGOUT" });
     },
+
+    SelectedTicket: async (ticketid) => {
+      setSelectedTicket(ticketid);
+    },
+
+    ticketid: selectedTicket,
   }));
 
   const [connectionState, setConnectionState] = useState(false);

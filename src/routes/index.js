@@ -86,7 +86,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
         }}
       />
       <Stack.Screen
@@ -96,7 +96,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
         }}
       />
       <Stack.Screen
@@ -106,7 +106,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
         }}
       />
       <Stack.Screen
@@ -116,7 +116,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -182,7 +182,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerTitle: "Questions and Feedback",
         }}
       />
@@ -193,7 +193,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerTitle: "About us",
         }}
       />
@@ -212,7 +212,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -223,7 +223,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -234,7 +234,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -246,7 +246,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -257,7 +257,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -269,7 +269,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -281,7 +281,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -293,7 +293,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
           headerShown: false,
         }}
@@ -306,7 +306,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
           headerShown: false,
         }}
@@ -320,7 +320,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -333,7 +333,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -346,7 +346,7 @@ const Routes = ({ navigation }) => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.Inverse,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerTitleStyle: {
@@ -359,7 +359,7 @@ const Routes = ({ navigation }) => {
               anchor={
                 <IconButton
                   icon="dots-vertical"
-                  color="#222"
+                  color={theme.dark.main}
                   size={22}
                   onPress={() => setShowMenu(true)}
                 />
@@ -409,7 +409,6 @@ const Routes = ({ navigation }) => {
           headerTitleAlign: "center",
           headerTintColor: theme.dark.main,
           headerTitleStyle: {
-            fontSize: Typography.size.headerMode,
             textAlign: "center",
           },
           headerShadowVisible: false,

@@ -1,11 +1,17 @@
 //import liraries
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import * as Animatable from "react-native-animatable";
 import Constants from "../constants/Constants";
+import Loader from "./ActivityIndicator";
 
 // create a component
-export const P2bAnimatedBtn = ({ title, animation, onPress }) => {
+export const P2bAnimatedBtn = ({ title, isSubmitting, animation, onPress }) => {
   return (
     <Animatable.View animation={animation} style={[styles.BtnContainer]}>
       <TouchableOpacity
@@ -13,7 +19,11 @@ export const P2bAnimatedBtn = ({ title, animation, onPress }) => {
         onPress={onPress}
         style={styles.btn}
       >
-        <Text style={styles.btntxt}> {title}</Text>
+        {isSubmitting ? (
+          <ActivityIndicator size="small" color={Constants.Inverse} />
+        ) : (
+          <Text style={styles.btntxt}> {title}</Text>
+        )}
       </TouchableOpacity>
     </Animatable.View>
   );
@@ -27,7 +37,6 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
     justifyContent: "center",
-
     padding: 6,
   },
   btn: {

@@ -55,6 +55,10 @@ const Connection = {
   AvailableTickets: "tickets",
   FeaturedEvent: "featured-event",
   boughtTickets: "soldticket/",
+  singleTicket: "single-ticket/",
+
+  //refunding related api's
+  requestRrefunding: "refunding-request",
 };
 
 export default Connection;
