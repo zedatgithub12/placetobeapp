@@ -9,35 +9,8 @@ const ProfileShimmer = () => {
   const { theme } = useTheme();
   return (
     <SkeletonPlaceholder>
-      <View style={{ height: 270 }}>
-        <View style={{ width: "100%", height: 130, borderRadius: 5 }} />
+      <View style={{ height: 200 }}></View>
 
-        <View
-          style={[
-            styles.profilePicker,
-            { backgroundColor: theme.background.darker },
-          ]}
-        />
-        <View
-          style={[styles.userNameShimmer, { width: 180, borderRadius: 3 }]}
-        />
-        <View
-          style={[styles.userEmailshimmer, { width: 250, borderRadius: 3 }]}
-        />
-      </View>
-
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          marginTop: -17,
-        }}
-      >
-        <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-        <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-        <View style={{ width: 110, height: 50, borderRadius: 5 }} />
-      </View>
       <View style={{ width: "100%", marginLeft: 13, marginVertical: 15 }}>
         <View
           style={{

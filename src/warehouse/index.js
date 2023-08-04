@@ -13,42 +13,35 @@ import {
   Alert,
   ActivityIndicator,
   Dimensions,
-  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../../constants/Constants";
-import {
-  Ionicons,
-  AntDesign,
-  MaterialCommunityIcons,
-} from "react-native-vector-icons";
-import OrganizerEvents from "./components/events";
-import { Caption, Divider, IconButton, Title } from "react-native-paper";
+import { Ionicons, MaterialCommunityIcons } from "react-native-vector-icons";
+import Connection from "../../constants/connection";
+import OrganizerEvents from "../../Components/Organizers/OrganizerEvents";
+import { Caption } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import call from "react-native-phone-call";
 import { AuthContext } from "../../Components/context";
 import OrganizersShimmer from "../../Components/Organizers/Skeleton/organizerShimmer";
-import { useTheme } from "@react-navigation/native";
-import { Typography } from "../../themes/typography";
-import { formatNumber } from "../../Utils/functions";
-import Connection from "../../api";
-import Loader from "../../ui-components/ActivityIndicator";
 
-// Organizer detail page
+// create a component
 const OrganizersDetail = ({ route, navigation }) => {
+  //parameters sent from event detail screen
   var { organizerInfo } = route.params;
-  const { theme } = useTheme();
-  const numColumns = 3;
 
-  const { userStatus } = React.useContext(AuthContext);
+  // check wether user logged in or not
+  // the state is store in the context and we are going to access it from context state
+  const { userStatus } = React.useContext(AuthContext); //wether user is loged or not is retrieved from our context
   const logged = userStatus.logged;
 
   //image directory on the server
   var featuredImageUri = Connection.url + Connection.assets;
 
+  //organizer image in full screen
   const [modalVisible, setModalVisible] = useState(false);
   const [count, setCount] = useState(0);
-  const [subscription, setSubscription] = useState(false);
+  const [subscription, setSubscription] = useState(false); // follow unfollow activity indicator
   const [follow, setFollow] = useState({
     subscription: "",
     btnDisabled: false,
@@ -154,7 +147,7 @@ const OrganizersDetail = ({ route, navigation }) => {
 
   // does organizer have provided phone
   const [provided, setProvided] = useState(false);
-  const [website, setWebsite] = useState(false);
+
   //make call to organizer
   const MakeCall = () => {
     const args = {
@@ -167,13 +160,74 @@ const OrganizersDetail = ({ route, navigation }) => {
   };
 
   // shimmer effect state
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   //event flatlist related code
   const [events, setEvents] = useState([]);
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
 
+  const DateFun = (startingTime) => {
+    var date = new Date(startingTime);
+    let day = date.getDay();
+    let month = date.getMonth();
+    let happeningDay = date.getDate();
+
+    // return weekname
+    var weekday = new Array(7);
+    weekday[1] = "Mon, ";
+    weekday[2] = "Tue, ";
+    weekday[3] = "Wed, ";
+    weekday[4] = "Thu, ";
+    weekday[5] = "Fri, ";
+    weekday[6] = "Sat, ";
+    weekday[0] = "Sun, ";
+
+    //an array of month name
+    var monthName = new Array(12);
+    monthName[1] = "Jan";
+    monthName[2] = "Feb";
+    monthName[3] = "Mar";
+    monthName[4] = "Apr";
+    monthName[5] = "May";
+    monthName[6] = "Jun";
+    monthName[7] = "Jul";
+    monthName[8] = "Aug";
+    monthName[9] = "Sep";
+    monthName[10] = "Oct";
+    monthName[11] = "Nov";
+    monthName[12] = "Dec";
+
+    return weekday[day] + monthName[month + 1] + " " + happeningDay;
+  };
+  const TimeFun = (eventTime) => {
+    var time = eventTime;
+    var result = time.slice(0, 2);
+    var minute = time.slice(3, 5);
+    var globalTime;
+    var postMeridian;
+    var separator = ":";
+    if (result > 12) {
+      postMeridian = result - 12;
+      globalTime = "PM";
+    } else {
+      postMeridian = result;
+      globalTime = "AM";
+    }
+
+    return postMeridian + separator + minute + " " + globalTime;
+  };
+  const EntranceFee = (price) => {
+    var eventPrice;
+    var free = "Free";
+    var currency = " ETB";
+    if (price != 0) {
+      eventPrice = price + currency;
+    } else {
+      eventPrice = free;
+    }
+    return eventPrice;
+  };
   //conditiional status filter
   const renderStatus = (startingDate, endingDate) => {
     var currentStatus;
@@ -201,9 +255,24 @@ const OrganizersDetail = ({ route, navigation }) => {
 
     return currentStatus;
   };
+  //render item to be displayed in the flatlist
+  const renderItem = ({ item }) => (
+    <OrganizerEvents
+      Event_Id={item.id}
+      status={renderStatus(item.start_date, item.end_date)}
+      org_id={item.userId}
+      FeaturedImage={item.event_image}
+      title={item.event_name}
+      date={DateFun(item.start_date)}
+      time={TimeFun(item.start_time)}
+      venue={item.event_address}
+      Price={EntranceFee(item.event_entrance_fee)}
+      onPress={() => navigation.push("EventDetail", { id: item.id })}
+    />
+  );
 
   const RefreshList = async () => {
-    setLoading(true);
+    setLoading(false);
     // set refreshing state to true
     // featching abort controller
     // after featching events the fetching function will be aborted
@@ -231,14 +300,14 @@ const OrganizersDetail = ({ route, navigation }) => {
           var orgEvents = response.data;
           setEvents(orgEvents);
           setNotFound(false);
-          setLoading(false);
+          setLoading(true);
         } else {
           setMessage("Event will be listed here.");
-          setLoading(false);
+          setLoading(true);
         }
       })
       .catch(() => {
-        setLoading(false);
+        setLoading(true);
       });
 
     return () => {
@@ -261,20 +330,10 @@ const OrganizersDetail = ({ route, navigation }) => {
     return () => {};
   }, []);
 
-  //render item to be displayed in the flatlist
-  const renderItem = ({ item }) => (
-    <OrganizerEvents
-      key={item.id}
-      FeaturedImage={item.event_image}
-      status={renderStatus(item.start_date, item.end_date)}
-      onPress={() => navigation.push("EventDetail", { id: item.id })}
-    />
-  );
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.darker }}>
+    <SafeAreaView style={styles.container}>
       <Modal
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
@@ -283,6 +342,11 @@ const OrganizersDetail = ({ route, navigation }) => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+            <Image
+              source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
+              resizeMode="contain"
+              style={styles.modalImage} //featured image styles
+            />
             <TouchableOpacity
               activeOpacity={0.7}
               style={[styles.button, styles.buttonClose]}
@@ -294,219 +358,127 @@ const OrganizersDetail = ({ route, navigation }) => {
                 color={Constants.Inverse}
               />
             </TouchableOpacity>
-            <Image
-              source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
-              resizeMode="contain"
-              style={styles.modalImage} //featured image styles
-            />
           </View>
         </View>
       </Modal>
 
       {loading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Loader size="large" />
-        </View>
-      ) : (
-        <>
-          <View
-            style={{ backgroundColor: theme.background.main, paddingBottom: 8 }}
-          >
-            <View style={styles.featuredImageContainer}>
-              <TouchableOpacity
-                style={styles.backArrow} // back arrow button style
-                onPress={() => navigation.goBack()}
-              >
-                <Ionicons name="arrow-back-sharp" size={25} />
-              </TouchableOpacity>
-              <Image
-                //Featured Image of the event
-                source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
-                resizeMode="cover"
-                style={styles.image} //featured image styles
-                blurRadius={4}
-              />
-            </View>
-            <View
-              style={{
-                alignSelf: "center",
-                marginTop: 30,
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => setModalVisible(true)}
-                style={styles.profileImageContainer}
-                activeOpacity={0.8}
-              >
+        <FlatList
+          // List of events in extracted from database in the form JSON data
+          data={events}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          onRefresh={RefreshList}
+          refreshing={refreshing}
+          style={styles.eventList}
+          initialNumToRender={2} // Reduce initial render amount
+          maxToRenderPerBatch={1} // Reduce number in each render batch
+          windowSize={7} // Reduce the window size
+          // when ithere is no item to be listed in flatlist
+
+          ListHeaderComponent={
+            <View>
+              <View style={styles.featuredImageContainer}>
+                <TouchableOpacity
+                  style={styles.backArrow} // back arrow button style
+                  onPress={() => navigation.goBack()}
+                >
+                  <Ionicons
+                    name="arrow-back-sharp"
+                    size={25}
+                    //back arrow icon
+                  />
+                </TouchableOpacity>
                 <Image
+                  //Featured Image of the event
                   source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
                   resizeMode="cover"
-                  style={styles.profileImage} //featured image styles
+                  style={styles.image} //featured image styles
+                  blurRadius={4}
                 />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.contentContainer}>
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.primaryHeading,
-                  fontWeight: Typography.weight.bold,
-                  color: theme.dark.main,
-                }}
-              >
-                {organizerInfo.username}
-              </Text>
-              <Text
-                style={{
-                  fontSize: Typography.size.headingthree,
-                  fontWeight: Typography.weight.bold,
-                  color: theme.dark.main,
-                  paddingHorizontal: 4,
-                  textTransform: "capitalize",
-                }}
-              >
-                {organizerInfo.category}
-              </Text>
-            </View>
-
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-evenly",
-              }}
-            >
-              <View
-                style={{
-                  alignItems: "center",
-                  padding: 14,
-                }}
-              >
-                <Title style={{ color: theme.dark.main }}>
-                  {formatNumber(events.length)}
-                </Title>
-                <Text>Events</Text>
               </View>
 
-              <View
-                style={{
-                  alignItems: "center",
-                  padding: 14,
-                }}
-              >
-                <Title style={{ color: theme.dark.main }}>
-                  {formatNumber(count)}
-                </Title>
-                <Text>Followers</Text>
-              </View>
-
-              <View
-                style={{
-                  alignItems: "center",
-                  padding: 10,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-around",
-                  }}
-                >
-                  <Title
-                    style={{ color: theme.dark.main, alignItems: "center" }}
-                  >
-                    4.9
-                  </Title>
-                  <AntDesign
-                    name="star"
-                    size={14}
-                    color={theme.primary.main}
-                    style={{ paddingLeft: 3 }}
-                  />
-                </View>
-                <Text>Rating</Text>
-              </View>
-            </View>
-            <Divider />
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingTop: 8,
-              }}
-            >
-              {logged && (
+              <View style={styles.sectionOne}>
                 <TouchableOpacity
-                  onPress={() => followOrganizer()}
-                  activeOpacity={0.7}
-                  style={[
-                    styles.followBtn,
-                    {
-                      backgroundColor:
-                        follow.subscription === "Following"
-                          ? theme.background.faded
-                          : theme.primary.main,
-                      color:
-                        follow.subscription === "Following"
-                          ? theme.primary.main
-                          : theme.dark.main,
-                    },
-                  ]}
+                  onPress={() => setModalVisible(true)}
+                  style={styles.profileImageContainer}
                 >
-                  {subscription ? (
-                    <ActivityIndicator size="small" color={theme.dark.main} />
-                  ) : (
-                    <Text numberOfLines={1} style={[styles.btnText]}>
-                      {follow.subscription}
-                    </Text>
-                  )}
+                  <Image
+                    source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
+                    resizeMode="cover"
+                    style={styles.profileImage} //featured image styles
+                  />
                 </TouchableOpacity>
-              )}
-              {website && (
-                <IconButton
-                  style={{
-                    backgroundColor: theme.background.faded,
-                    marginHorizontal: 16,
-                  }}
-                  icon="web"
-                  color={theme.primary[600]}
-                  size={28}
-                  onPress={() => console.log("Pressed")}
-                />
-              )}
+                <View style={styles.contentContainer}>
+                  <Text numberOfLines={1} style={styles.organizerName}>
+                    {organizerInfo.username}
+                  </Text>
+                  <Text>{organizerInfo.category}</Text>
 
-              {provided && (
-                <IconButton
-                  style={{ backgroundColor: theme.background.faded }}
-                  icon="phone"
-                  color={theme.primary[600]}
-                  size={28}
-                  onPress={() => MakeCall()}
-                />
-              )}
+                  <View style={styles.followersContainer}>
+                    <Text style={styles.followerCount}>{count}</Text>
+                    <Caption style={styles.followerText}> Followers</Caption>
+                  </View>
+                </View>
+                <View
+                  //contaner of section two
+                  style={styles.sectionTwo}
+                >
+                  {provided ? (
+                    <TouchableOpacity
+                      onPress={() => MakeCall()}
+                      activeOpacity={0.7}
+                      style={styles.callBtn}
+                    >
+                      <Text numberOfLines={1} style={styles.callText}>
+                        Call
+                      </Text>
+                    </TouchableOpacity>
+                  ) : null}
+
+                  {logged ? (
+                    <TouchableOpacity
+                      onPress={() => followOrganizer()}
+                      activeOpacity={0.7}
+                      style={[
+                        styles.followBtn,
+                        {
+                          backgroundColor:
+                            follow.subscription === "Following"
+                              ? Constants.transparentPrimary
+                              : Constants.primary,
+                        },
+                      ]}
+                    >
+                      {subscription ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={Constants.background}
+                        />
+                      ) : (
+                        <Text numberOfLines={1} style={[styles.btnText]}>
+                          {follow.subscription}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+              </View>
             </View>
-          </View>
-
-          <View
-            style={{
-              marginTop: 10,
-            }}
-          >
-            <FlatList
-              data={events}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id}
-              numColumns={numColumns}
-            />
-          </View>
-        </>
+          }
+          ListEmptyComponent={
+            <View style={styles.container}>
+              <Image
+                source={require("../../assets/images/NotFound.png")}
+                resizeMode="contain"
+                style={styles.notFound}
+              />
+              <Text style={styles.emptyMessageStyle}>{message}</Text>
+            </View>
+          }
+        />
+      ) : (
+        <OrganizersShimmer />
       )}
     </SafeAreaView>
   );
@@ -537,7 +509,7 @@ const styles = StyleSheet.create({
   // Featurd Image style
   image: {
     width: "100%",
-    height: 224,
+    height: 300,
     borderWidth: 2,
   },
   //featured Image Container Styling
@@ -545,17 +517,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "center",
     width: "100%",
-    height: 60,
-    maxHeight: 100,
+    height: 300,
+    maxHeight: 300,
     marginTop: -30,
   },
   //View container of profile Image and organizer name and category
+  sectionOne: {
+    flexDirection: "row",
 
+    alignItems: "center",
+    width: "100%",
+    alignSelf: "center",
+    marginTop: -80,
+    backgroundColor: Constants.background,
+    padding: 15,
+    paddingHorizontal: 25,
+    borderTopLeftRadius: Constants.borderRad,
+    borderTopRightRadius: Constants.borderRad,
+  },
   profileImageContainer: {
     width: "25%",
-    height: 100,
-    width: 100,
-    borderRadius: 50,
+    height: 74,
+    width: 74,
+    borderRadius: 37,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Constants.Faded,
@@ -563,15 +547,18 @@ const styles = StyleSheet.create({
     shadowColor: Constants.Secondary,
   },
   profileImage: {
-    height: 94,
-    width: 94,
-    borderRadius: 47,
+    height: 70,
+    width: 70,
+    borderRadius: 35,
   },
   contentContainer: {
-    alignSelf: "center",
-    alignItems: "center",
+    marginLeft: 15,
+    width: "40%",
   },
-
+  organizerName: {
+    fontWeight: Constants.Bold,
+    fontSize: Constants.headingone,
+  },
   followersContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -589,15 +576,18 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   followBtn: {
+    width: 105,
     alignItems: "center",
-    padding: 10,
-    paddingHorizontal: 40,
-    borderRadius: 50,
+    padding: 5,
+    paddingHorizontal: 15,
+    borderRadius: Constants.tinybox,
     margin: 10,
   },
   callBtn: {
+    width: 105,
     alignItems: "center",
     backgroundColor: Constants.background,
+
     padding: 3,
     paddingHorizontal: 30,
     borderRadius: Constants.tinybox,
@@ -605,7 +595,7 @@ const styles = StyleSheet.create({
     borderColor: Constants.primary,
   },
   btnText: {
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingthree,
     fontWeight: Constants.Bold,
     fontFamily: Constants.fontFam,
     color: Constants.Inverse,
@@ -621,19 +611,6 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 10,
   },
-
-  imageContainer: {
-    flex: 1,
-    marginLeft: 1.5,
-    aspectRatio: 1, // To maintain the square shape of the images
-  },
-  posters: {
-    width: Dimensions.get("screen").width / 3 - 4, // Subtracting margin from width
-    height: Dimensions.get("screen").width / 3 - 4,
-    resizeMode: "cover",
-    borderRadius: 2,
-  },
-
   emptyMessageStyle: {
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
@@ -655,32 +632,40 @@ const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "#0009",
   },
   modalView: {
+    margin: 15,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 9,
     alignItems: "center",
-    aspectRatio: 1,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalImage: {
-    width: Dimensions.get("screen").width,
-    height: 400,
-    resizeMode: "contain",
+    width: "100%",
+    height: 330,
+    borderRadius: 10,
   },
   button: {
+    position: "absolute",
+    top: 2,
+    right: 2,
     alignSelf: "flex-end",
     borderRadius: 50,
     padding: 7,
     margin: 10,
-
     elevation: 2,
   },
 
   buttonClose: {
     backgroundColor: Constants.Faded,
-    position: "absolute",
-    top: 6,
-    right: 2,
-    zIndex: 10,
   },
   textStyle: {
     color: Constants.Danger,

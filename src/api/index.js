@@ -26,7 +26,7 @@ const Connection = {
   followers: "followers/",
   following: "following/",
   upload: "uploadimage.php",
-  assets: "images",
+  assets: "images/",
   organizer: "organizer", //updated
 
   notification: "notification",

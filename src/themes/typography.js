@@ -1,7 +1,7 @@
 export const Typography = {
   family: "Roboto",
   size: {
-    primaryHeading: 22,
+    primaryHeading: 20,
     headingone: 18,
     headingtwo: 16,
     headingthree: 14,
