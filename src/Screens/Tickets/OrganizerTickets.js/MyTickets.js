@@ -7,11 +7,9 @@ import {
   Image,
   FlatList,
   ActivityIndicator,
-  Pressable,
   Dimensions,
   TouchableOpacity,
 } from "react-native";
-import { Paragraph, Title } from "react-native-paper";
 import Connection from "../../../constants/connection";
 import Constants from "../../../constants/Constants";
 import TicketListing from "../../../Components/Tickets/TicketsListing";

@@ -31,13 +31,13 @@ const OrganizerEvents = ({ FeaturedImage, status, onPress }) => {
       onPress={onPress}
     >
       {statusCond.statusType === "Happening" ? (
-        <View style={[styles.statusStyle, { backgroundColor: "#0003" }]}>
+        <View style={[styles.statusStyle, { backgroundColor: "#0008" }]}>
           <Text
             style={[
               styles.stutusText,
               {
                 color: theme.background.main,
-                fontWeight: Typography.weight.bold,
+                fontWeight: Typography.weight.semiBold,
                 fontSize: Typography.size.textSize,
                 fontFamily: Typography.family,
               },
@@ -47,13 +47,13 @@ const OrganizerEvents = ({ FeaturedImage, status, onPress }) => {
           </Text>
         </View>
       ) : statusCond.statusType === "Passed" ? (
-        <View style={[styles.statusStyle, { backgroundColor: "#0003" }]}>
+        <View style={[styles.statusStyle, { backgroundColor: "#0008" }]}>
           <Text
             style={[
               styles.stutusText,
               {
                 color: theme.background.main,
-                fontWeight: Typography.weight.bold,
+                fontWeight: Typography.weight.semiBold,
                 fontSize: Typography.size.textSize,
                 fontFamily: Typography.family,
               },
@@ -63,13 +63,13 @@ const OrganizerEvents = ({ FeaturedImage, status, onPress }) => {
           </Text>
         </View>
       ) : (
-        <View style={[styles.statusStyle, { backgroundColor: "#0003" }]}>
+        <View style={[styles.statusStyle, { backgroundColor: "#0008" }]}>
           <Text
             style={[
               styles.stutusText,
               {
                 color: theme.background.main,
-                fontWeight: Typography.weight.bold,
+                fontWeight: Typography.weight.semiBold,
                 fontSize: Typography.size.textSize,
                 fontFamily: Typography.family,
               },

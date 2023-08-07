@@ -25,10 +25,11 @@ import Category from "../../dummies/Category";
 import Events from "../../Components/Events/Events";
 import Connection from "../../constants/connection";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
+import { useTheme } from "@react-navigation/native";
 
 const Filter = ({ navigation, route }) => {
   const { item } = route.params;
-
+  const { theme } = useTheme();
   const [filterData, setFilterData] = React.useState(true);
   const [searchInput, setSearchInput] = React.useState("");
   const [inputs, setInputs] = React.useState({
@@ -294,7 +295,7 @@ const Filter = ({ navigation, route }) => {
     return () => {};
   }, []);
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.darker }}>
       <View
         // search and filter container
         style={styles.headers}
@@ -400,7 +401,6 @@ const Filter = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Constants.background,
   },
   // search and filter container
   headers: {

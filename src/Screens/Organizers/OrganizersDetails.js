@@ -1,19 +1,15 @@
 //import liraries
-import React, { Component, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Text,
   StyleSheet,
   View,
   Image,
-  ToastAndroid,
   TouchableOpacity,
   Modal,
-  Pressable,
-  Alert,
   ActivityIndicator,
   Dimensions,
-  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../../constants/Constants";
@@ -23,27 +19,27 @@ import {
   MaterialCommunityIcons,
 } from "react-native-vector-icons";
 import OrganizerEvents from "./components/events";
-import { Caption, Divider, IconButton, Title } from "react-native-paper";
+import { Caption, Divider, IconButton } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import call from "react-native-phone-call";
 import { AuthContext } from "../../Components/context";
-import OrganizersShimmer from "../../Components/Organizers/Skeleton/organizerShimmer";
 import { useTheme } from "@react-navigation/native";
 import { Typography } from "../../themes/typography";
 import { formatNumber } from "../../Utils/functions";
 import Connection from "../../api";
 import Loader from "../../ui-components/ActivityIndicator";
+import NetInfo from "@react-native-community/netinfo";
+import NoConnection from "../../handlers/connection";
 
 // Organizer detail page
 const OrganizersDetail = ({ route, navigation }) => {
   var { organizerInfo } = route.params;
+
   const { theme } = useTheme();
   const numColumns = 3;
 
   const { userStatus } = React.useContext(AuthContext);
   const logged = userStatus.logged;
-
-  //image directory on the server
   var featuredImageUri = Connection.url + Connection.assets;
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -54,6 +50,9 @@ const OrganizersDetail = ({ route, navigation }) => {
     btnDisabled: false,
     ButtonColor: Constants.primary,
   });
+
+  const [connection, setConnection] = useState(true);
+  const [retry, setRetry] = useState(false);
 
   // state of organizer followers
   const followCounter = async () => {
@@ -246,20 +245,40 @@ const OrganizersDetail = ({ route, navigation }) => {
     };
   };
 
+  const retryConnection = () => {
+    const InternetConnection = async () => {
+      const networkState = await NetInfo.fetch();
+      setConnection(networkState.isConnected);
+    };
+
+    const handleNetworkChange = (state) => {
+      setConnection(state.isConnected);
+    };
+
+    setRetry(true); // Set retry to true initially
+
+    setTimeout(async () => {
+      await InternetConnection();
+      setRetry(false); // Set retry to false after the operation is done
+    }, 3000); // 3000 milliseconds = 3 seconds
+
+    const subscription = NetInfo.addEventListener(handleNetworkChange);
+  };
+
   useEffect(() => {
     //check wether event organizer have phone number added to his account
-
     if (organizerInfo.phone !== null) {
       setProvided(true);
     } else {
       setProvided(false);
     }
 
-    //fetch count of organizer number
-    followCounter();
-    RefreshList();
+    if (connection) {
+      followCounter();
+      RefreshList();
+    }
     return () => {};
-  }, []);
+  }, [connection]);
 
   //render item to be displayed in the flatlist
   const renderItem = ({ item }) => (
@@ -302,211 +321,266 @@ const OrganizersDetail = ({ route, navigation }) => {
           </View>
         </View>
       </Modal>
-
-      {loading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Loader size="large" />
-        </View>
-      ) : (
-        <>
+      {Connection ? (
+        loading ? (
           <View
-            style={{ backgroundColor: theme.background.main, paddingBottom: 8 }}
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <View style={styles.featuredImageContainer}>
-              <TouchableOpacity
-                style={styles.backArrow} // back arrow button style
-                onPress={() => navigation.goBack()}
-              >
-                <Ionicons name="arrow-back-sharp" size={25} />
-              </TouchableOpacity>
-              <Image
-                //Featured Image of the event
-                source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
-                resizeMode="cover"
-                style={styles.image} //featured image styles
-                blurRadius={4}
-              />
-            </View>
+            <Loader size="large" />
+          </View>
+        ) : (
+          <>
             <View
               style={{
-                alignSelf: "center",
-                marginTop: 30,
+                backgroundColor: theme.background.main,
+                paddingBottom: 8,
               }}
             >
-              <TouchableOpacity
-                onPress={() => setModalVisible(true)}
-                style={styles.profileImageContainer}
-                activeOpacity={0.8}
-              >
+              <View style={styles.featuredImageContainer}>
+                <TouchableOpacity
+                  style={styles.backArrow} // back arrow button style
+                  onPress={() => navigation.goBack()}
+                >
+                  <Ionicons name="arrow-back-sharp" size={25} />
+                </TouchableOpacity>
                 <Image
+                  //Featured Image of the event
                   source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
                   resizeMode="cover"
-                  style={styles.profileImage} //featured image styles
+                  style={styles.image} //featured image styles
+                  blurRadius={4}
                 />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.contentContainer}>
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.primaryHeading,
-                  fontWeight: Typography.weight.bold,
-                  color: theme.dark.main,
-                }}
-              >
-                {organizerInfo.username}
-              </Text>
-              <Text
-                style={{
-                  fontSize: Typography.size.headingthree,
-                  fontWeight: Typography.weight.bold,
-                  color: theme.dark.main,
-                  paddingHorizontal: 4,
-                  textTransform: "capitalize",
-                }}
-              >
-                {organizerInfo.category}
-              </Text>
-            </View>
-
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-evenly",
-              }}
-            >
+              </View>
               <View
                 style={{
-                  alignItems: "center",
-                  padding: 14,
+                  alignSelf: "center",
+                  marginTop: 30,
                 }}
               >
-                <Title style={{ color: theme.dark.main }}>
-                  {formatNumber(events.length)}
-                </Title>
-                <Text>Events</Text>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(true)}
+                  style={styles.profileImageContainer}
+                  activeOpacity={0.8}
+                >
+                  <Image
+                    source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
+                    resizeMode="cover"
+                    style={styles.profileImage} //featured image styles
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.contentContainer}>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.primaryHeading,
+                    fontWeight: Typography.weight.bold,
+                    color: theme.dark.main,
+                  }}
+                >
+                  {organizerInfo.username}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: Typography.size.headingthree,
+                    fontWeight: Typography.weight.bold,
+                    color: theme.dark.main,
+                    paddingHorizontal: 4,
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {organizerInfo.category}
+                </Text>
               </View>
 
               <View
                 style={{
+                  display: "flex",
+                  flexDirection: "row",
                   alignItems: "center",
-                  padding: 14,
-                }}
-              >
-                <Title style={{ color: theme.dark.main }}>
-                  {formatNumber(count)}
-                </Title>
-                <Text>Followers</Text>
-              </View>
-
-              <View
-                style={{
-                  alignItems: "center",
-                  padding: 10,
+                  justifyContent: "center",
                 }}
               >
                 <View
                   style={{
-                    flexDirection: "row",
                     alignItems: "center",
-                    justifyContent: "space-around",
+                    padding: 14,
                   }}
                 >
-                  <Title
-                    style={{ color: theme.dark.main, alignItems: "center" }}
+                  <Text
+                    style={{
+                      color: theme.dark.main,
+                      fontSize: Typography.size.headingone,
+                      fontWeight: Typography.weight.semiBold,
+                      fontFamily: Typography.family,
+                    }}
                   >
-                    4.9
-                  </Title>
-                  <AntDesign
-                    name="star"
-                    size={14}
-                    color={theme.primary.main}
-                    style={{ paddingLeft: 3 }}
-                  />
+                    {formatNumber(events.length)}
+                  </Text>
+                  <Caption
+                    style={{
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.thirty,
+                      color: theme.dark.main,
+                    }}
+                  >
+                    Events
+                  </Caption>
                 </View>
-                <Text>Rating</Text>
+
+                <View
+                  style={{
+                    alignItems: "center",
+                    padding: 14,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: theme.dark.main,
+                      fontSize: Typography.size.headingone,
+                      fontWeight: Typography.weight.semiBold,
+                      fontFamily: Typography.family,
+                      marginHorizontal: 40,
+                    }}
+                  >
+                    {formatNumber(count)}
+                  </Text>
+                  <Caption
+                    style={{
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.thirty,
+                      color: theme.dark.main,
+                    }}
+                  >
+                    Followers
+                  </Caption>
+                </View>
+
+                <View
+                  style={{
+                    alignItems: "center",
+                    padding: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-around",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: theme.dark.main,
+                        alignItems: "center",
+                        fontSize: Typography.size.headingone,
+                        fontWeight: Typography.weight.semiBold,
+                        fontFamily: Typography.family,
+                      }}
+                    >
+                      4.9
+                    </Text>
+                    <AntDesign
+                      name="star"
+                      size={14}
+                      color={theme.primary.main}
+                      style={{ paddingLeft: 3 }}
+                    />
+                  </View>
+                  <Caption
+                    style={{
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.thirty,
+                      color: theme.dark.main,
+                    }}
+                  >
+                    Rating
+                  </Caption>
+                </View>
+              </View>
+              <Divider />
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingTop: 8,
+                }}
+              >
+                {website && (
+                  <IconButton
+                    style={{
+                      backgroundColor: theme.background.faded,
+
+                      marginHorizontal: 16,
+                    }}
+                    icon="web"
+                    color={theme.dark[400]}
+                    size={26}
+                    onPress={() => console.log("Pressed")}
+                  />
+                )}
+
+                {logged && (
+                  <TouchableOpacity
+                    onPress={() => followOrganizer()}
+                    activeOpacity={0.7}
+                    style={[
+                      styles.followBtn,
+                      {
+                        backgroundColor:
+                          follow.subscription === "Following"
+                            ? theme.background.faded
+                            : theme.primary.main,
+                        color:
+                          follow.subscription === "Following"
+                            ? theme.primary.main
+                            : theme.dark.main,
+                      },
+                    ]}
+                  >
+                    {subscription ? (
+                      <ActivityIndicator size="small" color={theme.dark.main} />
+                    ) : (
+                      <Text numberOfLines={1} style={[styles.btnText]}>
+                        {follow.subscription}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+
+                {provided && (
+                  <IconButton
+                    style={{
+                      backgroundColor: theme.success[100],
+                    }}
+                    icon="phone"
+                    color={theme.success[500]}
+                    size={26}
+                    onPress={() => MakeCall()}
+                  />
+                )}
               </View>
             </View>
-            <Divider />
+
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingTop: 8,
+                marginTop: 10,
               }}
             >
-              {logged && (
-                <TouchableOpacity
-                  onPress={() => followOrganizer()}
-                  activeOpacity={0.7}
-                  style={[
-                    styles.followBtn,
-                    {
-                      backgroundColor:
-                        follow.subscription === "Following"
-                          ? theme.background.faded
-                          : theme.primary.main,
-                      color:
-                        follow.subscription === "Following"
-                          ? theme.primary.main
-                          : theme.dark.main,
-                    },
-                  ]}
-                >
-                  {subscription ? (
-                    <ActivityIndicator size="small" color={theme.dark.main} />
-                  ) : (
-                    <Text numberOfLines={1} style={[styles.btnText]}>
-                      {follow.subscription}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              )}
-              {website && (
-                <IconButton
-                  style={{
-                    backgroundColor: theme.background.faded,
-                    marginHorizontal: 16,
-                  }}
-                  icon="web"
-                  color={theme.primary[600]}
-                  size={28}
-                  onPress={() => console.log("Pressed")}
-                />
-              )}
-
-              {provided && (
-                <IconButton
-                  style={{ backgroundColor: theme.background.faded }}
-                  icon="phone"
-                  color={theme.primary[600]}
-                  size={28}
-                  onPress={() => MakeCall()}
-                />
-              )}
+              <FlatList
+                data={events}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                numColumns={numColumns}
+              />
             </View>
-          </View>
-
-          <View
-            style={{
-              marginTop: 10,
-            }}
-          >
-            <FlatList
-              data={events}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id}
-              numColumns={numColumns}
-            />
-          </View>
-        </>
+          </>
+        )
+      ) : (
+        <NoConnection onPress={() => retryConnection()} isLoading={retry} />
       )}
     </SafeAreaView>
   );

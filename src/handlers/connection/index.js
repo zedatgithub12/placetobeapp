@@ -1,11 +1,20 @@
 //import liraries
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Caption } from "react-native-paper";
 import Constants from "../../constants/Constants";
+import { useTheme } from "@react-navigation/native";
 
 /************************ No Connection Handler ********************** */
 const NoConnection = ({ ...props }) => {
+  const { theme } = useTheme();
   return (
     <View style={styles.noConnection}>
       <Image
@@ -17,7 +26,13 @@ const NoConnection = ({ ...props }) => {
       <Text>No Connection</Text>
       <Caption>Please Check your internet connection</Caption>
       <TouchableOpacity onPress={props.onPress} style={styles.eventsBtn}>
-        <Text style={styles.eventstxt}>Retry</Text>
+        <Text style={styles.eventstxt}>
+          {props.isLoading ? (
+            <ActivityIndicator size="small" color={theme.dark.main} />
+          ) : (
+            "Retry"
+          )}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -46,8 +61,8 @@ const styles = StyleSheet.create({
   },
   eventstxt: {
     fontSize: Constants.headingtwo,
-    fontWeight: Constants.Bold,
-    color: Constants.background,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.Inverse,
   },
   icon: {
     width: 80,
