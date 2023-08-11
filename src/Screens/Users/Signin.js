@@ -8,12 +8,13 @@ import {
   TouchableOpacity,
   LogBox,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../../Components/context";
 import Connection from "../../constants/connection";
-import { ActivityIndicator, Caption } from "react-native-paper";
+import { Caption } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 
@@ -356,7 +357,7 @@ export default function Signin({ navigation }) {
           style={styles.signinbtn}
         >
           {loading ? (
-            <ActivityIndicator size="small" color={Constants.Faded} />
+            <ActivityIndicator size="small" color={Constants.Inverse} />
           ) : (
             <Text style={styles.signbtntxt}> Sign In</Text>
           )}
@@ -376,7 +377,7 @@ export default function Signin({ navigation }) {
             style={{ width: 25, height: 25 }}
           />
           {googleLoader ? (
-            <ActivityIndicator size="small" color={Constants.primary} />
+            <ActivityIndicator size="small" color={Constants.Inverse} />
           ) : (
             <Text style={styles.signbtntxt}>Continue With Google</Text>
           )}
@@ -391,13 +392,14 @@ export default function Signin({ navigation }) {
           style={styles.google}
           disabled={true}
         >
-          <ActivityIndicator size="small" color={Constants.primary} />
+          <ActivityIndicator size="small" color={Constants.Inverse} />
         </TouchableOpacity>
       )}
 
       <TouchableOpacity
         activeOpacity={0.5}
         onPress={() => navigation.navigate("ForgotPass")}
+        style={{ marginTop: 4 }}
       >
         <Text style={styles.forgotpass}>Forgot Password?</Text>
       </TouchableOpacity>
@@ -421,7 +423,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     position: "absolute",
-    left: 5,
+    left: 0,
     top: 30,
     zIndex: 2,
     justifyContent: "center",
@@ -429,11 +431,8 @@ const styles = StyleSheet.create({
     margin: 20,
     marginTop: 8,
     marginBottom: 8,
-    backgroundColor: Constants.background,
     height: 40,
     width: 40,
-    borderRadius: 50,
-    elevation: 2,
   },
   loginimage: {
     resizeMode: "contain",

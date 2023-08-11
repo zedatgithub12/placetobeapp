@@ -39,6 +39,7 @@ import { useTheme } from "@react-navigation/native";
 import Rating from "../../Components/Events/Rating";
 import RelatedEvent from "../../Components/Events/related";
 import { Typography } from "../../themes/typography";
+import { LocalNotification } from "../../Utils/localPushController";
 
 const EventDetails = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -798,7 +799,16 @@ const EventDetails = ({ route, navigation }) => {
               </Text>
 
               <View style={styles.actionButton}>
-                <View
+                <TouchableOpacity
+                  onPress={() =>
+                    LocalNotification(
+                      item.startingTime,
+                      item.event_name,
+                      item.event_description,
+                      featuredImageUri + item.event_image,
+                      item
+                    )
+                  }
                   style={{
                     display: "flex",
                     flexDirection: "row",
@@ -816,7 +826,7 @@ const EventDetails = ({ route, navigation }) => {
                   >
                     345
                   </Text>
-                </View>
+                </TouchableOpacity>
                 <View
                   style={{
                     display: "flex",
@@ -868,11 +878,11 @@ const EventDetails = ({ route, navigation }) => {
             >
               {item.event_description}
             </Text>
-            {readMorebtn ? (
+            {readMorebtn && (
               <TouchableOpacity activeOpacity={0.7} onPress={() => showmore()}>
                 <Text style={styles.ReadMore}>{descLength}</Text>
               </TouchableOpacity>
-            ) : null}
+            )}
           </View>
 
           <View style={styles.ratingContainer}>

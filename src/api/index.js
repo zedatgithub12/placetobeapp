@@ -27,14 +27,17 @@ const Connection = {
   following: "following/",
   upload: "uploadimage.php",
   assets: "images/",
+
+  //business api end points
   organizer: "organizer", //updated
+  singleBusiness: "singleBusiness",
 
   notification: "notification",
   OrganizerFollowCounter: "organizer-followers/",
   organizerEvents: "organizer-event/",
   organizerUpcomings: "organizer-upcoming-event/",
   createfeedback: "create-feedback",
-  forgotPassword: "forgotPassword", //*********** need pilot */
+  forgotPassword: "forgotPassword",
   status: "status", //*********** need pilot */
   Images: "Images",
   appInfo: "appinfo",
@@ -59,6 +62,21 @@ const Connection = {
 
   //refunding related api's
   requestRrefunding: "refunding-request",
+
+  //rating end points
+  addRating: "add-ratings",
+  getRating: "get-ratings/",
+  updateRating: "update-ratings/",
+
+  //ads endpoints
+  fetchAds: "display-ads",
+
+  //viewed ads end points
+  adViewed: "consumed-create",
+
+  //tickets endpoints
+  requestRefunding: "ticket-refunds",
+  refundingInfo: "ticket-refunds/",
 };
 
 export default Connection;

@@ -56,7 +56,7 @@ export default function App() {
           path: "profile",
         },
         EventDetail: {
-          path: "eventdetail/:externalLink",
+          path: "event-detail/:externalLink",
         },
       },
     },
