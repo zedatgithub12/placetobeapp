@@ -1,5 +1,5 @@
 //import liraries
-import React, { Component } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -8,17 +8,34 @@ import {
   Image,
   Pressable,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import { Typography } from "../../themes/typography";
 import { useTheme } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import * as Animatable from "react-native-animatable";
+import Connection from "../../api";
+import { UserInteraction } from "../../Utils/Ads";
 
 // slideup ads component
-const SlideUp = ({ slideUpPressed, onClose }) => {
+const SlideUp = ({ onClose, ad }) => {
+  const Ad = ad[0] ? ad[0] : [];
   const { theme } = useTheme();
+  const featuredImageUri = Connection.url + Connection.assets;
+
+  const handleUserAction = (reaction) => {
+    if (reaction === "conversion" || reaction === "clicked") {
+      Linking.openURL(Ad.ad_link_url);
+      UserInteraction(Ad, reaction);
+    } else {
+      UserInteraction(Ad, reaction);
+    }
+  };
   return (
-    <Pressable onPress={slideUpPressed} style={{ position: "relative" }}>
+    <Pressable
+      onPress={() => handleUserAction("clicked")}
+      style={{ position: "relative" }}
+    >
       <Animatable.View
         animation="slideInRight"
         style={[styles.container, { backgroundColor: theme.background.main }]}
@@ -32,7 +49,7 @@ const SlideUp = ({ slideUpPressed, onClose }) => {
         >
           <Image
             source={{
-              uri: "https://images.unsplash.com/photo-1541270941907-3f7143c8c7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8NHxYMmQ4cm41ZktUc3x8ZW58MHx8fHx8&auto=format&fit=crop&w=600&q=60",
+              uri: featuredImageUri + Ad.ad_creative,
             }}
             style={{
               width: Dimensions.get("screen").width / 5,
@@ -55,7 +72,7 @@ const SlideUp = ({ slideUpPressed, onClose }) => {
                 },
               ]}
             >
-              You can't rush the moment
+              {Ad.ad_heading}
             </Text>
             <Text
               style={[
@@ -71,7 +88,7 @@ const SlideUp = ({ slideUpPressed, onClose }) => {
               ]}
               numberOfLines={1}
             >
-              Cards are a great way to display information
+              {Ad.ad_description}
             </Text>
             <Text
               style={{
@@ -79,11 +96,10 @@ const SlideUp = ({ slideUpPressed, onClose }) => {
                 fontFamily: Typography.family,
                 fontSize: Typography.size.headingthree,
                 fontWeight: Typography.weight.medium,
-
                 color: theme.buttons.main,
               }}
             >
-              Learn more
+              {Ad.ad_button_label}
             </Text>
           </View>
         </View>

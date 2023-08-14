@@ -9,6 +9,7 @@ import {
   Dimensions,
   ScrollView,
   FlatList,
+  Linking,
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -41,6 +42,7 @@ import NativeAdsOne from "../../Components/Ads/nativeAd1";
 import SlideUp from "../../Components/Ads/slideup";
 import HeaderAds from "../../Components/Ads/headerAds";
 import TitleContainer from "./components/header";
+import { fetchAds, UserInteraction } from "../../Utils/Ads";
 
 function Home({ navigation, ...props }) {
   const { theme } = useTheme();
@@ -50,7 +52,7 @@ function Home({ navigation, ...props }) {
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
   const [active, setActive] = useState("All");
-  const [showNativeAd, setShowNativeAd] = useState(true);
+
   const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
   const [filteredEvent, setFilteredEvent] = useState([]);
@@ -59,6 +61,13 @@ function Home({ navigation, ...props }) {
   const [happening, setHappening] = useState([]);
   const [thisWeek, setThisWeek] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
+
+  const [showBannerAds, setShowBannerAds] = useState(true);
+  const [bannerAds, setBannerAds] = useState([]);
+  const [showNativeAd, setShowNativeAd] = useState(false);
+  const [nativeAd, setNativeAd] = useState([]);
+  const [showCardAd, setShowCardAd] = useState(false);
+  const [AdsInfo, setAdsInfo] = useState([]);
 
   const today = getCurrentDate();
   // check if the profile got updated and update the top right profile indicator
@@ -307,12 +316,42 @@ function Home({ navigation, ...props }) {
     };
   }, [retry]);
 
+  const handleBannerAds = async (type) => {
+    try {
+      const response = await fetchAds(type);
+      if (response.success) {
+        setBannerAds(response.data);
+        setShowBannerAds(true);
+      } else {
+        setShowBannerAds(false);
+      }
+    } catch (error) {
+      setShowBannerAds(false);
+    }
+  };
+
+  const handleNativeCardAds = async (type) => {
+    try {
+      const response = await fetchAds(type);
+      if (response.success) {
+        setAdsInfo(response.data);
+        setShowCardAd(true);
+      } else {
+        setShowCardAd(false);
+      }
+    } catch (error) {
+      setShowCardAd(false);
+    }
+  };
+  //handle component mounting event
   useEffect(() => {
     userInfoFunction();
     userProfile();
     FeatchEvents();
     weekEvents();
     upcomingEvents();
+    handleBannerAds("banner");
+    handleNativeCardAds("nativeCard");
     return () => {};
   }, [logged]);
 
@@ -446,7 +485,7 @@ function Home({ navigation, ...props }) {
                       )}
                     </View>
                   )}
-                  <Slider />
+                  {showBannerAds && bannerAds[0] && <Slider ad={bannerAds} />}
 
                   {/* Happening event listing */}
                   {happening.length > 0 && (
@@ -554,10 +593,13 @@ function Home({ navigation, ...props }) {
                       height: Dimensions.get("screen").height / 1.6,
                     }}
                   >
-                    <NativeAdsOne
-                      showAds={true}
-                      PositiveAction={() => alert("Yeah press me")}
-                    />
+                    {showCardAd && AdsInfo[0] && (
+                      <NativeAdsOne
+                        showAds={true}
+                        ad={AdsInfo}
+                        hideCard={() => setShowCardAd(false)}
+                      />
+                    )}
                   </View>
                 </ScrollView>
               ) : (
@@ -576,9 +618,11 @@ function Home({ navigation, ...props }) {
                       updateCellsBatchingPeriod={100} // Increase time between renders
                       windowSize={7} // Reduce the window size
                       ListHeaderComponent={
-                        showNativeAd && (
+                        showNativeAd &&
+                        nativeAd[0] && (
                           <HeaderAds
-                            PositiveAction={() => alert("leran more clicked")}
+                            ad={nativeAd}
+                            hideAd={() => setNativeAd(false)}
                           />
                         )
                       }

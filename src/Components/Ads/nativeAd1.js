@@ -8,64 +8,77 @@ import {
   Image,
   Dimensions,
   Pressable,
+  Linking,
 } from "react-native";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import { Typography } from "../../themes/typography";
-import * as Animatable from "react-native-animatable";
+import Connection from "../../api";
+import { UserInteraction } from "../../Utils/Ads";
 
 // create a native ads component to be shown inside homescreen
-const NativeAdsOne = ({ showAds, Ad, PositiveAction, CloseAds }) => {
-  const [showAd, setShowAd] = useState(showAds);
+const NativeAdsOne = ({ ad, hideCard }) => {
+  const Ad = ad[0] ? ad[0] : [];
   const { theme } = useTheme();
+  const featuredImageUri = Connection.url + Connection.assets;
+
+  const handleUserAction = (reaction) => {
+    if (reaction === "conversion" || reaction === "clicked") {
+      Linking.openURL(Ad.ad_link_url);
+      UserInteraction(Ad, reaction);
+    } else {
+      UserInteraction(Ad, reaction);
+    }
+  };
   return (
-    <Pressable onPress={PositiveAction}>
+    <Pressable onPress={hideCard}>
       <View style={styles.container}>
-        <View
-          style={{
-            width: Dimensions.get("screen").width / 1.1,
-            height: Dimensions.get("screen").height / 2.2,
-          }}
+        <TouchableOpacity
+          onPress={() => handleUserAction("closed")}
+          style={[
+            styles.closeButton,
+            {
+              height: 32,
+              width: 32,
+              backgroundColor: theme.background.faded,
+              zIndex: 2,
+            },
+          ]}
         >
           <View
             style={{
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
-              zIndex: 1000,
+              zIndex: 1,
             }}
           >
-            <TouchableOpacity
-              onPress={() => setShowAd(!showAd)}
-              style={[
-                styles.closeButton,
-                { backgroundColor: theme.background.faded },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="close"
-                size={20}
-                style={{ zIndex: 1001 }}
-              />
-            </TouchableOpacity>
+            <MaterialCommunityIcons
+              name="close"
+              size={22}
+              style={{ zIndex: 2 }}
+            />
           </View>
-          <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1541270941907-3f7143c8c7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8NHxYMmQ4cm41ZktUc3x8ZW58MHx8fHx8&auto=format&fit=crop&w=600&q=60",
-            }}
-            style={{
-              width: Dimensions.get("screen").width / 1.1,
-              height: 160,
-              borderTopLeftRadius: 8,
-              borderTopRightRadius: 8,
-            }}
-          />
+        </TouchableOpacity>
 
-          <View
-            style={[
-              styles.bodyContent,
-              { backgroundColor: theme.background.main },
-            ]}
-          >
+        <Image
+          source={{
+            uri: featuredImageUri + Ad.ad_creative,
+          }}
+          style={{
+            width: Dimensions.get("screen").width / 1.1,
+            height: 160,
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
+          }}
+        />
+
+        <View
+          style={[
+            styles.bodyContent,
+            { backgroundColor: theme.background.main },
+          ]}
+        >
+          <Pressable onPress={() => handleUserAction("clicked")}>
             <Text
               style={[
                 styles.title,
@@ -78,7 +91,7 @@ const NativeAdsOne = ({ showAds, Ad, PositiveAction, CloseAds }) => {
                 },
               ]}
             >
-              You can't rush the moment
+              {Ad.ad_heading}
             </Text>
             <Text
               style={[
@@ -93,48 +106,46 @@ const NativeAdsOne = ({ showAds, Ad, PositiveAction, CloseAds }) => {
                 },
               ]}
             >
-              Cards are a great way to display information, usually containing
-              content
+              {Ad.ad_description}
             </Text>
-
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
+          </Pressable>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Pressable
+              onPress={() => handleUserAction("conversion")}
+              style={{ margin: 8, marginLeft: 4, justifyContent: "flex-end" }}
             >
-              <Pressable
-                onPress={PositiveAction}
-                style={{ margin: 8, marginLeft: 4, justifyContent: "flex-end" }}
-              >
-                <Text
-                  style={{
-                    padding: 4,
-                    paddingLeft: 0,
-                    fontFamily: Typography.family,
-                    fontSize: Typography.size.headingthree,
-                    fontWeight: Typography.weight.bold,
-                    lineHeight: 20,
-                    color: theme.buttons.main,
-                  }}
-                >
-                  Learn more
-                </Text>
-              </Pressable>
-
               <Text
                 style={{
-                  position: "absolute",
-                  right: 0,
-                  bottom: 0,
-                  paddingHorizontal: 4,
+                  padding: 4,
+                  paddingLeft: 0,
                   fontFamily: Typography.family,
-                  fontSize: Typography.size.textSize,
-                  fontWeight: Typography.weight.semiBold,
-
-                  color: theme.dark.main,
+                  fontSize: Typography.size.headingthree,
+                  fontWeight: Typography.weight.bold,
+                  lineHeight: 20,
+                  color: theme.buttons.main,
                 }}
               >
-                Ads
+                {Ad.ad_button_label}
               </Text>
-            </View>
+            </Pressable>
+
+            <Text
+              style={{
+                position: "absolute",
+                right: 0,
+                bottom: 0,
+                paddingHorizontal: 4,
+                fontFamily: Typography.family,
+                fontSize: Typography.size.textSize,
+                fontWeight: Typography.weight.semiBold,
+
+                color: theme.dark.main,
+              }}
+            >
+              Ads
+            </Text>
           </View>
         </View>
       </View>
@@ -145,14 +156,16 @@ const NativeAdsOne = ({ showAds, Ad, PositiveAction, CloseAds }) => {
 // define your styles
 const styles = StyleSheet.create({
   container: {
+    width: Dimensions.get("screen").width / 1.1,
     justifyContent: "center",
     alignItems: "center",
+    alignSelf: "center",
     position: "relative",
   },
   closeButton: {
     position: "absolute",
     top: 6,
-    right: 0,
+    right: 2,
     bottom: 2,
     padding: 4,
     borderRadius: 20,

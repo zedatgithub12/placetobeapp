@@ -1,17 +1,36 @@
 //import liraries
 import React from "react";
-import { View, Text, StyleSheet, Image, Pressable } from "react-native";
-import Connection from "../../constants/connection";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  Linking,
+} from "react-native";
 import Constants from "../../constants/Constants";
 import { useTheme } from "@react-navigation/native";
 import { Typography } from "../../themes/typography";
+import { UserInteraction } from "../../Utils/Ads";
+import Connection from "../../api";
 
 // header ads component
-const HeaderAds = ({ showAds, Ad, PositiveAction, CloseAds }) => {
+const HeaderAds = ({ ad, hideAd }) => {
+  const Ad = ad[0] ? ad[0] : [];
   const { theme } = useTheme();
+  const featuredImageUri = Connection.url + Connection.assets;
+
+  const handleUserAction = (reaction) => {
+    if (reaction === "conversion" || reaction === "clicked") {
+      Linking.openURL(Ad.ad_link_url);
+      UserInteraction(Ad, reaction);
+    } else {
+      UserInteraction(Ad, reaction);
+    }
+  };
   return (
     <Pressable
-      onPress={PositiveAction}
+      onPress={() => handleUserAction("clicked")}
       style={[
         styles.EventContainer,
         {
@@ -24,28 +43,29 @@ const HeaderAds = ({ showAds, Ad, PositiveAction, CloseAds }) => {
       <View style={styles.ImageContainer}>
         <Image
           source={{
-            uri: "https://images.unsplash.com/photo-1541270941907-3f7143c8c7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8NHxYMmQ4cm41ZktUc3x8ZW58MHx8fHx8&auto=format&fit=crop&w=600&q=60",
+            uri: featuredImageUri + Ad.ad_creative,
           }}
           style={styles.FeaturedImagestyle}
         />
       </View>
 
       <View style={styles.ContainerTwo}>
-        <Text
-          style={[
-            styles.title,
-            {
-              paddingHorizontal: 4,
-              fontFamily: Typography.family,
-              fontSize: Typography.size.headingtwo,
-              fontWeight: Typography.weight.bold,
-              color: theme.dark.main,
-            },
-          ]}
-        >
-          You can't rush the moment
-        </Text>
-
+        <Pressable onPress={() => handleUserAction("clicked")}>
+          <Text
+            style={[
+              styles.title,
+              {
+                paddingHorizontal: 4,
+                fontFamily: Typography.family,
+                fontSize: Typography.size.headingtwo,
+                fontWeight: Typography.weight.bold,
+                color: theme.dark.main,
+              },
+            ]}
+          >
+            {Ad.ad_heading}
+          </Text>
+        </Pressable>
         <View
           style={{ flexDirection: "column", justifyContent: "space-between" }}
         >
@@ -59,7 +79,7 @@ const HeaderAds = ({ showAds, Ad, PositiveAction, CloseAds }) => {
               color: theme.dark[600],
             }}
           >
-            Cards are a great way to display information
+            {Ad.ad_description}
           </Text>
         </View>
         <View
@@ -73,7 +93,7 @@ const HeaderAds = ({ showAds, Ad, PositiveAction, CloseAds }) => {
             paddingHorizontal: 4,
           }}
         >
-          <Pressable onPress={PositiveAction}>
+          <Pressable onPress={() => handleUserAction("conversion")}>
             <Text
               style={{
                 fontFamily: Typography.family,
@@ -85,7 +105,7 @@ const HeaderAds = ({ showAds, Ad, PositiveAction, CloseAds }) => {
                 bottom: 0,
               }}
             >
-              Learn more
+              {Ad.ad_button_label}
             </Text>
           </Pressable>
 

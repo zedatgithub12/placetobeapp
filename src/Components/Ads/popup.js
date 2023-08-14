@@ -10,22 +10,37 @@ import {
   Image,
   Dimensions,
   Pressable,
+  Linking,
 } from "react-native";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import { Typography } from "../../themes/typography";
 import * as Animatable from "react-native-animatable";
+import { UserInteraction } from "../../Utils/Ads";
+import Connection from "../../api";
 
 // create a pop up modal
-const PopupAds = ({ showModal, ad, positiveAction }) => {
+const PopupAds = ({ showModal, ad }) => {
+  const Ad = ad[0];
   const [modalVisible, setModalVisible] = useState(showModal);
   const { theme } = useTheme();
+  const featuredImageUri = Connection.url + Connection.assets;
+
+  const handleUserAction = (reaction) => {
+    if (reaction === "conversion" || reaction === "clicked") {
+      Linking.openURL(Ad.ad_link_url);
+      UserInteraction(Ad, reaction);
+    } else {
+      setModalVisible(false);
+      UserInteraction(Ad, reaction);
+    }
+  };
 
   return (
     <Modal
       visible={modalVisible}
       animationType="fade"
       transparent={true}
-      onRequestClose={() => setModalVisible(!modalVisible)}
+      onRequestClose={() => handleUserAction("closed")}
     >
       <Animatable.View style={styles.container} animation="bounceIn">
         <View
@@ -37,7 +52,7 @@ const PopupAds = ({ showModal, ad, positiveAction }) => {
           }}
         >
           <TouchableOpacity
-            onPress={() => setModalVisible(!modalVisible)}
+            onPress={() => handleUserAction("closed")}
             style={[
               styles.closeButton,
               { backgroundColor: theme.background.faded },
@@ -53,57 +68,59 @@ const PopupAds = ({ showModal, ad, positiveAction }) => {
             height: Dimensions.get("screen").height / 2.2,
           }}
         >
-          <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1541270941907-3f7143c8c7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8NHxYMmQ4cm41ZktUc3x8ZW58MHx8fHx8&auto=format&fit=crop&w=600&q=60",
-            }}
-            style={{
-              width: Dimensions.get("screen").width / 1.2,
-              height: 160,
-              borderTopLeftRadius: 12,
-              borderTopRightRadius: 12,
-            }}
-          />
-
+          <Pressable onPress={() => handleUserAction("clicked")}>
+            <Image
+              source={{
+                uri: featuredImageUri + Ad.ad_creative,
+              }}
+              style={{
+                width: Dimensions.get("screen").width / 1.2,
+                height: 160,
+                borderTopLeftRadius: 12,
+                borderTopRightRadius: 12,
+              }}
+            />
+          </Pressable>
           <View
             style={[
               styles.bodyContent,
               { backgroundColor: theme.background.main },
             ]}
           >
-            <Text
-              style={[
-                styles.title,
-                {
-                  paddingHorizontal: 4,
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.headingone,
-                  fontWeight: Typography.weight.bold,
-                  color: theme.dark.main,
-                },
-              ]}
-            >
-              You can't rush the moment
-            </Text>
-            <Text
-              style={[
-                styles.content,
-                {
-                  padding: 4,
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.headingthree,
-                  fontWeight: Typography.weight.regular,
-                  lineHeight: 20,
-                  color: theme.dark[800],
-                },
-              ]}
-            >
-              Cards are a great way to display information, usually containing
-              content
-            </Text>
+            <Pressable onPress={() => handleUserAction("clicked")}>
+              <Text
+                style={[
+                  styles.title,
+                  {
+                    paddingHorizontal: 4,
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.headingone,
+                    fontWeight: Typography.weight.bold,
+                    color: theme.dark.main,
+                  },
+                ]}
+              >
+                {Ad.ad_heading}
+              </Text>
+              <Text
+                style={[
+                  styles.content,
+                  {
+                    padding: 4,
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.headingthree,
+                    fontWeight: Typography.weight.regular,
+                    lineHeight: 20,
+                    color: theme.dark[800],
+                  },
+                ]}
+              >
+                {Ad.ad_description}
+              </Text>
+            </Pressable>
 
             <Pressable
-              onPress={positiveAction}
+              onPress={() => handleUserAction("conversion")}
               style={{ margin: 8, marginLeft: 4, justifyContent: "flex-end" }}
             >
               <Text
@@ -116,7 +133,7 @@ const PopupAds = ({ showModal, ad, positiveAction }) => {
                   color: theme.buttons.main,
                 }}
               >
-                Learn more
+                {Ad.ad_button_label}
               </Text>
             </Pressable>
           </View>

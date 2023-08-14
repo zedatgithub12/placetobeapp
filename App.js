@@ -31,6 +31,7 @@ import RemotePushController from "./src/Utils/RemotePushController";
 import Routes from "./src/routes";
 import PopupAds from "./src/Components/Ads/popup";
 import SlideUp from "./src/Components/Ads/slideup";
+import { fetchAds } from "./src/Utils/Ads";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
@@ -66,9 +67,12 @@ export default function App() {
     isLoading: true,
   };
 
-  const [showPopUpAds, setShowPopupAds] = useState(true);
-  const [showSlideAds, setShowSlideAds] = useState(true);
+  const [showPopUpAds, setShowPopupAds] = useState(false);
+  const [popupAdsData, setPopupAdsData] = useState([]);
+  const [showSlideAds, setShowSlideAds] = useState(false);
+  const [slideupAds, setSlideupAds] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(0);
+
   //a constant which store a state of event field input datas
   // the information collected from all input field will be store here
   // the state is going to be updated inside the context function which trigger the value from the component
@@ -375,6 +379,34 @@ export default function App() {
     setRetry(!retry);
   };
 
+  const handlePopupAd = async (type) => {
+    try {
+      const response = await fetchAds(type);
+      if (response.success) {
+        setPopupAdsData(response.data);
+        setShowPopupAds(true);
+      } else {
+        setShowPopupAds(false);
+      }
+    } catch (error) {
+      setShowPopupAds(false);
+    }
+  };
+
+  const handleSlideupAd = async (type) => {
+    try {
+      const response = await fetchAds(type);
+      if (response.success) {
+        setSlideupAds(response.data);
+        setShowSlideAds(true);
+      } else {
+        setShowSlideAds(false);
+      }
+    } catch (error) {
+      setShowSlideAds(false);
+    }
+  };
+
   useEffect(() => {
     setTimeout(async () => {
       try {
@@ -391,9 +423,6 @@ export default function App() {
 
       dispatch({ type: "REGISTER", token: userToken });
     }, 2000);
-    const timer = setTimeout(() => {
-      setShowPopupAds(true);
-    }, 30000);
 
     NetInfo.fetch().then((state) => {
       if (state.isConnected) {
@@ -401,10 +430,25 @@ export default function App() {
       }
     });
 
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => {};
   }, [retry]);
+
+  // A useEffect which will be called after a specified time and fetchs popUp ad fetching
+  useEffect(() => {
+    const PopupAd = setTimeout(() => {
+      handlePopupAd("popUp");
+    }, 3000);
+    return () => clearTimeout(PopupAd);
+  }, []);
+
+  // A useEffect which will be called after a specified time and fetchs slideUp ad fetching
+  useEffect(() => {
+    const SlideUpAd = setTimeout(() => {
+      handleSlideupAd("slideUp");
+    }, 40000);
+
+    return () => clearTimeout(SlideUpAd);
+  }, []);
 
   //activity indicator which is going to be shown and the opening of app
   if (loginState.isLoading) {
@@ -469,14 +513,14 @@ export default function App() {
                 </View>
               )}
 
-              <PopupAds
-                showModal={showPopUpAds}
-                positiveAction={() => alert("positive")}
-              />
-              {showSlideAds && (
+              {showPopUpAds && popupAdsData[0] && (
+                <PopupAds showModal={showPopUpAds} ad={popupAdsData} />
+              )}
+
+              {showSlideAds && slideupAds[0] && (
                 <SlideUp
-                  slideUpPressed={() => alert("don't touch me")}
                   onClose={() => setShowSlideAds(false)}
+                  ad={slideupAds}
                 />
               )}
             </NavigationContainer>

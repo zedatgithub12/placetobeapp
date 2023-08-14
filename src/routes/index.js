@@ -125,6 +125,7 @@ const Routes = ({ navigation }) => {
         name="EventDetail"
         component={EventDetails}
         options={{
+          title: "Event Detail",
           headerStyle: {
             backgroundColor: Constants.primary,
           },
