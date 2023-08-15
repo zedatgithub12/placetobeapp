@@ -23,7 +23,6 @@ import {
 import Constants from "../../constants/Constants";
 import DetailContent from "../../Components/Events/EventContent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Connection from "../../constants/connection";
 import { AuthContext } from "../../Components/context";
 import * as FileSystem from "expo-file-system";
 import { useSelector, useDispatch } from "react-redux";
@@ -40,6 +39,9 @@ import Rating from "../../Components/Events/Rating";
 import RelatedEvent from "../../Components/Events/related";
 import { Typography } from "../../themes/typography";
 import { LocalNotification } from "../../Utils/localPushController";
+import { DateFormater, TimeFormater } from "../../Utils/functions";
+import Connection from "../../api";
+import galleryImage from "../../assets/images/galleryImage.png";
 
 const EventDetails = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -51,11 +53,22 @@ const EventDetails = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
   //item as value from database
-  const [item, setItem] = useState({});
+  const [item, setItem] = useState([]);
+  const [eventOrg, setEventOrg] = useState([]);
+  const [rating, setRating] = useState();
+  const [numberOfRatings, setNumberOfRatings] = useState();
   const [loading, setLoading] = useState(true);
   const [ratingVisible, setRatingVisible] = useState(false);
   const [currentRating, setCurrentRating] = useState(0);
+  const [ratingDetails, setRatingDetails] = useState([]);
+  const [userRated, setUserRated] = useState(false);
+  const [relatedEvents, setRelatedEvent] = useState([]);
+  const [exist, setExist] = useState(false); // the state of ticket existance
+
   const [mapOpen, setMapOpen] = useState(true);
+
+  var featuredImageUri = Connection.url + Connection.assets;
+
   const MakeCall = (phone) => {
     const args = {
       number: phone, // String value with the number to call
@@ -75,9 +88,36 @@ const EventDetails = ({ route, navigation }) => {
     setRatingVisible(false);
   };
 
-  const handleSubmitFeedback = (rating, review) => {
-    // Make API call to store the feedback
-    console.log("Submitting feedback:", rating, review);
+  const handleSubmitFeedback = async (rating, review) => {
+    const userid = await AsyncStorage.getItem("userId");
+    if (userid) {
+      var ApiUrl = Connection.url + Connection.addRating;
+      var headers = {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      };
+      const data = {
+        user_id: userid,
+        event_id: item.id,
+        rating: rating,
+        review: review,
+      };
+
+      fetch(ApiUrl, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          showToast(response.message);
+        })
+        .catch((error) => {
+          showToast("Unable to rate");
+        });
+    } else {
+      SignInAlert("Rating", "SignIn first to rate the event");
+    }
   };
 
   const [timing, setTime] = useState({
@@ -144,114 +184,127 @@ const EventDetails = ({ route, navigation }) => {
   const FeatchEvent = () => {
     const controller = new AbortController();
     const signal = controller.signal;
-    if (externalLink) {
-      setLoading(true);
-      var ApiUrl = Connection.url + Connection.Event + externalLink;
 
-      // header type for text data to be send to server
-      var headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      };
-      fetch(ApiUrl, {
-        method: "GET",
-        headers: headers,
-        signal: signal,
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          if (response.success) {
-            let event = response.data;
-            let startTime = response.StartTime;
-            let EndTime = response.EndTime;
-            var start = TimeFun(startTime);
-            var end = TimeFun(EndTime);
-            setItem(event);
-            setTime({
-              ...timing,
-              StartTime: start,
-              EndTime: end,
-            });
-            setLoading(false);
-            checkCoords(event);
-          } else {
-            setLoading(false);
-          }
-        })
-        .catch((error) => {
-          setLoading(false);
-          console.log(
-            "Error: there is miss understanding with backend" + error
-          );
-        });
-    } else {
-      setLoading(true);
-      var ApiUrl = Connection.url + Connection.Event + id;
-      //organizer id is the only data to be sent to server in order to retrive organizer data
+    setLoading(true);
+    var Externally = Connection.url + Connection.eventDetails + externalLink;
+    var InApp = Connection.url + Connection.eventDetails + id;
+    var ApiUrl = externalLink ? Externally : InApp;
 
-      // header type for text data to be send to server
-      var headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      };
-      fetch(ApiUrl, {
-        method: "GET",
-        headers: headers,
-        signal: signal,
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          if (response.success) {
-            let event = response.data;
-            let startTime = response.StartTime;
-            let EndTime = response.EndTime;
-            var start = TimeFun(startTime);
-            var end = TimeFun(EndTime);
-            setItem(event);
-            setTime({
-              ...timing,
-              StartTime: start,
-              EndTime: end,
-            });
-            setLoading(false);
-            checkCoords(event);
-          } else {
-            setLoading(false);
-          }
-        })
-        .catch((error) => {
+    // header type for text data to be send to server
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+    fetch(ApiUrl, {
+      method: "GET",
+      headers: headers,
+      signal: signal,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.success) {
+          let event = response.data;
+          let ticket = response.tickets;
+          let organizer = response.organizer;
+          let rating = response.rating;
+          let numberOfRatings = response.numberOfRatings;
+
+          let startTime = response.StartTime;
+          let EndTime = response.EndTime;
+          var start = TimeFormater(startTime);
+          var end = TimeFormater(EndTime);
+          setItem(event);
+          setExist(ticket);
+          setEventOrg(organizer);
+          setRating(rating);
+          setNumberOfRatings(numberOfRatings);
+          setTime({
+            ...timing,
+            StartTime: start,
+            EndTime: end,
+          });
           setLoading(false);
-        });
-    }
+          checkCoords(event);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+      });
 
     return () => {
       controller.abort();
     };
   };
-  // featuredImage asset location on the server
-  var featuredImageUri = Connection.url + Connection.assets;
 
-  /********************* */
-  // event bookmarking related code is writen below
-  /********************* */
+  const FetchUserRating = async () => {
+    const userid = await AsyncStorage.getItem("userId");
+
+    if (userid) {
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      var Externally =
+        Connection.url +
+        Connection.moreEventDetails +
+        `?eventid=${externalLink}&userid=${userid}`;
+      var InApp =
+        Connection.url +
+        Connection.moreEventDetails +
+        `?eventid=${id}&userid=${userid}`;
+      var ApiUrl = externalLink ? Externally : InApp;
+
+      // header type for text data to be send to server
+      var headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+      fetch(ApiUrl, {
+        method: "GET",
+        headers: headers,
+        signal: signal,
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          if (response.success) {
+            setRatingDetails(response.userrating ? response.userrating : []);
+            setCurrentRating(response.userrating.rating);
+            setRelatedEvent(response.related);
+            setUserRated(response.userrating.rating ? true : false);
+          }
+        })
+        .catch((error) => {
+          setLoading(false);
+        });
+
+      return () => {
+        controller.abort();
+      };
+    }
+  };
   const showToast = (message) => {
     ToastAndroid.show(message, ToastAndroid.SHORT); //message to be toasted after user clicked the bookmark button
   };
 
   const [bookmarkBtn, setBookmarkBtn] = useState(false);
   const [bookmarkBtnColor, setBookmarkBtnColor] = useState(theme.dark.main);
-
+  const [bookmarkBtnBackground, setBookmarkBtnBackground] = useState(
+    theme.background.main
+  );
   const bookmarkEvent = () => {
-    const find = items.find((event) => event.event_id === item.event_id);
+    const find = items.find((event) => event.id === item.id);
     if (find) {
       //setBookmarkBtn(true);
-      setBookmarkBtnColor(theme.primary.main);
-      dispatch(remove(item.event_id));
+      setBookmarkBtnColor(theme.dark.main);
+      setBookmarkBtnBackground(theme.background.main);
+      dispatch(remove(item.id));
       showToast("Unsaved!");
     } else {
       dispatch(bookmarkItem(item));
       // setBookmarkBtn(true);
-      setBookmarkBtnColor(Constants.primary);
+      setBookmarkBtnBackground(theme.primary.light);
+      setBookmarkBtnColor(theme.primary.main);
       showToast("Saved!");
     }
   };
@@ -259,10 +312,10 @@ const EventDetails = ({ route, navigation }) => {
 
   const bookmarked = () => {
     var yesItis = false;
-    const find = items.find((event) => event.event_id === id);
+    const find = items.find((event) => event.id === id);
     if (find) {
       //setBookmarkBtn(true);
-      setBookmarkBtnColor(Constants.primary);
+      setBookmarkBtnColor(theme.primary.main);
       yesItis = true;
       return yesItis;
     }
@@ -270,8 +323,8 @@ const EventDetails = ({ route, navigation }) => {
   };
 
   // alert when user doesn't logged into the system
-  const SignInAlert = () =>
-    Alert.alert("Bookmark", "SignIn first to bookmark the event!", [
+  const SignInAlert = (title, description) =>
+    Alert.alert(title, description, [
       {
         text: "Cancel",
 
@@ -288,11 +341,11 @@ const EventDetails = ({ route, navigation }) => {
   //event Sharing functionality related code is writen below
   /******************************************* */
   const ShareEvent = async (eventId) => {
-    let remoteUrl = featuredImageUri + item.event_image; //file path on the server
-    let event_image = item.event_image; //name of image to be shared
+    let remoteUrl = featuredImageUri + item.event_image;
+    let event_image = item.event_image;
 
-    let localPath = `${FileSystem.cacheDirectory}${event_image}`; //cached file url
-    FileSystem.downloadAsync(remoteUrl, localPath); //download file to cached directory
+    let localPath = `${FileSystem.cacheDirectory}${event_image}`;
+    FileSystem.downloadAsync(remoteUrl, localPath);
 
     const doesExist = await FileSystem.getInfoAsync(localPath);
 
@@ -305,61 +358,6 @@ const EventDetails = ({ route, navigation }) => {
     };
 
     await Share.open(shareOptions).catch((err) => {});
-  };
-  /********************************************* */
-  //event start date time and end date related code is writen below
-  /********************************************* */
-
-  const DateFun = (startingTime) => {
-    var date = new Date(startingTime);
-    let day = date.getDay();
-    let month = date.getMonth();
-    let happeningDay = date.getDate();
-
-    // return weekname
-    var weekday = new Array(7);
-    weekday[1] = "Mon, ";
-    weekday[2] = "Tue, ";
-    weekday[3] = "Wed, ";
-    weekday[4] = "Thu, ";
-    weekday[5] = "Fri, ";
-    weekday[6] = "Sat, ";
-    weekday[0] = "Sun, ";
-
-    //an array of month name
-    var monthName = new Array(12);
-    monthName[1] = "Jan";
-    monthName[2] = "Feb";
-    monthName[3] = "Mar";
-    monthName[4] = "Apr";
-    monthName[5] = "May";
-    monthName[6] = "Jun";
-    monthName[7] = "Jul";
-    monthName[8] = "Aug";
-    monthName[9] = "Sep";
-    monthName[10] = "Oct";
-    monthName[11] = "Nov";
-    monthName[12] = "Dec";
-
-    return weekday[day] + monthName[month + 1] + " " + happeningDay;
-  };
-
-  const TimeFun = (eventTime) => {
-    var time = eventTime;
-    var result = time.slice(0, 2);
-    var minute = time.slice(3, 5);
-    var globalTime;
-    var postMeridian;
-    var separator = ":";
-    if (result > 12) {
-      postMeridian = result - 12;
-      globalTime = "PM";
-    } else {
-      postMeridian = result;
-      globalTime = "AM";
-    }
-
-    return postMeridian + separator + minute + " " + globalTime;
   };
 
   /********************************************** */
@@ -391,249 +389,22 @@ const EventDetails = ({ route, navigation }) => {
     }
   };
 
-  /********************************************* */
-  //event organizer related code is writen below
-  /****************************************** */
-  const [organizerInfo, setOrganizerInfo] = useState();
-  var profile = "maleProfile.jpg"; // user profile placeholder
-  const [eventOrg, setEventOrg] = useState({
-    featuredImage: profile,
-    organizerName: "Organizer",
-    category: "Category",
-  });
-
-  /******************************************************************** */
-  // when user scroll organizer information will be fetched from the server
-  /******************************************************************* */
-  // fetch event organizer from database
-  const [followStatus, setFollowStatus] = useState();
-  const [featching, setFetching] = useState(false);
-
-  const featchOrganizer = async () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    var uid = await AsyncStorage.getItem("userId");
-    var eventid = id ? id : externalLink;
-    var ApiUrl = Connection.url + Connection.organizer;
-    //organizer id is the only data to be sent to server in order to retrive organizer data
-
-    var Data = {
-      eventid: eventid,
-      uid: uid,
-    };
-    // header type for text data to be send to server
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-      signal: signal,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.success) {
-          let profile = response.profile;
-          setEventOrg({
-            ...eventOrg,
-            featuredImage: profile.profile,
-            organizerName: profile.username,
-            category: profile.category,
-          });
-          setOrganizerInfo(profile);
-          setFetching(true);
-
-          //check user follow state
-          let follow = response.follow;
-          if (follow === "Following") {
-            setFollow({
-              ...follow,
-              subscription: follow,
-              btnDisabled: true,
-              ButtonColor: Constants.transparentPrimary,
-            });
-            setFollowStatus(follow);
-          } else {
-            setFollow({
-              ...follow,
-              subscription: follow,
-              btnDisabled: false,
-              ButtonColor: Constants.primary,
-            });
-            setFollowStatus(follow);
-          }
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    return () => {
-      // cancel the subscription
-      controller.abort();
-    };
-  };
-  /********************************************************************* */
-  //user follow unfollow related code is writen below
-  /******************************************************************** */
-  const [follow, setFollow] = useState({
-    subscription: "Follow",
-    btnDisabled: false,
-    ButtonColor: Constants.primary,
-  });
-
-  const [followProgress, setFollowProgress] = useState(false);
-
-  const followOrganizer = async () => {
-    setFollowProgress(true);
-
-    const controller = new AbortController();
-    const signal = controller.signal;
-    var organizerId = item.userId;
-    var followerId = await AsyncStorage.getItem("userId");
-    var APIUrl = Connection.url + Connection.follow;
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    var Data = {
-      oid: organizerId,
-      fid: followerId,
-    };
-    fetch(APIUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-      signal: signal,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        // effect subscription indicator
-
-        if (response.success) {
-          setFollow({
-            ...follow,
-            subscription: response.message,
-            btnDisabled: true,
-            ButtonColor:
-              response.message === "Following"
-                ? Constants.transparentPrimary
-                : Constants.primary,
-          });
-          setFollowProgress(false);
-          setFollowStatus(response.message);
-        } else {
-          setFollow({
-            ...follow,
-            subscription: response.message,
-            btnDisabled: false,
-            ButtonColor: Constants.primary,
-          });
-          setFollowStatus(response.message);
-          setFollowProgress(false);
-        }
-      })
-      .catch((error) => {
-        //  do something here
-      });
-
-    return () => {
-      // cancel the subscription
-
-      controller.abort();
-    };
-  };
-
-  /************************************************************* */
-  //Fetch tickets from database
-  /************************************************************* */
-  const [tickets, setTickets] = useState();
-  const [exist, setExist] = useState(false);
-
-  const FeatchTickets = () => {
-    if (externalLink) {
-      const controller = new AbortController();
-      const signal = controller.signal;
-
-      var ApiUrl = Connection.url + Connection.detailTicket + externalLink;
-      var headers = {
-        accept: "application/json",
-        "Content-Type": "application/json",
-      };
-
-      fetch(ApiUrl, {
-        method: "GET",
-        headers: headers,
-        signal: signal,
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          if (response.success) {
-            var eventTickets = response.data;
-            setTickets(eventTickets);
-            setExist(true);
-          } else {
-            setTickets();
-            setExist(false);
-          }
-        })
-        .catch(() => {
-          setExist(false);
-        });
-
-      return () => {
-        controller.abort();
-      };
-    } else {
-      const controller = new AbortController();
-      const signal = controller.signal;
-      var ApiUrl = Connection.url + Connection.detailTicket + id;
-      var headers = {
-        accept: "application/json",
-        "Content-Type": "application/json",
-      };
-
-      fetch(ApiUrl, {
-        method: "GET",
-        headers: headers,
-        signal: signal,
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          if (response.success) {
-            var eventTickets = response.data;
-            setTickets(eventTickets);
-            setExist(true);
-          } else {
-            setTickets();
-            setExist(false);
-          }
-        })
-        .catch(() => {
-          setExist(false);
-        });
-
-      return () => {
-        controller.abort();
-      };
-    }
-  };
-
   //we call useeffect hook once the component get mounted
   useEffect(() => {
     var isSubcribed = true;
     if (isSubcribed) {
       FeatchEvent();
-      FeatchTickets();
+      FetchUserRating();
       bookmarked();
-      featchOrganizer();
       isSubcribed = false;
     }
     return () => {};
   }, [externalLink]);
 
+  const openRelatedEvent = (eventid) => {
+    navigation.push("EventDetail", { id: eventid });
+    alert("clicked related event");
+  };
   return (
     <View
       style={{
@@ -667,7 +438,7 @@ const EventDetails = ({ route, navigation }) => {
               />
             </View>
 
-            <View style={styles.actionbuttons}>
+            <View style={[styles.actionbuttons]}>
               {logged && bookmarked ? (
                 <TouchableOpacity
                   //bookmark button beside event title
@@ -675,11 +446,11 @@ const EventDetails = ({ route, navigation }) => {
                   activeOpacity={0.7}
                   style={[
                     styles.bookmarkButton,
-                    { backgroundColor: theme.background.main },
+                    { backgroundColor: bookmarkBtnBackground },
                   ]}
                   onPress={() => bookmarkEvent()}
                 >
-                  <Feather
+                  <Ionicons
                     name="bookmark"
                     size={18}
                     color={bookmarkBtnColor}
@@ -694,9 +465,14 @@ const EventDetails = ({ route, navigation }) => {
                     styles.bookmarkButton,
                     { backgroundColor: theme.background.main },
                   ]}
-                  onPress={() => SignInAlert()}
+                  onPress={() =>
+                    SignInAlert(
+                      "Bookmark",
+                      "SignIn first to bookmark the event!"
+                    )
+                  }
                 >
-                  <Ionicons
+                  <Feather
                     name="bookmark"
                     size={18}
                     color={bookmarkBtnColor}
@@ -711,7 +487,7 @@ const EventDetails = ({ route, navigation }) => {
                   styles.bookmarkButton,
                   { backgroundColor: theme.background.main },
                 ]}
-                onPress={() => ShareEvent(item.event_id)}
+                onPress={() => ShareEvent(item.id)}
               >
                 <AntDesign name="sharealt" size={18} style={styles.shareIcon} />
               </TouchableOpacity>
@@ -774,7 +550,7 @@ const EventDetails = ({ route, navigation }) => {
             </View>
           </View>
 
-          {item.cancelled == "1" ? (
+          {item.cancelled === "1" && (
             <Animatable.View
               animation="slideInDown"
               style={styles.eventGotCancelled}
@@ -787,7 +563,7 @@ const EventDetails = ({ route, navigation }) => {
               />
               <Text style={styles.cancelledText}>Cancelled Event</Text>
             </Animatable.View>
-          ) : null}
+          )}
 
           <View style={{ marginTop: 6 }}>
             <View style={styles.EventTitle}>
@@ -798,65 +574,62 @@ const EventDetails = ({ route, navigation }) => {
                 {item.event_name}
               </Text>
 
-              <View style={styles.actionButton}>
-                <TouchableOpacity
-                  onPress={() =>
-                    LocalNotification(
-                      item.startingTime,
-                      item.event_name,
-                      item.event_description,
-                      featuredImageUri + item.event_image,
-                      item
-                    )
-                  }
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginRight: 10,
-                  }}
-                >
-                  <Text
+              {numberOfRatings > 0 && (
+                <View style={styles.actionButton}>
+                  <TouchableOpacity
                     style={{
-                      fontSize: 16,
-                      fontWeight: "500",
-                      marginHorizontal: 3,
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginRight: 10,
                     }}
                   >
-                    345
-                  </Text>
-                </TouchableOpacity>
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderLeftWidth: 0.4,
-                    borderColor: theme.dark[300],
-                    paddingLeft: 10,
-                  }}
-                >
-                  <Text
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "500",
+                        marginHorizontal: 3,
+                      }}
+                    >
+                      {numberOfRatings}
+                    </Text>
+                  </TouchableOpacity>
+                  <View
                     style={{
-                      fontSize: 16,
-                      fontWeight: Constants.Boldtwo,
-                      marginHorizontal: 3,
-                      color: theme.dark.main,
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderLeftWidth: 0.4,
+                      borderColor: theme.dark[300],
+                      paddingLeft: 10,
                     }}
                   >
-                    4.7
-                  </Text>
-                  <AntDesign name="star" size={14} color={theme.primary.main} />
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: Constants.Boldtwo,
+                        marginHorizontal: 3,
+                        color: theme.dark.main,
+                      }}
+                    >
+                      {rating}
+                    </Text>
+                    <AntDesign
+                      name="star"
+                      size={14}
+                      color={theme.primary.main}
+                    />
+                  </View>
                 </View>
-              </View>
+              )}
             </View>
 
             <DetailContent
-              StartDate={DateFun(item.start_date)}
+              StartDate={DateFormater(item.start_date)}
               StartTime={timing.StartTime}
-              EndDate={DateFun(item.end_date)}
+              EndDate={DateFormater(item.end_date)}
               EndTime={timing.EndTime}
               Price={item.event_entrance_fee}
               Venues={item.event_address}
@@ -886,10 +659,27 @@ const EventDetails = ({ route, navigation }) => {
           </View>
 
           <View style={styles.ratingContainer}>
-            <Text style={styles.ratingTitle}> Rate this event</Text>
-            <Text style={styles.ratingHelper} numberOfLines={1}>
-              Tell others what you think
-            </Text>
+            {userRated ? (
+              <>
+                <Text style={styles.ratingTitle}>
+                  You have rated this event
+                </Text>
+
+                {ratingDetails.review && (
+                  <Text style={styles.ratingHelper} numberOfLines={1}>
+                    {ratingDetails.review}
+                  </Text>
+                )}
+              </>
+            ) : (
+              <>
+                <Text style={styles.ratingTitle}> Rate this event</Text>
+                <Text style={styles.ratingHelper} numberOfLines={1}>
+                  Tell others what you think
+                </Text>
+              </>
+            )}
+
             <View
               style={{
                 flexDirection: "row",
@@ -1000,58 +790,70 @@ const EventDetails = ({ route, navigation }) => {
             </View>
           )}
 
-          {featching && (
-            <View style={{ backgroundColor: theme.background[100] }}>
-              <View style={styles.RelatedEventContainer}>
-                <Text style={styles.ratingTitle}> Event Organizer</Text>
-              </View>
+          <View style={{ backgroundColor: theme.background.darker }}>
+            <View style={styles.RelatedEventContainer}>
+              <Text style={styles.ratingTitle}> Event Organizer</Text>
+            </View>
 
-              <View
-                style={[styles.organizersSection]}
-                //organizers section container, which contains
-                // Organizers profile, name, Category and subscription button
+            <View
+              style={[styles.organizersSection]}
+              //organizers section container, which contains
+              // Organizers profile, name, Category and subscription button
+            >
+              <Pressable
+                onPress={() =>
+                  navigation.navigate("Organizer Detail", {
+                    eventOrg,
+                  })
+                }
               >
-                <Pressable
-                  onPress={() =>
-                    navigation.navigate("Organizer Detail", {
-                      organizerInfo,
-                      followStatus,
-                    })
-                  }
-                >
+                {eventOrg.business_logo ? (
                   <Image
-                    source={{ uri: featuredImageUri + eventOrg.featuredImage }}
+                    source={{
+                      uri: featuredImageUri + eventOrg.business_logo,
+                    }}
                     style={[
                       styles.organizerProfile,
                       { borderColor: theme.background.main },
                     ]}
                     resizeMode="contain"
                   />
-                </Pressable>
-                <Pressable
-                  // organizers name and operation category will be listed inside this component
-                  style={styles.orgInfoContainer}
-                  onPress={() =>
-                    navigation.navigate("Organizer Detail", {
-                      organizerInfo,
-                      followStatus,
-                    })
-                  }
+                ) : (
+                  <Image
+                    source={galleryImage}
+                    style={[
+                      styles.organizerProfile,
+                      { borderColor: theme.background.main },
+                    ]}
+                    resizeMode="contain"
+                  />
+                )}
+              </Pressable>
+              <Pressable
+                // organizers name and operation category will be listed inside this component
+                style={styles.orgInfoContainer}
+                onPress={() =>
+                  navigation.navigate("Organizer Detail", {
+                    eventOrg,
+                  })
+                }
+              >
+                <Text
+                  style={{
+                    fontSize: Constants.headingtwo,
+                    fontWeight: Typography.weight.semiBold,
+                    color: Constants.Inverse,
+                  }}
                 >
-                  <Text
-                    style={{
-                      fontSize: Constants.headingtwo,
-                      fontWeight: Typography.weight.semiBold,
-                      color: Constants.Inverse,
-                    }}
-                  >
-                    {eventOrg.organizerName}
-                  </Text>
-                  <Text
-                    style={styles.orgCategory} //organizers operation field or category
-                  >
-                    {eventOrg.category}
-                  </Text>
+                  {eventOrg.business_name}
+                </Text>
+                <Text
+                  style={styles.orgCategory} //organizers operation field or category
+                >
+                  {eventOrg.business_category}
+                </Text>
+
+                {parseInt(eventOrg.rating) > 0 && (
                   <Text
                     style={{
                       fontFamily: Constants.fontFam,
@@ -1060,79 +862,65 @@ const EventDetails = ({ route, navigation }) => {
                       color: Constants.Inverse,
                     }} //organizers operation field or category
                   >
-                    4.9{" "}
+                    {parseInt(eventOrg.rating)}
                     <AntDesign
                       name="star"
                       size={14}
                       color={theme.primary.main}
                     />
                   </Text>
-                </Pressable>
-                {/* {logged && (
-                <TouchableOpacity
-                  // follow organizers button
-
-                  activeOpacity={0.6}
-                  style={[
-                    styles.orgFollowBtn,
-                    { backgroundColor: follow.ButtonColor },
-                  ]}
-                  onPress={() => followOrganizer()}
-                >
-                  {followProgress ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={Constants.background}
-                    />
-                  ) : (
-                    <Text style={styles.orgFollowTxt}>
-                      {follow.subscription}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              )} */}
-              </View>
-            </View>
-          )}
-
-          <View style={styles.RelatedEventContainer}>
-            <Text style={styles.ratingTitle}> Related events</Text>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: theme.dark.main,
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.headingthree,
-
-                  textTransform: "capitalize",
-                  padding: 4,
-                }}
-                numberOfLines={1}
-              >
-                {item.category}
-              </Text>
+                )}
+              </Pressable>
             </View>
           </View>
 
-          <ScrollView horizontal>
-            <RelatedEvent
-              picture={item.event_image}
-              name={item.event_name}
-              date={item.start_date}
-              onPress={() =>
-                navigation.navigate("EventDetail", { id: item.id })
-              }
-            />
-          </ScrollView>
+          {relatedEvents.length > 1 && (
+            <View>
+              <View style={styles.RelatedEventContainer}>
+                <Text style={styles.RelatedEventTitle}> Related events</Text>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: theme.dark.main,
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.headingthree,
+
+                      textTransform: "capitalize",
+                      padding: 4,
+                      paddingVertical: 1,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {item.category}
+                  </Text>
+                </View>
+              </View>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {relatedEvents
+                  .filter((event) => event.id !== item.id)
+                  .map((event) => (
+                    <View key={event.id}>
+                      <RelatedEvent
+                        picture={event.event_image}
+                        name={event.event_name}
+                        date={event.start_date}
+                        onPress={() => openRelatedEvent(event.id)}
+                      />
+                    </View>
+                  ))}
+              </ScrollView>
+            </View>
+          )}
         </ScrollView>
       )}
-      {exist && item.cancelled == null && (
+      {!loading && exist && (
         <Animatable.View
           animation="fadeInUpBig"
           style={[styles.ticketBtnContainer]}
@@ -1159,7 +947,7 @@ const styles = StyleSheet.create({
   },
   //featured Image Container Styling
   featuredImageContainer: {
-    padding: 10,
+    padding: 5,
     justifyContent: "center",
     width: "80%",
     height: "100%",
@@ -1172,7 +960,7 @@ const styles = StyleSheet.create({
     height: "100%",
     alignSelf: "center",
     borderWidth: 2,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   //the style of buttons beside the event poster at the top the page
   actionbuttons: {
@@ -1436,8 +1224,13 @@ const styles = StyleSheet.create({
   },
   RelatedEventContainer: {
     margin: 10,
-    marginTop: 16,
-    marginBottom: 5,
+    marginTop: 30,
+    marginBottom: 0,
+  },
+  RelatedEventTitle: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Bold,
+    color: Constants.Inverse,
   },
 });
 export default EventDetails;

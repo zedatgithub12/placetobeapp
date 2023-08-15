@@ -1,55 +1,62 @@
 //import liraries
 import React from "react";
 
-import { View, Text, StyleSheet, Image, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
 
 import { Typography } from "../../themes/typography";
 import { useTheme } from "@react-navigation/native";
 import Constants from "../../constants/Constants";
 import Connection from "../../constants/connection";
-import { DateFormater } from "../../Utils/functions";
 
 // related event card
 
-const RelatedEvent = ({ onPress, picture, name, date }) => {
+const RelatedEvent = ({ onPress, picture, name }) => {
   const { theme } = useTheme();
 
   var featuredImageUri = Connection.url + Connection.assets;
   return (
-    <Pressable onPress={onPress} style={styles.relatedEventListing}>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={styles.relatedEventListing}
+    >
+      <Image
+        source={{ uri: featuredImageUri + picture }}
+        style={[
+          styles.featuredEventImage,
+          {
+            width: 120,
+            height: 120,
+            borderRadius: 5,
+            borderWidth: 1,
+          },
+        ]}
+        resizeMode="cover"
+      />
       <View>
-        <Image
-          source={{ uri: featuredImageUri + picture }}
-          style={[
-            styles.featuredEventImage,
-            {
-              width: 160,
-              height: 160,
-              borderRadius: 5,
-              borderWidth: 1,
-              resizeMode: "cover",
-            },
-          ]}
-          resizeMode="contain"
-        />
-        <View>
-          <Text
-            style={{
-              width: 160,
-              fontFamily: Typography.family,
-              fontSize: Typography.size.headingthree,
-              fontWeight: Typography.weight.bold,
-              color: theme.dark.main,
-              paddingVertical: 3,
-              marginLeft: 2,
-            }}
-            numberOfLines={2}
-          >
-            {name}
-          </Text>
-        </View>
+        <Text
+          style={{
+            width: 120,
+            fontFamily: Typography.family,
+            fontSize: Typography.size.headingthree,
+            fontWeight: Typography.weight.bold,
+            color: theme.dark.main,
+            paddingVertical: 3,
+            marginLeft: 2,
+          }}
+          numberOfLines={2}
+        >
+          {name}
+        </Text>
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 
@@ -60,19 +67,17 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   relatedEventListing: {
-    width: 180,
     flexDirection: "column",
     alignItems: "center",
-    alignSelf: "center",
     justifyContent: "space-between",
     borderRadius: 3,
-    marginLeft: 10,
+    marginLeft: 7,
     marginVertical: 10,
     padding: 3,
+    zIndex: 2,
   },
   featuredEventImage: {
     borderRadius: Constants.mediumbox,
-    marginRight: 12,
   },
 
   organizer: {

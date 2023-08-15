@@ -14,6 +14,8 @@ const Connection = {
 
   //event related api's
   events: "events",
+  eventDetails: "single-event/",
+  moreEventDetails: "event-more-detail",
   AddEvent: "add-event",
   TodayEvents: "today-events",
   WeekEvents: "week-events",

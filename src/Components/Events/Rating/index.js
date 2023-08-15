@@ -32,7 +32,6 @@ const Rating = ({
     onSubmitFeedback(currentRating, review);
     setModalVisible(false);
     onClose();
-    showToast("Successfully Rated!");
   };
   const handleCloseModal = () => {
     setModalVisible(false);

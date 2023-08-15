@@ -33,8 +33,8 @@ import NoConnection from "../../handlers/connection";
 
 // Organizer detail page
 const OrganizersDetail = ({ route, navigation }) => {
-  var { organizerInfo } = route.params;
-
+  var { eventOrg } = route.params;
+  var organizerInfo = eventOrg;
   const { theme } = useTheme();
   const numColumns = 3;
 
@@ -574,7 +574,7 @@ const OrganizersDetail = ({ route, navigation }) => {
                 data={events}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
-                numColumns={numColumns}
+                numColumns={3}
               />
             </View>
           </>

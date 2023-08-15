@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
     width: "94%",
   },
   iconContainer: {
-    backgroundColor: Constants.iconBack,
     margin: 5,
     padding: 8,
     borderRadius: 25,
