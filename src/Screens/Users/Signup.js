@@ -283,8 +283,6 @@ export default function SignUp({ navigation }) {
       }
     );
     userInfoResponse.json().then((data) => {
-      //setUserInfoState(data);
-
       var ApiUrl = Connection.url + Connection.googleSignUp;
       var headers = {
         Accept: "application/json",
@@ -512,7 +510,7 @@ export default function SignUp({ navigation }) {
           <Text style={styles.signbtntxt}> Register</Text>
         )}
       </TouchableOpacity>
-      <Text style={{marginTop: 8}}>Or</Text>
+      <Text style={{ marginTop: 8 }}>Or</Text>
 
       <TouchableOpacity
         onPress={accessToken ? GoogleSignUp : () => promptAsync()}

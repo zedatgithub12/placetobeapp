@@ -42,6 +42,7 @@ import { LocalNotification } from "../../Utils/localPushController";
 import { DateFormater, TimeFormater } from "../../Utils/functions";
 import Connection from "../../api";
 import galleryImage from "../../assets/images/galleryImage.png";
+import { showToast } from "../../Utils/Toast";
 
 const EventDetails = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -64,8 +65,8 @@ const EventDetails = ({ route, navigation }) => {
   const [userRated, setUserRated] = useState(false);
   const [relatedEvents, setRelatedEvent] = useState([]);
   const [exist, setExist] = useState(false); // the state of ticket existance
-
   const [mapOpen, setMapOpen] = useState(true);
+  const [userInfo, setUserInfo] = useState([]);
 
   var featuredImageUri = Connection.url + Connection.assets;
 
@@ -79,19 +80,57 @@ const EventDetails = ({ route, navigation }) => {
     call(args);
   };
 
-  const Rated = (value) => {
-    setCurrentRating(value);
-    setRatingVisible(true);
+  const Rated = async (value) => {
+    if (logged) {
+      setCurrentRating(value);
+      await getUserInfo();
+      setRatingVisible(true);
+    } else {
+      SignInAlert("Rating", "Please sign in first to rate this event");
+    }
   };
 
   const handleRatingClose = () => {
     setRatingVisible(false);
   };
 
-  const handleSubmitFeedback = async (rating, review) => {
+  const getUserInfo = async () => {
+    var userId = await AsyncStorage.getItem("userId");
+    var ApiUrl = Connection.url + Connection.MetaData + userId;
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    //save user info into database
+    fetch(ApiUrl, {
+      method: "GET",
+      headers: headers,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.success) {
+          let userInfo = response.data;
+          setUserInfo(userInfo);
+        } else {
+          showToast(response.message);
+        }
+      })
+      .catch(() => {
+        showToast("Unable to fetch user informations");
+      });
+  };
+
+  const handleSubmitRating = async (rating, review) => {
     const userid = await AsyncStorage.getItem("userId");
     if (userid) {
-      var ApiUrl = Connection.url + Connection.addRating;
+      var updateApi =
+        Connection.url +
+        Connection.updateRating +
+        ratingDetails.id +
+        `?userid=${userid}`;
+      var submitRating = Connection.url + Connection.addRating;
+      var ApiUrl = userRated ? updateApi : submitRating;
       var headers = {
         accept: "application/json",
         "Content-Type": "application/json",
@@ -116,7 +155,7 @@ const EventDetails = ({ route, navigation }) => {
           showToast("Unable to rate");
         });
     } else {
-      SignInAlert("Rating", "SignIn first to rate the event");
+      showToast("Error submitting reviews");
     }
   };
 
@@ -268,7 +307,7 @@ const EventDetails = ({ route, navigation }) => {
         .then((response) => response.json())
         .then((response) => {
           if (response.success) {
-            setRatingDetails(response.userrating ? response.userrating : []);
+            setRatingDetails(response.userrating);
             setCurrentRating(response.userrating.rating);
             setRelatedEvent(response.related);
             setUserRated(response.userrating.rating ? true : false);
@@ -282,9 +321,6 @@ const EventDetails = ({ route, navigation }) => {
         controller.abort();
       };
     }
-  };
-  const showToast = (message) => {
-    ToastAndroid.show(message, ToastAndroid.SHORT); //message to be toasted after user clicked the bookmark button
   };
 
   const [bookmarkBtn, setBookmarkBtn] = useState(false);
@@ -308,8 +344,8 @@ const EventDetails = ({ route, navigation }) => {
       showToast("Saved!");
     }
   };
-  //check bookmarked button state
 
+  //check bookmarked button state when component gets mounted
   const bookmarked = () => {
     var yesItis = false;
     const find = items.find((event) => event.id === id);
@@ -403,7 +439,6 @@ const EventDetails = ({ route, navigation }) => {
 
   const openRelatedEvent = (eventid) => {
     navigation.push("EventDetail", { id: eventid });
-    alert("clicked related event");
   };
   return (
     <View
@@ -441,7 +476,6 @@ const EventDetails = ({ route, navigation }) => {
             <View style={[styles.actionbuttons]}>
               {logged && bookmarked ? (
                 <TouchableOpacity
-                  //bookmark button beside event title
                   disabled={bookmarkBtn}
                   activeOpacity={0.7}
                   style={[
@@ -459,7 +493,6 @@ const EventDetails = ({ route, navigation }) => {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  //bookmark button beside event title
                   activeOpacity={0.7}
                   style={[
                     styles.bookmarkButton,
@@ -468,7 +501,7 @@ const EventDetails = ({ route, navigation }) => {
                   onPress={() =>
                     SignInAlert(
                       "Bookmark",
-                      "SignIn first to bookmark the event!"
+                      "SignIn first to bookmark this event!"
                     )
                   }
                 >
@@ -662,11 +695,14 @@ const EventDetails = ({ route, navigation }) => {
             {userRated ? (
               <>
                 <Text style={styles.ratingTitle}>
-                  You have rated this event
+                  Your rating {ratingDetails.review && "& reviews"}
                 </Text>
 
                 {ratingDetails.review && (
-                  <Text style={styles.ratingHelper} numberOfLines={1}>
+                  <Text
+                    style={[styles.ratingHelper, { lineHeight: 18 }]}
+                    numberOfLines={2}
+                  >
                     {ratingDetails.review}
                   </Text>
                 )}
@@ -704,8 +740,9 @@ const EventDetails = ({ route, navigation }) => {
               visible={ratingVisible}
               onClose={handleRatingClose}
               currentRating={currentRating}
-              onSubmitFeedback={handleSubmitFeedback}
+              onSubmitFeedback={handleSubmitRating}
               event={item}
+              user={userInfo}
             />
           </View>
 
@@ -1108,7 +1145,7 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     fontSize: Constants.thirty,
     color: Constants.Inverse,
-    marginLeft: 5,
+    marginLeft: 2,
   },
 
   mapContainer: {

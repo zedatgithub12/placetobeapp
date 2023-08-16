@@ -3,7 +3,7 @@ const Connection = {
   url: "http://192.168.100.3:8000/api/",
   signUp: "signup",
   signIn: "signin",
-  googleSignUp: "signup-with-google",
+  googleSignUp: "continue-with-google",
   googleSignIn: "signin-with-google",
   profile: "profile/", // need closer look
   changeprofile: "changeprofile/", // need closer look
