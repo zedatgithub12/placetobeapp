@@ -140,6 +140,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion '33.0.0'
+     buildFeatures {
+        viewBinding = true
+    }
     defaultConfig {
         applicationId 'com.afromina.placetobe'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -265,9 +268,7 @@ android {
 
         }
     }
-     buildFeatures {
-        viewBinding = true
-    }
+    
 
 
 }

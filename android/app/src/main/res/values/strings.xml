@@ -1,6 +1,7 @@
 <resources>
-  <string name="app_name">place to be Ethiopia</string>
+  <string name="app_name">Place to be Ethiopia</string>
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
   <string name="default_notification_channel_id">channel-id-1</string>
+  <!-- <string name="default_web_client_id">903368065253-alo3tolafl6mh1ripn83484rdmv58e0t.apps.googleusercontent.com</string> -->
 </resources>
