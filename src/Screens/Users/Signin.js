@@ -13,10 +13,11 @@ import {
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../../Components/context";
-import Connection from "../../constants/connection";
 import { Caption } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import { showToast } from "../../Utils/Toast";
+import Connection from "../../api";
 
 WebBrowser.maybeCompleteAuthSession();
 LogBox.ignoreLogs(["EventEmitter.removeListener"]);
@@ -169,7 +170,6 @@ export default function Signin({ navigation }) {
   };
 
   const [accessToken, setAccessToken] = useState(); //access token state initialisation
-  //const [userInfoState, setUserInfoState] = useState(); // userInfo state initialisation
   const [googleLoader, setGoogleLoader] = useState(false);
   const [request, response, promptAsync] = Google.useAuthRequest({
     expoClientId:
@@ -189,9 +189,7 @@ export default function Signin({ navigation }) {
       }
     );
     userInfoResponse.json().then((data) => {
-      // setUserInfoState(data);
-
-      var ApiUrl = Connection.url + Connection.googleSignIn;
+      var ApiUrl = Connection.url + Connection.googleSignUp;
       var headers = {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -204,8 +202,6 @@ export default function Signin({ navigation }) {
       const token = () => {
         return rand() + rand();
       };
-
-      // default category place holder
 
       var category = "Entertainment";
       //dat to be sent to server
@@ -226,51 +222,36 @@ export default function Signin({ navigation }) {
       })
         .then((response) => response.json()) //check response type of the API
         .then((response) => {
-          let resp = response[0];
-
-          if (resp.message === "succeed") {
-            var userInfo = response[0].user[0];
+          console.log(response);
+          if (response.success) {
+            var userInfo = response.data;
             googleSignUp(
-              userInfo.userId,
+              userInfo.id,
               userInfo.authentication_key,
               userInfo.email,
               userInfo.google_Id,
               userInfo.profile
             );
-            navigation.navigate("TabNav");
-          } else if (resp.message === "successfully Registered") {
-            var userInfo = response[0].user[0];
-            googleSignUp(
-              userInfo.userId,
-              userInfo.authentication_key,
-              userInfo.email,
-              userInfo.google_Id,
-              userInfo.profile
-            );
+            setGoogleLoader(false);
             navigation.navigate("TabNav");
           } else {
             setData({
               ...data,
               check_textInputChange: false,
               isFieldEmpty: false,
-              emptyField: response[0].message,
+              emptyField: response.message,
             });
             setGoogleLoader(false);
           }
         })
-        .catch((error) => {});
+        .catch((error) => {
+          setGoogleLoader(false);
+          showToast("Error continuing with Google");
+          console.log(error);
+        });
     });
   };
 
-  //handle response message
-  /*  const handleMessage = (message, type = "FAILED") => {
-    setData({
-      ...data,
-      message: message,
-      messageType: type,
-    });
-  };
-*/
   React.useEffect(() => {
     if (response?.type === "success") {
       setAccessToken(response.authentication.accessToken);
