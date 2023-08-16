@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -13,6 +13,7 @@ import {
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../../Components/context";
+import { GoogleSignin, statusCodes } from "react-native-google-signin";
 import { Caption } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
@@ -252,7 +253,7 @@ export default function Signin({ navigation }) {
     });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (response?.type === "success") {
       setAccessToken(response.authentication.accessToken);
       GoogleSignInBtn();
@@ -260,6 +261,97 @@ export default function Signin({ navigation }) {
 
     return () => {};
   });
+
+  useEffect(() => {
+    configureGoogleSignIn();
+  }, []);
+
+  const configureGoogleSignIn = () => {
+    GoogleSignin.configure({
+      webClientId:
+        "903368065253-alo3tolafl6mh1ripn83484rdmv58e0t.apps.googleusercontent.com",
+      offlineAccess: false,
+    });
+  };
+
+  const handleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const data = await GoogleSignin.signIn();
+      console.log("User Info:", data);
+      // You can now use the userInfo object to authenticate the user in your backend
+      var ApiUrl = Connection.url + Connection.googleSignUp;
+      var headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+
+      //generate random Text to be stored alongside with user info
+      const rand = () => {
+        return Math.random().toString(36).substring(2);
+      };
+      const token = () => {
+        return rand() + rand();
+      };
+
+      var category = "Entertainment";
+      //dat to be sent to server
+      var Data = {
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        fatherName: data.family_name,
+        kidName: data.given_name,
+        token: token(),
+        category: category,
+      };
+
+      fetch(ApiUrl, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(Data),
+      })
+        .then((response) => response.json()) //check response type of the API
+        .then((response) => {
+          console.log(response);
+          if (response.success) {
+            var userInfo = response.data;
+            googleSignUp(
+              userInfo.id,
+              userInfo.authentication_key,
+              userInfo.email,
+              userInfo.google_Id,
+              userInfo.profile
+            );
+            setGoogleLoader(false);
+            navigation.navigate("TabNav");
+          } else {
+            setData({
+              ...data,
+              check_textInputChange: false,
+              isFieldEmpty: false,
+              emptyField: response.message,
+            });
+            setGoogleLoader(false);
+          }
+        })
+        .catch((error) => {
+          setGoogleLoader(false);
+          showToast("Error continuing with Google");
+          console.log(error);
+        });
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log("User Cancelled the Login Flow");
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log("Signin in progress");
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log("Play Services Not Available or Outdated");
+      } else {
+        console.log("Some other error occurred:", error.message);
+      }
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -351,7 +443,7 @@ export default function Signin({ navigation }) {
         <TouchableOpacity
           activeOpacity={0.5}
           style={styles.google}
-          onPress={accessToken ? GoogleSignInBtn : () => promptAsync()}
+          onPress={handleSignIn}
         >
           <Image
             source={require("../../assets/images/google.png")}
