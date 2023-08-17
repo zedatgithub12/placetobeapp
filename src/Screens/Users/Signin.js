@@ -13,7 +13,10 @@ import {
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../../Components/context";
-import { GoogleSignin, statusCodes } from "react-native-google-signin";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { Caption } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
@@ -277,8 +280,8 @@ export default function Signin({ navigation }) {
   const handleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const data = await GoogleSignin.signIn();
-      console.log("User Info:", data);
+      const { user } = await GoogleSignin.signIn();
+      console.log("User Info:", user);
       // You can now use the userInfo object to authenticate the user in your backend
       var ApiUrl = Connection.url + Connection.googleSignUp;
       var headers = {
@@ -297,11 +300,11 @@ export default function Signin({ navigation }) {
       var category = "Entertainment";
       //dat to be sent to server
       var Data = {
-        id: data.id,
-        email: data.email,
-        name: data.name,
-        fatherName: data.family_name,
-        kidName: data.given_name,
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        // fatherName: user.family_name,
+        // kidName: user.given_name,
         token: token(),
         category: category,
       };
