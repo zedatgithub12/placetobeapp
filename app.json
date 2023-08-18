@@ -30,7 +30,8 @@
       "softwareKeyboardLayoutMode": "pan",
       "permissions": [
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
@@ -41,7 +42,8 @@
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin"
     ],
     "description": "p2b mobile app published from expo server",
     "githubUrl": "https://github.com/afromina-placetobe/mobile-app",

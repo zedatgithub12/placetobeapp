@@ -166,7 +166,6 @@ const Notifications = ({ navigation }) => {
                   <Text>You have no notification yet!</Text>
                 </View>
               }
-              ListHeaderComponent={<Slider />}
               ListFooterComponent={() => (
                 <View style={styles.listEnd}>
                   <HelperText>
@@ -201,7 +200,7 @@ const styles = StyleSheet.create({
   },
   noNoticeImage: {
     width: "85%",
-    height: 200,
+    height: 230,
     borderRadius: Constants.mediumbox,
   },
   prompttxt: {
