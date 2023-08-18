@@ -31,9 +31,8 @@ import Share from "react-native-share";
 import call from "react-native-phone-call";
 import * as Animatable from "react-native-animatable";
 import DetailShimmer from "../../Components/Events/Skeleton/DetailShimmer";
-import MapView, { PROVIDER_GOOGLE, Callout } from "react-native-maps";
-// import MapView from "react-native-maps";
-import { Marker } from "react-native-maps";
+import MapView, { PROVIDER_GOOGLE, Marker, Callout } from "react-native-maps";
+
 import { useTheme } from "@react-navigation/native";
 import Rating from "../../Components/Events/Rating";
 import RelatedEvent from "../../Components/Events/related";
@@ -184,18 +183,20 @@ const EventDetails = ({ route, navigation }) => {
   };
 
   const getDirection = async (latitude, longitude) => {
-    const mapLink = createMapLink(latitude, longitude);
+    if (latitude && longitude !== null) {
+      const mapLink = createMapLink(latitude, longitude);
 
-    try {
-      const supported = await Linking.canOpenURL(mapLink);
+      try {
+        const supported = await Linking.canOpenURL(mapLink);
 
-      if (supported) {
-        await Linking.openURL(mapLink);
-      } else {
-        showToast("No application found to handle the URL.");
+        if (supported) {
+          await Linking.openURL(mapLink);
+        } else {
+          showToast("No application found to handle the URL.");
+        }
+      } catch (error) {
+        showToast("An error occurred while opening the link:");
       }
-    } catch (error) {
-      showToast("An error occurred while opening the link:");
     }
   };
 
@@ -560,26 +561,6 @@ const EventDetails = ({ route, navigation }) => {
                   />
                 </TouchableOpacity>
               )}
-
-              {item.address_latitude && item.address_longitude && (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={[
-                    styles.bookmarkButton,
-                    { backgroundColor: theme.background.main },
-                  ]}
-                  onPress={() =>
-                    getDirection(item.address_latitude, item.address_longitude)
-                  }
-                >
-                  <SimpleLineIcons
-                    name="direction"
-                    size={18}
-                    color={theme.dark.main}
-                    style={styles.bookmarkIcon}
-                  />
-                </TouchableOpacity>
-              )}
             </View>
           </View>
 
@@ -617,6 +598,15 @@ const EventDetails = ({ route, navigation }) => {
                       alignItems: "center",
                       marginRight: 10,
                     }}
+                    onPress={() =>
+                      LocalNotification(
+                        item.startTime,
+                        item.event_name,
+                        item.event_description,
+                        item.event_image,
+                        ""
+                      )
+                    }
                   >
                     <Text
                       style={{
@@ -742,6 +732,9 @@ const EventDetails = ({ route, navigation }) => {
               currentRating={currentRating}
               onSubmitFeedback={handleSubmitRating}
               event={item}
+              previousReview={
+                ratingDetails.review ? ratingDetails.review : null
+              }
               user={userInfo}
             />
           </View>
@@ -801,20 +794,36 @@ const EventDetails = ({ route, navigation }) => {
                     loadingBackgroundColor={Constants.Faded}
                     loadingIndicatorColor={Constants.primary}
                     tintColor={Constants.primary}
-                    userLocationCalloutEnabled={true}
+                    showsUserLocation={true}
                     scrollEnabled={false}
-                    style={[styles.map]}
+                    style={styles.map}
                     initialRegion={{
-                      latitude: parseFloat(item.address_latitude),
-                      longitude: parseFloat(item.address_longitude),
+                      latitude: parseFloat(
+                        item.address_latitude
+                          ? item.address_latitude
+                          : 8.9633373
+                      ),
+                      longitude: parseFloat(
+                        item.address_longitude
+                          ? item.address_longitude
+                          : 38.6957437
+                      ),
                       latitudeDelta: 0.0922,
                       longitudeDelta: 0.0421,
                     }}
                   >
                     <Marker
                       coordinate={{
-                        latitude: parseFloat(item.address_latitude),
-                        longitude: parseFloat(item.address_longitude),
+                        latitude: parseFloat(
+                          item.address_latitude
+                            ? item.address_latitude
+                            : 8.9633373
+                        ),
+                        longitude: parseFloat(
+                          item.address_longitude
+                            ? item.address_longitude
+                            : 38.6957437
+                        ),
                       }}
                       image={{
                         uri: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngwing.com%2Fen%2Fsearch%3Fq%3Dmap%2BMarker&psig=AOvVaw1sWuU_lBSs-5sii34I1Nz_&ust=1676116422134000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCLDxkLXyiv0CFQAAAAAdAAAAABAF",
@@ -1181,11 +1190,17 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
   },
   map: {
+    ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
-    borderRadius: 6,
-    overflow: "hidden",
   },
+  // map: {
+
+  //   width: "100%",
+  //   height: "100%",
+  //   borderRadius: 6,
+  //   overflow: "hidden",
+  // },
 
   ticketBtnContainer: {
     position: "absolute",

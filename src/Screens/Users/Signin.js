@@ -81,7 +81,7 @@ export default function Signin({ navigation }) {
 
   const [loading, setLoading] = useState(false);
 
-  const validate = () => {
+  const ManualSignin = () => {
     var Email = data.email;
     var password = data.password;
 
@@ -167,10 +167,10 @@ export default function Signin({ navigation }) {
   //google signin will go here
   /******************************************** */
 
-  const { GoogleSignIn } = React.useContext(AuthContext);
+  const { GoogleAuth } = React.useContext(AuthContext);
 
   const googleSignUp = (id, token, email, googleId, profile) => {
-    GoogleSignIn(id, token, email, googleId, profile);
+    GoogleAuth(id, token, email, googleId, profile);
   };
 
   const [accessToken, setAccessToken] = useState(); //access token state initialisation
@@ -184,104 +184,101 @@ export default function Signin({ navigation }) {
       "799616009286-d8ci42svjmd21h4im7ulas5ajh8qs481.apps.googleusercontent.com",
   });
 
-  const GoogleSignInBtn = async () => {
-    setGoogleLoader(true);
-    let userInfoResponse = await fetch(
-      "https://www.googleapis.com/userinfo/v2/me",
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
-    );
-    userInfoResponse.json().then((data) => {
-      var ApiUrl = Connection.url + Connection.googleSignUp;
-      var headers = {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      };
+  // const GoogleSignInBtn = async () => {
+  //   setGoogleLoader(true);
+  //   let userInfoResponse = await fetch(
+  //     "https://www.googleapis.com/userinfo/v2/me",
+  //     {
+  //       headers: { Authorization: `Bearer ${accessToken}` },
+  //     }
+  //   );
+  //   userInfoResponse.json().then((data) => {
+  //     var ApiUrl = Connection.url + Connection.googleSignUp;
+  //     var headers = {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //     };
 
-      //generate random Text to be stored alongside with user info
-      const rand = () => {
-        return Math.random().toString(36).substring(2);
-      };
-      const token = () => {
-        return rand() + rand();
-      };
+  //     //generate random Text to be stored alongside with user info
+  //     const rand = () => {
+  //       return Math.random().toString(36).substring(2);
+  //     };
+  //     const token = () => {
+  //       return rand() + rand();
+  //     };
 
-      var category = "Entertainment";
-      //dat to be sent to server
-      var Data = {
-        id: data.id,
-        email: data.email,
-        name: data.name,
-        fatherName: data.family_name,
-        kidName: data.given_name,
-        token: token(),
-        category: category,
-      };
+  //     var category = "Entertainment";
+  //     //dat to be sent to server
+  //     var Data = {
+  //       id: data.id,
+  //       email: data.email,
+  //       name: data.name,
+  //       fatherName: data.family_name,
+  //       kidName: data.given_name,
+  //       token: token(),
+  //       category: category,
+  //     };
 
-      fetch(ApiUrl, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(Data),
-      })
-        .then((response) => response.json()) //check response type of the API
-        .then((response) => {
-          console.log(response);
-          if (response.success) {
-            var userInfo = response.data;
-            googleSignUp(
-              userInfo.id,
-              userInfo.authentication_key,
-              userInfo.email,
-              userInfo.google_Id,
-              userInfo.profile
-            );
-            setGoogleLoader(false);
-            navigation.navigate("TabNav");
-          } else {
-            setData({
-              ...data,
-              check_textInputChange: false,
-              isFieldEmpty: false,
-              emptyField: response.message,
-            });
-            setGoogleLoader(false);
-          }
-        })
-        .catch((error) => {
-          setGoogleLoader(false);
-          showToast("Error continuing with Google");
-          console.log(error);
-        });
-    });
-  };
+  //     fetch(ApiUrl, {
+  //       method: "POST",
+  //       headers: headers,
+  //       body: JSON.stringify(Data),
+  //     })
+  //       .then((response) => response.json()) //check response type of the API
+  //       .then((response) => {
+  //         console.log(response);
+  //         if (response.success) {
+  //           var userInfo = response.data;
+  //           googleSignUp(
+  //             userInfo.id,
+  //             userInfo.authentication_key,
+  //             userInfo.email,
+  //             userInfo.google_Id,
+  //             userInfo.profile
+  //           );
+  //           setGoogleLoader(false);
+  //           navigation.navigate("TabNav");
+  //         } else {
+  //           setData({
+  //             ...data,
+  //             check_textInputChange: false,
+  //             isFieldEmpty: false,
+  //             emptyField: response.message,
+  //           });
+  //           setGoogleLoader(false);
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         setGoogleLoader(false);
+  //         showToast("Error continuing with Google");
+  //         console.log(error);
+  //       });
+  //   });
+  // };
+
+  // useEffect(() => {
+  //   if (response?.type === "success") {
+  //     setAccessToken(response.authentication.accessToken);
+  //     GoogleSignInBtn();
+  //   }
+
+  //   return () => {};
+  // });
 
   useEffect(() => {
-    if (response?.type === "success") {
-      setAccessToken(response.authentication.accessToken);
-      GoogleSignInBtn();
-    }
-
-    return () => {};
-  });
-
-  useEffect(() => {
-    configureGoogleSignIn();
-  }, []);
-
-  const configureGoogleSignIn = () => {
     GoogleSignin.configure({
       webClientId:
         "903368065253-alo3tolafl6mh1ripn83484rdmv58e0t.apps.googleusercontent.com",
-      offlineAccess: false,
+      offlineAccess: true,
     });
-  };
+  }, []);
 
   const handleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const { user } = await GoogleSignin.signIn();
-      console.log("User Info:", user);
+      const userInfo = await GoogleSignin.signIn();
+
+      console.log("User Info:", {userInfo});
       // You can now use the userInfo object to authenticate the user in your backend
       var ApiUrl = Connection.url + Connection.googleSignUp;
       var headers = {
@@ -303,8 +300,8 @@ export default function Signin({ navigation }) {
         id: user.id,
         email: user.email,
         name: user.name,
-        // fatherName: user.family_name,
-        // kidName: user.given_name,
+        fatherName: user.familyName,
+        kidName: user.givenName,
         token: token(),
         category: category,
       };
@@ -318,13 +315,13 @@ export default function Signin({ navigation }) {
         .then((response) => {
           console.log(response);
           if (response.success) {
-            var userInfo = response.data;
+            var user = response.data;
             googleSignUp(
-              userInfo.id,
-              userInfo.authentication_key,
-              userInfo.email,
-              userInfo.google_Id,
-              userInfo.profile
+              user.id,
+              user.authentication_key,
+              user.email,
+              user.google_Id,
+              user.profile
             );
             setGoogleLoader(false);
             navigation.navigate("TabNav");
@@ -429,7 +426,7 @@ export default function Signin({ navigation }) {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           activeOpacity={0.5}
-          onPress={() => validate()}
+          onPress={() => ManualSignin()}
           style={styles.signinbtn}
         >
           {loading ? (
@@ -446,7 +443,7 @@ export default function Signin({ navigation }) {
         <TouchableOpacity
           activeOpacity={0.5}
           style={styles.google}
-          onPress={handleSignIn}
+          onPress={() => handleSignIn()}
         >
           <Image
             source={require("../../assets/images/google.png")}

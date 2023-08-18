@@ -47,6 +47,7 @@ function SuccessModal({ visible, children, navigation }) {
 }
 
 export default function SignUp({ navigation }) {
+  const { GoogleAuth } = React.useContext(AuthContext);
   const [visible, setVisible] = React.useState(false);
 
   const [data, setData] = React.useState({
@@ -256,10 +257,8 @@ export default function SignUp({ navigation }) {
   //google sign up will take place below
   /******************************************** */
 
-  const { GoogleSignIn } = React.useContext(AuthContext);
-
   const googleSignUp = (id, token, email, googleId) => {
-    GoogleSignIn(id, token, email, googleId);
+    GoogleAuth(id, token, email, googleId);
   };
 
   const [accessToken, setAccessToken] = useState();

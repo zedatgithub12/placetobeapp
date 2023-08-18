@@ -316,7 +316,7 @@ export default function App() {
       //setUserToken('eromayet01');
       // setIsLoading(false);
     },
-    GoogleSignIn: async (userId, userToken, email, id, profile) => {
+    GoogleAuth: async (userId, userToken, email, id, profile) => {
       if (email == email && id == id) {
         setUser({
           ...user,

@@ -39,7 +39,6 @@ import {
 import EventCounter from "./components/counter";
 import Preferences from "../../preferences";
 import NativeAdsOne from "../../Components/Ads/nativeAd1";
-import SlideUp from "../../Components/Ads/slideup";
 import HeaderAds from "../../Components/Ads/headerAds";
 import TitleContainer from "./components/header";
 import { fetchAds, UserInteraction } from "../../Utils/Ads";
@@ -62,7 +61,7 @@ function Home({ navigation, ...props }) {
   const [thisWeek, setThisWeek] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
 
-  const [showBannerAds, setShowBannerAds] = useState(true);
+  const [showBannerAds, setShowBannerAds] = useState(false);
   const [bannerAds, setBannerAds] = useState([]);
   const [showNativeAd, setShowNativeAd] = useState(false);
   const [nativeAd, setNativeAd] = useState([]);
@@ -485,7 +484,7 @@ function Home({ navigation, ...props }) {
                       )}
                     </View>
                   )}
-                  {showBannerAds && bannerAds[0] && <Slider ad={bannerAds} />}
+                  {showBannerAds && bannerAds && <Slider ad={bannerAds} />}
 
                   {/* Happening event listing */}
                   {happening.length > 0 && (

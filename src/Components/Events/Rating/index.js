@@ -18,6 +18,7 @@ const Rating = ({
   visible,
   onClose,
   currentRating,
+  previousReview,
   onSubmitFeedback,
   event,
   user,
@@ -37,6 +38,10 @@ const Rating = ({
     onClose();
   };
 
+  useEffect(() => {
+    setReview(previousReview);
+    return () => {};
+  }, []);
   return (
     <Modal
       visible={visible}
@@ -131,23 +136,24 @@ const Rating = ({
             )}
 
             <View style={{ marginLeft: 4 }}>
-              <Text
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.headingone,
-                  fontWeight: Typography.weight.bold,
-                  color: theme.dark.main,
-                  paddingLeft: 10,
-                }}
-              >
-                {user.first_name &&
-                  user.first_name + " " + user.middle_name &&
-                  user.middle_name}
-              </Text>
+              {user.first_name && user.middle_name && (
+                <Text
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.headingone,
+                    fontWeight: Typography.weight.bold,
+                    color: theme.dark.main,
+                    paddingLeft: 10,
+                  }}
+                >
+                  {user.first_name + " " + user.middle_name}
+                </Text>
+              )}
+
               <Text
                 style={{
                   display: "flex",
