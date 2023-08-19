@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,12 +19,12 @@ import {
   newItem,
 } from "../../Reducer/Ticket";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
-import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
+import Connection from "../../api";
+import { DateFormater } from "../../Utils/functions";
 
 const EventTickets = ({ navigation, route }) => {
   const { item } = route.params;
-
   var featuredImageUri = Connection.url + Connection.assets;
 
   const dispatch = useDispatch();
@@ -140,39 +141,6 @@ const EventTickets = ({ navigation, route }) => {
     }
     return Color;
   };
-  const DateFun = (startingTime) => {
-    var date = new Date(startingTime);
-    let day = date.getDay();
-    let month = date.getMonth();
-    let happeningDay = date.getDate();
-
-    // return weekname
-    var weekday = new Array(7);
-    weekday[1] = "Mon, ";
-    weekday[2] = "Tue, ";
-    weekday[3] = "Wed, ";
-    weekday[4] = "Thu, ";
-    weekday[5] = "Fri, ";
-    weekday[6] = "Sat, ";
-    weekday[0] = "Sun, ";
-
-    //an array of month name
-    var monthName = new Array(12);
-    monthName[1] = "Jan";
-    monthName[2] = "Feb";
-    monthName[3] = "Mar";
-    monthName[4] = "Apr";
-    monthName[5] = "May";
-    monthName[6] = "Jun";
-    monthName[7] = "Jul";
-    monthName[8] = "Aug";
-    monthName[9] = "Sep";
-    monthName[10] = "Oct";
-    monthName[11] = "Nov";
-    monthName[12] = "Dec";
-
-    return weekday[day] + monthName[month + 1] + " " + happeningDay;
-  };
 
   /****************************************************** */
   //featch Tickets
@@ -198,10 +166,9 @@ const EventTickets = ({ navigation, route }) => {
           setTickets(response.data);
           setEvents(response.Events);
           setLoading(false);
-          setExist(true);
         } else {
           setLoading(false);
-          setExist(false);
+          setTickets(response.data);
         }
       })
       .catch((error) => {
@@ -258,67 +225,69 @@ const EventTickets = ({ navigation, route }) => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.Main}>
+    <ScrollView contentContainerStyle={styles.Main}>
       {loading ? (
         <View>
           <ActivityIndicator size="large" color={Constants.primary} />
         </View>
       ) : (
         <View>
-          <View
-            style={[
-              styles.ticketsdescription,
-              { height: height / 4, width: width },
-            ]}
-          >
-            <View style={[styles.imageContainer]}>
-              <Image
-                style={styles.image}
-                source={{
-                  uri: featuredImageUri + event.event_image,
-                }}
-              />
+          {item && (
+            <View
+              style={[
+                styles.ticketsdescription,
+                { height: height / 4, width: width, padding: 2 },
+              ]}
+            >
+              <View style={[styles.imageContainer]}>
+                <Image
+                  style={styles.image}
+                  source={{
+                    uri: featuredImageUri + item.event_image,
+                  }}
+                />
+              </View>
+
+              <View style={[styles.DiscriptionText]}>
+                <View>
+                  <Text style={[styles.H1Text]}>{item.event_name}</Text>
+                </View>
+
+                <View style={[styles.Date]}>
+                  <MaterialCommunityIcons
+                    name="calendar-clock-outline"
+                    size={16}
+                    color={Constants.Inverse}
+                  />
+                  <Text style={[styles.H4Text]} numberOfLines={1}>
+                    {DateFormater(item.start_date)}
+                  </Text>
+                </View>
+
+                <View style={[styles.Date]}>
+                  <MaterialCommunityIcons
+                    name="map-marker-radius-outline"
+                    size={16}
+                    color={Constants.Inverse}
+                  />
+                  <Text style={[styles.H4Text]} numberOfLines={2}>
+                    {item.event_address}
+                  </Text>
+                </View>
+
+                <View style={[styles.Date]}>
+                  <MaterialCommunityIcons
+                    name="account-group-outline"
+                    size={16}
+                    color={Constants.Inverse}
+                  />
+                  <Text style={[styles.H4Text]} numberOfLines={2}>
+                    {item.event_organizer}
+                  </Text>
+                </View>
+              </View>
             </View>
-
-            <View style={[styles.DiscriptionText]}>
-              <View>
-                <Text style={[styles.H1Text]}>{event.event_name}</Text>
-              </View>
-
-              <View style={[styles.Date]}>
-                <MaterialCommunityIcons
-                  name="calendar-clock-outline"
-                  size={16}
-                  color={Constants.Inverse}
-                />
-                <Text style={[styles.H4Text]} numberOfLines={1}>
-                  {DateFun(event.start_date)}
-                </Text>
-              </View>
-
-              <View style={[styles.Date]}>
-                <MaterialCommunityIcons
-                  name="map-marker-radius-outline"
-                  size={16}
-                  color={Constants.Inverse}
-                />
-                <Text style={[styles.H4Text]} numberOfLines={2}>
-                  {event.event_address}
-                </Text>
-              </View>
-
-              <View style={[styles.Date]}>
-                <MaterialCommunityIcons
-                  name="account-group-outline"
-                  size={16}
-                  color={Constants.Inverse}
-                />
-                <Text style={[styles.H4Text]} numberOfLines={2}>
-                  {event.event_organizer}
-                </Text>
-              </View>
-            </View>
-          </View>
+          )}
 
           <Text
             style={[
@@ -329,28 +298,29 @@ const EventTickets = ({ navigation, route }) => {
             Avaliable Tickets
           </Text>
 
-          {exist ? (
-            ticket.map((tik, index) => (
+          {ticket.length > 0 ? (
+            ticket.map((ticket, index) => (
               <View
-                key={tik.id}
+                key={index}
                 style={[
                   styles.TicketView,
-                  active === index
-                    ? { borderLeftWidth: 3, borderLeftColor: Constants.Inverse }
-                    : null,
+                  active === index && {
+                    borderLeftWidth: 3,
+                    borderLeftColor: Constants.Inverse,
+                  },
                 ]}
               >
                 <View style={styles.LeftTicket}>
                   <View style={styles.IconWrapper}>
                     <MaterialCommunityIcons
-                      name={TicketName(tik.tickettype)}
+                      name={TicketName(ticket.tickettype)}
                       size={24}
-                      color={TicketColor(tik.tickettype)}
+                      color={TicketColor(ticket.tickettype)}
                     />
                   </View>
 
                   <View>
-                    <Text style={styles.productTitle}>{tik.tickettype}</Text>
+                    <Text style={styles.productTitle}>{ticket.tickettype}</Text>
                     {amount !== 0 ? (
                       <View>
                         <Text
@@ -361,11 +331,13 @@ const EventTickets = ({ navigation, route }) => {
                               : { color: "black" },
                           ]}
                         >
-                          {tik.currentprice} Birr
+                          {ticket.currentprice} Birr
                         </Text>
                       </View>
                     ) : (
-                      <Text style={styles.price}>{tik.currentprice} Birr</Text>
+                      <Text style={styles.price}>
+                        {ticket.currentprice} Birr
+                      </Text>
                     )}
                   </View>
                 </View>
@@ -381,7 +353,7 @@ const EventTickets = ({ navigation, route }) => {
                               setDisable(false);
                             }
                             // amount > 0 && dispatch(decrease(tik.id));
-                            DecreaseCount(tik.id);
+                            DecreaseCount(ticket.id);
                           }}
                           style={styles.counterButton}
                         >
@@ -401,7 +373,7 @@ const EventTickets = ({ navigation, route }) => {
                         <TouchableOpacity
                           onPress={() => {
                             setDisable(true);
-                            IncreaseCount(tik.id);
+                            IncreaseCount(ticket.id);
                             // dispatch(increase(tik.id));
                           }}
                           style={styles.counterButton}
@@ -482,19 +454,19 @@ const EventTickets = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       )}
-    </SafeAreaView>
+    </ScrollView>
   );
 };
 const styles = StyleSheet.create({
   Main: {
     flex: 1,
     alignItems: "center",
+    paddingTop: 10,
   },
   ticketsdescription: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width: "100%",
   },
   imageContainer: {
     paddingLeft: 10,
@@ -518,7 +490,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     // justifyContent: 'space-around',
-    spacing: 2,
+    spacing: 6,
     height: "100%",
     width: "50%",
   },

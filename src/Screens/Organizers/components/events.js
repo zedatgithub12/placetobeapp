@@ -91,29 +91,27 @@ const OrganizerEvents = ({ FeaturedImage, status, onPress }) => {
 const styles = StyleSheet.create({
   imageContainer: {
     position: "relative",
-    marginLeft: 2,
+    marginLeft: 3,
     // To maintain the square shape of the images
   },
   posters: {
     width: Dimensions.get("screen").width / 3 - 4, // Subtracting margin from width
     height: Dimensions.get("screen").width / 3 - 4,
     resizeMode: "cover",
-    borderRadius: 4,
     marginBottom: 3,
   },
   statusStyle: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    width: "99%",
+    width: "100%",
     position: "absolute",
     bottom: 2,
-    right: 2,
+    right: 0,
     paddingHorizontal: 8,
     paddingVertical: 2,
     zIndex: 10,
-    borderBottomEndRadius: 4,
-    borderBottomLeftRadius: 4,
+  
   },
   stutusText: {
     alignSelf: "center",

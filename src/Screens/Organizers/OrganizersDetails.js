@@ -30,13 +30,13 @@ import Connection from "../../api";
 import Loader from "../../ui-components/ActivityIndicator";
 import NetInfo from "@react-native-community/netinfo";
 import NoConnection from "../../handlers/connection";
+import { showToast } from "../../Utils/Toast";
 
 // Organizer detail page
 const OrganizersDetail = ({ route, navigation }) => {
   var { eventOrg } = route.params;
   var organizerInfo = eventOrg;
   const { theme } = useTheme();
-  const numColumns = 3;
 
   const { userStatus } = React.useContext(AuthContext);
   const logged = userStatus.logged;
@@ -46,7 +46,7 @@ const OrganizersDetail = ({ route, navigation }) => {
   const [count, setCount] = useState(0);
   const [subscription, setSubscription] = useState(false);
   const [follow, setFollow] = useState({
-    subscription: "",
+    subscription: "Follow",
     btnDisabled: false,
     ButtonColor: Constants.primary,
   });
@@ -64,30 +64,20 @@ const OrganizersDetail = ({ route, navigation }) => {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
-
-    var followerId = await AsyncStorage.getItem("userId");
-    var Data = {
-      fid: followerId,
-    };
-
     fetch(APIUrl, {
-      method: "POST",
+      method: "GET",
       headers: headers,
-      body: JSON.stringify(Data),
       signal: signal,
     })
       .then((response) => response.json())
       .then((response) => {
         if (response.success) {
           var followers = response.data;
-          setFollow({ ...follow, subscription: response.status });
           setCount(followers);
-        } else {
-          setCount(0);
         }
       })
       .catch((error) => {
-        console.log(error);
+        // showToast("Unable to fetch followers");
       });
 
     return () => {
@@ -119,17 +109,20 @@ const OrganizersDetail = ({ route, navigation }) => {
     })
       .then((response) => response.json())
       .then((response) => {
-        // effect subscription indicator
-
         if (response.success) {
+          var followers = response.data;
+          setCount(followers);
           setFollow({
             ...follow,
             subscription: response.message,
             btnDisabled: true,
           });
-          setSubscription(false);
+
           setFollowStatus(response.message);
+          setSubscription(false);
         } else {
+          var followers = response.data;
+          setCount(followers);
           setFollow({
             ...follow,
             subscription: response.message,
@@ -157,7 +150,7 @@ const OrganizersDetail = ({ route, navigation }) => {
   //make call to organizer
   const MakeCall = () => {
     const args = {
-      number: organizerInfo.phone, // String value with the number to call
+      number: organizerInfo.business_phone, // String value with the number to call
       prompt: false, // Optional boolean property. Determines if the user should be prompted prior to the call
       skipCanOpen: true, // Skip the canOpenURL check
     };
@@ -171,7 +164,6 @@ const OrganizersDetail = ({ route, navigation }) => {
   const [events, setEvents] = useState([]);
   const [message, setMessage] = useState();
   const [notFound, setNotFound] = useState(false);
-  const [refreshing, setRefreshing] = React.useState(false);
 
   //conditiional status filter
   const renderStatus = (startingDate, endingDate) => {
@@ -201,11 +193,28 @@ const OrganizersDetail = ({ route, navigation }) => {
     return currentStatus;
   };
 
-  const RefreshList = async () => {
+  const retryConnection = () => {
+    const InternetConnection = async () => {
+      const networkState = await NetInfo.fetch();
+      setConnection(networkState.isConnected);
+    };
+
+    const handleNetworkChange = (state) => {
+      setConnection(state.isConnected);
+    };
+
+    setRetry(true); // Set retry to true initially
+
+    setTimeout(async () => {
+      await InternetConnection();
+      setRetry(false); // Set retry to false after the operation is done
+    }, 3000); // 3000 milliseconds = 3 seconds
+
+    const subscription = NetInfo.addEventListener(handleNetworkChange);
+  };
+
+  const handleFetchingEvents = async () => {
     setLoading(true);
-    // set refreshing state to true
-    // featching abort controller
-    // after featching events the fetching function will be aborted
 
     const controller = new AbortController();
     const signal = controller.signal;
@@ -245,29 +254,9 @@ const OrganizersDetail = ({ route, navigation }) => {
     };
   };
 
-  const retryConnection = () => {
-    const InternetConnection = async () => {
-      const networkState = await NetInfo.fetch();
-      setConnection(networkState.isConnected);
-    };
-
-    const handleNetworkChange = (state) => {
-      setConnection(state.isConnected);
-    };
-
-    setRetry(true); // Set retry to true initially
-
-    setTimeout(async () => {
-      await InternetConnection();
-      setRetry(false); // Set retry to false after the operation is done
-    }, 3000); // 3000 milliseconds = 3 seconds
-
-    const subscription = NetInfo.addEventListener(handleNetworkChange);
-  };
-
   useEffect(() => {
     //check wether event organizer have phone number added to his account
-    if (organizerInfo.phone !== null) {
+    if (organizerInfo.business_phone !== null) {
       setProvided(true);
     } else {
       setProvided(false);
@@ -275,7 +264,7 @@ const OrganizersDetail = ({ route, navigation }) => {
 
     if (connection) {
       followCounter();
-      RefreshList();
+      handleFetchingEvents();
     }
     return () => {};
   }, [connection]);
@@ -314,7 +303,7 @@ const OrganizersDetail = ({ route, navigation }) => {
               />
             </TouchableOpacity>
             <Image
-              source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
+              source={{ uri: featuredImageUri + organizerInfo.business_logo }} //featured image source
               resizeMode="contain"
               style={styles.modalImage} //featured image styles
             />
@@ -345,7 +334,9 @@ const OrganizersDetail = ({ route, navigation }) => {
                 </TouchableOpacity>
                 <Image
                   //Featured Image of the event
-                  source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
+                  source={{
+                    uri: featuredImageUri + organizerInfo.business_logo,
+                  }} //featured image source
                   resizeMode="cover"
                   style={styles.image} //featured image styles
                   blurRadius={4}
@@ -363,7 +354,9 @@ const OrganizersDetail = ({ route, navigation }) => {
                   activeOpacity={0.8}
                 >
                   <Image
-                    source={{ uri: featuredImageUri + organizerInfo.profile }} //featured image source
+                    source={{
+                      uri: featuredImageUri + organizerInfo.business_logo,
+                    }} //featured image source
                     resizeMode="cover"
                     style={styles.profileImage} //featured image styles
                   />
@@ -380,7 +373,7 @@ const OrganizersDetail = ({ route, navigation }) => {
                     color: theme.dark.main,
                   }}
                 >
-                  {organizerInfo.username}
+                  {organizerInfo.business_name}
                 </Text>
                 <Text
                   style={{
@@ -391,7 +384,7 @@ const OrganizersDetail = ({ route, navigation }) => {
                     textTransform: "capitalize",
                   }}
                 >
-                  {organizerInfo.category}
+                  {organizerInfo.business_category}
                 </Text>
               </View>
 
@@ -480,7 +473,7 @@ const OrganizersDetail = ({ route, navigation }) => {
                         fontFamily: Typography.family,
                       }}
                     >
-                      4.9
+                      {organizerInfo.rating}
                     </Text>
                     <AntDesign
                       name="star"

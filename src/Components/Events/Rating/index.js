@@ -25,7 +25,7 @@ const Rating = ({
 }) => {
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(visible);
-  const [review, setReview] = useState("");
+  const [review, setReview] = useState();
   var featuredImageUri = Connection.url + Connection.assets;
 
   const handleSubmitReview = () => {
