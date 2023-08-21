@@ -255,7 +255,7 @@ const EventTickets = ({ navigation, route }) => {
 
                 <View style={[styles.Date]}>
                   <MaterialCommunityIcons
-                    name="calendar-clock-outline"
+                    name="calendar-clock"
                     size={16}
                     color={Constants.Inverse}
                   />
@@ -266,23 +266,12 @@ const EventTickets = ({ navigation, route }) => {
 
                 <View style={[styles.Date]}>
                   <MaterialCommunityIcons
-                    name="map-marker-radius-outline"
+                    name="map-marker-radius"
                     size={16}
                     color={Constants.Inverse}
                   />
                   <Text style={[styles.H4Text]} numberOfLines={2}>
                     {item.event_address}
-                  </Text>
-                </View>
-
-                <View style={[styles.Date]}>
-                  <MaterialCommunityIcons
-                    name="account-group-outline"
-                    size={16}
-                    color={Constants.Inverse}
-                  />
-                  <Text style={[styles.H4Text]} numberOfLines={2}>
-                    {item.event_organizer}
                   </Text>
                 </View>
               </View>

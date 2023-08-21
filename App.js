@@ -383,7 +383,6 @@ export default function App() {
     try {
       const response = await fetchAds(type);
       if (response.success) {
-        console.log(response);
         setPopupAdsData(response.data);
         setShowPopupAds(true);
       } else {

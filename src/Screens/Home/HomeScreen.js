@@ -20,6 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Connection from "../../api";
 import Categories from "../../Components/Categories/CategoryListing";
 import Category from "../../data/Category";
+import EventStatus from "../../data/eventStatus";
 import Events from "../../Components/Events/Events";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
 import { LocalNotification } from "../../Utils/localPushController";
@@ -27,7 +28,7 @@ import Slider from "../../Components/Slider";
 import NoConnection from "../../handlers/connection";
 import { useTheme } from "@react-navigation/native";
 import Loader from "../../ui-components/ActivityIndicator";
-import { HelperText } from "react-native-paper";
+import { Divider, HelperText } from "react-native-paper";
 import {
   DateFormater,
   TimeFormater,
@@ -42,6 +43,7 @@ import NativeAdsOne from "../../Components/Ads/nativeAd1";
 import HeaderAds from "../../Components/Ads/headerAds";
 import TitleContainer from "./components/header";
 import { fetchAds, UserInteraction } from "../../Utils/Ads";
+import Statuses from "../../Components/Categories/statusFiltering";
 
 function Home({ navigation, ...props }) {
   const { theme } = useTheme();
@@ -51,6 +53,7 @@ function Home({ navigation, ...props }) {
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
   const [active, setActive] = useState("All");
+  const [status, setStatus] = useState("Featured");
 
   const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
@@ -137,40 +140,45 @@ function Home({ navigation, ...props }) {
       });
   };
 
-  const handleCategoryClick = (categoryname, type) => {
-    setActive(categoryname);
+  const handleCategoryClick = (categoryname) => {
     if (active === "All") {
-      renderAll();
+      setFilteredEvent(events);
+      setActive(categoryname);
     } else {
-      renderFilter(categoryname, type);
-    }
-  };
-
-  /****************************************
-   * Render events those the category is other than "All"
-   */
-  const renderFilter = (category, type) => {
-    if (type === "status") {
-      statusFilter(category);
-    } else if (type === "filter") {
-      const filteredData = events.filter((event) => event.priority === 1);
-      setFilteredEvent(filteredData);
-    } else if (type === "category") {
       const filteredData = events.filter(
-        (event) => event.category === category
+        (event) => event.category === categoryname
       );
       setFilteredEvent(filteredData);
+      setActive(categoryname);
     }
   };
 
-  /*******************************************
-   * Filter event in status
-   * the status are
-   * Happening, This week, Upcoming
-   */
+  const handleStatusClick = (type, category) => {
+    if (type === "thisweek") {
+      //filter events in this week
+      var Api = Connection.url + Connection.WeekEvents;
+      fetchEvent(Api);
+    } else if (type === "upcoming") {
+      //filter upcoming events
+      var Api = Connection.url + Connection.UpcomingEvents;
+      fetchEvent(Api);
+    } else if (type === "happening") {
+      //filter events happening today
+      var Api = Connection.url + Connection.TodayEvents;
+      fetchEvent(Api);
+    } else if (type === "featured") {
+      var Api = Connection.url + Connection.FeaturedEvent;
+      fetchEvent(Api);
+    }
+    setStatus(category);
+  };
 
   const statusFilter = (category) => {
-    if (category === "This week") {
+    if (category === "Happening") {
+      //filter events happening today
+      var Api = Connection.url + Connection.TodayEvents;
+      fetchEvent(Api);
+    } else if (category === "This Week") {
       //filter events in this week
       var Api = Connection.url + Connection.WeekEvents;
       fetchEvent(Api);
@@ -178,9 +186,8 @@ function Home({ navigation, ...props }) {
       //filter upcoming events
       var Api = Connection.url + Connection.UpcomingEvents;
       fetchEvent(Api);
-    } else if (category === "Happening") {
-      //filter events happening today
-      var Api = Connection.url + Connection.TodayEvents;
+    } else if (category === "Featured") {
+      var Api = Connection.url + Connection.FeaturedEvent;
       fetchEvent(Api);
     }
   };
@@ -196,7 +203,6 @@ function Home({ navigation, ...props }) {
         if (response.success) {
           setFilteredEvent(response.data);
           setLoading(false);
-          renderAll();
         } else {
           setLoading(false);
         }
@@ -418,232 +424,108 @@ function Home({ navigation, ...props }) {
           )}
         </View>
 
-        <View style={styles.homeSection2}>
-          <ScrollView contentContainerStyle={{ minHeight: 40 }}>
-            <View>
-              <ScrollView
-                horizontal
-                contentContainerStyle={styles.categories}
-                showsHorizontalScrollIndicator={false}
-              >
-                {Category.map((item, index) => (
-                  <Categories
-                    key={index}
-                    icon={item.icon}
-                    category={item.name}
-                    border={item.color}
-                    background={
-                      active === item.name ? item.color : theme.background.main
-                    }
-                    color={
-                      active === item.name
-                        ? Constants.background
-                        : Constants.Inverse
-                    }
-                    onPress={() => handleCategoryClick(item.name, item.type)}
-                  />
-                ))}
-              </ScrollView>
-            </View>
-          </ScrollView>
-        </View>
-
-        <View style={styles.sectionthree}>
+        <View style={styles.homebody}>
           {connection ? (
             <View style={styles.homescrollview}>
-              {active === "All" ? (
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {featured.length > 0 && (
-                    <View>
-                      <TitleContainer title="Featured Events" />
-                      {featured.map((item, index) => (
-                        <Events
-                          key={index}
-                          Event_Id={item.id}
-                          org_id={item.userId}
-                          FeaturedImage={item.event_image}
-                          title={item.event_name}
-                          date={DateFormater(item.start_date)}
-                          time={TimeFormater(item.start_time)}
-                          venue={item.event_address}
-                          category={CategoryColor(item.category)}
-                          Price={EntranceFee(item.event_entrance_fee)}
-                          onPress={() =>
-                            navigation.navigate("EventDetail", { id: item.id })
-                          }
-                        />
-                      ))}
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {showBannerAds && bannerAds && <Slider ad={bannerAds} />}
 
-                      {featured.length > Preferences.listedEvent && (
-                        <EventCounter
-                          events={featured}
-                          onPress={() =>
-                            handleCategoryClick("Featured", "filter")
-                          }
-                        />
-                      )}
-                    </View>
-                  )}
-                  {showBannerAds && bannerAds && <Slider ad={bannerAds} />}
+                <View>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {Category.map((item, index) => (
+                      <Categories
+                        key={index}
+                        icon={item.icon}
+                        category={item.name}
+                        border={item.color}
+                        background={
+                          active === item.name
+                            ? item.color
+                            : theme.background.main
+                        }
+                        color={
+                          active === item.name
+                            ? Constants.background
+                            : Constants.Inverse
+                        }
+                        onPress={() => handleCategoryClick(item.name)}
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
+                <Divider />
+                <View>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {EventStatus.map((item, index) => (
+                      <Statuses
+                        key={index}
+                        category={item.name}
+                        border={item.color}
+                        background={
+                          status === item.name
+                            ? theme.primary.main
+                            : theme.background.main
+                        }
+                        color={
+                          status === item.name
+                            ? Constants.Inverse
+                            : Constants.Inverse
+                        }
+                        check={status === item.name ? true : false}
+                        onPress={() => handleStatusClick(item.type, item.name)}
+                      />
+                    ))}
+                  </ScrollView>
+                </View>
 
-                  {/* Happening event listing */}
-                  {happening.length > 0 && (
-                    <View>
-                      <TitleContainer title="Happening" />
-                      {happening.map((item, index) => (
-                        <Events
-                          key={index}
-                          Event_Id={item.id}
-                          org_id={item.userId}
-                          FeaturedImage={item.event_image}
-                          title={item.event_name}
-                          date={DateFormater(item.start_date)}
-                          time={TimeFormater(item.start_time)}
-                          venue={item.event_address}
-                          category={CategoryColor(item.category)}
-                          Price={EntranceFee(item.event_entrance_fee)}
-                          onPress={() =>
-                            navigation.navigate("EventDetail", { id: item.id })
-                          }
-                        />
-                      ))}
+                {loading ? (
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Loader size="large" />
+                  </View>
+                ) : filteredEvent.length == 0 ? (
+                  <View>
+                    <Text>No Event</Text>
+                  </View>
+                ) : (
+                  filteredEvent.map((item, index) => (
+                    <Events
+                      key={index}
+                      Event_Id={item.id}
+                      org_id={item.userId}
+                      FeaturedImage={item.event_image}
+                      title={item.event_name}
+                      date={DateFormater(item.start_date)}
+                      time={TimeFormater(item.start_time)}
+                      venue={item.event_address}
+                      category={CategoryColor(item.category)}
+                      Price={EntranceFee(item.event_entrance_fee)}
+                      onPress={() =>
+                        navigation.navigate("EventDetail", { id: item.id })
+                      }
+                    />
+                  ))
+                )}
 
-                      {happening.length > Preferences.listedEvent && (
-                        <EventCounter
-                          events={happening}
-                          onPress={() =>
-                            handleCategoryClick("Happening", "status")
-                          }
-                        />
-                      )}
-                    </View>
-                  )}
-
-                  {/* This week event listing */}
-                  {thisWeek.length > 0 && (
-                    <View>
-                      <TitleContainer title="This Week" />
-                      {thisWeek.map((item, index) => (
-                        <Events
-                          key={index}
-                          Event_Id={item.id}
-                          org_id={item.userId}
-                          FeaturedImage={item.event_image}
-                          title={item.event_name}
-                          date={DateFormater(item.start_date)}
-                          time={TimeFormater(item.start_time)}
-                          venue={item.event_address}
-                          category={CategoryColor(item.category)}
-                          Price={EntranceFee(item.event_entrance_fee)}
-                          onPress={() =>
-                            navigation.navigate("EventDetail", { id: item.id })
-                          }
-                        />
-                      ))}
-
-                      {thisWeek.length > Preferences.listedEvent && (
-                        <EventCounter
-                          events={thisWeek}
-                          onPress={() =>
-                            handleCategoryClick("This Week", "status")
-                          }
-                        />
-                      )}
-                    </View>
-                  )}
-
-                  {/* upcoming event listing */}
-                  {upcoming.length > 0 && (
-                    <View>
-                      <TitleContainer title="Upcoming" />
-
-                      {upcoming.map((item, index) => (
-                        <Events
-                          key={index}
-                          Event_Id={item.id}
-                          org_id={item.userId}
-                          FeaturedImage={item.event_image}
-                          title={item.event_name}
-                          date={DateFormater(item.start_date)}
-                          time={TimeFormater(item.start_time)}
-                          venue={item.event_address}
-                          category={CategoryColor(item.category)}
-                          Price={EntranceFee(item.event_entrance_fee)}
-                          onPress={() =>
-                            navigation.navigate("EventDetail", { id: item.id })
-                          }
-                        />
-                      ))}
-
-                      {upcoming.length > Preferences.listedEvent && (
-                        <EventCounter
-                          events={upcoming}
-                          onPress={() =>
-                            handleCategoryClick("Upcoming", "status")
-                          }
-                        />
-                      )}
-                    </View>
-                  )}
-
+                {showCardAd && AdsInfo[0] && (
                   <View
                     style={{
                       paddingTop: 20,
                       height: Dimensions.get("screen").height / 1.6,
                     }}
                   >
-                    {showCardAd && AdsInfo[0] && (
-                      <NativeAdsOne
-                        showAds={true}
-                        ad={AdsInfo}
-                        hideCard={() => setShowCardAd(false)}
-                      />
-                    )}
-                  </View>
-                </ScrollView>
-              ) : (
-                <View>
-                  {loading ? (
-                    <Loader size="small" />
-                  ) : (
-                    <FlatList
-                      // List of events in extracted from database in the form JSON data
-                      data={filteredEvent}
-                      renderItem={renderItem}
-                      keyExtractor={(item) => item.id}
-                      nestedScrollEnabled
-                      initialNumToRender={2} // Reduce initial render amount
-                      maxToRenderPerBatch={1} // Reduce number in each render batch
-                      updateCellsBatchingPeriod={100} // Increase time between renders
-                      windowSize={7} // Reduce the window size
-                      ListHeaderComponent={
-                        showNativeAd &&
-                        nativeAd[0] && (
-                          <HeaderAds
-                            ad={nativeAd}
-                            hideAd={() => setNativeAd(false)}
-                          />
-                        )
-                      }
-                      ListEmptyComponent={
-                        <View style={styles.container}>
-                          <Image
-                            source={require("../../assets/images/NotFound.png")}
-                            resizeMode="contain"
-                            style={styles.notFound}
-                          />
-                          <Text style={styles.emptyMessageStyle}>
-                            We don't have event for today!
-                          </Text>
-                          <HelperText style={{ alignSelf: "center" }}>
-                            Check events of the week
-                          </HelperText>
-                        </View>
-                      }
+                    <NativeAdsOne
+                      showAds={true}
+                      ad={AdsInfo}
+                      hideCard={() => setShowCardAd(false)}
                     />
-                  )}
-                </View>
-              )}
+                  </View>
+                )}
+              </ScrollView>
             </View>
           ) : (
             <View style={{ height: Dimensions.get("screen").height / 1.2 }}>
@@ -762,14 +644,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  homeSection2: {
-    marginTop: 68,
-  },
-  sectionthree: {
-    marginBottom: 48,
+
+  homebody: {
+    marginTop: 70,
   },
   homescrollview: {
-    marginBottom: 55,
+    marginBottom: 52,
   },
   title: {
     fontSize: Constants.headingtwo,
