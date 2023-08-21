@@ -1,7 +1,7 @@
 //import liraries
 import React, { useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import { View } from "react-native";
 //event screens import
 import EventDetails from "../Screens/Event/eventDetails";
 import CategorizedEvent from "../Screens/Event/CategorizedEvent";
@@ -52,6 +52,8 @@ import { Menu, IconButton, Divider } from "react-native-paper";
 import { useTheme } from "@react-navigation/native";
 import { Typography } from "../themes/typography";
 import { Linking } from "react-native";
+import Timer from "./Timer";
+
 /********************************* ROUTES SCREEN ****************************** */
 
 const Stack = createNativeStackNavigator();
@@ -317,7 +319,7 @@ const Routes = ({ navigation }) => {
         name="TicketScreen"
         component={EventTickets}
         options={{
-          title: "Tickets",
+          title: "Your Tickets",
           headerStyle: {
             backgroundColor: Constants.primary,
           },
@@ -336,6 +338,7 @@ const Routes = ({ navigation }) => {
           },
           headerTintColor: theme.dark.main,
           headerShadowVisible: false,
+          headerRight: () => <Timer />,
         }}
       />
 
@@ -343,7 +346,7 @@ const Routes = ({ navigation }) => {
         name="BoughtDetail"
         component={BoughtDetail}
         options={({ navigation }) => ({
-          title: "Your Tickets",
+          title: "Ticket Detail",
           headerStyle: {
             backgroundColor: Constants.primary,
           },

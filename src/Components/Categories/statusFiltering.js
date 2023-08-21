@@ -1,22 +1,25 @@
 //import liraries
 import React from "react";
 import { View, Text, StyleSheet, TouchableNativeFeedback } from "react-native";
-import { MaterialCommunityIcons } from "react-native-vector-icons";
+import { Ionicons } from "react-native-vector-icons";
 
-// category listing component
+// status listing component
 
-const Categories = ({ category, icon, background, color, border, onPress }) => {
+const Statuses = ({ category, check, background, color, border, onPress }) => {
   return (
-    <TouchableNativeFeedback activeOpacity={0.8} onPress={onPress}>
+    <TouchableNativeFeedback
+      activeOpacity={0.8}
+      onPress={onPress}
+      style={{ borderRadius: 6 }}
+    >
       <View
         style={[
           styles.container,
           { backgroundColor: background, borderColor: border },
         ]}
       >
-        {icon && <MaterialCommunityIcons name={icon} size={22} color={color} />}
-
         <Text style={[styles.categoryText, { color: color }]}>{category}</Text>
+        {check && <Ionicons name="checkmark-circle" size={14} color="#fff" />}
       </View>
     </TouchableNativeFeedback>
   );
@@ -25,12 +28,14 @@ const Categories = ({ category, icon, background, color, border, onPress }) => {
 // define your styles
 const styles = StyleSheet.create({
   container: {
-    minWidth: 60,
-    justifyContent: "center",
+    minWidth: 110,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     marginVertical: 8,
     marginHorizontal: 5,
-    padding: 6,
+    padding: 8,
     paddingHorizontal: 10,
     borderRadius: 6,
   },
@@ -40,4 +45,4 @@ const styles = StyleSheet.create({
 });
 
 //make this component available to the app
-export default Categories;
+export default Statuses;

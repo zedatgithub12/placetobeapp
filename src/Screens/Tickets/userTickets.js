@@ -11,6 +11,8 @@ import NetInfo from "@react-native-community/netinfo";
 import NoConnection from "../../handlers/connection";
 import TicketListing from "../../Components/Tickets/TicketsListing";
 import { Status, StatusText } from "../../Utils/functions";
+import Loader from "../../ui-components/ActivityIndicator";
+import Internet from "../../connection";
 
 /********************************** User Tickets Listing Screen ************************** */
 
@@ -21,13 +23,13 @@ const UserTickets = ({ navigation }) => {
   const [retry, setRetry] = useState(false);
   const [sold, setSold] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-
+  const [Loading, setLoading] = useState(true);
   const FeatchTicket = async () => {
     const controller = new AbortController();
     const signal = controller.signal;
 
     var userId = await AsyncStorage.getItem("userId");
-    setRefreshing(true);
+    setLoading(true);
 
     var APIUrl = Connection.url + Connection.boughtTickets + userId;
     var headers = {
@@ -45,13 +47,13 @@ const UserTickets = ({ navigation }) => {
         if (response.success) {
           var ticket = response.data;
           setSold(ticket);
-          setRefreshing(false);
+          setLoading(false);
         } else {
-          setRefreshing(false);
+          setLoading(false);
         }
       })
       .catch((error) => {
-        setRefreshing(false);
+        setLoading(false);
       });
 
     return () => {
@@ -203,20 +205,6 @@ const UserTickets = ({ navigation }) => {
       onPress={() => navigation.navigate("BoughtDetail", { ...item })}
     />
   );
-  useEffect(() => {
-    const InternetConnection = async () => {
-      const networkState = await NetInfo.fetch();
-      setConnection(networkState.isConnected);
-    };
-    InternetConnection();
-
-    const subscription = NetInfo.addEventListener(async (state) => {
-      setConnection(state.isConnected);
-    });
-    return () => {
-      subscription();
-    };
-  }, [retry]);
 
   //handle the work to be done when network is available
   useEffect(() => {
@@ -229,20 +217,31 @@ const UserTickets = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {logged ? (
-        connection ? (
-          <FlatList
-            data={sold}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            onRefresh={Refresh}
-            refreshing={refreshing}
-            ListEmptyComponent={
-              <NoTicket
-                title=" You didn't buy ticket yet!"
-                helperText="Once you bought a ticket, it will be listed here!"
-              />
-            }
-          />
+        Internet ? (
+          Loading ? (
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Loader size="large" />
+            </View>
+          ) : (
+            <FlatList
+              data={sold}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+              onRefresh={Refresh}
+              refreshing={refreshing}
+              ListEmptyComponent={
+                <NoTicket
+                  title=" You didn't buy ticket yet!"
+                  helperText="Once you bought a ticket, it will be listed here!"
+                />
+              }
+            />
+          )
         ) : (
           <NoConnection onPress={() => setRetry(!retry)} />
         )

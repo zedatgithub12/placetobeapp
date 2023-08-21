@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  Dimensions,
 } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
@@ -14,13 +15,28 @@ import { Divider, HelperText } from "react-native-paper";
 import Connection from "../../constants/connection";
 import TicketDetail from "./TicketDetail";
 
+import { useTheme } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  startTimer,
+  stopTimer,
+  decreaseTime,
+  releaseTicket,
+} from "../../Reducer/TimerSlice";
+import { P2bAnimatedBtn } from "../../ui-components/Button";
+
 function CheckoutScreen({ route }) {
   const { pass } = route.params;
+  const TicketInfo = pass;
+  const { theme } = useTheme();
+
+  const dispatch = useDispatch();
+  const timerRunning = useSelector((state) => state.timer.timerRunning);
+  const remainingTime = useSelector((state) => state.timer.remainingTime);
+  const ticketData = useSelector((state) => state.timer.ticketData);
 
   const [selection, setSelection] = useState(null);
   const [agent, setAgent] = useState();
-  const [timerStatus, setTimerStatus] = useState("initial");
-  const [reservationid, setReservationid] = useState();
   const [contactInfo, setContactInfo] = useState({
     fullname: "",
     nameBorder: Constants.Secondary,
@@ -52,80 +68,6 @@ function CheckoutScreen({ route }) {
   // with JS setInterval to keep track of it and
   // stop it when needed
   const Ref = useRef(null);
-
-  // The state for our timer
-  const [timer, setTimer] = useState(720); // 12 minutes in seconds
-
-  useEffect(() => {
-    if (timer > 0) {
-      const intervalId = setInterval(() => {
-        setTimer(timer - 1);
-      }, 1000);
-      return () => clearInterval(intervalId);
-    } else {
-      featchOperation("elapsed", reservationid);
-
-      //continue from here
-    }
-  }, [timer]);
-
-  // code to send and featch from app backend
-  // it featches responses culculated inside Resource file
-
-  const featchOperation = (currentStatus, rsvp) => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    var ApiUrl = Connection.url + Connection.createReservation;
-    var headers = {
-      accept: "application/json",
-      "Content-Type": "application/json",
-    };
-
-    var Data = {
-      ticketId: pass.id,
-      userId: pass.userId,
-      quantity: pass.amount,
-      timer: currentStatus,
-      rsvp: rsvp,
-    };
-
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(Data),
-      signal: signal,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.success && response.message === "start timer") {
-          setTimer(720);
-          setReservationid(response.data);
-          console.log(response);
-        } else {
-          setTimer(response.message);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    return () => {
-      controller.abort();
-    };
-  };
-
-  //check out timer function
-  //check if the time is starting or elapsed by lestining to the state
-
-  const CheckoutTimer = (status) => {
-    if (status === "initial") {
-      featchOperation(status, null);
-    } else if (status === "elapsed") {
-      featchOperation(status, pass.id);
-    } else if (status === "paid") {
-      featchOperation(status, pass.id);
-    }
-  };
 
   /**************************************** */
   //on pay button pressed
@@ -222,115 +164,78 @@ function CheckoutScreen({ route }) {
         });
     }
   };
+  const start = () => {
+    const ticket = {
+      id: pass.id,
+      userId: pass.userId,
+      quantity: pass.amount,
+    };
 
-  //on component did mount
+    dispatch(startTimer(ticket));
+  };
+
+  //on component mount
   useEffect(() => {
-    CheckoutTimer(timerStatus);
-  }, []);
+    if (
+      !ticketData ||
+      ticketData.id !== TicketInfo.id ||
+      ticketData.quantity !== TicketInfo.amount
+    ) {
+      start();
+    }
+    return () => {};
+  }, [TicketInfo]);
 
   return (
     <SafeAreaView style={styles.root}>
-      <View style={{ height: 160 }}>
-        <View style={styles.timerContainer}>
-          <MaterialCommunityIcons
-            name="timer"
-            size={18}
-            color={Constants.Inverse}
-          />
-          <Text style={styles.timerTxt}>
-            Time {Math.floor(timer / 60)}:{timer % 60 < 10 ? "0" : ""}
-            {timer % 60}
-          </Text>
-        </View>
+      <View style={{ height: 140 }}>
+        <Divider style={{ backgroundColor: theme.primary[600] }} />
 
-        <View style={styles.ticketcheckout}>
-          <View style={styles.leftCheckout}>
-            <Text style={styles.eventName}>{pass.event_name}</Text>
+        <View style={styles.leftCheckout}>
+          <View style={styles.detailrow}>
+            <Text style={styles.infoLabel}>Event</Text>
 
-            <View style={styles.ttype}>
-              <Text
-                style={{
-                  fontSize: Constants.headingtwo,
-                  fontWeight: Constants.Bold,
-                  color: Constants.Inverse,
-                  fontStyle: "italic",
-                }}
-              >
-                {pass.amount}
-              </Text>
-
-              <Text
-                style={{
-                  marginLeft: 8,
-                  fontSize: Constants.headingtwo,
-                  fontWeight: Constants.Boldtwo,
-                  color: Constants.Inverse,
-                  fontStyle: "italic",
-                }}
-              >
-                {pass.tickettype} Ticket
-              </Text>
-            </View>
+            <Text style={styles.infoValue}>{pass.event_name}</Text>
           </View>
 
-          <View
-            style={{
-              flexDirection: "column",
-              padding: 5,
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                color: "#7B3F00",
-                fontSize: 17,
-                paddingRight: 8,
-                fontWeight: "bold",
-              }}
-            >
-              Total
-            </Text>
+          <View style={styles.detailrow}>
+            <Text style={styles.infoLabel}>Ticket</Text>
             <View
               style={{
+                display: "flex",
                 flexDirection: "row",
-                padding: 5,
                 alignItems: "center",
               }}
             >
-              <Text
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#7B3F00",
-                  fontSize: Constants.headingone,
-
-                  fontWeight: Constants.Bold,
-                }}
-              >
-                {pass.currentprice * pass.amount}
-              </Text>
-              <Text
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#7B3F00",
-                  fontSize: Constants.headingone,
-                  paddingRight: 8,
-                  fontWeight: "bold",
-                }}
-              >
-                {pass.originalprice} ETB
-              </Text>
+              <Text style={styles.infoValue}> {pass.tickettype}</Text>
+              <MaterialCommunityIcons
+                name="close"
+                size={12}
+                style={{ marginHorizontal: 4 }}
+              />
+              <Text style={styles.infoValue}>{pass.amount}</Text>
             </View>
+          </View>
+
+          <View style={styles.detailrow}>
+            <Text style={styles.infoLabel}>Each Price </Text>
+
+            <Text style={styles.infoValue}>{pass.currentprice} ETB</Text>
+          </View>
+
+          <View style={styles.detailrow}>
+            <Text style={styles.infoLabel}>Total</Text>
+
+            <Text style={styles.infoValue}>
+              {pass.currentprice * pass.amount} ETB
+            </Text>
           </View>
         </View>
 
         <View style={styles.ticketPriceContainer}>
           <Text
             style={{
-              marginLeft: 30,
+              marginLeft: 24,
               marginTop: 16,
               marginBottom: -5,
               padding: 0,
@@ -352,29 +257,28 @@ function CheckoutScreen({ route }) {
               onChangeText={(name) => fullname(name)}
             />
           </View>
-          {contactInfo.nameError ? (
+          {contactInfo.nameError && (
             <Text style={styles.error}>{contactInfo.errorMessage}</Text>
-          ) : null}
+          )}
         </View>
 
-        <View style={styles.ticketPriceContainer}>
-          <View style={styles.phonefieldContainer}>
-            <Text style={styles.code}>+251</Text>
-            <TextInput
-              placeholder="Phone"
-              keyboardType="phone-pad"
-              style={[
-                styles.phonefield,
-                { borderColor: contactInfo.phoneBorder },
-              ]}
-              value={contactInfo.phone}
-              onChangeText={(phone) => Phone(phone)}
-            />
-          </View>
-          {contactInfo.phoneError ? (
-            <Text style={styles.error}>{contactInfo.phoneErrorMessage}</Text>
-          ) : null}
+        <View style={styles.phonefieldContainer}>
+          <Text style={styles.code}>+251</Text>
+          <TextInput
+            placeholder="Phone"
+            keyboardType="phone-pad"
+            style={[
+              styles.phonefield,
+              { borderColor: contactInfo.phoneBorder },
+            ]}
+            value={contactInfo.phone}
+            onChangeText={(phone) => Phone(phone)}
+          />
         </View>
+        {contactInfo.phoneError && (
+          <Text style={styles.error}>{contactInfo.phoneErrorMessage}</Text>
+        )}
+
         <Divider style={{ marginTop: 15 }} />
 
         <View style={styles.btnGroup}>
@@ -470,67 +374,17 @@ function CheckoutScreen({ route }) {
               </Text>
             </View>
           </TouchableOpacity>
-
-          {/* <TouchableOpacity
-            style={[
-              styles.btn,
-              selection === 3
-                ? [
-                    {
-                      backgroundColor: "#ebebeb",
-                      borderWidth: 1,
-                      borderColor: "green",
-                    },
-                  ]
-                : { backgroundColor: "white" },
-            ]}
-            onPress={() => {setSelection(3); setAgent(3)}}
-          >
-            {selection === 3 ? (
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={18}
-                color="green"
-                style={{ position: "absolute", right: 6, top: 6 }}
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name="radiobox-blank"
-                size={18}
-                color={Constants.Secondary}
-                style={{ position: "absolute", right: 6, top: 6 }}
-              />
-            )}
-            <View style={styles.LeftPayment}>
-              <Image
-                style={styles.Paymentlogo}
-                source={{
-                  uri: "https://play-lh.googleusercontent.com/GEjGBnUGMkupE8FpnT9LiqSzuS-_1n2sms1xJu8sPKp-JQsA92u8Fl-pKuk0E_x4SmM",
-                }}
-              />
-              <Text
-                style={[
-                  styles.btnText,
-                  selection === 3 ? { color: "black" } : null,
-                ]}
-              >
-                Amole
-              </Text>
-            </View>
-          </TouchableOpacity> */}
         </View>
-
-        {selection && (
-          <View style={[styles.paybtn, { marginHorizontal: 10 }]}>
-            <TouchableOpacity
-              onPress={() => Pay()}
-              style={styles.paybuttonStyle}
-            >
-              <Text style={styles.paytxt}>Pay</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
+
+      {selection && (
+        <P2bAnimatedBtn
+          title="Pay"
+          animation="fadeInUpBig"
+          isSubmitting={false}
+          onPress={() => Pay()}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -588,29 +442,29 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   leftCheckout: {
-    padding: 4,
-  },
-  eventName: {
-    fontSize: Constants.headingone,
-    fontWeight: Constants.Bold,
-    color: Constants.Inverse,
-    paddingLeft: 13,
-  },
-  ttype: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 10,
-    paddingLeft: 13,
+    width: Dimensions.get("screen").width,
+    flexDirection: "column",
+    justifyContent: "space-between",
+    padding: 18,
+    backgroundColor: Constants.primary,
   },
 
-  ticketcheckout: {
+  detailrow: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    display: "flex",
-    padding: 20,
-    flexDirection: "row",
-    backgroundColor: Constants.primary,
-    paddingVertical: 40,
+    marginTop: 14,
+    paddingLeft: 5,
+  },
+  infoLabel: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.Inverse,
+  },
+  infoValue: {
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    color: Constants.Inverse,
   },
   imageContainer: {
     alignItems: "center",
@@ -624,25 +478,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     width: 50,
   },
-  paybtn: {
-    width: "45%",
-    alignSelf: "center",
-    justifyContent: "center",
-  },
-  paybuttonStyle: {
-    alignSelf: "center",
-    padding: 7,
-    paddingHorizontal: 45,
-    backgroundColor: Constants.primary,
-    borderRadius: Constants.tiny,
-  },
-  paytxt: {
-    fontSize: Constants.headingtwo,
-    fontWeight: Constants.Boldtwo,
-  },
-  ticketPriceContainer: {
-    flexDirection: "column",
-  },
+
   fullnameContainer: {
     margin: 10,
     flexDirection: "row",
@@ -650,7 +486,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   pricefield: {
-    width: "87%",
+    width: "94%",
     borderRadius: Constants.tinybox,
     margin: 4,
     marginRight: 0,
@@ -685,8 +521,7 @@ const styles = StyleSheet.create({
     borderRadius: Constants.tinybox,
   },
   phonefield: {
-    width: "72%",
-
+    width: "78%",
     borderRadius: Constants.tinybox,
     margin: 4,
     marginRight: 0,
@@ -700,7 +535,7 @@ const styles = StyleSheet.create({
   error: {
     color: Constants.red,
     fontSize: Constants.textSize,
-    marginLeft: 38,
+    marginLeft: 24,
     marginTop: -6,
     marginBottom: 4,
   },
