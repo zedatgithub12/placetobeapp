@@ -11,12 +11,7 @@ import {
 } from "react-native";
 
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
-import {
-  ActivityIndicator,
-  Caption,
-  Paragraph,
-  Title,
-} from "react-native-paper";
+import { Caption, Paragraph, Title } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Ionicons,
@@ -43,12 +38,12 @@ import {
 import P2bMenu from "../../ui-components/menu";
 import { EventType } from "../../data/eventType";
 import { EventCategory } from "../../data/eventCategory";
+import Loader from "../../ui-components/ActivityIndicator";
 
-const CategorizedEvent = ({ navigation }) => {
+const SearchEvent = ({ navigation }) => {
   const { theme } = useTheme();
-  const [filterData, setFilterData] = React.useState(true);
-  const [searchInput, setSearchInput] = React.useState("All");
-  const [inputs, setInputs] = React.useState({
+  const [searchInput, setSearchInput] = useState("");
+  const [inputs, setInputs] = useState({
     submitBtn: false,
     startDateBorder: Constants.Inverse,
     startDateCheckIcon: false,
@@ -56,9 +51,12 @@ const CategorizedEvent = ({ navigation }) => {
     endDateBorder: Constants.Inverse,
     endDateCheckIcon: false,
   });
-  const [search, setSearch] = React.useState([]);
+
+  const [search, setSearch] = useState([]);
+  const [filteredEvent, setFilteredEvent] = useState([]);
+
   const [searching, setSearching] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [date, setDate] = useState(new Date());
@@ -102,56 +100,6 @@ const CategorizedEvent = ({ navigation }) => {
     });
   };
 
-  // state of search icon
-
-  // search event
-  const searchEvent = () => {
-    setLoading(false);
-    setSearching(true);
-    // after the search button get pressed the state set to true
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    var ApiUrl = Connection.url + Connection.search + searchInput;
-    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-
-    fetch(ApiUrl, {
-      method: "GET",
-      headers: headers,
-      signal: signal,
-    })
-      .then((response) => response.json()) //check response type of the API
-      .then((response) => {
-        // handle success
-
-        if (response.success) {
-          var data = response.data;
-          setSearch(data);
-          setFilterData(true);
-          setLoading(true);
-          setSearching(false);
-        } else {
-          setFilterData(false);
-          setLoading(true);
-          setSearching(false);
-        }
-      })
-      .catch((err) => {
-        setLoading(true);
-        setSearching(false);
-      });
-    return () => {
-      // cancel the subscription
-
-      controller.abort();
-    };
-  };
-
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
@@ -181,17 +129,10 @@ const CategorizedEvent = ({ navigation }) => {
         color={Constants.primary}
         style={styles.submitIcon}
       />
-      <Title style={styles.prompttxt}>Search Events!</Title>
+      <Title style={styles.prompttxt}>No result found</Title>
       <Paragraph>Your search result appear here.</Paragraph>
     </View>
   );
-
-  //run component did mount and component unmounted
-  useEffect(() => {
-    searchEvent();
-
-    return () => {};
-  }, []);
 
   // a code to select event start Date and time
   const onChange = (event, SelectDate) => {
@@ -202,30 +143,12 @@ const CategorizedEvent = ({ navigation }) => {
     let tempDate = new Date(currentDate);
     let startDate =
       tempDate.getFullYear() +
-      "/" +
+      "-" +
       (tempDate.getMonth() + 1) +
-      "/" +
+      "-" +
       tempDate.getDate();
 
     setStartDate(startDate);
-
-    if (startDate) {
-      setInputs({
-        ...inputs,
-        startDateBorder: Constants.Success,
-        startTimeborder: Constants.Success,
-        startDateCheckIcon: true,
-        startTimeCheckIcon: true,
-      });
-    } else {
-      setInputs({
-        ...inputs,
-        startDateBorder: Constants.Faded,
-        startTimeborder: Constants.Faded,
-        startTimeCheckIcon: false,
-        startDateCheckIcon: false,
-      });
-    }
   };
 
   // code written below is to select event end date and end a time
@@ -239,39 +162,24 @@ const CategorizedEvent = ({ navigation }) => {
 
     let endDate =
       expiredDate.getFullYear() +
-      "/" +
+      "-" +
       (expiredDate.getMonth() + 1) +
-      "/" +
+      "-" +
       expiredDate.getDate();
 
     setEndDate(endDate);
-    if (endDate) {
-      setInputs({
-        ...inputs,
-        endDateBorder: Constants.Success,
-        endDateCheckIcon: true,
-        endTimeBoarder: Constants.Success,
-        endTimeCheckIcon: true,
-      });
-    } else {
-      setInputs({
-        ...inputs,
-        endDateBorder: Constants.Faded,
-        endTimeBoarder: Constants.Faded,
-        endDateCheckIcon: false,
-        endTimeCheckIcon: false,
-      });
-    }
   };
 
   const showMode = (currentMode) => {
     setShow(true);
     setMode(currentMode);
   };
+
   const endDateShowMode = (eventEndDate) => {
     setShowit(true);
     setEndMode(eventEndDate);
   };
+
   const handleResetFiltering = () => {
     setStartDate("Start Date");
     setEndDate("End Date");
@@ -280,40 +188,134 @@ const CategorizedEvent = ({ navigation }) => {
     setPriceRange([0, 2000]);
   };
 
-  const handleDoneFiltering = () => {
-    let apiUrl = "https://example.com/api/events?";
-
-    // Append non-empty filter queries to the API URL
-    if (startDate !== "Start Date") {
-      apiUrl += `startDate=${startDate}&`;
-    }
-    if (endDate !== "End Date") {
-      apiUrl += `endDate=${endDate}&`;
-    }
-    if (selectedType !== "All") {
-      apiUrl += `eventType=${selectedType}&`;
-    }
-    if (category !== "All") {
-      apiUrl += `category=${category}&`;
-    }
-    if (selectedType === "Paid") {
-      apiUrl += `priceRange=${priceRange[0]}-${priceRange[1]}`;
-    }
-    // Make the API request
-    fetch(apiUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        // Process the retrieved data
-        console.log("Filtered events:", data);
-      })
-      .catch((error) => {
-        console.error("Error occurred while filtering events:", error);
-      });
-  };
-
   const handlePriceRangeChange = (values) => {
     setPriceRange(values);
   };
+
+  const SubmitQuery = () => {
+    setLoading(true);
+    setSearching(true);
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    var ApiUrl = Connection.url + Connection.search + `?query=${searchInput}`;
+
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    fetch(ApiUrl, {
+      method: "GET",
+      headers: headers,
+      signal: signal,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.success) {
+          setFilteredEvent(response.data);
+          setLoading(false);
+          setSearching(false);
+        } else {
+          setLoading(false);
+          setSearching(false);
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        setSearching(false);
+      });
+    return () => {
+      // cancel the subscription
+
+      controller.abort();
+    };
+  };
+
+  useEffect(() => {
+    const searchEvent = () => {
+      setLoading(true);
+      setSearching(true);
+
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      var ApiUrl = Connection.url + Connection.search + `?query=${searchInput}`;
+
+      var headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+
+      fetch(ApiUrl, {
+        method: "GET",
+        headers: headers,
+        signal: signal,
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          if (response.success) {
+            setSearch(response.data);
+            setFilteredEvent(response.data);
+            setLoading(false);
+            setSearching(false);
+          } else {
+            setLoading(false);
+            setSearching(false);
+          }
+        })
+        .catch((err) => {
+          setLoading(false);
+          setSearching(false);
+        });
+
+      return () => {
+        // cancel the subscription
+
+        controller.abort();
+      };
+    };
+    searchEvent();
+    return () => {};
+  }, []);
+
+  useEffect(() => {
+    const filteredData = search.filter((event) => {
+      let isMatch = true;
+
+      if (searchInput !== "") {
+        const searchRegex = new RegExp(searchInput, "i");
+        isMatch =
+          isMatch &&
+          (searchRegex.test(event.event_name) ||
+            searchRegex.test(event.event_address) ||
+            searchRegex.test(event.event_organizer));
+      }
+
+      if (startDate !== "Start Date") {
+        isMatch = isMatch && event.start_date >= startDate;
+      }
+      if (endDate !== "End Date") {
+        isMatch = isMatch && event.end_date <= endDate;
+      }
+      if (selectedType !== "All") {
+        isMatch = isMatch && event.event_type === selectedType;
+      }
+      if (category !== "All") {
+        isMatch = isMatch && event.category === category;
+      }
+      if (priceRange !== [0, 2000]) {
+        isMatch =
+          isMatch &&
+          event.event_entrance_fee >= priceRange[0] &&
+          event.event_entrance_fee <= priceRange[1];
+      }
+      return isMatch;
+    });
+    setFilteredEvent(filteredData);
+    return () => {};
+  }, [searchInput, startDate, endDate, selectedType, category, priceRange]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.darker }}>
@@ -343,7 +345,7 @@ const CategorizedEvent = ({ navigation }) => {
             style={styles.SearchField}
             value={searchInput}
             onChangeText={(text) => updateSearchKey(text)}
-            onSubmitEditing={() => searchEvent()}
+            onSubmitEditing={() => SubmitQuery()}
           />
           {inputs.submitBtn && (
             <TouchableOpacity
@@ -368,17 +370,13 @@ const CategorizedEvent = ({ navigation }) => {
             //filter button container
             activeOpacity={0.8}
             style={styles.submitSearch}
-            onPress={() => searchEvent()}
+            onPress={() => SubmitQuery()}
           >
-            {searching ? (
-              <ActivityIndicator size="small" style={styles.submitIcon} />
-            ) : (
-              <Ionicons
-                name="search-outline"
-                size={22}
-                style={styles.submitIcon}
-              />
-            )}
+            <Ionicons
+              name="search-outline"
+              size={22}
+              style={styles.submitIcon}
+            />
           </TouchableOpacity>
           <TouchableOpacity
             //filter button container
@@ -392,41 +390,20 @@ const CategorizedEvent = ({ navigation }) => {
       </View>
 
       {loading ? (
-        filterData ? (
-          <FlatList
-            // List of events in extracted from database in the form JSON data
-            data={search}
-            renderItem={renderedItem}
-            keyExtractor={(item) => item.id}
-            ListEmptyComponent={() => listEmptyComponent()}
-            style={styles.filteredEventList}
-            initialNumToRender={2} // Reduce initial render amount
-            maxToRenderPerBatch={1} // Reduce number in each render batch
-            updateCellsBatchingPeriod={100} // Increase time between renders
-            windowSize={7} // Reduce the window size
-          />
-        ) : (
-          <View style={styles.noResultContainer}>
-            <Ionicons
-              name="search-outline"
-              size={38}
-              color={Constants.Secondary}
-              style={styles.submitIcon}
-            />
-            <Title style={styles.prompttxt}>No result found!</Title>
-            <Caption>Your search result appear here</Caption>
-          </View>
-        )
-      ) : (
         <View>
-          <Listing />
-          <Listing />
-          <Listing />
-          <Listing />
-          <Listing />
-          <Listing />
-          <Listing />
+          <Loader size="small" />
         </View>
+      ) : (
+        <FlatList
+          // List of events in extracted from database in the form JSON data
+          data={filteredEvent}
+          renderItem={renderedItem}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={() => listEmptyComponent()}
+          style={styles.filteredEventList}
+          updateCellsBatchingPeriod={100} // Increase time between renders
+          windowSize={7} // Reduce the window size
+        />
       )}
 
       <Modal
@@ -441,7 +418,7 @@ const CategorizedEvent = ({ navigation }) => {
             styles.bottomsheet,
             {
               minHeight:
-                selectedType === "Paid"
+                selectedType === "paid"
                   ? Dimensions.get("screen").height / 1.7
                   : Dimensions.get("screen").height / 2.1,
             },
@@ -526,7 +503,9 @@ const CategorizedEvent = ({ navigation }) => {
                       padding: 10,
                     }}
                   >
-                    <Text>{selectedType}</Text>
+                    <Text style={{ textTransform: "capitalize" }}>
+                      {selectedType}
+                    </Text>
 
                     {open ? (
                       <MaterialCommunityIcons name="chevron-up" size={20} />
@@ -551,6 +530,7 @@ const CategorizedEvent = ({ navigation }) => {
                           fontWeight: Typography.weight.medium,
                           paddingVertical: 7,
                           paddingHorizontal: 8,
+                          textTransform: "capitalize",
                         }}
                       >
                         {type.title}
@@ -577,7 +557,9 @@ const CategorizedEvent = ({ navigation }) => {
                       padding: 10,
                     }}
                   >
-                    <Text>{category}</Text>
+                    <Text style={{ textTransform: "capitalize" }}>
+                      {category}
+                    </Text>
                     {openCategoryMenu ? (
                       <MaterialCommunityIcons name="chevron-up" size={20} />
                     ) : (
@@ -610,12 +592,12 @@ const CategorizedEvent = ({ navigation }) => {
             </View>
           </View>
 
-          {selectedType === "Paid" && (
+          {selectedType === "paid" && (
             <View
               style={{
                 alignSelf: "center",
                 marginBottom: 10,
-                marginTop: 40,
+                marginTop: 20,
               }}
             >
               <Caption>Entrance Fee Range</Caption>
@@ -694,7 +676,7 @@ const CategorizedEvent = ({ navigation }) => {
                 </Text>
               </View>
             </TouchableNativeFeedback>
-            <TouchableNativeFeedback onPress={() => handleDoneFiltering()}>
+            <TouchableNativeFeedback onPress={toggleModal}>
               <View
                 style={{
                   backgroundColor: theme.primary.main,
@@ -885,4 +867,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CategorizedEvent;
+export default SearchEvent;

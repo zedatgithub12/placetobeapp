@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { View } from "react-native";
 //event screens import
 import EventDetails from "../Screens/Event/eventDetails";
-import CategorizedEvent from "../Screens/Event/CategorizedEvent";
+import SearchEvent from "../Screens/Event/SearchEvent";
 import YourEvents from "../Screens/Event/YourEvents";
 import UpdateEvent from "../Screens/Event/UpdateEvent";
 import UpdateSucceed from "../Screens/Event/UpdateSucceed";
@@ -145,7 +145,7 @@ const Routes = ({ navigation }) => {
       />
       <Stack.Screen
         name="Eventcat"
-        component={CategorizedEvent}
+        component={SearchEvent}
         options={{
           headerShown: false,
         }}

@@ -13,6 +13,7 @@ import {
 } from "react-native-vector-icons";
 import Connection from "../../constants/connection";
 import { HelperText } from "react-native-paper";
+import { useTheme } from "@react-navigation/native";
 
 const Events = ({
   title,
@@ -24,29 +25,30 @@ const Events = ({
   category,
   onPress,
 }) => {
+  const { theme } = useTheme();
   const featuredImageUri = Connection.url + Connection.assets;
   return (
     <TouchableNativeFeedback onPress={onPress} style={styles.lists}>
       <View style={[styles.EventContainer, { borderRightColor: category }]}>
-        <View style={styles.ImageContainer}>
+        <View style={styles.Imagecontainer}>
           <Image
             source={{ uri: featuredImageUri + FeaturedImage }}
             style={styles.FeaturedImagestyle}
           />
         </View>
 
-        <View style={styles.ContainerTwo}>
+        <View style={styles.ContentContainer}>
           <Text style={styles.EventName} numberOfLines={1}>
             {title}
           </Text>
 
-          <View style={styles.sectionOne}>
+          <View style={styles.dateContainer}>
             <FontAwesome5
               name="calendar-check"
               size={13}
-              style={styles.eventIcons}
+              style={[styles.eventIcons, { color: theme.primary.main }]}
             />
-            <Text style={styles.EventDate}>
+            <Text style={[styles.textContent, { fontWeight: Constants.Bold }]}>
               {date} ({time})
             </Text>
           </View>
@@ -57,9 +59,9 @@ const Events = ({
               <MaterialCommunityIcons
                 name="map-marker-radius"
                 size={16}
-                style={styles.VenueIcon}
+                style={[styles.icon, { color: theme.primary.main }]}
               />
-              <Text style={styles.EventVenue} numberOfLines={1}>
+              <Text style={styles.textContent} numberOfLines={1}>
                 {venue}
               </Text>
             </View>
@@ -68,9 +70,9 @@ const Events = ({
               <MaterialCommunityIcons
                 name="ticket"
                 size={14}
-                style={styles.ticketIcon}
+                style={[styles.icon, { color: theme.primary.main }]}
               />
-              <Text style={styles.EventPrice} numberOfLines={1}>
+              <Text style={styles.textContent} numberOfLines={1}>
                 {Price}
               </Text>
             </View>
@@ -85,30 +87,40 @@ const styles = StyleSheet.create({
   EventContainer: {
     flexDirection: "row",
     width: "97%",
-    marginTop: 4,
+    marginTop: 5,
     alignSelf: "center",
     backgroundColor: Constants.background,
     borderRightWidth: 3,
     marginHorizontal: 12,
+    borderBottomLeftRadius: Constants.tiny,
+    borderTopLeftRadius: Constants.tiny,
   },
-  ImageContainer: {},
-  FeaturedImagestyle: {
+  Imagecontainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     width: 106,
     height: 106,
-    borderBottomLeftRadius: Constants.medium,
-    borderTopLeftRadius: Constants.medium,
   },
-  ContainerTwo: {
+  FeaturedImagestyle: {
+    width: 100,
+    height: 100,
+    borderRadius: Constants.tiny,
+    objectFit: "contain",
+    margin: "auto",
+  },
+  ContentContainer: {
     width: "68%",
     padding: 4,
     paddingTop: 0,
     marginLeft: 5,
   },
-  sectionOne: {
+  dateContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
   sectionTwo: {
+    alignItems: "center",
     alignItems: "flex-start",
     justifyContent: "space-between",
   },
@@ -118,20 +130,20 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     color: Constants.Inverse,
     textTransform: "capitalize",
+    marginVertical: 4,
   },
   eventIcons: {
-    padding: 3,
-    marginTop: 5,
-    color: Constants.primary,
+    paddingLeft: 3,
   },
   //flatlist event date styles
   EventDate: {
-    marginLeft: 2,
+    marginLeft: 8,
     marginTop: 3,
     color: Constants.Inverse,
     fontFamily: Constants.fontFam,
-    fontSize: Constants.headingthree,
+    fontSize: Constants.textSize,
     fontWeight: Constants.Boldtwo,
+    backgroundColor: "#343",
   },
   // venue container style
   venueContainer: {
@@ -140,34 +152,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   // event venue text style
-  EventVenue: {
-    marginLeft: 4,
+  textContent: {
+    marginLeft: 6,
     marginVertical: 3,
     color: Constants.Inverse,
     fontFamily: Constants.fontFam,
-    fontSize: Constants.headingthree,
-    textTransform: "capitalize",
+    fontSize: Constants.textSize,
+    fontWeight: Constants.Boldtwo,
+    alignItems: "center",
   },
   // map marker for event venue name
-  VenueIcon: {
+  icon: {
     color: Constants.primary,
   },
   //event ticket container box style
   ticketContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: Constants.transparentPrimary,
-    marginTop: 6,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: Constants.tinybox,
     minWidth: 60,
   },
   //event price icon styles
   ticketIcon: {
-    marginRight: 3,
-    color: Constants.primary,
+    color: Constants.Inverse,
   },
   // event price text style
   EventPrice: {

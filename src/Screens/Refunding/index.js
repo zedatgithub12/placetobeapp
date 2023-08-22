@@ -94,29 +94,40 @@ const RefundingRequest = () => {
     return () => {};
   }, [connection]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    var userId = await AsyncStorage.getItem("userId");
     setSubmitting(true);
     const controller = new AbortController();
     const signal = controller.signal;
 
-    var APIUrl = Connection.url + Connection.requestRrefunding;
+    var APIUrl = Connection.url + Connection.requestRefunding;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
 
+    const data = {
+      ticket_id: sold.ticketid,
+      user_id: userId,
+      event_id: sold.event_id,
+      refund_reason: reason,
+      quantity: sold.quantity,
+      price: sold.price,
+    };
+
     fetch(APIUrl, {
-      method: "GET",
+      method: "POST",
       headers: headers,
+      body: JSON.stringify(data),
       signal: signal,
     })
       .then((reponse) => reponse.json())
       .then((response) => {
         if (response.success) {
-          showToast("Successfully submitted!");
+          showToast(response.message);
           setSubmitting(false);
         } else {
-          showToast("Cannot submit, Retry later");
+          showToast(response.message);
           setSubmitting(false);
         }
       })

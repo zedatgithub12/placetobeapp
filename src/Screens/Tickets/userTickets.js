@@ -225,7 +225,7 @@ const UserTickets = ({ navigation }) => {
                 alignItems: "center",
               }}
             >
-              <Loader size="large" />
+              <Loader size="small" />
             </View>
           ) : (
             <FlatList
