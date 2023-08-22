@@ -51,6 +51,7 @@ function Home({ navigation, ...props }) {
 
   const [loading, setLoading] = useState(true);
   const [connection, setConnection] = useState(true);
+  const [Api, setApi] = useState(Connection.url + Connection.FeaturedEvent);
   const [retry, setRetry] = useState(false);
   const [active, setActive] = useState("All");
   const [status, setStatus] = useState("Featured");
@@ -58,11 +59,6 @@ function Home({ navigation, ...props }) {
   const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
   const [filteredEvent, setFilteredEvent] = useState([]);
-  // state of event in the homepage
-  const [featured, setFeatured] = useState([]);
-  const [happening, setHappening] = useState([]);
-  const [thisWeek, setThisWeek] = useState([]);
-  const [upcoming, setUpcoming] = useState([]);
 
   const [showBannerAds, setShowBannerAds] = useState(false);
   const [bannerAds, setBannerAds] = useState([]);
@@ -108,100 +104,16 @@ function Home({ navigation, ...props }) {
       });
   };
 
-  // featch Featured events
-  //featured events are the event which have high priority or value of number 1 in databse table
-  const FeatchEvents = () => {
-    setLoading(true);
-
-    var ApiUrl = Connection.url + Connection.events;
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-
-    fetch(ApiUrl, {
-      method: "GET",
-      headers: headers,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.success) {
-          setEvents(response.data);
-          setEventShimmer(false);
-          setLoading(false);
-        } else {
-          setEventShimmer(false);
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        setEventShimmer(false);
-        setLoading(false);
-      });
-  };
-
-  const handleCategoryClick = (categoryname) => {
-    if (active === "All") {
-      setFilteredEvent(events);
-      setActive(categoryname);
-    } else {
-      const filteredData = events.filter(
-        (event) => event.category === categoryname
-      );
-      setFilteredEvent(filteredData);
-      setActive(categoryname);
-    }
-  };
-
-  const handleStatusClick = (type, category) => {
-    if (type === "thisweek") {
-      //filter events in this week
-      var Api = Connection.url + Connection.WeekEvents;
-      fetchEvent(Api);
-    } else if (type === "upcoming") {
-      //filter upcoming events
-      var Api = Connection.url + Connection.UpcomingEvents;
-      fetchEvent(Api);
-    } else if (type === "happening") {
-      //filter events happening today
-      var Api = Connection.url + Connection.TodayEvents;
-      fetchEvent(Api);
-    } else if (type === "featured") {
-      var Api = Connection.url + Connection.FeaturedEvent;
-      fetchEvent(Api);
-    }
-    setStatus(category);
-  };
-
-  const statusFilter = (category) => {
-    if (category === "Happening") {
-      //filter events happening today
-      var Api = Connection.url + Connection.TodayEvents;
-      fetchEvent(Api);
-    } else if (category === "This Week") {
-      //filter events in this week
-      var Api = Connection.url + Connection.WeekEvents;
-      fetchEvent(Api);
-    } else if (category === "Upcoming") {
-      //filter upcoming events
-      var Api = Connection.url + Connection.UpcomingEvents;
-      fetchEvent(Api);
-    } else if (category === "Featured") {
-      var Api = Connection.url + Connection.FeaturedEvent;
-      fetchEvent(Api);
-    }
-  };
-
-  const fetchEvent = (Api) => {
+  const fetchEvent = () => {
     setLoading(true);
 
     fetch(Api, {
       method: "GET",
     })
-      .then((response) => response.json()) //check response type of the API
+      .then((response) => response.json())
       .then((response) => {
         if (response.success) {
-          setFilteredEvent(response.data);
+          setEvents(response.data);
           setLoading(false);
         } else {
           setLoading(false);
@@ -211,95 +123,6 @@ function Home({ navigation, ...props }) {
         setLoading(false);
       });
   };
-
-  /****************************************
-   * Render events those the category is "All"
-   */
-  const renderAll = () => {
-    const featured_event = events.filter((event) => event.priority === 1);
-    setFeatured(featured_event);
-
-    const happening_event = events.filter(
-      (event) => event.start_date <= today && event.end_date >= today
-    );
-    setHappening(happening_event);
-
-    const upcoming_event = events.filter(
-      (event) => event.start_date <= today && event.end_date >= today
-    );
-    setUpcoming(upcoming_event);
-  };
-
-  const weekEvents = () => {
-    const this_weekevents = events.filter((event) => {
-      const currentDate = new Date();
-      // Get the start and end dates of the week
-      const startOfWeek = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate() - currentDate.getDay()
-      );
-      const endOfWeek = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate() + (6 - currentDate.getDay())
-      );
-      // Convert the event's start and end dates to Date objects
-      const eventStartDate = new Date(formattedDate(event.start_date));
-      const eventEndDate = new Date(formattedDate(event.end_date));
-
-      // Check if the event's start date is within the current week
-      const isStartDateValid =
-        eventStartDate >= startOfWeek && eventStartDate <= endOfWeek;
-
-      // Check if the event's end date is within the current week
-      const isEndDateValid =
-        eventEndDate >= startOfWeek && eventEndDate <= endOfWeek;
-
-      // Return true only if all conditions are met
-      return isStartDateValid && isEndDateValid;
-    });
-
-    setThisWeek(this_weekevents);
-  };
-
-  const upcomingEvents = () => {
-    const upcomings = events.filter((event) => {
-      const currentDate = new Date();
-
-      const endOfWeek = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate() + (6 - currentDate.getDay())
-      );
-      // Convert the event's start and end dates to Date objects
-      const eventStartDate = new Date(formattedDate(event.start_date));
-
-      // Check if the event's start date is after the end of the current week
-      const isStartDateValid = eventStartDate > endOfWeek;
-
-      // Return true only if all conditions are met
-      return isStartDateValid;
-    });
-
-    setUpcoming(upcomings);
-  };
-
-  // render item in flatlist format
-  const renderItem = ({ item }) => (
-    <Events
-      Event_Id={item.id}
-      org_id={item.userId}
-      FeaturedImage={item.event_image}
-      title={item.event_name}
-      date={DateFormater(item.start_date)}
-      time={TimeFormater(item.start_time)}
-      venue={item.event_address}
-      category={CategoryColor(item.category)}
-      Price={EntranceFee(item.event_entrance_fee)}
-      onPress={() => navigation.navigate("EventDetail", { id: item.id })}
-    />
-  );
 
   // //image to be used in notification
   // const featuredImageUri =
@@ -350,17 +173,58 @@ function Home({ navigation, ...props }) {
   };
   //handle component mounting event
   useEffect(() => {
+    fetchEvent();
+    return () => {};
+  }, [Api]);
+  //handle component mounting event
+  useEffect(() => {
     userInfoFunction();
     userProfile();
-    FeatchEvents();
-    weekEvents();
-    upcomingEvents();
     handleBannerAds("banner");
     handleNativeCardAds("nativeCard");
     return () => {};
   }, [logged]);
 
   const logged = userStatus.logged;
+
+  const handleCategoryClick = (categoryname) => {
+    if (categoryname === active) {
+      setActive("All");
+    } else {
+      setActive(categoryname);
+    }
+  };
+
+  useEffect(() => {
+    const filteredData = events.filter((event) => {
+      let isMatch = true;
+      if (active !== "All") {
+        isMatch = isMatch && event.category === active;
+      }
+      return isMatch;
+    });
+    setFilteredEvent(filteredData);
+
+    return () => {};
+  }, [active, events]);
+
+  const handleStatusClick = (type, category) => {
+    if (category !== status) {
+      if (type === "thisweek") {
+        //filter events in this week
+        setApi(Connection.url + Connection.WeekEvents);
+      } else if (type === "upcoming") {
+        //filter upcoming events
+        setApi(Connection.url + Connection.UpcomingEvents);
+      } else if (type === "happening") {
+        //filter events happening today
+        setApi(Connection.url + Connection.TodayEvents);
+      } else if (type === "featured") {
+        setApi(Connection.url + Connection.FeaturedEvent);
+      }
+      setStatus(category);
+    }
+  };
 
   return (
     <SafeAreaView
@@ -426,107 +290,108 @@ function Home({ navigation, ...props }) {
 
         <View style={styles.homebody}>
           {connection ? (
-            <View style={styles.homescrollview}>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {showBannerAds && bannerAds && <Slider ad={bannerAds} />}
+            <ScrollView
+              style={styles.homescrollview}
+              showsVerticalScrollIndicator={false}
+              stickyHeaderIndices={[3]}
+            >
+              {showBannerAds && bannerAds && <Slider ad={bannerAds} />}
 
-                <View>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {Category.map((item, index) => (
-                      <Categories
-                        key={index}
-                        icon={item.icon}
-                        category={item.name}
-                        border={item.color}
-                        background={
-                          active === item.name
-                            ? item.color
-                            : theme.background.main
-                        }
-                        color={
-                          active === item.name
-                            ? Constants.background
-                            : Constants.Inverse
-                        }
-                        onPress={() => handleCategoryClick(item.name)}
-                      />
-                    ))}
-                  </ScrollView>
-                </View>
-                <Divider />
-                <View>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {EventStatus.map((item, index) => (
-                      <Statuses
-                        key={index}
-                        category={item.name}
-                        border={item.color}
-                        background={
-                          status === item.name
-                            ? theme.primary.main
-                            : theme.background.main
-                        }
-                        color={
-                          status === item.name
-                            ? Constants.Inverse
-                            : Constants.Inverse
-                        }
-                        check={status === item.name ? true : false}
-                        onPress={() => handleStatusClick(item.type, item.name)}
-                      />
-                    ))}
-                  </ScrollView>
-                </View>
-
-                {loading ? (
-                  <View
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Loader size="large" />
-                  </View>
-                ) : filteredEvent.length == 0 ? (
-                  <View>
-                    <Text>No Event</Text>
-                  </View>
-                ) : (
-                  filteredEvent.map((item, index) => (
-                    <Events
+              <View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {Category.map((item, index) => (
+                    <Categories
                       key={index}
-                      Event_Id={item.id}
-                      org_id={item.userId}
-                      FeaturedImage={item.event_image}
-                      title={item.event_name}
-                      date={DateFormater(item.start_date)}
-                      time={TimeFormater(item.start_time)}
-                      venue={item.event_address}
-                      category={CategoryColor(item.category)}
-                      Price={EntranceFee(item.event_entrance_fee)}
-                      onPress={() =>
-                        navigation.navigate("EventDetail", { id: item.id })
+                      icon={item.icon}
+                      category={item.name}
+                      border={item.color}
+                      background={
+                        active === item.name
+                          ? item.color
+                          : theme.background.main
                       }
+                      color={
+                        active === item.name
+                          ? Constants.background
+                          : Constants.Inverse
+                      }
+                      onPress={() => handleCategoryClick(item.name)}
                     />
-                  ))
-                )}
+                  ))}
+                </ScrollView>
+              </View>
+              <Divider />
+              <View style={{ backgroundColor: theme.background.darker }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {EventStatus.map((item, index) => (
+                    <Statuses
+                      key={index}
+                      category={item.name}
+                      border={item.color}
+                      background={
+                        status === item.name
+                          ? theme.primary.main
+                          : theme.background.main
+                      }
+                      color={
+                        status === item.name
+                          ? Constants.Inverse
+                          : Constants.Inverse
+                      }
+                      check={status === item.name ? true : false}
+                      onPress={() => handleStatusClick(item.type, item.name)}
+                    />
+                  ))}
+                </ScrollView>
+              </View>
 
-                {showCardAd && AdsInfo[0] && (
-                  <View
-                    style={{
-                      paddingTop: 20,
-                      height: Dimensions.get("screen").height / 1.6,
-                    }}
-                  >
-                    <NativeAdsOne
-                      showAds={true}
-                      ad={AdsInfo}
-                      hideCard={() => setShowCardAd(false)}
-                    />
-                  </View>
-                )}
-              </ScrollView>
-            </View>
+              {loading ? (
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Loader size="large" />
+                </View>
+              ) : filteredEvent.length == 0 ? (
+                <View>
+                  <Text>No Event</Text>
+                </View>
+              ) : (
+                filteredEvent.map((item, index) => (
+                  <Events
+                    key={index}
+                    Event_Id={item.id}
+                    org_id={item.userId}
+                    FeaturedImage={item.event_image}
+                    title={item.event_name}
+                    date={DateFormater(item.start_date)}
+                    time={TimeFormater(item.start_time)}
+                    venue={item.event_address}
+                    category={CategoryColor(item.category)}
+                    Price={EntranceFee(item.event_entrance_fee)}
+                    onPress={() =>
+                      navigation.navigate("EventDetail", { id: item.id })
+                    }
+                  />
+                ))
+              )}
+
+              {showCardAd && AdsInfo[0] && (
+                <View
+                  style={{
+                    paddingTop: 20,
+                  }}
+                >
+                  <NativeAdsOne
+                    showAds={true}
+                    ad={AdsInfo}
+                    hideCard={() => setShowCardAd(false)}
+                  />
+                </View>
+              )}
+            </ScrollView>
           ) : (
             <View style={{ height: Dimensions.get("screen").height / 1.2 }}>
               <NoConnection onPress={() => setRetry(!retry)} />

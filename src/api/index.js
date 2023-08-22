@@ -21,7 +21,7 @@ const Connection = {
   WeekEvents: "week-events",
   UpcomingEvents: "upcoming-events",
   categoryFilter: "search-category/",
-  search: "search-event/",
+  search: "search-event",
   YourEvents: "your-events/",
 
   follow: "follow",

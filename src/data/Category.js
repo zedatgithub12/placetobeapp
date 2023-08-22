@@ -3,7 +3,7 @@ const Category = [
     id: "13",
     type: "all",
     name: "All",
-    color: "#222222",
+    color: "#292b2c",
     icon: "dots-grid",
   },
 
@@ -12,7 +12,7 @@ const Category = [
     type: "category",
     name: "Entertainment",
     color: "#007bc2",
-    icon: "emoticon-happy-outline",
+    icon: "human-female-dance",
   },
   {
     id: "11",
@@ -21,7 +21,13 @@ const Category = [
     color: "#0c790c",
     icon: "hiking",
   },
-
+  {
+    id: "8",
+    type: "category",
+    name: "Professional",
+    color: "#2c2e27",
+    icon: "medal-outline",
+  },
   {
     id: "3",
     type: "category",
@@ -50,14 +56,6 @@ const Category = [
     name: "Trade Fairs & Expo",
     color: "#f57a00",
     icon: "hexagram-outline",
-  },
-
-  {
-    id: "8",
-    type: "category",
-    name: "Professional",
-    color: "#2c2e27",
-    icon: "medal-outline",
   },
 
   {
