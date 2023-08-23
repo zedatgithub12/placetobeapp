@@ -10,7 +10,7 @@ const Connection = {
   userInfo: "user-info/",
   MetaData: "meta-info/",
   updateUserInfo: "update/",
-  ChangePassword: "changepassword",
+  ChangePassword: "changepassword/",
 
   //event related api's
   events: "events",

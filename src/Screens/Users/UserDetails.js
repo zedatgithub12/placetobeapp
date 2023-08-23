@@ -1,5 +1,5 @@
 //import liraries
-import React, { Component, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,20 +13,23 @@ import {
   ActivityIndicator,
   Dimensions,
 } from "react-native";
-import { Caption, HelperText, Title } from "react-native-paper";
+import { Caption, Divider, HelperText } from "react-native-paper";
 import Constants from "../../constants/Constants";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Fontisto, AntDesign, Ionicons } from "react-native-vector-icons";
+import { AntDesign, Ionicons } from "react-native-vector-icons";
 import { RadioButton } from "react-native-paper";
-import Category from "../../dummies/Category";
+import Category from "../../data/Category";
 import Connection from "../../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Animatable from "react-native-animatable";
 import { showToast } from "../../Utils/Toast";
+import { useTheme } from "@react-navigation/native";
 
-// create a component
+// create account setting component
 const UserDetails = ({ route, navigation }) => {
   const { detailInfo } = route.params;
+
+  const { theme } = useTheme();
+
   const [MetaInfo, setMetaInfo] = React.useState({
     firstName: detailInfo.first_name ? detailInfo.first_name : "",
     middleName: detailInfo.middle_name ? detailInfo.middle_name : "",
@@ -171,7 +174,6 @@ const UserDetails = ({ route, navigation }) => {
       lastName: MetaInfo.lastName,
       birthDate: startDate,
       gender: checked,
-      username: MetaInfo.userName,
       category: category,
       Phone: MetaInfo.Phone,
     };
@@ -258,65 +260,90 @@ const UserDetails = ({ route, navigation }) => {
 
   const ChangePassword = () => {
     setUpdatePassword(true);
-    var userId = detailInfo.userId;
-    var ApiUrl = Connection.url + Connection.ChangePassword;
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    var data = {
-      userId: userId,
-      oldPassword: MetaInfo.oldPassword,
-      newPassword: MetaInfo.confirmPassword,
-    };
+
     if (MetaInfo.oldPassword.length === 0) {
       setError({
         ...error,
         errorMessage: "Please enter your old password",
+        messageColor: Constants.Danger,
       });
       setUpdatePassword(false);
     } else if (MetaInfo.password.length === 0) {
       setError({
         ...error,
         errorMessage: "Please enter your new password",
+        messageColor: Constants.Danger,
       });
       setUpdatePassword(false);
     } else if (MetaInfo.confirmPassword.length === 0) {
       setError({
         ...error,
         errorMessage: "Please confirm the password",
+        messageColor: Constants.Danger,
+      });
+      setUpdatePassword(false);
+    } else if (
+      MetaInfo.confirmPassword.length === MetaInfo.oldPassword.length
+    ) {
+      setError({
+        ...error,
+        errorMessage: "The old and confirmed password are same",
+        messageColor: Constants.Danger,
       });
       setUpdatePassword(false);
     } else {
+      var id = detailInfo.id;
+      var ApiUrl = Connection.url + Connection.ChangePassword + id;
+      var headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+      var data = {
+        oldPassword: MetaInfo.oldPassword,
+        newPassword: MetaInfo.confirmPassword,
+      };
+
       fetch(ApiUrl, {
-        method: "POST",
+        method: "PUT",
         headers: headers,
         body: JSON.stringify(data),
       })
         .then((response) => response.json())
         .then((response) => {
-          var backendResponse = response[0].message;
-          if (backendResponse === "Password Updated") {
+          if (response.success) {
             setError({
               ...error,
-              errorMessage: "Password Updated Successfully!",
-              messageColor: Constants.Success,
+              errorMessage: response.message,
+              messageColor: theme.success.main,
             });
             setUpdatePassword(false);
           } else {
             setError({
               ...error,
-              errorMessage: backendResponse,
+              errorMessage: response.message,
               messageColor: Constants.Danger,
             });
             setUpdatePassword(false);
           }
+        })
+        .catch((error) => {
+          setError({
+            ...error,
+            errorMessage: "There is error updating password",
+            messageColor: Constants.Danger,
+          });
+          setUpdatePassword(false);
         });
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.scrollContainer,
+        { backgroundColor: theme.background.darker },
+      ]}
+    >
       <View style={styles.subContainerOne}>
         <Text style={styles.label}>First name</Text>
         <TextInput
@@ -346,14 +373,10 @@ const UserDetails = ({ route, navigation }) => {
         />
       </View>
 
-      {
-        //third mini container which contains user birthdate
-      }
-
       <View style={styles.subContainerDate}>
         <Text style={styles.label}>Your Birth Date</Text>
 
-        <View style={styles.birthDate}>
+        <View style={styles.inpuFields}>
           <TouchableOpacity
             onPress={() => showMode("date")}
             style={styles.selectDateBtn}
@@ -375,59 +398,42 @@ const UserDetails = ({ route, navigation }) => {
       )}
 
       <View style={styles.subContainerFour}>
+        <Text style={styles.label}>Gender</Text>
+
         <View style={styles.fourOne}>
-          <Text style={styles.genderTitle}>Gender</Text>
-        </View>
+          <View style={styles.fourTwo}>
+            <Text style={styles.genderLabel}> Male</Text>
 
-        <View style={styles.fourTwo}>
-          <Text style={styles.genderLabel}> Male</Text>
+            <RadioButton
+              value="Male"
+              status={checked === "Male" ? "checked" : "unchecked"}
+              onPress={() => setChecked("Male")}
+              color={theme.primary[600]}
+            />
+          </View>
 
-          <RadioButton
-            value="Male"
-            status={checked === "Male" ? "checked" : "unchecked"}
-            onPress={() => setChecked("Male")}
-            color={Constants.Inverse}
-          />
-        </View>
-
-        <View style={styles.fourThree}>
-          <Text style={styles.genderLabel}> Female</Text>
-          <RadioButton
-            value="Female"
-            status={checked === "Female" ? "checked" : "unchecked"}
-            onPress={() => setChecked("Female")}
-            color={Constants.Inverse}
-          />
+          <View style={styles.fourThree}>
+            <Text style={styles.genderLabel}> Female</Text>
+            <RadioButton
+              value="Female"
+              status={checked === "Female" ? "checked" : "unchecked"}
+              onPress={() => setChecked("Female")}
+              color={theme.primary[600]}
+            />
+          </View>
         </View>
       </View>
 
-      {
-        //update username
-      }
-      <View style={styles.usernameUpdate}>
-        <Text style={styles.label}>Organizer name</Text>
-        <TextInput
-          placeholder="Ex: Afromina Events"
-          style={styles.username}
-          value={MetaInfo.userName}
-          onChangeText={(val) => updateUsername(val)}
-        />
-      </View>
-      {
-        //user phone number
-      }
       <View style={styles.userPhoneNumber}>
         <Text style={styles.label}>Phone number</Text>
         <TextInput
           placeholder="09********"
-          style={styles.phone}
+          style={styles.inpuFields}
           value={MetaInfo.Phone}
           onChangeText={(val) => updatePhone(val)}
         />
       </View>
-      {
-        //select category section
-      }
+
       <View style={styles.category}>
         <Modal
           //modal with a list of category
@@ -446,8 +452,8 @@ const UserDetails = ({ route, navigation }) => {
               onPress={() => setModalVisible(!modalVisible)}
             >
               <AntDesign
-                name="closecircle"
-                size={24}
+                name="close"
+                size={20}
                 color={Constants.Inverse}
                 style={styles.closeBtn}
               />
@@ -466,7 +472,7 @@ const UserDetails = ({ route, navigation }) => {
         <Text
           style={[
             styles.label,
-            { marginLeft: 10, marginTop: 10, marginBottom: -8, padding: 0 },
+            { marginLeft: 10, marginTop: 16, marginBottom: -8, padding: 0 },
           ]}
         >
           Select category
@@ -479,29 +485,28 @@ const UserDetails = ({ route, navigation }) => {
           <Text style={[styles.selectedCategory, { color: catback }]}>
             {category}
           </Text>
-          <Ionicons
-            name="list-outline"
-            size={22}
-            color={Constants.background}
-          />
+          <Ionicons name="list-outline" size={22} color={theme.dark.main} />
         </Pressable>
       </View>
 
       <Pressable onPress={() => SaveUserInfo()} style={styles.saveBtn}>
         {updating ? (
-          <ActivityIndicator size="small" color={Constants.background} />
+          <ActivityIndicator size="small" color={Constants.Inverse} />
         ) : (
           <Text style={styles.saveText}>Save</Text>
         )}
       </Pressable>
+
+      <Divider />
+
       {!googleId && (
         <View style={styles.updatePasswords}>
           <Text style={styles.changePasswordTitle}>Change Password</Text>
-          <HelperText
+          <Text
             style={[styles.errorMessageStyle, { color: error.messageColor }]}
           >
             {error.errorMessage}
-          </HelperText>
+          </Text>
 
           <TextInput
             placeholder="Old Password"
@@ -526,7 +531,7 @@ const UserDetails = ({ route, navigation }) => {
             style={styles.updatepassword}
           >
             {updatePassword ? (
-              <ActivityIndicator size="small" color={Constants.background} />
+              <ActivityIndicator size="small" color={Constants.Inverse} />
             ) : (
               <Text style={styles.saveText}>Change Password</Text>
             )}
@@ -539,12 +544,8 @@ const UserDetails = ({ route, navigation }) => {
 
 // define your styles
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Constants.background,
-  },
   scrollContainer: {
     alignItems: "center",
-    backgroundColor: Constants.background,
     minHeight: "100%",
   },
   accountSettingHead: {
@@ -555,27 +556,24 @@ const styles = StyleSheet.create({
   subContainerOne: {
     width: Dimensions.get("screen").width / 1.09,
     marginTop: 10,
-    backgroundColor: Constants.Faded,
     borderRadius: Constants.tinybox,
-    backgroundColor: Constants.background,
   },
   label: {
     paddingVertical: 6,
     marginTop: 3,
     color: Constants.Inverse,
+    fontSize: Constants.textSize,
   },
   inpuFields: {
     width: Dimensions.get("screen").width / 1.09,
     borderRadius: Constants.tinybox,
-    padding: 8,
-    paddingHorizontal: 20,
+    padding: 4,
     fontSize: Constants.headingtwo,
-    borderWidth: 0.3,
-    borderColor: Constants.Inverse,
+    borderBottomWidth: 0.4,
+    borderBottomColor: Constants.icon,
   },
   subContainerTwo: {
     marginTop: 10,
-    backgroundColor: Constants.background,
   },
   subContainerDate: {
     flexDirection: "column",
@@ -602,19 +600,9 @@ const styles = StyleSheet.create({
   //styles for gender selector radio button
   subContainerFour: {
     width: Dimensions.get("screen").width / 1.09,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignSelf: "center",
-    alignItems: "center",
+    flexDirection: "column",
     borderRadius: 8,
-    padding: 6,
-    backgroundColor: Constants.transparentPrimary,
-  },
-  genderTitle: {
-    fontFamily: Constants.fontFam,
-    fontSize: Constants.headingtwo,
-    fontWeight: Constants.Bold,
-    color: Constants.Inverse,
+    paddingVertical: 10,
   },
   genderLabel: {
     fontFamily: Constants.fontFam,
@@ -623,7 +611,9 @@ const styles = StyleSheet.create({
     color: Constants.Inverse,
   },
   fourOne: {
-    // first view container of gender View container
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   fourTwo: {
     flexDirection: "row",
@@ -706,43 +696,19 @@ const styles = StyleSheet.create({
 
     // paddingHorizontal: 5,
   },
-  phone: {
-    borderRadius: Constants.tinybox,
-    padding: 8,
-    paddingHorizontal: 20,
-    fontSize: Constants.headingtwo,
-    borderWidth: 0.3,
-    borderColor: Constants.Inverse,
-  },
 
-  // username related styling
-  usernameUpdate: {
-    width: "91.5%",
-    borderRadius: Constants.mediumbox,
-    //paddingHorizontal: 5,
-    marginTop: 10,
-  },
-  username: {
-    borderRadius: Constants.tinybox,
-    padding: 8,
-    paddingHorizontal: 20,
-    fontSize: Constants.headingtwo,
-    borderWidth: 0.4,
-    borderColor: Constants.purple,
-  },
   saveBtn: {
-    width: Dimensions.get("screen").width / 1.09,
+    width: Dimensions.get("screen").width / 1.1,
     flexDirection: "row",
     justifyContent: "center",
-    alignSelf: "center",
     marginVertical: 20,
     padding: 10,
     color: Constants.Inverse,
-    backgroundColor: Constants.primary,
     borderRadius: Constants.tiny,
+    backgroundColor: Constants.primary,
   },
   saveText: {
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
     color: Constants.Inverse,
@@ -753,7 +719,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignSelf: "center",
-    marginVertical: 20,
+    marginVertical: 30,
     padding: 10,
     color: Constants.Inverse,
     backgroundColor: Constants.primary,
@@ -762,43 +728,21 @@ const styles = StyleSheet.create({
 
   // change password section
   updatePasswords: {
-    width: "94%",
-    backgroundColor: Constants.Faded,
     borderRadius: Constants.mediumbox,
     padding: 8,
     paddingHorizontal: 15,
     marginTop: 5,
   },
   pass: {
-    backgroundColor: Constants.background,
     borderRadius: Constants.tinybox,
     padding: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     fontSize: Constants.headingthree,
     marginTop: 8,
-    borderWidth: 0.4,
-    borderColor: Constants.purple,
+    borderBottomWidth: 0.4,
+    borderColor: Constants.icon,
   },
-  updatePrompt: {
-    position: "absolute",
-    top: 10,
-    zIndex: 1000,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
-    paddingHorizontal: 15,
-    borderRadius: Constants.tiny,
-    backgroundColor: Constants.Success,
-  },
-  promptText: {
-    fontWeight: Constants.Boldtwo,
-    fontSize: Constants.headingone,
-    fontFamily: Constants.fontFam,
-    color: Constants.background,
-    marginRight: 40,
-  },
-  //change password title
+
   changePasswordTitle: {
     fontWeight: Constants.Boldtwo,
     fontFamily: Constants.fontFam,
@@ -810,6 +754,9 @@ const styles = StyleSheet.create({
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingthree,
     color: Constants.Danger,
+    marginTop: 4,
+    marginBottom: 10,
+    paddingLeft: 3,
   },
 });
 

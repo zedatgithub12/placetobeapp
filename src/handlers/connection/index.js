@@ -46,15 +46,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   connImage: {
-    height: "50%",
-    width: "90%",
+    height: 400,
+    width: 300,
   },
   eventsBtn: {
     width: "60%",
     padding: 8,
     paddingHorizontal: 35,
     borderRadius: Constants.mediumbox,
-    backgroundColor: Constants.primary,
     margin: 20,
     justifyContent: "center",
     alignItems: "center",
@@ -62,7 +61,7 @@ const styles = StyleSheet.create({
   eventstxt: {
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
-    color: Constants.Inverse,
+    color: Constants.primary,
   },
   icon: {
     width: 80,

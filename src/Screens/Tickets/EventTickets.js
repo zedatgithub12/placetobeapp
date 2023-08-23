@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator,
   ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,10 +20,15 @@ import {
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import Constants from "../../constants/Constants";
 import Connection from "../../api";
-import { DateFormater } from "../../Utils/functions";
+import { DateFormater, TicketColor, TicketName } from "../../Utils/functions";
+import Loader from "../../ui-components/ActivityIndicator";
+import { useTheme } from "@react-navigation/native";
 
 const EventTickets = ({ navigation, route }) => {
   const { item } = route.params;
+
+  const { theme } = useTheme();
+
   var featuredImageUri = Connection.url + Connection.assets;
 
   const dispatch = useDispatch();
@@ -35,111 +39,19 @@ const EventTickets = ({ navigation, route }) => {
   const [price, setPrice] = useState();
   const [ticket, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState();
-  const [exist, setExist] = useState(true);
   const [active, setActiveIndex] = useState();
   const [disable, setDisable] = useState(false);
   const [event, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const width = Dimensions.get("window").width;
-  const height = Dimensions.get("window").height;
+  const width = Dimensions.get("screen").width;
+  const height = Dimensions.get("screen").height;
 
   const handlechange = (index) => {
     const newItem = tickets[index];
     const newUpdate = { ...newItem, open: false };
     // console.log(newUpdate);
     dispatch(addTicket(newUpdate));
-  };
-
-  const TicketName = (iconname) => {
-    var name;
-    switch (iconname) {
-      case "Early Bird":
-        name = "bird";
-        break;
-
-      case "Regular":
-        name = "ticket";
-        break;
-
-      case "VIP":
-        name = "star-outline";
-        break;
-
-      case "VVIP":
-        name = "star-shooting-outline";
-        break;
-
-      case "Student":
-        name = "book-education-outline";
-        break;
-
-      case "Kids":
-        name = "baby-face-outline";
-        break;
-
-      case "Adult":
-        name = "face-man";
-        break;
-
-      case "Member":
-        name = "account-group-outline";
-        break;
-
-      default:
-        name = "ticket";
-    }
-    return name;
-  };
-
-  //ticket icon color
-  const TicketColor = (iconname) => {
-    var Color;
-
-    switch (iconname) {
-      case "Early Bird":
-        Color = "#ff24da";
-        break;
-
-      case "Regular":
-        Color = "#00a2ff";
-
-        break;
-
-      case "VIP":
-        Color = "#ffc800";
-
-        break;
-
-      case "VVIP":
-        Color = "#ffb300";
-
-        break;
-
-      case "Student":
-        Color = "#00c4de";
-
-        break;
-
-      case "Kids":
-        Color = "#ff3686";
-
-        break;
-
-      case "Adult":
-        Color = "#ff551c";
-
-        break;
-
-      case "Member":
-        Color = "#5fcc41";
-
-        break;
-
-      default:
-        Color = "#ffbb00";
-    }
-    return Color;
   };
 
   /****************************************************** */
@@ -225,21 +137,21 @@ const EventTickets = ({ navigation, route }) => {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.Main}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.Main,
+        { backgroundColor: theme.background.darker },
+      ]}
+    >
       {loading ? (
         <View>
-          <ActivityIndicator size="large" color={Constants.primary} />
+          <Loader size="small" color={theme.primary.main} />
         </View>
       ) : (
         <View>
           {item && (
-            <View
-              style={[
-                styles.ticketsdescription,
-                { height: height / 4, width: width, padding: 2 },
-              ]}
-            >
-              <View style={[styles.imageContainer]}>
+            <View style={[styles.ticketsdescription]}>
+              <View style={styles.imageContainer}>
                 <Image
                   style={styles.image}
                   source={{
@@ -248,18 +160,16 @@ const EventTickets = ({ navigation, route }) => {
                 />
               </View>
 
-              <View style={[styles.DiscriptionText]}>
-                <View>
-                  <Text style={[styles.H1Text]}>{item.event_name}</Text>
-                </View>
+              <View style={styles.DiscriptionText}>
+                <Text style={styles.H1Text}>{item.event_name}</Text>
 
-                <View style={[styles.Date]}>
+                <View style={styles.Date}>
                   <MaterialCommunityIcons
                     name="calendar-clock"
                     size={16}
-                    color={Constants.Inverse}
+                    color={Constants.primary}
                   />
-                  <Text style={[styles.H4Text]} numberOfLines={1}>
+                  <Text style={styles.H4Text} numberOfLines={1}>
                     {DateFormater(item.start_date)}
                   </Text>
                 </View>
@@ -268,9 +178,9 @@ const EventTickets = ({ navigation, route }) => {
                   <MaterialCommunityIcons
                     name="map-marker-radius"
                     size={16}
-                    color={Constants.Inverse}
+                    color={theme.primary.main}
                   />
-                  <Text style={[styles.H4Text]} numberOfLines={2}>
+                  <Text style={styles.H4Text} numberOfLines={2}>
                     {item.event_address}
                   </Text>
                 </View>
@@ -295,7 +205,7 @@ const EventTickets = ({ navigation, route }) => {
                   styles.TicketView,
                   active === index && {
                     borderLeftWidth: 3,
-                    borderLeftColor: Constants.Inverse,
+                    borderLeftColor: Constants.primary,
                   },
                 ]}
               >
@@ -341,7 +251,7 @@ const EventTickets = ({ navigation, route }) => {
                               setActiveIndex(null);
                               setDisable(false);
                             }
-                            // amount > 0 && dispatch(decrease(tik.id));
+
                             DecreaseCount(ticket.id);
                           }}
                           style={styles.counterButton}
@@ -349,7 +259,7 @@ const EventTickets = ({ navigation, route }) => {
                           <MaterialCommunityIcons
                             name="minus-thick"
                             size={16}
-                            color="white"
+                            color={theme.dark.main}
                           />
                         </TouchableOpacity>
                       </View>
@@ -363,14 +273,13 @@ const EventTickets = ({ navigation, route }) => {
                           onPress={() => {
                             setDisable(true);
                             IncreaseCount(ticket.id);
-                            // dispatch(increase(tik.id));
                           }}
                           style={styles.counterButton}
                         >
                           <MaterialCommunityIcons
                             name="plus-thick"
                             size={16}
-                            color="white"
+                            color={theme.dark.main}
                           />
                         </TouchableOpacity>
                       </View>
@@ -420,26 +329,30 @@ const EventTickets = ({ navigation, route }) => {
         </View>
       )}
       {disable && (
-        <View style={[styles.bottomNavigationView]}>
-          <View></View>
-          <View style={[{ flexDirection: "row" }, { alignItems: "center" }]}>
-            <Text style={styles.BStext}>Total</Text>
+        <View style={styles.bottomNavigationView}>
+          <View
+            style={[
+              {
+                marginTop: 16,
+                marginLeft: 8,
+                width: "94%",
+              },
+            ]}
+          >
+            <Text style={styles.BSTicketTotal}>
+              {parseFloat(price * amount).toFixed(2)} ETB
+            </Text>
+            <Text style={[styles.BStext, { color: theme.dark.main }]}>
+              Total price
+            </Text>
           </View>
 
-          <View style={styles.LeftbottomNavigationView}>
-            <Text style={styles.BSTicketcount}>{price * amount} Birr</Text>
-          </View>
           <TouchableOpacity
+            activeOpacity={0.7}
             onPress={() => PaymentGateway()}
             style={styles.appButtonContainer}
           >
-            <Text style={styles.appButtonText}>Countinue</Text>
-            <MaterialCommunityIcons
-              name="arrow-right"
-              size={14}
-              color={Constants.background}
-              style={{ marginLeft: 4 }}
-            />
+            <Text style={styles.appButtonText}>Checkout</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -453,32 +366,29 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   ticketsdescription: {
+    width: Dimensions.get("screen").width,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   imageContainer: {
-    paddingLeft: 10,
-    height: "100%",
-    width: "50%",
+    paddingLeft: 4,
+    height: 180,
+    width: 180,
   },
   image: {
-    borderRadius: Constants.medium,
+    backgroundColor: Constants.background,
+    width: "100%",
     height: "100%",
     resizeMode: "contain",
-    width: "100%",
-    backgroundColor: Constants.background,
-    marginLeft: 8,
-    marginRight: 8,
+    marginHorizontal: 8,
     padding: 4,
-    borderWidth: 4,
+    borderRadius: Constants.medium,
+    borderWidth: 2,
     borderColor: Constants.background,
   },
   DiscriptionText: {
-    marginLeft: 16,
     flexDirection: "column",
-    alignItems: "flex-start",
-    // justifyContent: 'space-around',
     spacing: 6,
     height: "100%",
     width: "50%",
@@ -510,7 +420,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#900",
   },
   counterButton: {
-    backgroundColor: "#ffbb00",
     borderRadius: 5,
     padding: 6,
   },
@@ -617,64 +526,47 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Boldtwo,
   },
   ///
-
-  BSTicketTotal: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#ffbb00",
-    marginRight: 5,
-  },
-  BSTicketcount: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#ffbb00",
-    marginRight: 5,
-    marginLeft: 5,
-  },
-
-  BStext: {
-    fontSize: Constants.headingone,
-    fontWeight: "bold",
-    color: "white",
-    marginRight: 5,
-  },
-  LeftbottomNavigationView: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   bottomNavigationView: {
     paddingHorizontal: 10,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-    backgroundColor: Constants.Inverse,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    backgroundColor: Constants.background,
     width: "100%",
-    height: 100,
+    height: 140,
     position: "absolute",
     bottom: 0,
     margin: 0,
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "space-between",
   },
+
+  BSTicketTotal: {
+    fontSize: Constants.primaryHeading,
+    fontFamily: Constants.fontFam,
+    fontWeight: Constants.Bold,
+  },
+
+  BStext: {
+    fontSize: Constants.headingthree,
+    marginRight: 5,
+  },
+
   appButtonContainer: {
+    width: "96%",
     flexDirection: "row",
     alignItems: "center",
-    elevation: 8,
-    backgroundColor: Constants.Inverse,
+    justifyContent: "center",
+    backgroundColor: Constants.primary,
     borderRadius: Constants.tiny,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderWidth: 0.5,
-    borderColor: Constants.background,
-    marginRight: 6,
-    //  backgroundColor:Constants.transparentPrimary
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    marginBottom: 8,
   },
 
   appButtonText: {
-    fontSize: Constants.headingtwo,
-    color: Constants.background,
+    fontSize: Constants.headingone,
+    color: Constants.Inverse,
     fontWeight: Constants.Boldtwo,
     alignSelf: "center",
   },

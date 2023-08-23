@@ -4,11 +4,11 @@ import { useTheme } from "@react-navigation/native";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 
 // create a component
-const Loader = ({ size, color }) => {
+const Loader = (size, { color }) => {
   const { theme } = useTheme();
   const kelem = color ? color : theme.dark.main;
   const indicator =
-    size == "large" ? (
+    size === "large" ? (
       <View style={styles.container}>
         <ActivityIndicator size="large" color={kelem} />
       </View>
