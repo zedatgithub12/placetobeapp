@@ -14,10 +14,6 @@ export const ArrivalTime = () => {
   return time;
 };
 
-/********************************************************** */
-//date function which perform date format conversion and return the suitable format for frontend
-/********************************************************** */
-
 export const DateFormater = (startingDate) => {
   var date = new Date(startingDate);
   let day = date.getDay();
@@ -51,6 +47,7 @@ export const DateFormater = (startingDate) => {
 
   return weekday[day] + monthName[month + 1] + " " + happeningDay;
 };
+
 export const TimeFormater = (eventTime) => {
   var time = eventTime;
   var result = time.slice(0, 2);
@@ -68,6 +65,7 @@ export const TimeFormater = (eventTime) => {
 
   return postMeridian + separator + minute + " " + globalTime;
 };
+
 export const EntranceFee = (price) => {
   var eventPrice;
   var free = "Free";
@@ -79,6 +77,7 @@ export const EntranceFee = (price) => {
   }
   return eventPrice;
 };
+
 // events category color
 export const CategoryColor = (category) => {
   var color;
@@ -120,6 +119,7 @@ export const CategoryColor = (category) => {
   }
   return color;
 };
+
 // ticket status
 export const Status = (Tstatus) => {
   var ticketStatus;
@@ -193,6 +193,7 @@ export const getCurrentDate = () => {
 
   return `${year}-${month}-${day}`;
 };
+
 export const formattedDate = (date) => {
   const currentDate = new Date(date);
   const year = currentDate.getFullYear();
@@ -211,4 +212,95 @@ export const formatNumber = (number) => {
   } else {
     return number.toString();
   }
+};
+
+export const TicketName = (iconname) => {
+  var name;
+  switch (iconname) {
+    case "Early Bird":
+      name = "bird";
+      break;
+
+    case "Regular":
+      name = "ticket";
+      break;
+
+    case "VIP":
+      name = "star-outline";
+      break;
+
+    case "VVIP":
+      name = "star-shooting-outline";
+      break;
+
+    case "Student":
+      name = "book-education-outline";
+      break;
+
+    case "Kids":
+      name = "baby-face-outline";
+      break;
+
+    case "Adult":
+      name = "face-man";
+      break;
+
+    case "Member":
+      name = "account-group-outline";
+      break;
+
+    default:
+      name = "ticket";
+  }
+  return name;
+};
+
+//ticket icon color
+export const TicketColor = (iconname) => {
+  var Color;
+
+  switch (iconname) {
+    case "Early Bird":
+      Color = "#ff24da";
+      break;
+
+    case "Regular":
+      Color = "#00a2ff";
+
+      break;
+
+    case "VIP":
+      Color = "#ffc800";
+
+      break;
+
+    case "VVIP":
+      Color = "#ffb300";
+
+      break;
+
+    case "Student":
+      Color = "#00c4de";
+
+      break;
+
+    case "Kids":
+      Color = "#ff3686";
+
+      break;
+
+    case "Adult":
+      Color = "#ff551c";
+
+      break;
+
+    case "Member":
+      Color = "#5fcc41";
+
+      break;
+
+    default:
+      Color = "#ffbb00";
+  }
+  return Color;
 };

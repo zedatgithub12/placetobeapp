@@ -32,6 +32,7 @@ import Routes from "./src/routes";
 import PopupAds from "./src/Components/Ads/popup";
 import SlideUp from "./src/Components/Ads/slideup";
 import { fetchAds } from "./src/Utils/Ads";
+import { showToast } from "./src/Utils/Toast";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
@@ -39,6 +40,27 @@ const link = Linking.createURL("/");
 const app = Linking.createURL("com.afromina.placetobe://");
 const Domain = Linking.createURL("www.p2b-ethiopia.com");
 const subDomain = Linking.createURL("www.*.p2b-ethiopia.com");
+
+export const Connectivity = () => {
+  const [connection, setConnection] = useState(false);
+  useEffect(() => {
+    const InternetConnection = async () => {
+      try {
+        const networkState = await NetInfo.fetch();
+        setConnection(networkState.isConnected);
+      } catch (error) {
+        showToast("Problem indentifying your network state");
+      }
+    };
+    InternetConnection();
+
+    const subscription = NetInfo.addEventListener(async (state) => {
+      setConnection(state.isConnected);
+    });
+    return () => {};
+  }, []);
+  return connection;
+};
 
 export default function App() {
   const handleNotification = () => {
@@ -446,7 +468,6 @@ export default function App() {
     const SlideUpAd = setTimeout(() => {
       handleSlideupAd("slideUp");
     }, 40000);
-
     return () => clearTimeout(SlideUpAd);
   }, []);
 

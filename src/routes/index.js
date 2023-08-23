@@ -319,7 +319,7 @@ const Routes = ({ navigation }) => {
         name="TicketScreen"
         component={EventTickets}
         options={{
-          title: "Your Tickets",
+          title: "Tickets",
           headerStyle: {
             backgroundColor: Constants.primary,
           },

@@ -1,32 +1,31 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   StyleSheet,
   Text,
+  Image,
   TouchableOpacity,
   Share,
   ScrollView,
-  ToastAndroid,
-  Alert,
-  Pressable,
-  TouchableNativeFeedback,
+  Modal,
   ActivityIndicator,
+  Dimensions,
+  Pressable,
 } from "react-native";
-
+import NetInfo from "@react-native-community/netinfo";
 import Constants from "../../constants/Constants";
 import {
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "react-native-vector-icons";
+import Connection from "../../api";
 import { AuthContext } from "../../Components/context";
-import { Avatar, Caption, Divider, Paragraph, Title } from "react-native-paper";
+import { Avatar, Caption } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
-import Connection from "../../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BottomSheet from "react-native-simple-bottom-sheet";
 import * as Animatable from "react-native-animatable";
 import * as Linking from "expo-linking";
 import p2bavatar from "../../assets/images/p2bavatar.png";
@@ -34,24 +33,25 @@ import ProfileShimmer from "./Skeletons/profilepage";
 import { useTheme } from "@react-navigation/native";
 import { Typography } from "../../themes/typography";
 import LogoutDialog from "./components/logout";
+import { showToast } from "../../Utils/Toast";
+import NoConnection from "../../handlers/connection";
 
-function Profile({ navigation, props }) {
+function Profile({ navigation }) {
   const { theme } = useTheme();
-  const [load, setLoad] = React.useState(true);
-  const { Signout } = React.useContext(AuthContext);
 
+  const { Signout } = useContext(AuthContext);
+
+  const [connection, setConnection] = useState(true);
+  const [retry, setRetry] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [detailInfo, setDetailInfo] = useState();
   const [hasGalleryPersmission, setHasGalleryPermission] = useState(null);
   const [updatingProfile, setupdatingProfile] = useState("camera");
-  const [buttonShown, setButtonShown] = useState(false);
-  const [count, setCount] = useState(0);
-
-  const [userInfo, setUserInfo] = React.useState({
-    eventPosted: "0",
-    followers: "0",
-    following: "0",
-  });
-  const [userData, setUserData] = React.useState({
+  const [image, setImage] = useState(null);
+  const [btnstate, setBtnState] = useState(false);
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); //show profile modal
+  const [userData, setUserData] = useState({
     userId: "",
     userEmail: "",
     userProfile: "",
@@ -59,22 +59,26 @@ function Profile({ navigation, props }) {
     firstName: "",
     middleName: "",
     lastName: "",
+    following: "0",
   });
 
-  const [image, setImage] = useState(
-    Connection.url + Connection.assets + userData.userProfile
-  );
-  //toast message for profile update
-  const showToast = (message) => {
-    ToastAndroid.show(message, ToastAndroid.SHORT);
+  const Nameformatter = (firstname, fathername) => {
+    if (firstname && fathername) {
+      return firstname + " " + fathername;
+    } else if (firstname && !fathername) {
+      return firstname;
+    } else {
+      var username = "Your Name";
+      return username;
+    }
   };
 
-  /********************************************* */
-  // we select user profile here
-  /******************************************* */
+  const selectProfileImage = async () => {
+    if (btnstate) {
+      return; // Ignore double touch
+    }
+    setBtnState(true);
 
-  const selectFeaturedImage = async () => {
-    //ask the divice for permission
     if (hasGalleryPersmission === false) {
       return <Text> No access to internal Storage</Text>;
     }
@@ -86,15 +90,17 @@ function Profile({ navigation, props }) {
         quality: 1,
       });
 
-      if (!result.cancelled && result.uri) {
-        setImage(result.uri);
-        uploadImage(result.uri);
-      } else {
-        console.log("Error: No image selected");
+      if (!result.canceled && result.assets[0].uri) {
+        setImage(result.assets[0].uri);
+        uploadImage(result.assets[0].uri);
       }
     } catch (error) {
       console.log("Error: ", error);
     }
+
+    setTimeout(() => {
+      setBtnState(false);
+    }, 2000);
   };
 
   const uploadImage = async (image) => {
@@ -130,7 +136,7 @@ function Profile({ navigation, props }) {
     });
 
     if (size > 10.0) {
-      showToast("Max image size is reached!");
+      showToast("Exceeded max(10MB) image size!");
       setupdatingProfile("camera");
       setImage(Connection.url + Connection.assets + userData.userProfile);
     } else {
@@ -150,25 +156,21 @@ function Profile({ navigation, props }) {
           }
         })
         .catch((error) => {
-          console.error("Error:", error);
-          console.error("Error:", error.stack);
           setupdatingProfile("camera");
         });
     }
   };
 
-  // variables and functions for invite friends button inside profile screen
-  var msg = "You are invited to install Place to be mobile app  ";
-  var links = Constants.appLink;
-  // share the app to friends
   const onShare = async () => {
+    var msg = "You are invited to install Place to be mobile app  ";
+    var links = Constants.appLink;
     try {
       const result = await Share.share({
         message: msg + links,
       });
+
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          // shared with activity type of result.activityType
         } else {
           // shared
         }
@@ -176,70 +178,26 @@ function Profile({ navigation, props }) {
         // dismissed
       }
     } catch (error) {
-      console.log(error.message);
+      showToast("Error sharing link");
     }
   };
-  // when logout button pressed this function is called
+
+  const handleCancel = () => {
+    setDialogVisible(false);
+  };
+
+  const handleLogout = () => {
+    userLoggedOut();
+    setDialogVisible(false);
+  };
+
   const userLoggedOut = async () => {
     await Signout();
     navigation.navigate("TabNav");
   };
 
-  //featch user information from databse
-  //fetch event posted by user, followers and following
-  // Event count state to b delivered to detail screen
-
-  const featchUserInformation = async () => {
-    const Controller = new AbortController();
-    const Signal = Controller.signal;
-
-    var fetchIt = true;
-    var id = await AsyncStorage.getItem("userId");
-
-    var ApiUrl = Connection.url + Connection.userInfo + id;
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-    fetch(ApiUrl, {
-      method: "GET",
-      headers: headers,
-      signal: Signal,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (fetchIt) {
-          if (response.success) {
-            var eventPostedCount = response.events;
-            var followerCount = response.followers;
-            var followingCount = response.following;
-
-            setUserInfo({
-              ...userInfo,
-              eventPosted: eventPostedCount,
-              followers: followerCount,
-              following: followingCount,
-            });
-            setCount(eventPostedCount);
-            setLoad(false);
-          } else {
-            setLoad(false);
-          }
-        }
-      })
-      .catch((err) => {
-        setLoad(false);
-      });
-    return () => {
-      fetchIt = false;
-      Controller.abort();
-    };
-  };
-
-  /****************************************************** */
-  // we get user information from database
-  /****************************************************** */
   const getUserInfo = async () => {
+    setLoading(true);
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -250,7 +208,6 @@ function Profile({ navigation, props }) {
       "Content-Type": "application/json",
     };
 
-    //save user info into database
     fetch(ApiUrl, {
       method: "GET",
       headers: headers,
@@ -260,7 +217,7 @@ function Profile({ navigation, props }) {
       .then((response) => {
         if (response.success) {
           var userInfo = response.data;
-          setDetailInfo(userInfo);
+
           setUserData({
             ...userData,
             userId: userInfo.id,
@@ -270,363 +227,344 @@ function Profile({ navigation, props }) {
             firstName: userInfo.first_name,
             middleName: userInfo.middle_name,
             lastName: userInfo.last_name,
+            following: response.following,
           });
+
+          setDetailInfo(userInfo);
           setImage(Connection.url + Connection.assets + userInfo.profile);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    return () => {
-      controller.abort();
-    };
-  };
-  // bottom sheet reference
-  const panelRef = useRef(null);
-
-  const updateButton = () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    var appVersion = require("../../../package.json");
-    var localAppVersion = appVersion.version;
-
-    var ApiUrl = Connection.url + Connection.appInfo;
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-
-    fetch(ApiUrl, {
-      method: "POST",
-      headers: headers,
-      signal: signal,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        var message = response[0].message;
-
-        if (message === "succeed") {
-          var databaseAppVersion = response[0].version.version;
-
-          if (databaseAppVersion > localAppVersion) {
-            setButtonShown(true);
-          } else {
-            setButtonShown(false);
-          }
-        } else if (message === "not featched") {
-          setButtonShown(false);
+          setLoading(false);
         } else {
-          setButtonShown(false);
+          setLoading(false);
         }
       })
       .catch((error) => {
-        setButtonShown(false);
+        setLoading(false);
       });
+
     return () => {
-      // cancel the request before component unmounts
       controller.abort();
     };
   };
 
-  // useffect perform componentdidmount and componentwillUnmounted function here
   useEffect(() => {
-    let isApiSubscribed = true;
-
-    if (isApiSubscribed) {
-      getUserInfo();
-      featchUserInformation();
-      (async () => {
-        const gallerStatus =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        setHasGalleryPermission(gallerStatus.status === "granted");
-      })();
-
-      updateButton();
-    }
-    return () => {
-      isApiSubscribed = false;
+    const InternetConnection = async () => {
+      const networkState = await NetInfo.fetch();
+      setConnection(networkState.isConnected);
     };
+    InternetConnection();
+
+    const subscription = NetInfo.addEventListener(async (state) => {
+      setConnection(state.isConnected);
+    });
+    return () => {
+      subscription();
+    };
+  }, [retry]);
+
+  useEffect(() => {
+    getUserInfo();
+
+    (async () => {
+      const gallerStatus =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      setHasGalleryPermission(gallerStatus.status === "granted");
+    })();
+
+    // setTimeout(() => {
+    //   if (loading) {
+    //     getUserInfo();
+    //   }
+    // }, 5000);
+    return () => {};
   }, []);
 
-  const [dialogVisible, setDialogVisible] = useState(false);
-
-  const handleCancel = () => {
-    setDialogVisible(false);
-  };
-
-  const handleLogout = () => {
-    setDialogVisible(false);
-    userLoggedOut();
-  };
-
-  // loggout function
-  const Logout = () =>
-    Alert.alert(
-      "Are you sure you want to logout?",
-      "This action will log you out of the application.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Yes",
-          onPress: () => userLoggedOut(),
-          style: "destructive",
-        },
-      ]
-    );
   return (
-    <ScrollView style={{ backgroundColor: theme.background.darker }}>
-      {load ? (
-        <ProfileShimmer />
-      ) : (
-        <View>
-          <View
-            style={[
-              styles.profileContainer,
-              { backgroundColor: theme.primary.main },
-            ]}
-          >
-            <TouchableOpacity
-              //button which trigger the select Image functionality to chane profile picture
-              activeOpacity={0.9}
-              onPress={selectFeaturedImage}
-              style={styles.profilePicker}
+    <ScrollView style={{ flex: 1, backgroundColor: theme.background.darker }}>
+      {connection ? (
+        loading ? (
+          <ProfileShimmer />
+        ) : (
+          <View>
+            <View
+              style={[
+                styles.profileContainer,
+                { backgroundColor: theme.primary.main },
+              ]}
             >
-              <Avatar.Image
-                source={image ? { uri: image } : p2bavatar}
-                size={80}
-                style={styles.profileImage}
-                onPress={selectFeaturedImage}
-              />
-              <View style={styles.cameraIcon}>
-                {updatingProfile === "camera" ? (
+              <Pressable
+                onPress={() => setModalVisible(true)}
+                disabled={btnstate}
+                style={styles.profilePicker}
+              >
+                <Avatar.Image
+                  source={image ? { uri: image } : p2bavatar}
+                  size={80}
+                  style={styles.profileImage}
+                  onPress={() => setModalVisible(true)}
+                />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => selectProfileImage()}
+                  style={styles.cameraIcon}
+                >
+                  {updatingProfile === "camera" ? (
+                    <MaterialCommunityIcons
+                      name="camera"
+                      size={18}
+                      color={theme.dark[900]}
+                    />
+                  ) : updatingProfile === "loading" ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={theme.primary.main}
+                    />
+                  ) : updatingProfile === "done" ? (
+                    <MaterialCommunityIcons
+                      name="check-circle"
+                      size={18}
+                      color={Constants.Success}
+                    />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name="information"
+                      size={18}
+                      color={Constants.Danger}
+                    />
+                  )}
+                </TouchableOpacity>
+              </Pressable>
+
+              <View style={styles.txtContent}>
+                <View style={{ alignSelf: "center", alignItems: "center" }}>
+                  <Text
+                    style={{
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.headingone,
+                      fontWeight: Typography.weight.bold,
+                      paddingHorizontal: 6,
+                    }}
+                  >
+                    {Nameformatter(userData.firstName, userData.middleName)}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Following")}
+                  activeOpacity={0.9}
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    margin: 4,
+                    padding: 3,
+                    paddingTop: 2,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.headingtwo,
+                      fontWeight: Typography.weight.bold,
+                      paddingHorizontal: 6,
+                    }}
+                  >
+                    {userData.following}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.headingtwo,
+                      fontWeight: Typography.weight.medium,
+                    }}
+                  >
+                    Following
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View
+              style={[
+                styles.setContainer,
+                { backgroundColor: theme.background.darker },
+              ]}
+            >
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.Settings}
+                onPress={() =>
+                  navigation.navigate("Account Settings", { detailInfo })
+                }
+              >
+                <View style={styles.iconbackground}>
                   <MaterialCommunityIcons
-                    name="camera"
-                    size={18}
-                    color={theme.dark[400]}
+                    name="account-cog"
+                    size={22}
+                    style={{ color: theme.dark[600] }}
                   />
-                ) : updatingProfile === "loading" ? (
-                  <ActivityIndicator size="small" color={Constants.Success} />
-                ) : updatingProfile === "done" ? (
+                </View>
+                <Text style={styles.settingtxt}>Account Settings</Text>
+                <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[
+                    styles.rightarrow,
+                    { position: "absolute", right: 10 },
+                  ]}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={onShare}
+                style={styles.Settings} //share app with your friends
+              >
+                <View style={styles.iconbackground}>
+                  <Ionicons
+                    name="share-social-sharp"
+                    size={20}
+                    style={{ color: theme.dark[600] }}
+                  />
+                </View>
+                <Text style={styles.settingtxt}>Invite Friends</Text>
+                <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[
+                    styles.rightarrow,
+                    { position: "absolute", right: 10 },
+                  ]}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.Settings}
+                onPress={() =>
+                  Linking.openURL(
+                    "https://www.p2b-ethiopia.com/privacy-policy-2/"
+                  )
+                }
+              >
+                <View style={styles.iconbackground}>
                   <MaterialCommunityIcons
-                    name="check-circle"
-                    size={18}
-                    color={Constants.Success}
+                    name="security"
+                    size={23}
+                    style={{ color: theme.dark[600] }}
                   />
-                ) : (
+                </View>
+                <Text style={styles.settingtxt}>Privacy Policy</Text>
+                <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[
+                    styles.rightarrow,
+                    { position: "absolute", right: 10 },
+                  ]}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.Settings}
+                onPress={() => navigation.navigate("Questions")}
+              >
+                <View style={styles.iconbackground}>
+                  <MaterialCommunityIcons
+                    name="message-question"
+                    size={20}
+                    style={{ color: theme.dark[600] }}
+                  />
+                </View>
+                <Text style={styles.settingtxt}>Ask Question</Text>
+                <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[
+                    styles.rightarrow,
+                    { position: "absolute", right: 10 },
+                  ]}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.Settings}
+                onPress={() => navigation.navigate("About")}
+              >
+                <View style={styles.iconbackground}>
                   <MaterialCommunityIcons
                     name="information"
-                    size={18}
-                    color={Constants.Danger}
+                    size={24}
+                    style={{ color: theme.dark[600] }}
                   />
-                )}
-              </View>
-            </TouchableOpacity>
-
-            <View style={styles.txtContent}>
-              <View style={{ alignSelf: "center", alignItems: "center" }}>
-                <Text
-                  style={{
-                    fontFamily: Typography.family,
-                    fontSize: Typography.size.headingone,
-                    fontWeight: Typography.weight.bold,
-                    paddingHorizontal: 6,
-                  }}
-                >
-                  {userData.userName}
-                </Text>
-              </View>
+                </View>
+                <Text style={styles.settingtxt}>About us</Text>
+                <MaterialIcons
+                  name="keyboard-arrow-right"
+                  size={24}
+                  style={[
+                    styles.rightarrow,
+                    { position: "absolute", right: 10 },
+                  ]}
+                />
+              </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => navigation.navigate("Following")}
-                activeOpacity={0.9}
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  margin: 4,
-                  padding: 3,
-                  paddingTop: 2,
-                }}
+                activeOpacity={0.7}
+                style={styles.logoutbtn}
+                onPress={() => setDialogVisible(true)}
               >
-                <Text
-                  style={{
-                    fontFamily: Typography.family,
-                    fontSize: Typography.size.headingtwo,
-                    fontWeight: Typography.weight.bold,
-                    paddingHorizontal: 6,
-                  }}
-                >
-                  {userInfo.following}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: Typography.family,
-                    fontSize: Typography.size.headingtwo,
-                    fontWeight: Typography.weight.medium,
-                  }}
-                >
-                  Following
-                </Text>
+                <View style={styles.iconbackground}>
+                  <Ionicons
+                    name="log-out"
+                    size={24}
+                    style={{ color: theme.dark[600] }}
+                  />
+                </View>
+                <Text style={styles.settingtxt}>Log-out</Text>
               </TouchableOpacity>
             </View>
+            <View style={styles.versioning}>
+              <Caption> Version 1.0.1</Caption>
+            </View>
           </View>
-
-          <View
-            style={[
-              styles.setContainer,
-              { backgroundColor: theme.background.darker },
-            ]}
-          >
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.Settings}
-              onPress={() =>
-                navigation.navigate("Account Settings", { detailInfo })
-              }
-            >
-              <View style={styles.iconbackground}>
-                <MaterialCommunityIcons
-                  name="account-cog"
-                  size={22}
-                  style={{ color: theme.dark[600] }}
-                />
-              </View>
-              <Text style={styles.settingtxt}>Account Settings</Text>
-              <MaterialIcons
-                name="keyboard-arrow-right"
-                size={24}
-                style={[styles.rightarrow, { position: "absolute", right: 10 }]}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={onShare}
-              style={styles.Settings} //share app with your friends
-            >
-              <View style={styles.iconbackground}>
-                <Ionicons
-                  name="share-social-sharp"
-                  size={20}
-                  style={{ color: theme.dark[600] }}
-                />
-              </View>
-              <Text style={styles.settingtxt}>Invite Friends</Text>
-              <MaterialIcons
-                name="keyboard-arrow-right"
-                size={24}
-                style={[styles.rightarrow, { position: "absolute", right: 10 }]}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.Settings}
-              onPress={() =>
-                Linking.openURL(
-                  "https://www.p2b-ethiopia.com/privacy-policy-2/"
-                )
-              }
-            >
-              <View style={styles.iconbackground}>
-                <MaterialCommunityIcons
-                  name="security"
-                  size={23}
-                  style={{ color: theme.dark[600] }}
-                />
-              </View>
-              <Text style={styles.settingtxt}>Privacy Policy</Text>
-              <MaterialIcons
-                name="keyboard-arrow-right"
-                size={24}
-                style={[styles.rightarrow, { position: "absolute", right: 10 }]}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.Settings}
-              onPress={() => navigation.navigate("Questions")}
-            >
-              <View style={styles.iconbackground}>
-                <MaterialCommunityIcons
-                  name="message-question"
-                  size={20}
-                  style={{ color: theme.dark[600] }}
-                />
-              </View>
-              <Text style={styles.settingtxt}>Ask Question</Text>
-              <MaterialIcons
-                name="keyboard-arrow-right"
-                size={24}
-                style={[styles.rightarrow, { position: "absolute", right: 10 }]}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.Settings}
-              onPress={() => navigation.navigate("About")}
-            >
-              <View style={styles.iconbackground}>
-                <MaterialCommunityIcons
-                  name="information"
-                  size={24}
-                  style={{ color: theme.dark[600] }}
-                />
-              </View>
-              <Text style={styles.settingtxt}>About us</Text>
-              <MaterialIcons
-                name="keyboard-arrow-right"
-                size={24}
-                style={[styles.rightarrow, { position: "absolute", right: 10 }]}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.logoutbtn}
-              onPress={() => setDialogVisible(true)}
-            >
-              <View style={styles.iconbackground}>
-                <Ionicons
-                  name="log-out"
-                  size={24}
-                  style={{ color: theme.dark[600] }}
-                />
-              </View>
-              <Text style={styles.settingtxt}>Log-out</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.versioning}>
-            <Caption> Version 1.0.1</Caption>
-          </View>
-          {buttonShown && (
-            <TouchableNativeFeedback
-              onPress={() => Linking.openURL(Constants.appLink)}
-              style={{ alignItems: "center" }}
-            >
-              <Animatable.View
-                animation="slideInRight"
-                style={styles.updateButton}
-              >
-                <MaterialCommunityIcons
-                  name="arrow-up-bold-circle"
-                  size={20}
-                  style={styles.updateIcon}
-                />
-                <Text style={styles.updateText}>Update Available</Text>
-              </Animatable.View>
-            </TouchableNativeFeedback>
-          )}
-        </View>
+        )
+      ) : (
+        <NoConnection />
       )}
+
       <LogoutDialog
         visible={dialogVisible}
         onCancel={handleCancel}
         onLogout={handleLogout}
       />
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={20}
+                color={Constants.Inverse}
+              />
+            </TouchableOpacity>
+            <Image
+              source={image ? { uri: image } : p2bavatar}
+              resizeMode="contain"
+              style={styles.modalImage} //featured image styles
+            />
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -640,39 +578,6 @@ const styles = StyleSheet.create({
     borderWidth: 0.2,
     borderColor: Constants.Faded,
   },
-  iconbackground: {
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 8,
-    borderRadius: 10,
-    marginLeft: 5,
-  },
-  Settings: {
-    flexDirection: "row",
-    alignItems: "center",
-    margin: 3,
-    marginHorizontal: 16,
-    borderRadius: 8,
-    paddingVertical: 6,
-  },
-  rightarrow: {
-    color: Constants.Secondary,
-  },
-
-  settingtxt: {
-    justifyContent: "center",
-    fontSize: Constants.headingthree,
-    marginLeft: 15,
-    fontWeight: Constants.Bold,
-    fontFamily: Constants.fontFam,
-    color: Constants.Inverse,
-  },
-  horizontalline: {
-    backgroundColor: Constants.background,
-    height: 1,
-    margin: 10,
-  },
-
   profileContainer: {
     position: "relative",
     justifyContent: "center",
@@ -729,6 +634,34 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
 
+  iconbackground: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 8,
+    borderRadius: 10,
+    marginLeft: 5,
+  },
+  Settings: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 3,
+    marginHorizontal: 16,
+    borderRadius: 8,
+    paddingVertical: 6,
+  },
+  rightarrow: {
+    color: Constants.Secondary,
+  },
+
+  settingtxt: {
+    justifyContent: "center",
+    fontSize: Constants.headingthree,
+    marginLeft: 15,
+    fontWeight: Constants.Bold,
+    fontFamily: Constants.fontFam,
+    color: Constants.Inverse,
+  },
+
   logoutbtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -765,6 +698,47 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     marginLeft: 28,
   },
+  //modal for profile image to be shown in full screen size
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "#0009",
+  },
+  modalView: {
+    alignItems: "center",
+    aspectRatio: 1,
+  },
+  modalImage: {
+    width: Dimensions.get("screen").width,
+    height: 400,
+    resizeMode: "contain",
+  },
+  button: {
+    alignSelf: "flex-end",
+    borderRadius: 50,
+    padding: 7,
+    margin: 10,
+
+    elevation: 2,
+  },
+
+  buttonClose: {
+    backgroundColor: Constants.Faded,
+    position: "absolute",
+    top: 6,
+    right: 2,
+    zIndex: 10,
+  },
+  textStyle: {
+    color: Constants.Danger,
+    fontWeight: Constants.Bold,
+    textAlign: "center",
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  eventList: {},
 });
 
 export default Profile;

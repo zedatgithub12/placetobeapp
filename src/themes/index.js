@@ -38,7 +38,7 @@ export const theme = {
       main: "#0075FF",
     },
     success: {
-      main: "#5cb85c",
+      main: "#45a245",
       50: "#f4faf3",
       100: "#e4f5e3",
       200: "#c8eac8",

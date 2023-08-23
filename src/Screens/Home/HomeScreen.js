@@ -41,7 +41,6 @@ import EventCounter from "./components/counter";
 import Preferences from "../../preferences";
 import NativeAdsOne from "../../Components/Ads/nativeAd1";
 import HeaderAds from "../../Components/Ads/headerAds";
-import TitleContainer from "./components/header";
 import { fetchAds, UserInteraction } from "../../Utils/Ads";
 import Statuses from "../../Components/Categories/statusFiltering";
 
