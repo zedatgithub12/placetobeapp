@@ -75,6 +75,7 @@ export const theme = {
       950: "#000000",
     },
     blue: {
+      main: "#4285f4",
       50: "#eff6ff",
       100: "#dbeafe",
       200: "#c0dbfd",

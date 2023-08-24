@@ -7,11 +7,13 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  Linking,
+  ScrollView,
 } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import Constants from "../../constants/Constants";
-import { Divider, HelperText } from "react-native-paper";
+import { Divider, HelperText, Checkbox, IconButton } from "react-native-paper";
 import Connection from "../../constants/connection";
 import TicketDetail from "./TicketDetail";
 
@@ -24,6 +26,9 @@ import {
   releaseTicket,
 } from "../../Reducer/TimerSlice";
 import { P2bAnimatedBtn } from "../../ui-components/Button";
+import { Typography } from "../../themes/typography";
+import Gateways from "./components/payment";
+import { PaymentGateways } from "../../data/PaymentGateways";
 
 function CheckoutScreen({ route }) {
   const { pass } = route.params;
@@ -49,6 +54,12 @@ function CheckoutScreen({ route }) {
     phoneError: false,
   });
 
+  const [isChecked, setIsChecked] = useState(false);
+
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
+  };
+
   //onchangeText triggered in fullname field
   const fullname = (name) => {
     setContactInfo({
@@ -64,14 +75,15 @@ function CheckoutScreen({ route }) {
       phone: phone,
     });
   };
-  // We need ref in this, because we are dealing
-  // with JS setInterval to keep track of it and
-  // stop it when needed
-  const Ref = useRef(null);
 
-  /**************************************** */
-  //on pay button pressed
-  /************************************** */
+  const ChooseGateway = (gateway) => {
+    if (selection === gateway.name) {
+      setSelection(null);
+    } else {
+      setSelection(gateway.name);
+    }
+  };
+
   const Pay = () => {
     var regName = /^[a-zA-Z]+ [a-zA-Z]+$/;
     var message;
@@ -187,15 +199,25 @@ function CheckoutScreen({ route }) {
   }, [TicketInfo]);
 
   return (
-    <SafeAreaView style={styles.root}>
-      <View style={{ height: 140 }}>
+    <View style={{ flex: 1, backgroundColor: theme.background.faded }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <Divider style={{ backgroundColor: theme.primary[600] }} />
 
         <View style={styles.leftCheckout}>
           <View style={styles.detailrow}>
             <Text style={styles.infoLabel}>Event</Text>
 
-            <Text style={styles.infoValue}>{pass.event_name}</Text>
+            <Text
+              style={[
+                styles.infoValue,
+                {
+                  fontWeight: Typography.weight.bold,
+                  fontSize: Typography.size.headingtwo,
+                },
+              ]}
+            >
+              {pass.event_name}
+            </Text>
           </View>
 
           <View style={styles.detailrow}>
@@ -226,13 +248,21 @@ function CheckoutScreen({ route }) {
           <View style={styles.detailrow}>
             <Text style={styles.infoLabel}>Total</Text>
 
-            <Text style={styles.infoValue}>
-              {pass.currentprice * pass.amount} ETB
+            <Text
+              style={[
+                styles.infoValue,
+                {
+                  fontWeight: Typography.weight.extraBold,
+                  fontSize: Typography.size.headingtwo,
+                },
+              ]}
+            >
+              {parseFloat(pass.currentprice * pass.amount).toFixed(2)} ETB
             </Text>
           </View>
         </View>
 
-        <View style={styles.ticketPriceContainer}>
+        <View>
           <Text
             style={{
               marginLeft: 24,
@@ -275,6 +305,7 @@ function CheckoutScreen({ route }) {
             onChangeText={(phone) => Phone(phone)}
           />
         </View>
+
         {contactInfo.phoneError && (
           <Text style={styles.error}>{contactInfo.phoneErrorMessage}</Text>
         )}
@@ -282,117 +313,55 @@ function CheckoutScreen({ route }) {
         <Divider style={{ marginTop: 15 }} />
 
         <View style={styles.btnGroup}>
-          <TouchableOpacity
-            style={[
-              styles.btn,
-              selection === 1
-                ? [
-                    { backgroundColor: "#ebebeb" },
-                    { borderWidth: 1 },
-                    { borderColor: "green" },
-                  ]
-                : { backgroundColor: "white" },
-            ]}
-            onPress={() => {
-              setSelection(1);
-              setAgent(1);
-            }}
-          >
-            {selection === 1 ? (
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={18}
-                color="green"
-                style={{ position: "absolute", right: 6, top: 6 }}
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name="radiobox-blank"
-                size={18}
-                color={Constants.Secondary}
-                style={{ position: "absolute", right: 6, top: 6 }}
-              />
-            )}
-            <View style={styles.LeftPayment}>
-              <Image
-                style={styles.Paymentlogo}
-                source={require("../../assets/images/telebirr.png")}
-              />
-              <Text
-                style={[
-                  styles.btnText,
-                  selection === 1 ? { color: "black" } : null,
-                ]}
-              >
-                Telebirr
-              </Text>
-            </View>
-          </TouchableOpacity>
+          {PaymentGateways.map((gateway) => (
+            <Gateways
+              key={gateway.id}
+              logo={gateway.logo}
+              name={gateway.name}
+              onPress={() => ChooseGateway(gateway)}
+              isChecked={selection === gateway.name ? true : false}
+            />
+          ))}
+        </View>
 
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 15,
+            marginBottom: 90,
+          }}
+        >
+          <Checkbox
+            status={isChecked ? "checked" : "unchecked"}
+            onPress={handleCheckboxChange}
+            color={theme.blue.main}
+            position="leading"
+          />
+
+          <Text>I agree to </Text>
           <TouchableOpacity
-            style={[
-              styles.btn,
-              selection === 2
-                ? [
-                    { backgroundColor: "#ebebeb" },
-                    { borderWidth: 1, borderColor: "green" },
-                  ]
-                : { backgroundColor: "white" },
-            ]}
-            onPress={() => {
-              setSelection(2);
-              setAgent(2);
-            }}
+            activeOpacity={0.5}
+            onPress={() => Linking.openURL(Constants.terms)}
           >
-            {selection === 2 ? (
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={18}
-                color="green"
-                style={{ position: "absolute", right: 6, top: 6 }}
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name="radiobox-blank"
-                size={18}
-                color={Constants.Secondary}
-                style={{ position: "absolute", right: 6, top: 6 }}
-              />
-            )}
-            <View style={styles.LeftPayment}>
-              <Image
-                style={styles.Paymentlogo}
-                source={require("../../assets/images/chapa.png")}
-              />
-              <Text
-                style={[
-                  styles.btnText,
-                  selection === 2 ? { color: "black" } : null,
-                ]}
-              >
-                Chapa
-              </Text>
-            </View>
+            <Text style={{ color: theme.blue[700] }}>Terms & Conditions</Text>
           </TouchableOpacity>
         </View>
-      </View>
-
-      {selection && (
+      </ScrollView>
+      {selection && isChecked && (
         <P2bAnimatedBtn
-          title="Pay"
-          animation="fadeInUpBig"
+          title={`Pay${" with " + selection}`}
+          animation="zoomIn"
+          duration={8}
           isSubmitting={false}
           onPress={() => Pay()}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Constants.Faded,
-  },
   paybuttonStyle: {
     width: 50,
     marginHorizontal: 100,
@@ -408,15 +377,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   btnGroup: {
+    width: Dimensions.get("screen").width,
+    flexWrap: "wrap",
     flexDirection: "row",
     borderRadius: 10,
     marginTop: 10,
     padding: 10,
-    height: "auto",
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "space-around",
-    alignItems: "center",
+    justifyContent: "center",
   },
   btn: {
     justifyContent: "space-between",

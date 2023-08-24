@@ -11,9 +11,19 @@ import Constants from "../constants/Constants";
 import Loader from "./ActivityIndicator";
 
 // create a component
-export const P2bAnimatedBtn = ({ title, isSubmitting, animation, onPress }) => {
+export const P2bAnimatedBtn = ({
+  title,
+  isSubmitting,
+  animation,
+  duration,
+  onPress,
+}) => {
   return (
-    <Animatable.View animation={animation} style={[styles.BtnContainer]}>
+    <Animatable.View
+      animation={animation}
+      duration={duration ? duration : null}
+      style={[styles.BtnContainer]}
+    >
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={onPress}

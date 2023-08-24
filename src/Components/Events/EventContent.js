@@ -92,12 +92,9 @@ const DetailContent = ({ ...props }) => {
           style={styles.iconContainer}
         />
 
-        <View
-          style={styles.eventDate}
-          // Event price detail
-        >
+        <View style={styles.eventDate}>
           <Text style={styles.prices} numberOfLines={1}>
-            {props.Price == 0 ? free : props.Price + currency}
+            {props.Price == null ? free : props.Price + currency}
           </Text>
           <Text style={styles.time}>Entrance fee</Text>
         </View>
