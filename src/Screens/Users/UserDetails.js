@@ -42,17 +42,19 @@ const UserDetails = ({ route, navigation }) => {
   });
 
   const [googleId, setGoogleId] = useState(detailInfo.google_Id);
-  //Message from server
-  const [message, setMessage] = useState("Success");
-  const [showMessage, setShowMesssage] = useState(false);
-
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState("date");
   const [show, setShow] = useState(false); // date modal state
-  const [startDate, setStartDate] = useState(detailInfo.birthdate); //birthDate state
-  const [checked, setChecked] = useState(detailInfo.gender); //gender state
+  const [startDate, setStartDate] = useState(
+    detailInfo.birthdate ? detailInfo.birthdate : ""
+  ); //birthDate state
+  const [checked, setChecked] = useState(
+    detailInfo.gender ? detailInfo.gender : ""
+  ); //gender state
 
-  const [category, setCategory] = useState(detailInfo.category);
+  const [category, setCategory] = useState(
+    detailInfo.category ? detailInfo.category : ""
+  );
   const [modalVisible, setModalVisible] = useState(false); // category modal state
 
   const [inputs, setInputs] = useState({
@@ -186,9 +188,6 @@ const UserDetails = ({ route, navigation }) => {
       .then((response) => response.json())
       .then((response) => {
         if (response.success) {
-          var serverResponse = response.message;
-
-          setMessage(serverResponse);
           setUpdating(false);
           showToast("Successfully updated!");
         } else {
@@ -201,21 +200,20 @@ const UserDetails = ({ route, navigation }) => {
       });
   };
 
-  //user asked old password
   const updateOldPassword = (pass) => {
     setMetaInfo({
       ...MetaInfo,
       oldPassword: pass,
     });
   };
-  //user asked new password
+
   const updateNewPassword = (pass) => {
     setMetaInfo({
       ...MetaInfo,
       password: pass,
     });
   };
-  //user asked to confirm password
+
   const updateConfirmedPassword = (pass) => {
     setMetaInfo({
       ...MetaInfo,
@@ -240,7 +238,6 @@ const UserDetails = ({ route, navigation }) => {
     }
   };
 
-  //password change error indicator field
   const [error, setError] = useState({
     oldPasswordBorder: Constants.Faded,
     setPasswordBorder: Constants.Faded,
@@ -248,15 +245,8 @@ const UserDetails = ({ route, navigation }) => {
     errorMessage: "",
     messageColor: Constants.Danger,
   });
-  /******************************************************* */
-  //changing password
-  /****************************************************** */
-
-  //activity indicator for change password button
 
   const [updatePassword, setUpdatePassword] = useState(false);
-
-  //function to be called when change password button get clicked
 
   const ChangePassword = () => {
     setUpdatePassword(true);

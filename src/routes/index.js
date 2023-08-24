@@ -382,19 +382,14 @@ const Routes = ({ navigation }) => {
               <Menu.Item
                 onPress={() => {
                   setShowMenu(false),
-                    Linking.openURL(
-                      "https://placetobeethiopia.com/refunding-terms"
-                    );
+                    Linking.openURL(Constants.refunding_policy);
                 }}
                 title="Refunding Terms"
               />
               <Divider />
               <Menu.Item
                 onPress={() => {
-                  setShowMenu(false),
-                    Linking.openURL(
-                      "https://placetobeethiopia.com/terms-agreement"
-                    );
+                  setShowMenu(false), Linking.openURL(Constants.terms);
                 }}
                 title="Terms and Agreement"
               />

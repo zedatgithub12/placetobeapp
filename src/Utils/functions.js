@@ -70,7 +70,7 @@ export const EntranceFee = (price) => {
   var eventPrice;
   var free = "Free";
   var currency = " ETB";
-  if (price != 0) {
+  if (price != null) {
     eventPrice = price + currency;
   } else {
     eventPrice = free;
@@ -78,7 +78,6 @@ export const EntranceFee = (price) => {
   return eventPrice;
 };
 
-// events category color
 export const CategoryColor = (category) => {
   var color;
   switch (category) {
@@ -120,7 +119,6 @@ export const CategoryColor = (category) => {
   return color;
 };
 
-// ticket status
 export const Status = (Tstatus) => {
   var ticketStatus;
 
@@ -147,7 +145,6 @@ export const Status = (Tstatus) => {
   return ticketStatus;
 };
 
-//status text color
 export const StatusText = (textColor) => {
   var StatusColor;
 
@@ -174,7 +171,6 @@ export const StatusText = (textColor) => {
   return StatusColor;
 };
 
-// check if there is discount on ticket price and let them know there is discount
 export const discount = (current, origional) => {
   var discount = origional - current;
 
@@ -203,7 +199,6 @@ export const formattedDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-//large number formatter
 export const formatNumber = (number) => {
   if (number >= 1000000) {
     return (number / 1000000).toFixed(1) + "M";
@@ -255,7 +250,6 @@ export const TicketName = (iconname) => {
   return name;
 };
 
-//ticket icon color
 export const TicketColor = (iconname) => {
   var Color;
 

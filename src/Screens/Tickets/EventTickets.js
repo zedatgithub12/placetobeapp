@@ -259,7 +259,7 @@ const EventTickets = ({ navigation, route }) => {
                           <MaterialCommunityIcons
                             name="minus-thick"
                             size={16}
-                            color={theme.dark.main}
+                            color={theme.dark[400]}
                           />
                         </TouchableOpacity>
                       </View>
@@ -279,7 +279,7 @@ const EventTickets = ({ navigation, route }) => {
                           <MaterialCommunityIcons
                             name="plus-thick"
                             size={16}
-                            color={theme.dark.main}
+                            color={theme.dark[400]}
                           />
                         </TouchableOpacity>
                       </View>

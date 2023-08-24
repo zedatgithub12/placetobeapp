@@ -1,17 +1,17 @@
 const Constants = {
   primarycolor: {
-    '50': '#fffeea',
-    '100': '#fffac5',
-    '200': '#fff685',
-    '300': '#ffea46',
-    '400': '#ffdb1b',
-    '500': '#ffbb00',
-    '600': '#e29000',
-    '700': '#bb6502',
-    '800': '#984e08',
-    '900': '#7c400b',
-    '950': '#482100',
-},
+    50: "#fffeea",
+    100: "#fffac5",
+    200: "#fff685",
+    300: "#ffea46",
+    400: "#ffdb1b",
+    500: "#ffbb00",
+    600: "#e29000",
+    700: "#bb6502",
+    800: "#984e08",
+    900: "#7c400b",
+    950: "#482100",
+  },
   //main colors
   mainText: "#000000",
   mainTwo: "#555555",
@@ -68,5 +68,8 @@ const Constants = {
   //application link
   appLink: "http://app.p2b-ethiopia.com/playstore",
   webLink: "https://www.p2b-ethiopia.com/",
+  terms: "https://placetobeethiopia.com/terms-agreement",
+  refunding_policy: "https://placetobeethiopia.com/refunding-terms",
+  privacy_policy: "https://placetobeethiopia.com/privacy-policy",
 };
 export default Constants;

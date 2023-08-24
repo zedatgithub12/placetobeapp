@@ -7,9 +7,9 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
-  Modal,
+  Linking,
 } from "react-native";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { theme } from "./src/themes";
 //import Organizers from "./Screens/Organizers";
 import { Caption } from "react-native-paper";
@@ -19,14 +19,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "./src/store/store";
 import { Provider } from "react-redux";
 import { Provider as PaperProvider } from "react-native-paper";
-
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
-import * as Linking from "expo-linking";
 import NetInfo from "@react-native-community/netinfo";
 import * as Animatable from "react-native-animatable";
 import Geolocation from "@react-native-community/geolocation";
-import { LocalNotification } from "./src/Utils/localPushController";
 import RemotePushController from "./src/Utils/RemotePushController";
 import Routes from "./src/routes";
 import PopupAds from "./src/Components/Ads/popup";
@@ -36,10 +33,10 @@ import { showToast } from "./src/Utils/Toast";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
-const link = Linking.createURL("/");
-const app = Linking.createURL("com.afromina.placetobe://");
-const Domain = Linking.createURL("www.p2b-ethiopia.com");
-const subDomain = Linking.createURL("www.*.p2b-ethiopia.com");
+// const link = Linking.createURL("/");
+// const app = Linking.createURL("com.afromina.placetobe://");
+// const Domain = Linking.createURL("https://www.placetobeethiopia.com/");
+// const subDomain = Linking.createURL("https://www.*.p2b-ethiopia.com");
 
 export const Connectivity = () => {
   const [connection, setConnection] = useState(false);
@@ -62,28 +59,34 @@ export const Connectivity = () => {
   return connection;
 };
 
-export default function App() {
-  const handleNotification = () => {
-    LocalNotification();
-  };
+const handleDeepLink = async (url) => {
+  const { path, queryParams } = Linking.parse(url);
 
-  const Linkings = {
-    prefixes: [link, app, Domain, subDomain],
-    config: {
-      initialRouteName: "TabNav",
-      screens: {
-        TabNav: {
-          path: "tabNav",
-        },
-        Profile: {
-          path: "profile",
-        },
-        EventDetail: {
-          path: "event-detail/:externalLink",
-        },
-      },
-    },
-  };
+  if (path === "event-detail") {
+    const { id } = queryParams;
+
+    navigation.navigate("EventDetail", { id: id });
+  }
+};
+
+export default function App() {
+  // const Linkings = {
+  //   prefixes: [link, app, Domain, subDomain],
+  //   config: {
+  //     initialRouteName: "TabNav",
+  //     screens: {
+  //       TabNav: {
+  //         path: "tabNav",
+  //       },
+  //       Profile: {
+  //         path: "profile",
+  //       },
+  //       EventDetail: {
+  //         path: "event-detail/:externalLink",
+  //       },
+  //     },
+  //   },
+  // };
 
   const initialLoginState = {
     isLoading: true,
@@ -471,6 +474,18 @@ export default function App() {
     return () => clearTimeout(SlideUpAd);
   }, []);
 
+  useEffect(() => {
+    const handleUrl = async ({ url }) => {
+      await handleDeepLink(url);
+    };
+
+    Linking.addEventListener("url", handleUrl);
+
+    return () => {
+      Linking.removeEventListener("url", handleUrl);
+    };
+  }, []);
+
   //activity indicator which is going to be shown and the opening of app
   if (loginState.isLoading) {
     return (
@@ -500,7 +515,6 @@ export default function App() {
           <AuthContext.Provider value={authContext}>
             <NavigationContainer
               theme={theme}
-              linking={Linkings}
               fallback={
                 <View style={styles.loader}>
                   <ActivityIndicator color={Constants.primary} size="large" />
