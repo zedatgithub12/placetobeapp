@@ -129,7 +129,7 @@ const Notifications = ({ navigation }) => {
   }, [connection]);
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       {logged ? (
         connection ? (
           loading ? (

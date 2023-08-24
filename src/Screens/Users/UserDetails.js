@@ -22,6 +22,7 @@ import Category from "../../dummies/Category";
 import Connection from "../../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Animatable from "react-native-animatable";
+import { showToast } from "../../Utils/Toast";
 
 // create a component
 const UserDetails = ({ route, navigation }) => {
@@ -142,7 +143,7 @@ const UserDetails = ({ route, navigation }) => {
     </TouchableOpacity>
   );
   /*************************************************** */
-  //phone related operations
+  //phone number related operations
   /************************************************** */
 
   const updatePhone = (val) => {
@@ -184,15 +185,17 @@ const UserDetails = ({ route, navigation }) => {
       .then((response) => {
         if (response.success) {
           var serverResponse = response.message;
-          setShowMesssage(true);
+
           setMessage(serverResponse);
           setUpdating(false);
+          showToast("Successfully updated!");
         } else {
           setUpdating(false);
+          showToast("Please try again later");
         }
       })
       .catch((error) => {
-        console.log(error);
+        showToast("Error updating");
       });
   };
 
@@ -312,30 +315,8 @@ const UserDetails = ({ route, navigation }) => {
     }
   };
 
-  useEffect(() => {
-    return () => {};
-  });
-
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {showMessage ? (
-        <Animatable.View
-          animation="fadeInDown"
-          delay={500}
-          style={styles.updatePrompt}
-        >
-          <Text style={styles.promptText}>{message}</Text>
-          <Pressable onPress={() => setShowMesssage(false)}>
-            <AntDesign
-              name="closecircle"
-              size={24}
-              color={Constants.background}
-              style={styles.closeBtn}
-            />
-          </Pressable>
-        </Animatable.View>
-      ) : null}
-
       <View style={styles.subContainerOne}>
         <Text style={styles.label}>First name</Text>
         <TextInput
@@ -513,7 +494,7 @@ const UserDetails = ({ route, navigation }) => {
           <Text style={styles.saveText}>Save</Text>
         )}
       </Pressable>
-      {googleId && (
+      {!googleId && (
         <View style={styles.updatePasswords}>
           <Text style={styles.changePasswordTitle}>Change Password</Text>
           <HelperText

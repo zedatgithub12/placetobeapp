@@ -8,15 +8,16 @@ import Constants from "../../constants/Constants";
 /**************************** User not Logged in handler ************************ */
 const NotLoggedIn = ({ ...props }) => {
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center",  }}>
       <View style={styles.notLogedPrompt}>
         <FontAwesome5
-          name="exclamation-circle"
+          name="info-circle"
           size={66}
-          color={Constants.Secondary}
+          color={Constants.primary}
+          style={{ marginTop: -50 }}
         />
 
-        <Title style={styles.prompttxt}>Please Login First!</Title>
+        <Title style={styles.prompttxt}>Please sign in first</Title>
         <Paragraph style={styles.helperText}>{props.helpertext}</Paragraph>
 
         <View style={styles.actionBtns}>
@@ -44,7 +45,7 @@ const NotLoggedIn = ({ ...props }) => {
 // define your styles
 const styles = StyleSheet.create({
   notLogedPrompt: {
-    height: 300,
+    height: 270,
     width: 300,
     alignItems: "center",
     alignSelf: "center",
@@ -52,13 +53,14 @@ const styles = StyleSheet.create({
     borderRadius: Constants.borderRad,
     elevation: 6,
     padding: 15,
-    shadowColor: Constants.Secondary,
+    shadowColor: Constants.transparentPrimary,
+    
   },
   prompttxt: {
     fontSize: Constants.primaryHeading,
     fontWeight: Constants.Bold,
     marginTop: 10,
-    color: Constants.Secondary,
+    color: Constants.Inverse,
   },
   helperText: {
     width: "90%",
@@ -79,7 +81,6 @@ const styles = StyleSheet.create({
     borderRadius: Constants.tiny,
     padding: 10,
     alignItems: "center",
-    elevation: 1,
   },
   LoginBtn: {
     width: "38%",

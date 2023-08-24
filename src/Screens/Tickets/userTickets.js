@@ -1,15 +1,16 @@
 //import liraries
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, StyleSheet, FlatList } from "react-native";
 import { AuthContext } from "../../Components/context";
-import BoughtTicket from "../../Components/Tickets/BoughtTicket";
 import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
 import NotLoggedIn from "../../handlers/auth";
 import NoTicket from "../../handlers/Tickets";
 import NetInfo from "@react-native-community/netinfo";
 import NoConnection from "../../handlers/connection";
+import TicketListing from "../../Components/Tickets/TicketsListing";
+import { Status, StatusText } from "../../Utils/functions";
 
 /********************************** User Tickets Listing Screen ************************** */
 
@@ -41,7 +42,6 @@ const UserTickets = ({ navigation }) => {
     })
       .then((reponse) => reponse.json())
       .then((response) => {
-        console.log(response);
         if (response.success) {
           var ticket = response.data;
           setSold(ticket);
@@ -52,7 +52,6 @@ const UserTickets = ({ navigation }) => {
       })
       .catch((error) => {
         setRefreshing(false);
-        console.log(error);
       });
 
     return () => {
@@ -81,7 +80,6 @@ const UserTickets = ({ navigation }) => {
     })
       .then((reponse) => reponse.json())
       .then((response) => {
-        console.log(response);
         if (response.success) {
           var ticket = response.data;
           setSold(ticket);
@@ -92,7 +90,6 @@ const UserTickets = ({ navigation }) => {
       })
       .catch((error) => {
         setRefreshing(false);
-        console.log(error);
       });
 
     return () => {
@@ -192,18 +189,20 @@ const UserTickets = ({ navigation }) => {
     return Color;
   };
 
+  // render ticket listing
   const renderItem = ({ item }) => (
-    <BoughtTicket
-      id={item.id}
-      title={item.event_name}
+    <TicketListing
+      event={item.event_name}
+      type={item.tickettype}
+      quantity={item.quantity}
+      price={item.price}
       iconName={TicketName(item.tickettype)}
       iconColor={TicketColor(item.tickettype)}
-      quantity={item.quantity}
-      type={item.tickettype}
-      onPress={() => navigation.navigate("BoughtDetail", item)}
+      status={Status(item.status)}
+      textColor={StatusText(item.status)}
+      onPress={() => navigation.navigate("BoughtDetail", { ...item })}
     />
   );
-
   useEffect(() => {
     const InternetConnection = async () => {
       const networkState = await NetInfo.fetch();

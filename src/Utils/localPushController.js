@@ -2,14 +2,11 @@ import PushNotification, { Importance } from "react-native-push-notification";
 import Constants from "../constants/Constants";
 import * as Linking from "expo-linking";
 
-
-
 PushNotification.configure({
   onNotification: function (notify) {
-    
     if (notify.data.type == "events") {
-       Linking.openURL('com.afromina.placetobe://eventdetail/'+notify.data.id);
-      // Linking.openURL('http://www.p2b-ethiopia.com/eventdetail/'+notify.data.id);
+      // Linking.openURL("com.afromina.placetobe://event-detail/" + notify.data.id);
+      Linking.openURL('http://www.p2b-ethiopia.com/eventdetail/'+notify.data.id);
     }
   },
   popInitialNotification: true,
@@ -25,20 +22,12 @@ PushNotification.createChannel({
   vibrate: true,
 });
 
-
-export const LocalNotification = (
-  time,
-  title,
-  message,
-  picture,
-  userInfo,
- 
-) => {
+export const LocalNotification = (time, title, message, picture, userInfo) => {
   PushNotification.localNotification({
     channelId: "channel-id",
     channelName: "My channel",
     title: title,
-    ticker: 'Tcker',
+    ticker: "Ticker",
     message: message,
     subText: time,
     when: time,
@@ -54,8 +43,8 @@ export const LocalNotification = (
     onlyAlertOnce: false,
 
     largeIcon: "ic_launcher",
-    largeIconUrl:picture,
+    largeIconUrl: picture,
     bigLargeIcon: "ic_launcher",
-    bigLargeIconUrl:picture
+    bigLargeIconUrl: picture,
   });
 };

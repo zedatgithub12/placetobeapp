@@ -1,91 +1,41 @@
 //import liraries
 import React, { useEffect, useState, useRef } from "react";
-import { View, StyleSheet, Image, ScrollView, Dimensions } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  ScrollView,
+  Dimensions,
+  Pressable,
+  Linking,
+} from "react-native";
 import Connection from "../../constants/connection";
+import { UserInteraction } from "../../Utils/Ads";
 
 // slider a component
-const Slider = () => {
-  var placeHoldersImage = "placeholders.jpg";
+const Slider = ({ ad }) => {
+  const Banners = ad;
+  const featuredImageUri = Connection.url + Connection.assets;
 
-  const PlaceholderImages = [
-    {
-      id: "1",
-      image: placeHoldersImage,
-    },
-    {
-      id: "2",
-      image: placeHoldersImage,
-    },
-    {
-      id: "3",
-      image: placeHoldersImage,
-    },
-    {
-      id: "4",
-      image: placeHoldersImage,
-    },
-    {
-      id: "5",
-      image: placeHoldersImage,
-    },
-    {
-      id: "6",
-      image: placeHoldersImage,
-    },
-    {
-      id: "7",
-      image: placeHoldersImage,
-    },
-    {
-      id: "8",
-      image: placeHoldersImage,
-    },
-  ];
-  // state of featured image
-  const [Images, setImage] = useState(PlaceholderImages);
-  //a function which featches featured-image on the top of home screen from database
-  // then the function will be called on the component mounting
-  useEffect(() => {
-    const featchImage = () => {
-      var ApiUrl = Connection.url + Connection.Images;
-      var headers = {
-        Accept: "application/json",
-        "Content-Type": "appliction/json",
-      };
-
-      fetch(ApiUrl, {
-        method: "post",
-        headers: headers,
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          var message = response[0].message;
-
-          if (message === "succeed") {
-            var featuredImages = response[0].images;
-
-            setImage(featuredImages);
-          } else {
-            setImage(Images);
-          }
-        })
-        .catch(() => {
-          setImage(Images);
-        });
-    };
-    featchImage();
-    return () => {};
-  }, []);
+  const handleUserAction = (reaction, banner) => {
+    if (reaction === "clicked") {
+      Linking.openURL(banner.ad_link_url);
+      UserInteraction(banner, reaction);
+    } else {
+      UserInteraction(banner, reaction);
+    }
+  };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scrollViewRef = useRef();
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      const nextIndex = (currentImageIndex + 1) % Images.length;
+      const nextIndex = (currentImageIndex + 1) % Banners.length;
       setCurrentImageIndex(nextIndex);
       scrollViewRef.current.scrollTo({
         x: nextIndex * Dimensions.get("screen").width,
+        animated: true,
       });
     }, 5000);
 
@@ -106,17 +56,21 @@ const Slider = () => {
           setCurrentImageIndex(index);
         }}
       >
-        {Images.map((image, index) => (
-          <View key={index} style={styles.box}>
+        {Banners.map((banner, index) => (
+          <Pressable
+            key={index}
+            style={styles.box}
+            onPress={() => handleUserAction("clicked", banner)}
+          >
             <Image
-              source={{ uri: Connection.url + Connection.assets + image.image }}
+              source={{ uri: featuredImageUri + banner.ad_creative }}
               style={styles.image}
             />
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
       <View style={styles.pagination}>
-        {Images.map((_, index) => (
+        {Banners.map((_, index) => (
           <View
             key={index}
             style={[
@@ -134,47 +88,45 @@ const Slider = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
-    borderRadius: 12,
+    justifyContent: "center",
+    borderRadius: 8,
+    marginVertical: 5,
   },
 
   box: {
     flexDirection: "row",
     width: Dimensions.get("screen").width,
     height: 110,
-    justifyContent: "center",
     alignItems: "center",
-    marginTop: 8,
-    marginBottom: 6,
-    paddingHorizontal: 10,
-
-    borderRadius: 12,
+    justifyContent: "center",
+    borderRadius: 6,
+    marginVertical: 2,
   },
   image: {
-    width: "100%",
+    width: "92%",
     height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
     borderRadius: 12,
-    backgroundColor: "#eee",
+    backgroundColor: "#fff",
     resizeMode: "contain",
   },
 
   pagination: {
     flexDirection: "row",
     position: "absolute",
-    bottom: 10,
+    bottom: 5,
+    padding: 10,
+    paddingBottom: 2,
   },
   paginationDot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: "#ccc",
+    width: 7,
+    height: 7,
+    borderRadius: 3,
+    backgroundColor: "#f3f3f3",
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: "#ffbb00",
+    backgroundColor: "#e29000",
   },
 });
 //make this component available to the app

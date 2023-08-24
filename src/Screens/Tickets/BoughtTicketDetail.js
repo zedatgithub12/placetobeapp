@@ -1,106 +1,215 @@
 //import liraries
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useContext, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Dimensions,
+} from "react-native";
 import { Divider } from "react-native-paper";
 import SvgQRCode from "react-native-qrcode-svg";
 import Constants from "../../constants/Constants";
-import { Feather } from "react-native-vector-icons";
 import Connection from "../../constants/connection";
-// create a component
+import { useTheme } from "@react-navigation/native";
+import { Typography } from "../../themes/typography";
+import { MaterialCommunityIcons } from "react-native-vector-icons";
+import { DateFormater, Status, StatusText } from "../../Utils/functions";
+import { AuthContext } from "../../Components/context";
+
+function Simple(item) {
+  const { theme } = useTheme();
+  return (
+    <SvgQRCode
+      value={Connection.url + item.id}
+      size={180}
+      enableLinearGradient={true}
+      linearGradient={[theme.primary[700], theme.dark.main]}
+    />
+  );
+}
+
 const BoughtDetail = ({ navigation, route }) => {
   const item = route.params;
-  function Simple() {
-    return <SvgQRCode value={Connection.url+item.id}/>;
-  }
+  const { theme } = useTheme();
+  const { SelectedTicket } = useContext(AuthContext);
+  const setID = (id) => {
+    SelectedTicket(id);
+  };
+  useEffect(() => {
+    setID(item.id);
+
+    return () => {};
+  }, []);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={{ backgroundColor: theme.background.darker }}>
       <View style={styles.qrcodecontainer}>
-        <Simple
-          style={styles.qrcode}
-           
-        />
+        <Simple item={item} />
       </View>
 
-      <View style={styles.firstcontent}>
-        <View>
-          <Text style={styles.username} numberOfLines={1}>
-            {item.username}
+      <View
+        style={[
+          styles.firstcontent,
+          {
+            backgroundColor: theme.background.main,
+            borderWidth: 0.2,
+            borderColor: theme.dark[200],
+            borderRadius: 2,
+          },
+        ]}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 20,
+          }}
+        >
+          <Text
+            style={{
+              textTransform: "capitalize",
+              fontFamily: Typography.family,
+              fontSize: Typography.size.headingtwo,
+              fontWeight: Typography.weight.bold,
+              marginBottom: 8,
+            }}
+          >
+            Buyer Info
           </Text>
-          <Text style={styles.phone}>{item.phone}</Text>
+        </View>
+        <Divider height="2" />
+        <View style={{ paddingHorizontal: 20, paddingVertical: 6 }}>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={styles.leftside}>Full name</Text>
+            <Text style={styles.username} numberOfLines={1}>
+              {item.username}
+            </Text>
+          </View>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={styles.leftside}>Phone</Text>
+            <Text style={styles.phone}>{item.phone}</Text>
+          </View>
+        </View>
+      </View>
+
+      <View
+        style={[
+          styles.firstcontent,
+          {
+            backgroundColor: theme.background.main,
+            borderWidth: 0.2,
+            borderColor: theme.dark[200],
+            borderRadius: 2,
+          },
+        ]}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 20,
+          }}
+        >
+          <Text
+            style={{
+              textTransform: "capitalize",
+              fontFamily: Typography.family,
+              fontSize: Typography.size.headingtwo,
+              fontWeight: Typography.weight.bold,
+              marginBottom: 8,
+            }}
+          >
+            Ticket Info
+          </Text>
+          <View style={styles.status}>
+            <Text
+              style={[styles.statustxt, { color: StatusText(item.status) }]}
+            >
+              {item.status == 2 && (
+                <MaterialCommunityIcons name="check-circle" size={13} />
+              )}
+              {Status(item.status)}
+            </Text>
+          </View>
+        </View>
+        <Divider height="2" />
+        <View style={styles.secondcontents}>
+          <Text style={styles.leftside}>Ticket Name</Text>
+          <Text style={styles.rightside}>{item.event_name}</Text>
+        </View>
+        <View style={styles.secondcontents}>
+          <Text style={styles.leftside}>Type</Text>
+          <Text style={styles.rightside}>{item.tickettype}</Text>
+        </View>
+        <View style={styles.secondcontents}>
+          <Text style={styles.leftside}>Quantity</Text>
+          <Text style={styles.rightside}>{item.quantity}</Text>
+        </View>
+        <View style={styles.secondcontents}>
+          <Text style={styles.leftside}>Each Price</Text>
+          <Text style={styles.rightside}>{item.price} Birr </Text>
+        </View>
+        <View style={styles.secondcontents}>
+          <Text style={styles.leftside}>Bought by</Text>
+          {item.p_gateway == 1 ? (
+            <Text style={styles.rightside}>Telebirr</Text>
+          ) : item.p_gateway == 2 ? (
+            <Text style={styles.rightside}>Chapa</Text>
+          ) : null}
         </View>
 
-        <View style={styles.status}>
-          <Text style={styles.statustxt}>Upcoming</Text>
+        <View style={styles.secondcontents}>
+          <Text style={styles.leftside}>Date</Text>
+          <Text style={styles.rightside}>{DateFormater(item.date)}</Text>
         </View>
-      </View>
 
-      <Divider height="2" />
-
-      <View style={styles.secondcontents}>
-        <Text style={styles.leftside}>Ticket Name</Text>
-        <Text style={styles.rightside}>{item.event_name}</Text>
+        <TouchableOpacity
+          style={styles.viewEvent}
+          activeOpacity={0.7}
+          onPress={() =>
+            navigation.navigate("EventDetail", { id: item.event_id })
+          }
+        >
+          <Text style={styles.viewtxt}>View Event</Text>
+        </TouchableOpacity>
       </View>
-      <View style={styles.secondcontents}>
-        <Text style={styles.leftside}>Type</Text>
-        <Text style={styles.rightside}>{item.tickettype}</Text>
-      </View>
-      <View style={styles.secondcontents}>
-        <Text style={styles.leftside}>Quantity</Text>
-        <Text style={styles.rightside}>{item.quantity}</Text>
-      </View>
-      <View style={styles.secondcontents}>
-        <Text style={styles.leftside}>Each Price</Text>
-        <Text style={styles.rightside}>{item.price} Birr </Text>
-      </View>
-      <View style={styles.secondcontents}>
-        <Text style={styles.leftside}>Bought by</Text>
-        {item.p_gateway == 1 ? (
-          <Text style={styles.rightside}>Telebirr</Text>
-        ) : item.p_gateway == 2 ? (
-          <Text style={styles.rightside}>Chapa</Text>
-        ) : null}
-      </View>
-      <View style={styles.secondcontents}>
-        <Text style={styles.leftside}>Date</Text>
-        <Text style={styles.rightside}>{item.date}</Text>
-      </View>
-
-      <TouchableOpacity style={styles.viewEvent} activeOpacity={0.7} 
-       onPress={() => navigation.navigate("EventDetail",   {id:item.event_id} )}>
-        <Text style={styles.viewtxt}>View Event</Text>
-        <Feather name="chevrons-right" size={22} color={Constants.primary} />
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 // define your styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Constants.Faded,
-    paddingTop: 40,
-  },
   qrcodecontainer: {
-    margin: 20,
+    width: Dimensions.get("screen").width / 1.8,
+    height: Dimensions.get("screen").height / 3.8,
+    margin: 30,
     alignSelf: "center",
+    justifyContent: "center",
     padding: 6,
-    borderWidth: 0.5,
-    borderRadius: 4,
-    borderColor: Constants.Secondary,
+  },
+  qrcode: {
+    width: "100%",
+    height: "100%",
   },
   firstcontent: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    margin: 10,
+    paddingVertical: 6,
+    marginHorizontal: 8,
+    marginVertical: 2,
   },
   username: {
     textTransform: "capitalize",
     fontFamily: Constants.fontFam,
-    fontSize: Constants.headingone,
+    fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
     marginBottom: 8,
   },
@@ -111,22 +220,19 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   status: {
-    padding: 4,
+    paddingVertical: 4,
   },
   statustxt: {
-    backgroundColor: Constants.background,
     padding: 4,
-    paddingHorizontal: 10,
-    borderRadius: 2,
+    paddingHorizontal: 4,
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
     fontSize: Constants.headingthree,
-    color: Constants.green,
   },
   secondcontents: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     margin: 10,
   },
   leftside: {
@@ -136,9 +242,10 @@ const styles = StyleSheet.create({
     color: Constants.Inverse,
   },
   rightside: {
-    fontWeight: Constants.Bold,
-    fontSize: Constants.headingtwo,
+    textTransform: "capitalize",
     fontFamily: Constants.fontFam,
+    fontSize: Constants.headingtwo,
+    fontWeight: Constants.Bold,
     color: Constants.Inverse,
   },
   viewEvent: {

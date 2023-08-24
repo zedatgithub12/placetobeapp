@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  StatusBar,
   View,
   StyleSheet,
   Text,
@@ -7,49 +8,68 @@ import {
   Image,
   Dimensions,
   ScrollView,
-  Pressable,
-  ActivityIndicator,
+  FlatList,
+  Linking,
 } from "react-native";
+import NetInfo from "@react-native-community/netinfo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "../../constants/Constants";
-import { Ionicons, MaterialIcons } from "react-native-vector-icons";
-import { Divider } from "react-native-paper";
+import { Ionicons } from "react-native-vector-icons";
 import { AuthContext } from "../../Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Connection from "../../constants/connection";
+import Connection from "../../api";
 import Categories from "../../Components/Categories/CategoryListing";
-import Category from "../../dummies/Category";
-import TicketCard from "../../Components/Tickets/TicketCard";
-import TicketShimmer from "../../Components/Tickets/Skeleton/TicketShimmer";
+import Category from "../../data/Category";
 import Events from "../../Components/Events/Events";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
 import { LocalNotification } from "../../Utils/localPushController";
 import Slider from "../../Components/Slider";
+import NoConnection from "../../handlers/connection";
+import { useTheme } from "@react-navigation/native";
+import Loader from "../../ui-components/ActivityIndicator";
+import { HelperText } from "react-native-paper";
+import {
+  DateFormater,
+  TimeFormater,
+  CategoryColor,
+  EntranceFee,
+  getCurrentDate,
+  formattedDate,
+} from "../../Utils/functions";
+import EventCounter from "./components/counter";
+import Preferences from "../../preferences";
+import NativeAdsOne from "../../Components/Ads/nativeAd1";
+import SlideUp from "../../Components/Ads/slideup";
+import HeaderAds from "../../Components/Ads/headerAds";
+import TitleContainer from "./components/header";
+import { fetchAds, UserInteraction } from "../../Utils/Ads";
 
 function Home({ navigation, ...props }) {
+  const { theme } = useTheme();
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
-  const [Tickets, setTickets] = useState([]);
-  const [ticketShimmer, setTicketShimmer] = useState(true);
+
+  const [loading, setLoading] = useState(true);
+  const [connection, setConnection] = useState(true);
+  const [retry, setRetry] = useState(false);
+  const [active, setActive] = useState("All");
+
   const [events, setEvents] = useState([]);
   const [eventShimmer, setEventShimmer] = useState(true);
-  const d = new Date();
-  let Hour = d.getHours();
-  let minute = d.getMinutes();
+  const [filteredEvent, setFilteredEvent] = useState([]);
+  // state of event in the homepage
+  const [featured, setFeatured] = useState([]);
+  const [happening, setHappening] = useState([]);
+  const [thisWeek, setThisWeek] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
 
-  // notification arrival time in human readable format
-  const ArrivalTime = () => {
-    var time;
-    if (Hour > 12) {
-      time = Hour - 12 + ":" + minute + " pm";
-    } else if (Hour == 12) {
-      time = Hour + ":" + minute + " pm";
-    } else {
-      time = Hour + ":" + minute + " am";
-    }
+  const [showBannerAds, setShowBannerAds] = useState(true);
+  const [bannerAds, setBannerAds] = useState([]);
+  const [showNativeAd, setShowNativeAd] = useState(false);
+  const [nativeAd, setNativeAd] = useState([]);
+  const [showCardAd, setShowCardAd] = useState(false);
+  const [AdsInfo, setAdsInfo] = useState([]);
 
-    return time;
-  };
-
+  const today = getCurrentDate();
   // check if the profile got updated and update the top right profile indicator
   const profile = () => {
     navigation.navigate("Profile");
@@ -86,40 +106,12 @@ function Home({ navigation, ...props }) {
       });
   };
 
-  //featch available tickets
-
-  const FeatchTickets = () => {
-    var ApiUrl = Connection.url + Connection.AvailableTickets;
-
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-
-    // start Api request
-    fetch(ApiUrl, {
-      method: "GET",
-      headers: headers,
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.success) {
-          setTickets(response.data);
-          setTicketShimmer(false);
-        } else {
-          setTicketShimmer(false);
-        }
-      })
-      .catch((error) => {
-        console.log("Error ticket featching" + error);
-        setTicketShimmer(false);
-      });
-  };
-
   // featch Featured events
   //featured events are the event which have high priority or value of number 1 in databse table
   const FeatchEvents = () => {
-    var ApiUrl = Connection.url + Connection.FeaturedEvent;
+    setLoading(true);
+
+    var ApiUrl = Connection.url + Connection.events;
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -134,167 +126,262 @@ function Home({ navigation, ...props }) {
         if (response.success) {
           setEvents(response.data);
           setEventShimmer(false);
+          setLoading(false);
         } else {
           setEventShimmer(false);
+          setLoading(false);
         }
       })
       .catch((error) => {
         setEventShimmer(false);
+        setLoading(false);
       });
   };
-  /********************************************************** */
-  //date function which perform date format conversion and return the suitable format for frontend
-  /********************************************************** */
-  const DateFun = (startingDate) => {
-    var date = new Date(startingDate);
-    let day = date.getDay();
-    let month = date.getMonth();
-    let happeningDay = date.getDate();
 
-    // return weekname
-    var weekday = new Array(7);
-    weekday[1] = "Mon, ";
-    weekday[2] = "Tue, ";
-    weekday[3] = "Wed, ";
-    weekday[4] = "Thu, ";
-    weekday[5] = "Fri, ";
-    weekday[6] = "Sat, ";
-    weekday[0] = "Sun, ";
-
-    //an array of month name
-    var monthName = new Array(12);
-    monthName[1] = "Jan";
-    monthName[2] = "Feb";
-    monthName[3] = "Mar";
-    monthName[4] = "Apr";
-    monthName[5] = "May";
-    monthName[6] = "Jun";
-    monthName[7] = "Jul";
-    monthName[8] = "Aug";
-    monthName[9] = "Sep";
-    monthName[10] = "Oct";
-    monthName[11] = "Nov";
-    monthName[12] = "Dec";
-
-    return weekday[day] + monthName[month + 1] + " " + happeningDay;
-  };
-  const TimeFun = (eventTime) => {
-    var time = eventTime;
-    var result = time.slice(0, 2);
-    var minute = time.slice(3, 5);
-    var globalTime;
-    var postMeridian;
-    var separator = ":";
-    if (result > 12) {
-      postMeridian = result - 12;
-      globalTime = "PM";
+  const handleCategoryClick = (categoryname, type) => {
+    setActive(categoryname);
+    if (active === "All") {
+      renderAll();
     } else {
-      postMeridian = result;
-      globalTime = "AM";
-    }
-
-    return postMeridian + separator + minute + " " + globalTime;
-  };
-  const EntranceFee = (price) => {
-    var eventPrice;
-    var free = "Free";
-    var currency = " ETB";
-    if (price != 0) {
-      eventPrice = price + currency;
-    } else {
-      eventPrice = free;
-    }
-    return eventPrice;
-  };
-  // events category color
-  const CategoryColor = (category) => {
-    var color;
-    switch (category) {
-      case "Entertainment":
-        color = "#007bc2";
-        break;
-      case "Travelling":
-        color = "#0c790c";
-        break;
-
-      case "Cinema & Theater":
-        color = "#00e8e0";
-        break;
-
-      case "Community":
-        color = "#F96666";
-        break;
-      case "Trade Fairs & Expo":
-        color = "#f57a00";
-        break;
-      case "Nightlife":
-        color = "#472D2D";
-        break;
-      case "Professional":
-        color = "#2c2e27";
-        break;
-      case "Shopping":
-        color = "#9306c2";
-        break;
-      case "Sport":
-        color = "#ff0571";
-        break;
-      case "Others":
-        color = "#e8b200";
-        break;
-      default:
-        color = "#ffbb00";
-    }
-    return color;
-  };
-
-  // check if there is discount on ticket price and let them know there is discount
-  const discount = (current, origional) => {
-    var discount = origional - current;
-
-    if (discount > 0) {
-      return origional + " Birr";
-    } else {
-      return discount;
+      renderFilter(categoryname, type);
     }
   };
 
-  //image to be used in notification
-  const featuredImageUri =
-    Connection.url + Connection.assets + "Placeholder.png";
-  const NotificationIcon = Connection.url + Connection.assets + "favicon.png";
+  /****************************************
+   * Render events those the category is other than "All"
+   */
+  const renderFilter = (category, type) => {
+    if (type === "status") {
+      statusFilter(category);
+    } else if (type === "filter") {
+      const filteredData = events.filter((event) => event.priority === 1);
+      setFilteredEvent(filteredData);
+    } else if (type === "category") {
+      const filteredData = events.filter(
+        (event) => event.category === category
+      );
+      setFilteredEvent(filteredData);
+    }
+  };
 
-  const [shown, setShown] = useState(true);
+  /*******************************************
+   * Filter event in status
+   * the status are
+   * Happening, This week, Upcoming
+   */
 
+  const statusFilter = (category) => {
+    if (category === "This week") {
+      //filter events in this week
+      var Api = Connection.url + Connection.WeekEvents;
+      fetchEvent(Api);
+    } else if (category === "Upcoming") {
+      //filter upcoming events
+      var Api = Connection.url + Connection.UpcomingEvents;
+      fetchEvent(Api);
+    } else if (category === "Happening") {
+      //filter events happening today
+      var Api = Connection.url + Connection.TodayEvents;
+      fetchEvent(Api);
+    }
+  };
+
+  const fetchEvent = (Api) => {
+    setLoading(true);
+
+    fetch(Api, {
+      method: "GET",
+    })
+      .then((response) => response.json()) //check response type of the API
+      .then((response) => {
+        if (response.success) {
+          setFilteredEvent(response.data);
+          setLoading(false);
+          renderAll();
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+      });
+  };
+
+  /****************************************
+   * Render events those the category is "All"
+   */
+  const renderAll = () => {
+    const featured_event = events.filter((event) => event.priority === 1);
+    setFeatured(featured_event);
+
+    const happening_event = events.filter(
+      (event) => event.start_date <= today && event.end_date >= today
+    );
+    setHappening(happening_event);
+
+    const upcoming_event = events.filter(
+      (event) => event.start_date <= today && event.end_date >= today
+    );
+    setUpcoming(upcoming_event);
+  };
+
+  const weekEvents = () => {
+    const this_weekevents = events.filter((event) => {
+      const currentDate = new Date();
+      // Get the start and end dates of the week
+      const startOfWeek = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate() - currentDate.getDay()
+      );
+      const endOfWeek = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate() + (6 - currentDate.getDay())
+      );
+      // Convert the event's start and end dates to Date objects
+      const eventStartDate = new Date(formattedDate(event.start_date));
+      const eventEndDate = new Date(formattedDate(event.end_date));
+
+      // Check if the event's start date is within the current week
+      const isStartDateValid =
+        eventStartDate >= startOfWeek && eventStartDate <= endOfWeek;
+
+      // Check if the event's end date is within the current week
+      const isEndDateValid =
+        eventEndDate >= startOfWeek && eventEndDate <= endOfWeek;
+
+      // Return true only if all conditions are met
+      return isStartDateValid && isEndDateValid;
+    });
+
+    setThisWeek(this_weekevents);
+  };
+
+  const upcomingEvents = () => {
+    const upcomings = events.filter((event) => {
+      const currentDate = new Date();
+
+      const endOfWeek = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate() + (6 - currentDate.getDay())
+      );
+      // Convert the event's start and end dates to Date objects
+      const eventStartDate = new Date(formattedDate(event.start_date));
+
+      // Check if the event's start date is after the end of the current week
+      const isStartDateValid = eventStartDate > endOfWeek;
+
+      // Return true only if all conditions are met
+      return isStartDateValid;
+    });
+
+    setUpcoming(upcomings);
+  };
+
+  // render item in flatlist format
+  const renderItem = ({ item }) => (
+    <Events
+      Event_Id={item.id}
+      org_id={item.userId}
+      FeaturedImage={item.event_image}
+      title={item.event_name}
+      date={DateFormater(item.start_date)}
+      time={TimeFormater(item.start_time)}
+      venue={item.event_address}
+      category={CategoryColor(item.category)}
+      Price={EntranceFee(item.event_entrance_fee)}
+      onPress={() => navigation.navigate("EventDetail", { id: item.id })}
+    />
+  );
+
+  // //image to be used in notification
+  // const featuredImageUri =
+  //   Connection.url + Connection.assets + "Placeholder.png";
+  // const NotificationIcon = Connection.url + Connection.assets + "favicon.png";
+
+  useEffect(() => {
+    const InternetConnection = async () => {
+      const networkState = await NetInfo.fetch();
+      setConnection(networkState.isConnected);
+    };
+    InternetConnection();
+
+    const subscription = NetInfo.addEventListener(async (state) => {
+      setConnection(state.isConnected);
+    });
+    return () => {
+      subscription();
+    };
+  }, [retry]);
+
+  const handleBannerAds = async (type) => {
+    try {
+      const response = await fetchAds(type);
+      if (response.success) {
+        setBannerAds(response.data);
+        setShowBannerAds(true);
+      } else {
+        setShowBannerAds(false);
+      }
+    } catch (error) {
+      setShowBannerAds(false);
+    }
+  };
+
+  const handleNativeCardAds = async (type) => {
+    try {
+      const response = await fetchAds(type);
+      if (response.success) {
+        setAdsInfo(response.data);
+        setShowCardAd(true);
+      } else {
+        setShowCardAd(false);
+      }
+    } catch (error) {
+      setShowCardAd(false);
+    }
+  };
+  //handle component mounting event
   useEffect(() => {
     userInfoFunction();
     userProfile();
-    FeatchTickets();
     FeatchEvents();
+    weekEvents();
+    upcomingEvents();
+    handleBannerAds("banner");
+    handleNativeCardAds("nativeCard");
     return () => {};
   }, [logged]);
 
   const logged = userStatus.logged;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background.darker }]}
+    >
+      <StatusBar backgroundColor={theme.primary.main} barStyle="dark-content" />
+      <View>
         <View
           //to component container
-          // profile avatar, App name and serach is included inside the component
-          style={styles.headers}
+          // profile avatar, App name and search is included inside the component
+          style={[styles.headers, { backgroundColor: theme.background.main }]}
         >
           <View style={styles.brands}>
             <Image
               source={require("../../assets/images/homebranding.png")}
               resizeMode="cover"
-              style={{ width: 152, height: 70 }}
+              style={{ width: 130, height: 60 }}
             />
           </View>
 
           <TouchableOpacity
             activeOpacity={0.8}
-            style={styles.searchBtn}
+            style={[
+              styles.searchBtn,
+              { backgroundColor: theme.background.faded },
+            ]}
             onPress={() => navigation.push("Eventcat")}
           >
             <Ionicons
@@ -333,150 +420,256 @@ function Home({ navigation, ...props }) {
         </View>
 
         <View style={styles.homeSection2}>
-          <Divider style={{ color: Constants.background }} />
-
-          {shown ? (
-            <ScrollView contentContainerStyle={{ minHeight: 180 }}>
-              {/* promo slide component  */}
-              <Slider />
-
-              <View>
-                <ScrollView
-                  horizontal
-                  contentContainerStyle={styles.categories}
-                  showsHorizontalScrollIndicator={false}
-                >
-                  {Category.map((item) => (
-                    <Categories
-                      key={item.id}
-                      icon={item.icon}
-                      category={item.name}
-                      color={item.background}
-                      onPress={() => navigation.push("Filter", { item })}
-                    />
-                  ))}
-                </ScrollView>
-              </View>
-            </ScrollView>
-          ) : null}
-        </View>
-
-        <View style={styles.availableTickets}>
-          <Text style={styles.ticketTitle}>Available Tickets</Text>
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            marginLeft: 8,
-            paddingRight: 12,
-          }}
-        >
-          {ticketShimmer ? (
-            <View style={{ flexDirection: "row" }}>
-              <TicketShimmer />
-              <TicketShimmer />
-              <TicketShimmer />
-              <TicketShimmer />
-            </View>
-          ) : Tickets.length == 0 ? (
-            <View
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text>There is no Tickets</Text>
-            </View>
-          ) : (
-            Tickets.map((item) => (
-              <TicketCard
-                key={item.id}
-                picture={item.event_image}
-                title={item.event_name}
-                type={item.tickettype}
-                price={item.currentprice}
-                discount={discount(item.currentprice, item.origionalprice)}
-                EventName={() =>
-                  navigation.navigate("EventDetail", { id: item.event_id })
-                }
-                onPress={() => navigation.navigate("TicketScreen", { item })}
-              />
-            ))
-          )}
-        </ScrollView>
-
-        <View style={styles.availableTickets}>
-          <Text style={styles.ticketTitle}>Featured Events</Text>
-          <Pressable>
-            <Ionicons
-              onPress={() => navigation.navigate("Events")}
-              name="md-grid-outline"
-              size={18}
-              color={Constants.Inverse}
-            />
-          </Pressable>
-        </View>
-
-        <View style={{ marginBottom: 55 }}>
-          {eventShimmer ? (
+          <ScrollView contentContainerStyle={{ minHeight: 40 }}>
             <View>
-              <Listing />
-              <Listing />
-              <Listing />
+              <ScrollView
+                horizontal
+                contentContainerStyle={styles.categories}
+                showsHorizontalScrollIndicator={false}
+              >
+                {Category.map((item, index) => (
+                  <Categories
+                    key={index}
+                    icon={item.icon}
+                    category={item.name}
+                    border={item.color}
+                    background={
+                      active === item.name ? item.color : theme.background.main
+                    }
+                    color={
+                      active === item.name
+                        ? Constants.background
+                        : Constants.Inverse
+                    }
+                    onPress={() => handleCategoryClick(item.name, item.type)}
+                  />
+                ))}
+              </ScrollView>
             </View>
-          ) : events.length == 0 ? (
-            <View
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text>There is no Featured</Text>
+          </ScrollView>
+        </View>
+
+        <View style={styles.sectionthree}>
+          {connection ? (
+            <View style={styles.homescrollview}>
+              {active === "All" ? (
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {featured.length > 0 && (
+                    <View>
+                      <TitleContainer title="Featured Events" />
+                      {featured.map((item, index) => (
+                        <Events
+                          key={index}
+                          Event_Id={item.id}
+                          org_id={item.userId}
+                          FeaturedImage={item.event_image}
+                          title={item.event_name}
+                          date={DateFormater(item.start_date)}
+                          time={TimeFormater(item.start_time)}
+                          venue={item.event_address}
+                          category={CategoryColor(item.category)}
+                          Price={EntranceFee(item.event_entrance_fee)}
+                          onPress={() =>
+                            navigation.navigate("EventDetail", { id: item.id })
+                          }
+                        />
+                      ))}
+
+                      {featured.length > Preferences.listedEvent && (
+                        <EventCounter
+                          events={featured}
+                          onPress={() =>
+                            handleCategoryClick("Featured", "filter")
+                          }
+                        />
+                      )}
+                    </View>
+                  )}
+                  {showBannerAds && bannerAds[0] && <Slider ad={bannerAds} />}
+
+                  {/* Happening event listing */}
+                  {happening.length > 0 && (
+                    <View>
+                      <TitleContainer title="Happening" />
+                      {happening.map((item, index) => (
+                        <Events
+                          key={index}
+                          Event_Id={item.id}
+                          org_id={item.userId}
+                          FeaturedImage={item.event_image}
+                          title={item.event_name}
+                          date={DateFormater(item.start_date)}
+                          time={TimeFormater(item.start_time)}
+                          venue={item.event_address}
+                          category={CategoryColor(item.category)}
+                          Price={EntranceFee(item.event_entrance_fee)}
+                          onPress={() =>
+                            navigation.navigate("EventDetail", { id: item.id })
+                          }
+                        />
+                      ))}
+
+                      {happening.length > Preferences.listedEvent && (
+                        <EventCounter
+                          events={happening}
+                          onPress={() =>
+                            handleCategoryClick("Happening", "status")
+                          }
+                        />
+                      )}
+                    </View>
+                  )}
+
+                  {/* This week event listing */}
+                  {thisWeek.length > 0 && (
+                    <View>
+                      <TitleContainer title="This Week" />
+                      {thisWeek.map((item, index) => (
+                        <Events
+                          key={index}
+                          Event_Id={item.id}
+                          org_id={item.userId}
+                          FeaturedImage={item.event_image}
+                          title={item.event_name}
+                          date={DateFormater(item.start_date)}
+                          time={TimeFormater(item.start_time)}
+                          venue={item.event_address}
+                          category={CategoryColor(item.category)}
+                          Price={EntranceFee(item.event_entrance_fee)}
+                          onPress={() =>
+                            navigation.navigate("EventDetail", { id: item.id })
+                          }
+                        />
+                      ))}
+
+                      {thisWeek.length > Preferences.listedEvent && (
+                        <EventCounter
+                          events={thisWeek}
+                          onPress={() =>
+                            handleCategoryClick("This Week", "status")
+                          }
+                        />
+                      )}
+                    </View>
+                  )}
+
+                  {/* upcoming event listing */}
+                  {upcoming.length > 0 && (
+                    <View>
+                      <TitleContainer title="Upcoming" />
+
+                      {upcoming.map((item, index) => (
+                        <Events
+                          key={index}
+                          Event_Id={item.id}
+                          org_id={item.userId}
+                          FeaturedImage={item.event_image}
+                          title={item.event_name}
+                          date={DateFormater(item.start_date)}
+                          time={TimeFormater(item.start_time)}
+                          venue={item.event_address}
+                          category={CategoryColor(item.category)}
+                          Price={EntranceFee(item.event_entrance_fee)}
+                          onPress={() =>
+                            navigation.navigate("EventDetail", { id: item.id })
+                          }
+                        />
+                      ))}
+
+                      {upcoming.length > Preferences.listedEvent && (
+                        <EventCounter
+                          events={upcoming}
+                          onPress={() =>
+                            handleCategoryClick("Upcoming", "status")
+                          }
+                        />
+                      )}
+                    </View>
+                  )}
+
+                  <View
+                    style={{
+                      paddingTop: 20,
+                      height: Dimensions.get("screen").height / 1.6,
+                    }}
+                  >
+                    {showCardAd && AdsInfo[0] && (
+                      <NativeAdsOne
+                        showAds={true}
+                        ad={AdsInfo}
+                        hideCard={() => setShowCardAd(false)}
+                      />
+                    )}
+                  </View>
+                </ScrollView>
+              ) : (
+                <View>
+                  {loading ? (
+                    <Loader size="small" />
+                  ) : (
+                    <FlatList
+                      // List of events in extracted from database in the form JSON data
+                      data={filteredEvent}
+                      renderItem={renderItem}
+                      keyExtractor={(item) => item.id}
+                      nestedScrollEnabled
+                      initialNumToRender={2} // Reduce initial render amount
+                      maxToRenderPerBatch={1} // Reduce number in each render batch
+                      updateCellsBatchingPeriod={100} // Increase time between renders
+                      windowSize={7} // Reduce the window size
+                      ListHeaderComponent={
+                        showNativeAd &&
+                        nativeAd[0] && (
+                          <HeaderAds
+                            ad={nativeAd}
+                            hideAd={() => setNativeAd(false)}
+                          />
+                        )
+                      }
+                      ListEmptyComponent={
+                        <View style={styles.container}>
+                          <Image
+                            source={require("../../assets/images/NotFound.png")}
+                            resizeMode="contain"
+                            style={styles.notFound}
+                          />
+                          <Text style={styles.emptyMessageStyle}>
+                            We don't have event for today!
+                          </Text>
+                          <HelperText style={{ alignSelf: "center" }}>
+                            Check events of the week
+                          </HelperText>
+                        </View>
+                      }
+                    />
+                  )}
+                </View>
+              )}
             </View>
           ) : (
-            events.map((item) => (
-              <Events
-                key={item.id}
-                Event_Id={item.id}
-                org_id={item.userId}
-                FeaturedImage={item.event_image}
-                title={item.event_name}
-                date={DateFun(item.start_date)}
-                time={TimeFun(item.start_time)}
-                venue={item.event_address}
-                category={CategoryColor(item.category)}
-                Price={EntranceFee(item.event_entrance_fee)}
-                onPress={() =>
-                  navigation.navigate("EventDetail", { id: item.id })
-                }
-              />
-            ))
+            <View style={{ height: Dimensions.get("screen").height / 1.2 }}>
+              <NoConnection onPress={() => setRetry(!retry)} />
+            </View>
           )}
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fcfcfc",
   },
   headers: {
-    width: "95%",
+    width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingLeft: 10,
-    paddingTop: Constants.paddTwo,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     alignSelf: "center",
     marginBottom: 10,
     position: "absolute",
-    top: 0,
     zIndex: 1000,
   },
   SearchFieldContainer: {
@@ -490,7 +683,6 @@ const styles = StyleSheet.create({
   brands: {
     flexDirection: "row",
     alignItems: "center",
-
     width: "76%",
   },
   SearchField: {
@@ -572,24 +764,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   homeSection2: {
-    marginTop: 80,
+    marginTop: 68,
   },
-  categories: {
-    paddingHorizontal: 6,
+  sectionthree: {
+    marginBottom: 48,
   },
-  availableTickets: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    margin: 4,
-    marginTop: 10,
+  homescrollview: {
+    marginBottom: 55,
   },
-  ticketTitle: {
-    fontFamily: Constants.fontFam,
-    fontWeight: Constants.Boldtwo,
+  title: {
     fontSize: Constants.headingtwo,
+    fontWeight: Constants.Boldtwo,
+    marginLeft: 10,
+    marginTop: 6,
+    marginBottom: 2,
+  },
+  notFound: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
+  },
+  emptyMessageStyle: {
+    fontSize: Constants.headingthree,
+    fontWeight: Constants.Bold,
+    color: Constants.Secondary,
+    alignSelf: "center",
+    justifyContent: "center",
   },
 });
 

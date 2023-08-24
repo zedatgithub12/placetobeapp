@@ -1,6 +1,5 @@
 //import liraries
-import React, { Component } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 //event screens import
@@ -44,15 +43,23 @@ import Bookmarks from "../Screens/Others/Bookmarks";
 import Questions from "../Screens/Others/AskQuestion";
 import About from "../Screens/Others/About";
 import Filter from "../Screens/Others/Filter";
+import RefundingRequest from "../Screens/Refunding";
 //import Organizers from "./Screens/Organizers";
 
 //other imports
 import Constants from "../constants/Constants";
+import { Menu, IconButton, Divider } from "react-native-paper";
+import { useTheme } from "@react-navigation/native";
+import { Typography } from "../themes/typography";
+import { Linking } from "react-native";
 /********************************* ROUTES SCREEN ****************************** */
 
 const Stack = createNativeStackNavigator();
 // create a component
-const Routes = () => {
+const Routes = ({ navigation }) => {
+  const [showmenu, setShowMenu] = useState(false);
+  const { theme } = useTheme();
+
   return (
     <Stack.Navigator headerMode="none" initialRouteName="TabNav">
       <Stack.Screen
@@ -79,7 +86,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
         }}
       />
       <Stack.Screen
@@ -89,7 +96,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
         }}
       />
       <Stack.Screen
@@ -99,7 +106,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
         }}
       />
       <Stack.Screen
@@ -109,7 +116,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -117,7 +124,14 @@ const Routes = () => {
       <Stack.Screen
         name="EventDetail"
         component={EventDetails}
-        options={{ headerShown: false }}
+        options={{
+          title: "Event Detail",
+          headerStyle: {
+            backgroundColor: Constants.primary,
+          },
+
+          headerShadowVisible: false,
+        }}
       />
 
       <Stack.Screen
@@ -169,7 +183,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerTitle: "Questions and Feedback",
         }}
       />
@@ -180,7 +194,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerTitle: "About us",
         }}
       />
@@ -199,7 +213,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -210,7 +224,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -221,7 +235,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -233,7 +247,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -244,7 +258,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -256,7 +270,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -268,7 +282,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -280,7 +294,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
           headerShown: false,
         }}
@@ -293,7 +307,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
           headerShown: false,
         }}
@@ -307,7 +321,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -320,7 +334,7 @@ const Routes = () => {
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.background,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
         }}
       />
@@ -328,17 +342,77 @@ const Routes = () => {
       <Stack.Screen
         name="BoughtDetail"
         component={BoughtDetail}
-        options={{
-          title: "Purchased Ticket Details",
+        options={({ navigation }) => ({
+          title: "Your Tickets",
           headerStyle: {
             backgroundColor: Constants.primary,
           },
-          headerTintColor: Constants.Inverse,
+          headerTintColor: theme.dark.main,
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerTitleStyle: {
-            fontSize: Constants.headingone,
+            textAlign: "center",
           },
+          headerRight: () => (
+            <Menu
+              visible={showmenu} // Set to true to show the menu by default
+              onDismiss={() => setShowMenu(false)}
+              anchor={
+                <IconButton
+                  icon="dots-vertical"
+                  color={theme.dark.main}
+                  size={22}
+                  onPress={() => setShowMenu(true)}
+                />
+              }
+              contentStyle={{ marginRight: 6 }}
+              style={{ marginTop: 40 }}
+            >
+              {/* Add your menu items here */}
+              <Menu.Item
+                onPress={() => {
+                  setShowMenu(false), navigation.push("Refunding");
+                }}
+                title="Request Refunding"
+              />
+              <Divider />
+              <Menu.Item
+                onPress={() => {
+                  setShowMenu(false),
+                    Linking.openURL(
+                      "https://placetobeethiopia.com/refunding-terms"
+                    );
+                }}
+                title="Refunding Terms"
+              />
+              <Divider />
+              <Menu.Item
+                onPress={() => {
+                  setShowMenu(false),
+                    Linking.openURL(
+                      "https://placetobeethiopia.com/terms-agreement"
+                    );
+                }}
+                title="Terms and Agreement"
+              />
+            </Menu>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="Refunding"
+        component={RefundingRequest}
+        options={{
+          title: "Request Refunding",
+          headerStyle: {
+            backgroundColor: Constants.primary,
+          },
+          headerTitleAlign: "center",
+          headerTintColor: theme.dark.main,
+          headerTitleStyle: {
+            textAlign: "center",
+          },
+          headerShadowVisible: false,
         }}
       />
     </Stack.Navigator>

@@ -158,14 +158,14 @@ const FormTwo = () => {
         </TouchableOpacity>
         {
           //check button on validation of input field
-          inputs.startDateCheckIcon ? (
+          inputs.startDateCheckIcon && (
             <MaterialCommunityIcons
               name="checkbox-marked-circle"
               size={22}
               color={Constants.Success}
               style={styles.checkIcon}
             />
-          ) : null
+          )
         }
       </View>
 

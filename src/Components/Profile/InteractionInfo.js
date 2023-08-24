@@ -11,29 +11,11 @@ const userInfo = ({ ...props }) => {
     >
       <View style={styles.containerWithIcon}>
         <TouchableOpacity
-          activeOpacity={0.8}
-          style={{ alignItems: "center" }}
-          onPress={props.getData}
-        >
-          <Text style={styles.txts}>{props.Events}</Text>
-          <Text style={styles.describingtxt}>Your Events</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.containerWithIcon}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={{ alignItems: "center" }}
-          onPress={props.followerCountPressed}
-        >
-          <Text style={styles.txts}>{props.Followers}</Text>
-          <Text style={styles.describingtxt}>Followers</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.containerWithIcon}>
-        <TouchableOpacity
-          style={{ alignItems: "center" }}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-around",
+          }}
           onPress={props.followingCountPressed}
           activeOpacity={0.8}
         >
@@ -47,9 +29,8 @@ const userInfo = ({ ...props }) => {
 const styles = StyleSheet.create({
   infoContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 15,
     marginBottom: 0,
     paddingHorizontal: 15,
   },
@@ -57,22 +38,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 5,
-    elevation: 1,
-    shadowColor: Constants.Secondary,
-    borderRadius: Constants.tinybox,
-    width: "30%",
-    backgroundColor: Constants.Faded,
   },
-  describingtxt: {
-    color: Constants.Inverse,
-    fontFamily: Constants.fontFam,
-    //fontWeight: Constants.Boldtwo,
-  },
+
   txts: {
     fontWeight: Constants.Bold,
     fontSize: Constants.headingtwo,
     color: Constants.Inverse,
     fontFamily: Constants.fontFam,
+    marginHorizontal: 4,
+  },
+  describingtxt: {
+    color: Constants.Inverse,
+    fontFamily: Constants.fontFam,
+    //fontWeight: Constants.Boldtwo,
   },
 });
 

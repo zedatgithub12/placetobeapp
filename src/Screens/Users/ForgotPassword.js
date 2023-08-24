@@ -7,14 +7,18 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import Constants from "../../constants/Constants";
 import { MaterialCommunityIcons, Ionicons } from "react-native-vector-icons";
-import { ActivityIndicator, Caption } from "react-native-paper";
+import { Caption } from "react-native-paper";
 import Connection from "../../constants/connection";
+import { useTheme } from "@react-navigation/native";
 
 // create a component
 const ForgotPass = ({ navigation }) => {
+  const { theme } = useTheme();
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState();
   const [submit, setSubmit] = useState(false);
@@ -28,9 +32,7 @@ const ForgotPass = ({ navigation }) => {
   const ResetPassword = () => {
     if (email == 0) {
       setError(true);
-      setErrorMessage(
-        "Please enter you email address or username associated with your account"
-      );
+      setErrorMessage("Please enter your email address");
       setSubmit(false);
     } else {
       setSubmit(true);
@@ -50,21 +52,27 @@ const ForgotPass = ({ navigation }) => {
       })
         .then((response) => response.json())
         .then((response) => {
-          var message = response[0].message;
-          if (message === "succeed") {
+          if (response.success) {
             setSucceed(true);
             setSubmit(false);
             setError(false);
+            console.log(response.message);
           } else {
-            setErrorMessage(message);
+            setErrorMessage(response.message);
             setSubmit(false);
             setError(true);
+            setSucceed(false);
           }
+        })
+        .catch((error) => {
+          setSucceed(false);
         });
     }
   };
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: theme.background.main }]}
+    >
       <TouchableOpacity
         style={styles.backArrow} // back arrow button style
         onPress={() => navigation.goBack()}
@@ -76,27 +84,21 @@ const ForgotPass = ({ navigation }) => {
         />
       </TouchableOpacity>
       <Image
-        source={require("../../assets/images/forget.png")}
+        source={require("../../assets/images/passwords.png")}
         style={styles.forgotPass}
       />
 
-      <Text style={styles.title}>Reset Password</Text>
+      <Text style={styles.title}>Forgot Password</Text>
       <Caption style={styles.caption}>
-        Enter your email address or username associated with your account in the
-        field below
+        Enter email address associated with your account
       </Caption>
 
       <TextInput
-        placeholder="Email or Username"
+        placeholder="Email address"
         style={styles.emailField}
         value={email}
         onChangeText={(val) => sendEmail(val)}
       />
-      {error ? (
-        <Text style={styles.errorPrompt}>{errorMessage}</Text>
-      ) : (
-        <Text style={styles.errorPlaceHolder}></Text>
-      )}
 
       <TouchableOpacity
         onPress={() => ResetPassword()}
@@ -104,26 +106,30 @@ const ForgotPass = ({ navigation }) => {
         style={styles.sendBtn}
       >
         {submit ? (
-          <ActivityIndicator size="small" color={Constants.background} />
+          <ActivityIndicator size="small" color={Constants.Inverse} />
         ) : (
           <Text style={styles.sendButton}>Send</Text>
         )}
       </TouchableOpacity>
-
-      {succeed ? (
+      {error ? (
+        <Text style={styles.errorPrompt}>{errorMessage}</Text>
+      ) : (
+        <Text style={styles.errorPlaceHolder}></Text>
+      )}
+      {succeed && (
         <View style={styles.successContainer}>
-          <Text style={styles.successText}>
-            Successfully sent reset link to email address associated with your
-            account open your email and set new password!
-          </Text>
           <MaterialCommunityIcons
             name="check-circle"
-            size={32}
-            color={Constants.background}
-            style={{ paddingHorizontal: 20 }}
+            size={28}
+            color={Constants.Success}
+            style={{ paddingHorizontal: 4, marginRight: 8, marginTop: 4 }}
           />
+          <Text style={styles.successText}>
+            Successfully sent reset link to email address, open your email and
+            set new password!
+          </Text>
         </View>
-      ) : null}
+      )}
     </View>
   );
 };
@@ -138,23 +144,21 @@ const styles = StyleSheet.create({
   backArrow: {
     position: "absolute",
     top: 30,
-    left: 10,
+    left: 0,
     zIndex: 2,
     justifyContent: "center",
     alignItems: "center",
     margin: 20,
     marginTop: 8,
     marginBottom: 8,
-    backgroundColor: Constants.background,
     height: 40,
     width: 40,
-    borderRadius: 50,
-    elevation: 2,
   },
   forgotPass: {
-    marginTop: 80,
-    width: 280,
-    height: 180,
+    marginTop: 120,
+    marginBottom: 20,
+    width: 200,
+    height: 100,
   },
   title: {
     fontSize: Constants.primaryHeading,
@@ -173,9 +177,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   emailField: {
-    padding: 8,
+    padding: 10,
     backgroundColor: Constants.Faded,
-    width: "80%",
+    width: "84%",
     borderRadius: Constants.medium,
     marginTop: 20,
     paddingLeft: 25,
@@ -187,27 +191,28 @@ const styles = StyleSheet.create({
   },
   sendBtn: {
     backgroundColor: Constants.primary,
-    width: 200,
+    width: Dimensions.get("screen").width / 1.2,
+    marginTop: 18,
     justifyContent: "center",
     alignItems: "center",
-    padding: 8,
+    padding: 12,
     borderRadius: Constants.tiny,
   },
   successContainer: {
+    backgroundColor: Constants.lightGreen,
     flexDirection: "row",
-    alignItems: "center",
-    width: "80%",
-    marginTop: 40,
-    backgroundColor: Constants.Success,
+    width: "84%",
+    marginTop: 0,
     borderRadius: Constants.medium,
-    padding: 20,
+    borderColor: Constants.Success,
+    padding: 8,
   },
   successText: {
-    color: Constants.background,
+    color: Constants.Inverse,
     fontFamily: Constants.fontFam,
-    fontSize: Constants.headingthree,
+    fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
-    width: "87%",
+    width: "84%",
   },
   sendButton: {
     color: Constants.Inverse,
@@ -215,12 +220,10 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
   },
   errorPrompt: {
-    backgroundColor: Constants.lightRed,
     marginVertical: 15,
-    width: "70%",
+    width: "84%",
     padding: 4,
     borderRadius: Constants.tiny,
-    paddingHorizontal: 20,
     color: Constants.Danger,
   },
   errorPlaceHolder: {

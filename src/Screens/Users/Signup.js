@@ -512,7 +512,7 @@ export default function SignUp({ navigation }) {
           <Text style={styles.signbtntxt}> Register</Text>
         )}
       </TouchableOpacity>
-      <Text>Or</Text>
+      <Text style={{marginTop: 8}}>Or</Text>
 
       <TouchableOpacity
         onPress={accessToken ? GoogleSignUp : () => promptAsync()}
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     position: "absolute",
-    left: 5,
+    left: 0,
     top: 30,
     zIndex: 2,
     justifyContent: "center",
@@ -567,11 +567,8 @@ const styles = StyleSheet.create({
     margin: 20,
     marginTop: 8,
     marginBottom: 8,
-    backgroundColor: Constants.background,
     height: 40,
     width: 40,
-    borderRadius: 50,
-    elevation: 2,
   },
   loginimage: {
     resizeMode: "contain",

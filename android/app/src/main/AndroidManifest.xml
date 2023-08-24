@@ -120,7 +120,7 @@
                 <data
                     android:scheme="http"
                     android:host="www.app.p2b-ethiopia.com"
-                    android:pathPrefix="/eventDetail/" />
+                    android:pathPrefix="/event-detail/" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -131,7 +131,7 @@
                 <data
                     android:scheme="http"
                     android:host="www.p2b-ethiopia.com"
-                    android:pathPrefix="/eventDetail/" />
+                    android:pathPrefix="/event-detail/" />
             </intent-filter>
 
         </activity>

@@ -9,11 +9,15 @@ import {
 } from "react-native";
 import Constants from "../../constants/Constants";
 import { MaterialCommunityIcons, Ionicons } from "react-native-vector-icons";
-// create a component
+import { useTheme } from "@react-navigation/native";
+import { Typography } from "../../themes/typography";
+
+// create Ticket listing a component
 const TicketListing = ({
   onPress,
   event,
   type,
+  quantity,
   iconName,
   iconColor,
   price,
@@ -21,6 +25,7 @@ const TicketListing = ({
   textColor,
   longPress,
 }) => {
+  const { theme } = useTheme();
   return (
     <TouchableNativeFeedback onPress={onPress} onLongPress={longPress}>
       <View
@@ -37,19 +42,43 @@ const TicketListing = ({
           <Text numberOfLines={2} style={styles.title}>
             {event}
           </Text>
-          <Text style={styles.ticketType}>{type} Ticket</Text>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.ticketType}>{type} Ticket</Text>
+            {quantity && (
+              <MaterialCommunityIcons
+                name="close"
+                size={12}
+                style={{ paddingHorizontal: 4 }}
+              />
+            )}
+            <Text
+              style={{
+                color: theme.dark.main,
+                fontFamily: Typography.family,
+                fontWeight: Typography.weight.extraBold,
+              }}
+            >
+              {quantity}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.priceContainer}>
           <Text style={styles.priceText}>{price} ETB</Text>
           <Text style={[styles.statusstyl, { color: textColor }]}>
-            {status === "Sold-out" ? (
+            {status === "Sold-out" && (
               <Ionicons
                 name="ios-checkmark-circle-outline"
                 size={13}
                 color={Constants.Secondary}
               />
-            ) : null}
+            )}
 
             {status}
           </Text>
@@ -89,6 +118,7 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Boldtwo,
     fontFamily: Constants.fontFam,
   },
+
   priceContainer: {
     flexDirection: "row",
     justifyContent: "space-between",

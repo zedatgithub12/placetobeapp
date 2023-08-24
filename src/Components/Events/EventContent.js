@@ -30,9 +30,6 @@ const DetailContent = ({ ...props }) => {
     call(args);
   };
 
-  var location = props.Venues;
-  var replacedSpaces = location.split(" ").join("+");
-
   return (
     <View
       style={styles.topContent} //event detail text content container component
@@ -70,11 +67,7 @@ const DetailContent = ({ ...props }) => {
       <TouchableOpacity
         activeOpacity={0.7}
         style={styles.subContainer}
-        onPress={() =>
-          Linking.openURL(
-            "https://www.google.com/maps/search/?api=1&query=" + replacedSpaces
-          )
-        }
+        onPress={props.direction}
       >
         <MaterialCommunityIcons
           name="map-marker-radius"
@@ -111,7 +104,7 @@ const DetailContent = ({ ...props }) => {
       </View>
 
       {/* call button */}
-      {props.phone == null ? null : (
+      {props.phone && (
         <View>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -139,10 +132,8 @@ const DetailContent = ({ ...props }) => {
 };
 const styles = StyleSheet.create({
   topContent: {
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     paddingBottom: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: Constants.icon,
   },
   subContainer: {
     flexDirection: "row",
@@ -150,7 +141,6 @@ const styles = StyleSheet.create({
     width: "94%",
   },
   iconContainer: {
-    backgroundColor: Constants.iconBack,
     margin: 5,
     padding: 8,
     borderRadius: 25,

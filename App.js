@@ -7,8 +7,10 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
 } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { theme } from "./src/themes";
 //import Organizers from "./Screens/Organizers";
 import { Caption } from "react-native-paper";
 import Constants from "./src/constants/Constants";
@@ -16,6 +18,8 @@ import { AuthContext } from "./src/Components/context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "./src/store/store";
 import { Provider } from "react-redux";
+import { Provider as PaperProvider } from "react-native-paper";
+
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import * as Linking from "expo-linking";
@@ -25,6 +29,9 @@ import Geolocation from "@react-native-community/geolocation";
 import { LocalNotification } from "./src/Utils/localPushController";
 import RemotePushController from "./src/Utils/RemotePushController";
 import Routes from "./src/routes";
+import PopupAds from "./src/Components/Ads/popup";
+import SlideUp from "./src/Components/Ads/slideup";
+import { fetchAds } from "./src/Utils/Ads";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
@@ -50,7 +57,7 @@ export default function App() {
           path: "profile",
         },
         EventDetail: {
-          path: "eventdetail/:externalLink",
+          path: "event-detail/:externalLink",
         },
       },
     },
@@ -59,6 +66,12 @@ export default function App() {
   const initialLoginState = {
     isLoading: true,
   };
+
+  const [showPopUpAds, setShowPopupAds] = useState(false);
+  const [popupAdsData, setPopupAdsData] = useState([]);
+  const [showSlideAds, setShowSlideAds] = useState(false);
+  const [slideupAds, setSlideupAds] = useState([]);
+  const [selectedTicket, setSelectedTicket] = useState(0);
 
   //a constant which store a state of event field input datas
   // the information collected from all input field will be store here
@@ -81,7 +94,7 @@ export default function App() {
     redirectLink: "",
     imageStatus: false,
   });
-  const [user, setUser] = React.useState({
+  const [user, setUser] = useState({
     userId: "",
     userTokens: "",
     userEmail: "",
@@ -351,6 +364,12 @@ export default function App() {
 
       dispatch({ type: "LOGOUT" });
     },
+
+    SelectedTicket: async (ticketid) => {
+      setSelectedTicket(ticketid);
+    },
+
+    ticketid: selectedTicket,
   }));
 
   const [connectionState, setConnectionState] = useState(false);
@@ -358,6 +377,34 @@ export default function App() {
 
   const Referesh = () => {
     setRetry(!retry);
+  };
+
+  const handlePopupAd = async (type) => {
+    try {
+      const response = await fetchAds(type);
+      if (response.success) {
+        setPopupAdsData(response.data);
+        setShowPopupAds(true);
+      } else {
+        setShowPopupAds(false);
+      }
+    } catch (error) {
+      setShowPopupAds(false);
+    }
+  };
+
+  const handleSlideupAd = async (type) => {
+    try {
+      const response = await fetchAds(type);
+      if (response.success) {
+        setSlideupAds(response.data);
+        setShowSlideAds(true);
+      } else {
+        setShowSlideAds(false);
+      }
+    } catch (error) {
+      setShowSlideAds(false);
+    }
   };
 
   useEffect(() => {
@@ -375,7 +422,8 @@ export default function App() {
       }
 
       dispatch({ type: "REGISTER", token: userToken });
-    }, 4000);
+    }, 2000);
+
     NetInfo.fetch().then((state) => {
       if (state.isConnected) {
         setConnectionState(true);
@@ -384,6 +432,23 @@ export default function App() {
 
     return () => {};
   }, [retry]);
+
+  // A useEffect which will be called after a specified time and fetchs popUp ad fetching
+  useEffect(() => {
+    const PopupAd = setTimeout(() => {
+      handlePopupAd("popUp");
+    }, 3000);
+    return () => clearTimeout(PopupAd);
+  }, []);
+
+  // A useEffect which will be called after a specified time and fetchs slideUp ad fetching
+  useEffect(() => {
+    const SlideUpAd = setTimeout(() => {
+      handleSlideupAd("slideUp");
+    }, 40000);
+
+    return () => clearTimeout(SlideUpAd);
+  }, []);
 
   //activity indicator which is going to be shown and the opening of app
   if (loginState.isLoading) {
@@ -409,45 +474,59 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <AuthContext.Provider value={authContext}>
-          <NavigationContainer
-            linking={Linkings}
-            fallback={
-              <View style={styles.loader}>
-                <ActivityIndicator color={Constants.primary} size="large" />
-                <RemotePushController />
-              </View>
-            }
-          >
-            <StatusBar style={Constants.Inverse} />
-            {connectionState ? (
-              <Routes />
-            ) : (
-              <View style={styles.noConnection}>
-                <Image
-                  source={require("./src/assets/images/connect.png")}
-                  style={styles.connImage}
-                  resizeMode="contain"
+      <PaperProvider>
+        <PersistGate loading={null} persistor={persistor}>
+          <AuthContext.Provider value={authContext}>
+            <NavigationContainer
+              theme={theme}
+              linking={Linkings}
+              fallback={
+                <View style={styles.loader}>
+                  <ActivityIndicator color={Constants.primary} size="large" />
+                  <RemotePushController />
+                </View>
+              }
+            >
+              <StatusBar style={Constants.Inverse} />
+              {connectionState ? (
+                <Routes />
+              ) : (
+                <View style={styles.noConnection}>
+                  <Image
+                    source={require("./src/assets/images/connect.png")}
+                    style={styles.connImage}
+                    resizeMode="contain"
+                  />
+                  <Image
+                    source={require("./src/assets/images/icon.png")}
+                    style={styles.icon}
+                    resizeMode="contain"
+                  />
+                  <Text>No Connection</Text>
+                  <Caption>Please Check your internet connection</Caption>
+                  <TouchableOpacity
+                    onPress={() => Referesh()}
+                    style={styles.eventsBtn}
+                  >
+                    <Text style={styles.eventstxt}>Retry</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {showPopUpAds && popupAdsData[0] && (
+                <PopupAds showModal={showPopUpAds} ad={popupAdsData} />
+              )}
+
+              {showSlideAds && slideupAds[0] && (
+                <SlideUp
+                  onClose={() => setShowSlideAds(false)}
+                  ad={slideupAds}
                 />
-                <Image
-                  source={require("./src/assets/images/icon.png")}
-                  style={styles.icon}
-                  resizeMode="contain"
-                />
-                <Text>No Connection</Text>
-                <Caption>Please Check your internet connection</Caption>
-                <TouchableOpacity
-                  onPress={() => Referesh()}
-                  style={styles.eventsBtn}
-                >
-                  <Text style={styles.eventstxt}>Retry</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </NavigationContainer>
-        </AuthContext.Provider>
-      </PersistGate>
+              )}
+            </NavigationContainer>
+          </AuthContext.Provider>
+        </PersistGate>
+      </PaperProvider>
     </Provider>
   );
 }
