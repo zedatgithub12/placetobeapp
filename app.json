@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/images/icon.png",
-    "scheme": "com.afromina.placetobe://",
+    "scheme": "com.afromina.placetobe",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./src/assets/images/icon.png",

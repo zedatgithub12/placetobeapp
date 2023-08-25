@@ -7,20 +7,12 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
-  Linking,
 } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { theme } from "./src/themes";
-//import Organizers from "./Screens/Organizers";
-import { Caption } from "react-native-paper";
-import Constants from "./src/constants/Constants";
-import { AuthContext } from "./src/Components/context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import store from "./src/store/store";
-import { Provider } from "react-redux";
-import { Provider as PaperProvider } from "react-native-paper";
-import { PersistGate } from "redux-persist/integration/react";
-import { persistStore } from "redux-persist";
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+} from "@react-navigation/native";
+import * as Linking from "expo-linking";
 import NetInfo from "@react-native-community/netinfo";
 import * as Animatable from "react-native-animatable";
 import Geolocation from "@react-native-community/geolocation";
@@ -28,15 +20,22 @@ import RemotePushController from "./src/Utils/RemotePushController";
 import Routes from "./src/routes";
 import PopupAds from "./src/Components/Ads/popup";
 import SlideUp from "./src/Components/Ads/slideup";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import store from "./src/store/store";
+import Constants from "./src/constants/Constants";
+
+import { theme } from "./src/themes";
+import { Caption } from "react-native-paper";
+import { AuthContext } from "./src/Components/context";
+import { Provider } from "react-redux";
+import { Provider as PaperProvider } from "react-native-paper";
+import { PersistGate } from "redux-persist/integration/react";
+import { persistStore } from "redux-persist";
 import { fetchAds } from "./src/Utils/Ads";
 import { showToast } from "./src/Utils/Toast";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
-// const link = Linking.createURL("/");
-// const app = Linking.createURL("com.afromina.placetobe://");
-// const Domain = Linking.createURL("https://www.placetobeethiopia.com/");
-// const subDomain = Linking.createURL("https://www.*.p2b-ethiopia.com");
 
 export const Connectivity = () => {
   const [connection, setConnection] = useState(false);
@@ -59,35 +58,13 @@ export const Connectivity = () => {
   return connection;
 };
 
-const handleDeepLink = async (url) => {
-  const { path, queryParams } = Linking.parse(url);
+const navigationRef = React.createRef();
 
-  if (path === "event-detail") {
-    const { id } = queryParams;
-
-    navigation.navigate("EventDetail", { id: id });
-  }
-};
+export function navigate(name, params) {
+  navigationRef.current?.navigate(name, params);
+}
 
 export default function App() {
-  // const Linkings = {
-  //   prefixes: [link, app, Domain, subDomain],
-  //   config: {
-  //     initialRouteName: "TabNav",
-  //     screens: {
-  //       TabNav: {
-  //         path: "tabNav",
-  //       },
-  //       Profile: {
-  //         path: "profile",
-  //       },
-  //       EventDetail: {
-  //         path: "event-detail/:externalLink",
-  //       },
-  //     },
-  //   },
-  // };
-
   const initialLoginState = {
     isLoading: true,
   };
@@ -432,6 +409,36 @@ export default function App() {
     }
   };
 
+  const handleDeepLink = async (url) => {
+    const { path } = Linking.parse(url);
+    const pathSegments = path.split("/");
+
+    if (pathSegments[0] === "event") {
+      const eventId = pathSegments[1];
+      navigate("EventDetail", { id: eventId });
+    }
+  };
+  const handleUrl = async ({ url }) => {
+    await handleDeepLink(url);
+  };
+
+  const setupDeepLinking = async () => {
+    const url = await Linking.getInitialURL();
+    if (url) {
+      handleUrl({ url });
+    }
+
+    Linking.addEventListener("url", handleUrl);
+  };
+
+  useEffect(() => {
+    setupDeepLinking();
+
+    return () => {
+      Linking.removeEventListener("url", handleUrl);
+    };
+  }, []);
+
   useEffect(() => {
     setTimeout(async () => {
       try {
@@ -458,7 +465,7 @@ export default function App() {
     return () => {};
   }, [retry]);
 
-  // A useEffect which will be called after a specified time and fetchs popUp ad fetching
+  // fetchs popUp ad fetching
   useEffect(() => {
     const PopupAd = setTimeout(() => {
       handlePopupAd("popUp");
@@ -466,24 +473,12 @@ export default function App() {
     return () => clearTimeout(PopupAd);
   }, []);
 
-  // A useEffect which will be called after a specified time and fetchs slideUp ad fetching
+  // fetchs slideUp ad fetching
   useEffect(() => {
     const SlideUpAd = setTimeout(() => {
       handleSlideupAd("slideUp");
     }, 40000);
     return () => clearTimeout(SlideUpAd);
-  }, []);
-
-  useEffect(() => {
-    const handleUrl = async ({ url }) => {
-      await handleDeepLink(url);
-    };
-
-    Linking.addEventListener("url", handleUrl);
-
-    return () => {
-      Linking.removeEventListener("url", handleUrl);
-    };
   }, []);
 
   //activity indicator which is going to be shown and the opening of app
@@ -514,6 +509,7 @@ export default function App() {
         <PersistGate loading={null} persistor={persistor}>
           <AuthContext.Provider value={authContext}>
             <NavigationContainer
+              ref={navigationRef}
               theme={theme}
               fallback={
                 <View style={styles.loader}>

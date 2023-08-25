@@ -65,7 +65,8 @@ const Constants = {
   lightGreen: "#e6ffe8",
   PrimaryBlue: "#0fa7ff",
 
-  //application link
+  //link
+  domain: "https://www.placetobeethiopia.com/",
   appLink: "http://app.p2b-ethiopia.com/playstore",
   webLink: "https://www.p2b-ethiopia.com/",
   terms: "https://placetobeethiopia.com/terms-agreement",
