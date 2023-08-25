@@ -66,7 +66,21 @@ const EventDetails = ({ route, navigation }) => {
   const [exist, setExist] = useState(false); // the state of ticket existance
   const [mapOpen, setMapOpen] = useState(true);
   const [userInfo, setUserInfo] = useState([]);
+  const [read, setRead] = useState(5);
+  const [readMorebtn, setReadMorebtn] = useState(false);
+  const [textLength, setTextLength] = useState(read);
+  const [descLength, setDescLength] = useState("Read More");
+  const [timing, setTime] = useState({
+    StartTime: "",
+    EndTime: "",
+  });
 
+  const [coords, setCoords] = useState(true);
+  const [bookmarkBtn, setBookmarkBtn] = useState(false);
+  const [bookmarkBtnColor, setBookmarkBtnColor] = useState(theme.dark.main);
+  const [bookmarkBtnBackground, setBookmarkBtnBackground] = useState(
+    theme.background.main
+  );
   var featuredImageUri = Connection.url + Connection.assets;
 
   const MakeCall = (phone) => {
@@ -158,16 +172,6 @@ const EventDetails = ({ route, navigation }) => {
     }
   };
 
-  const [timing, setTime] = useState({
-    StartTime: "",
-    EndTime: "",
-  });
-  /********************************************** */
-  // the method  which checks the existance of event address coordinates and
-  // update the state to show or hide event address map
-  /******************************************** */
-  const [coords, setCoords] = useState(true);
-
   const checkCoords = (latlng) => {
     var latitude = latlng.address_latitude;
     var longitude = latlng.address_latitude;
@@ -200,11 +204,8 @@ const EventDetails = ({ route, navigation }) => {
     }
   };
 
-  //open redirect url in the homepage
   const openLink = async (url) => {
-    // Check if the URL starts with 'http://' or 'https://'
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      // Add the 'http://' prefix if missing
       url = "http://" + url;
     }
 
@@ -212,14 +213,8 @@ const EventDetails = ({ route, navigation }) => {
       await Linking.openURL(url);
     } catch (error) {
       showToast("Error opening URL");
-      // Handle the error here (e.g., show an error message to the user)
     }
   };
-
-  /******************************************** */
-  //let fetch event detail from database and we access the value returned in the json format
-  //and distrube it through the scree
-  /****************************************** */
 
   const FeatchEvent = () => {
     const controller = new AbortController();
@@ -230,7 +225,6 @@ const EventDetails = ({ route, navigation }) => {
     var InApp = Connection.url + Connection.eventDetails + id;
     var ApiUrl = externalLink ? Externally : InApp;
 
-    // header type for text data to be send to server
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -324,11 +318,6 @@ const EventDetails = ({ route, navigation }) => {
     }
   };
 
-  const [bookmarkBtn, setBookmarkBtn] = useState(false);
-  const [bookmarkBtnColor, setBookmarkBtnColor] = useState(theme.dark.main);
-  const [bookmarkBtnBackground, setBookmarkBtnBackground] = useState(
-    theme.background.main
-  );
   const bookmarkEvent = () => {
     const find = items.find((event) => event.id === item.id);
     if (find) {
@@ -346,12 +335,10 @@ const EventDetails = ({ route, navigation }) => {
     }
   };
 
-  //check bookmarked button state when component gets mounted
   const bookmarked = () => {
     var yesItis = false;
     const find = items.find((event) => event.id === id);
     if (find) {
-      //setBookmarkBtn(true);
       setBookmarkBtnColor(theme.primary.main);
       yesItis = true;
       return yesItis;
@@ -359,7 +346,6 @@ const EventDetails = ({ route, navigation }) => {
     return yesItis;
   };
 
-  // alert when user doesn't logged into the system
   const SignInAlert = (title, description) =>
     Alert.alert(title, description, [
       {
@@ -374,9 +360,6 @@ const EventDetails = ({ route, navigation }) => {
       },
     ]);
 
-  /******************************************* */
-  //event Sharing functionality related code is writen below
-  /******************************************* */
   const ShareEvent = async (eventId) => {
     let remoteUrl = featuredImageUri + item.event_image;
     let event_image = item.event_image;
@@ -384,25 +367,17 @@ const EventDetails = ({ route, navigation }) => {
     let localPath = `${FileSystem.cacheDirectory}${event_image}`;
     FileSystem.downloadAsync(remoteUrl, localPath);
 
-    const doesExist = await FileSystem.getInfoAsync(localPath);
+    var sharedEvent = "event/" + eventId;
+    var sharedLink = Constants.domain + sharedEvent;
 
-    var weblink = Constants.webLink;
-    // var urlAddress = Connection.url+"/"+Connection.Event+"/"+eventId;
     const shareOptions = {
       url: localPath,
       title: item.event_name,
-      message: "Check out this event on Place to be Ethiopia" + " " + weblink,
+      message: "Check out this event on Place to be Ethiopia " + sharedLink,
     };
 
     await Share.open(shareOptions).catch((err) => {});
   };
-
-  /********************************************** */
-  //read more description button related code  is writen below
-  /******************************************** */
-  const [read, setRead] = useState(5);
-  const [readMorebtn, setReadMorebtn] = useState(false);
-  const [textLength, setTextLength] = useState(read);
 
   const onTextLayout = React.useCallback((e) => {
     const lineLength = e.nativeEvent.lines.length; // get text line count
@@ -413,7 +388,6 @@ const EventDetails = ({ route, navigation }) => {
     }
   }, []);
 
-  const [descLength, setDescLength] = useState("Read More");
   const showmore = () => {
     if (textLength > read) {
       setRead(textLength);
@@ -426,21 +400,18 @@ const EventDetails = ({ route, navigation }) => {
     }
   };
 
-  //we call useeffect hook once the component get mounted
-  useEffect(() => {
-    var isSubcribed = true;
-    if (isSubcribed) {
-      FeatchEvent();
-      FetchUserRating();
-      bookmarked();
-      isSubcribed = false;
-    }
-    return () => {};
-  }, [externalLink]);
-
   const openRelatedEvent = (eventid) => {
     navigation.push("EventDetail", { id: eventid });
   };
+
+  useEffect(() => {
+    FeatchEvent();
+    FetchUserRating();
+    bookmarked();
+
+    return () => {};
+  }, [id]);
+
   return (
     <View
       style={{
