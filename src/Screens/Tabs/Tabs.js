@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet } from "react-native";
 import Constants from "../../constants/Constants";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../Home/HomeScreen";
@@ -16,13 +16,13 @@ import { NotificationsTab } from "./components/Notification";
 
 const Tab = createBottomTabNavigator();
 
-function TabNav({ navigation }) {
+function TabNav() {
   const notificationcount = useSelector(
     (state) => state.counts.notificationCount
   );
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={() => ({
         tabBarStyle: {
           position: "absolute",
           bottom: 0,
@@ -43,7 +43,11 @@ function TabNav({ navigation }) {
           headerShown: false,
 
           tabBarIcon: ({ focused, color }) => (
-            <Feather name="home" size={22} color={color} />
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={22}
+              color={color}
+            />
           ),
           tabBarActiveTintColor: Constants.primary,
           tabBarInactiveTintColor: Constants.Inverse,
@@ -60,7 +64,11 @@ function TabNav({ navigation }) {
           headerTintColor: Constants.Inverse,
 
           tabBarIcon: ({ focused, color }) => (
-            <Ionicons name="heart-outline" size={24} color={color} />
+            <Ionicons
+              name={focused ? "bookmark" : "bookmark-outline"}
+              size={22}
+              color={color}
+            />
           ),
           tabBarActiveTintColor: Constants.primary,
           tabBarInactiveTintColor: Constants.Inverse,
@@ -77,9 +85,9 @@ function TabNav({ navigation }) {
           },
           headerTintColor: Constants.Inverse,
           tabBarIcon: ({ focused, color }) => (
-            <MaterialCommunityIcons
-              name="ticket-confirmation-outline"
-              size={26}
+            <Ionicons
+              name={focused ? "receipt" : "receipt-outline"}
+              size={22}
               color={color}
             />
           ),
@@ -102,7 +110,7 @@ function TabNav({ navigation }) {
             <NotificationsTab
               focused={focused}
               color={color}
-              notificationCount={3}
+              notificationCount={notificationcount}
             />
           ),
           tabBarActiveTintColor: Constants.primary,

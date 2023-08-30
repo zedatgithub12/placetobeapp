@@ -34,6 +34,9 @@ const Connection = {
   singleBusiness: "singleBusiness",
 
   notification: "notification",
+  getNotification: "fetchNotifications/",
+  notified: "notified-users",
+
   OrganizerFollowCounter: "organizer-followers/",
   organizerEvents: "organizer-event/",
   organizerUpcomings: "organizer-upcoming-event/",

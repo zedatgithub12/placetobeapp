@@ -8,8 +8,8 @@ const NotificationCountSlice = createSlice({
   name: "notification_count",
   initialState,
   reducers: {
-    incrementNotificationCount: (state) => {
-      state.notificationCount += 1;
+    incrementNotificationCount: (state, action) => {
+      state.notificationCount = action.payload;
     },
     decrementNotificationCount: (state) => {
       state.notificationCount -= 1;
