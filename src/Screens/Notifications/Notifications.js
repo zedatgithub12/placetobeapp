@@ -1,32 +1,37 @@
+import React, { useState, useContext, useEffect } from "react";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   StyleSheet,
   Text,
   Image,
   FlatList,
-  ToastAndroid,
   Dimensions,
 } from "react-native";
-import { Title, HelperText } from "react-native-paper";
 import { AuthContext } from "../../Components/context";
+import { useTheme } from "@react-navigation/native";
 import Notice from "../../Components/Notifications/Notice";
-import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
 import NotLoggedIn from "../../handlers/auth";
 import NoConnection from "../../handlers/connection";
-import { useTheme } from "@react-navigation/native";
 import NotificationSkeleton from "./skeleton";
 import P2bModal from "../../ui-components/p2bmodal";
+import moment from "moment";
+import Connection from "../../api";
+import { useDispatch } from "react-redux";
+import {
+  incrementNotificationCount,
+  decrementNotificationCount,
+} from "../../Reducer/NotificationCount";
 
 const Notifications = ({ navigation }) => {
   const { userStatus } = useContext(AuthContext);
   const logged = userStatus.logged;
 
-  const { theme } = useTheme();
+  const dispatch = useDispatch();
 
+  const { theme } = useTheme();
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
   const [notification, setNotification] = useState([]);
@@ -38,15 +43,17 @@ const Notifications = ({ navigation }) => {
     description: "",
   });
 
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
+  const handleNewNotification = async () => {
+    const unseen = notification.filter((notice) => notice.status == null);
+    const counts = unseen.length;
+    dispatch(incrementNotificationCount(counts));
   };
 
   // Fetch & render notification when component get mounted
   const FetchNotifications = async () => {
     let id = await AsyncStorage.getItem("userId");
 
-    var ApiUrl = Connection.url + Connection.notification + id;
+    var ApiUrl = Connection.url + Connection.getNotification + id;
 
     var headers = {
       Accept: "application/json",
@@ -61,19 +68,15 @@ const Notifications = ({ navigation }) => {
       .then((response) => {
         if (response.success) {
           setNotification(response.data);
+          handleNewNotification();
           setLoading(false);
         } else {
-          setNotification([]);
           setLoading(false);
         }
       })
       .catch(() => {
         setLoading(false);
       });
-    return () => {
-      // cancel the subscription
-      isApiSubscribed = false;
-    };
   };
 
   // refresh the list of notifications
@@ -81,7 +84,7 @@ const Notifications = ({ navigation }) => {
     let id = await AsyncStorage.getItem("userId");
     setRefreshing(true);
     setLoading(true);
-    var ApiUrl = Connection.url + Connection.notification + id;
+    var ApiUrl = Connection.url + Connection.getNotification + id;
 
     var headers = {
       Accept: "application/json",
@@ -96,6 +99,7 @@ const Notifications = ({ navigation }) => {
       .then((response) => {
         if (response.success) {
           setNotification(response.data);
+
           setRefreshing(false);
           setLoading(false);
         } else {
@@ -114,36 +118,135 @@ const Notifications = ({ navigation }) => {
   };
 
   //render notification timestamp
-
   const Timestamp = (time) => {
-    const createdDate = new Date(time);
-    const options = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-    };
-    const formattedTimestamp = createdDate.toLocaleString("en-US", options);
-    return formattedTimestamp;
+    const createdDate = moment(time);
+    const currentDate = moment();
+    const duration = moment.duration(currentDate.diff(createdDate));
+
+    const days = duration.days();
+    const hours = duration.hours();
+    const minutes = duration.minutes();
+
+    let timeSince = "";
+
+    if (days > 0) {
+      timeSince += `${days} day${days > 1 ? "s" : ""} `;
+    } else if (days > 7) {
+      timeSince += `${days / 4} week${days > 1 ? "s" : ""} `;
+    } else if (days > 30) {
+      timeSince += `${days / 30} month${days > 1 ? "s" : ""} `;
+    } else if (days > 365) {
+      timeSince += `${days / 365} year${days > 1 ? "s" : ""} `;
+    } else if (hours > 0) {
+      timeSince += `${hours} hour${hours > 1 ? "s" : ""} `;
+    } else if (minutes > 0) {
+      timeSince += `${minutes} minute${minutes > 1 ? "s" : ""} `;
+    }
+
+    if (timeSince === "") {
+      timeSince = "Just now";
+    } else {
+      timeSince += "ago";
+    }
+
+    return timeSince;
+  };
+
+  const NotificationIconColor = (type) => {
+    var Color;
+
+    switch (type) {
+      case "event":
+        Color = theme.success.main;
+        break;
+
+      case "alert":
+        Color = theme.primary.main;
+
+        break;
+
+      default:
+        Color = "#ffbb00";
+    }
+    return Color;
   };
 
   // render flatlist item
   const renderNotice = ({ item }) => (
     <Notice
+      key={item.id}
+      type={item.notification_content_type}
+      iconColor={NotificationIconColor(item.notification_content_type)}
       noticeTitle={item.notification_title}
       about={item.notification_content}
       date={item.created_at}
       time={Timestamp(item.created_at)}
+      status={item.status}
       onPressNotice={() => OpenNotification(item)}
     />
   );
 
-  const OpenNotification = (item) => {
-    if (item.notification_content_type === "event") {
-      navigation.navigate("EventDetail", { id: item.id });
+  const SeenNotification = async (notification) => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    let id = await AsyncStorage.getItem("userId");
+    var ApiUrl = Connection.url + Connection.notified;
+
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    var data = {
+      notification_id: notification.id,
+      user_id: id,
+      status: "seen",
+    };
+
+    fetch(ApiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(data),
+      signal: signal,
+    });
+
+    return () => {
+      controller.abort();
+    };
+  };
+
+  const UpdateNotificationState = (id) => {
+    const ItemIndex = notification.findIndex((notice) => notice.id === id);
+
+    if (ItemIndex !== -1) {
+      const updatedData = [...notification];
+      updatedData[ItemIndex].status = "seen";
+      setNotification(updatedData);
+    }
+  };
+
+  const OpenNotification = async (item) => {
+    if (item.status === null) {
+      UpdateNotificationState(item.id);
+      dispatch(decrementNotificationCount());
+
+      if (item.notification_content_type === "event") {
+        await SeenNotification(item);
+        navigation.navigate("EventDetail", {
+          id: item.notification_content_id,
+        });
+      } else {
+        OpenBottomSheet(item);
+        SeenNotification(item);
+      }
     } else {
-      OpenBottomSheet(item);
+      if (item.notification_content_type === "event") {
+        navigation.navigate("EventDetail", {
+          id: item.notification_content_id,
+        });
+      } else {
+        OpenBottomSheet(item);
+      }
     }
   };
 
@@ -156,6 +259,9 @@ const Notifications = ({ navigation }) => {
     setIsModalVisible(true);
   };
 
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
   useEffect(() => {
     const InternetConnection = async () => {
       const networkState = await NetInfo.fetch();
@@ -181,7 +287,10 @@ const Notifications = ({ navigation }) => {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.background.darker }]}
+      style={[
+        styles.container,
+        { backgroundColor: theme.background.darker, paddingBottom: 50 },
+      ]}
     >
       {logged ? (
         connection ? (
@@ -213,7 +322,7 @@ const Notifications = ({ navigation }) => {
         )
       ) : (
         <NotLoggedIn
-          helpertext="You should have to login first to view your tickets"
+          helpertext="You should have to login first to receive notifications"
           signUp={() => navigation.navigate("SignUp")}
           signIn={() => navigation.navigate("SignIn")}
         />

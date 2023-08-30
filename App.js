@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
@@ -20,7 +20,6 @@ import SlideUp from "./src/Components/Ads/slideup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "./src/store/store";
 import Constants from "./src/constants/Constants";
-import getUserDeviceToken from "./src/Utils/getUserDeviceToken";
 
 import { theme } from "./src/themes";
 import { Caption } from "react-native-paper";

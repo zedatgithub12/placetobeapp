@@ -2,27 +2,46 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableNativeFeedback } from "react-native";
 import Constants from "../../constants/Constants";
-import { Entypo } from "react-native-vector-icons";
+import { Ionicons } from "react-native-vector-icons";
 import { Dimensions } from "react-native";
-import { Divider } from "react-native-paper";
-// create a component
+import { Badge } from "react-native-paper";
+import { useTheme } from "@react-navigation/native";
 
-const Notice = ({ noticeTitle, about, date, time, onPressNotice }) => {
-  const events = new Date();
-  let year = events.getFullYear();
-  let month = events.getMonth();
-  let day = events.getDate();
-  var currentMonth = month + 1;
-  var today = year + "-" + currentMonth + "-" + day;
-
+//  notice listing component
+const Notice = ({
+  type,
+  iconColor,
+  noticeTitle,
+  about,
+  time,
+  status,
+  onPressNotice,
+}) => {
+  var icon = type === "event" ? "time" : "notifications-outline";
+  const { theme } = useTheme();
   return (
     <TouchableNativeFeedback
       onPress={onPressNotice}
       style={styles.containerBtn}
     >
-      <View style={styles.noticeContainer}>
+      <View
+        style={[
+          styles.noticeContainer,
+          {
+            display: "flex",
+            alignItems: "center",
+            backgroundColor:
+              status === "seen"
+                ? theme.background.main
+                : Constants.transparentPrimary,
+          },
+        ]}
+      >
         <View style={styles.notbellContainer}>
-          <Entypo name="bell" size={20} color={Constants.primary} />
+          {status == null && (
+            <Badge size={8} style={{ backgroundColor: theme.primary[600] }} />
+          )}
+          <Ionicons name={icon} size={22} color={iconColor} />
         </View>
 
         <View style={styles.contentContainer}>
@@ -38,8 +57,6 @@ const Notice = ({ noticeTitle, about, date, time, onPressNotice }) => {
             {time}
           </Text>
         </View>
-        {date == today && <Text style={styles.noticeStatus}>New</Text>}
-        <Divider />
       </View>
     </TouchableNativeFeedback>
   );
@@ -54,9 +71,9 @@ const styles = StyleSheet.create({
   noticeContainer: {
     flexDirection: "row",
     width: Dimensions.get("screen").width,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    marginTop: 2,
+    marginTop: 1,
     borderRadius: Constants.tinybox,
     backgroundColor: Constants.background,
   },
@@ -76,23 +93,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   noticeTitle: {
+    width: Dimensions.get("screen").width / 1.3,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingthree,
-    fontWeight: Constants.Boldtwo,
+    fontWeight: Constants.Bold,
     color: Constants.Inverse,
     margin: 2,
   },
   contents: {
+    width: Dimensions.get("screen").width / 1.3,
     margin: 2,
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Boldtwo,
     fontSize: Constants.textSize,
-    color: Constants.Secondary,
+    color: Constants.Inverse,
   },
   noticeTimestamp: {
     margin: 3,
+    fontFamily: Constants.fontFam,
     fontWeight: Constants.Boldtwo,
-    color: Constants.Secondary,
+    fontSize: Constants.textSize,
+    color: Constants.Inverse,
+    fontStyle: "italic",
   },
   helperInfo: {
     flexDirection: "row",

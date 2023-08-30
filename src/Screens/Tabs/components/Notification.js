@@ -7,13 +7,17 @@ export const NotificationsTab = ({ focused, color, notificationCount }) => {
   const { theme } = useTheme();
   return (
     <View>
-      <Ionicons name="notifications-outline" size={24} color={color} />
+      <Ionicons
+        name={focused ? "notifications" : "notifications-outline"}
+        size={22}
+        color={color}
+      />
       {notificationCount > 0 && (
         <View
           style={{
             position: "absolute",
-            top: -5,
-            right: -5,
+            top: -6,
+            right: -6,
             backgroundColor: "#FF0000",
             borderRadius: 10,
             width: 20,
