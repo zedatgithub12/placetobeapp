@@ -32,7 +32,6 @@ import call from "react-native-phone-call";
 import * as Animatable from "react-native-animatable";
 import DetailShimmer from "../../Components/Events/Skeleton/DetailShimmer";
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from "react-native-maps";
-
 import { useTheme } from "@react-navigation/native";
 import Rating from "../../Components/Events/Rating";
 import RelatedEvent from "../../Components/Events/related";
@@ -569,15 +568,6 @@ const EventDetails = ({ route, navigation }) => {
                       alignItems: "center",
                       marginRight: 10,
                     }}
-                    onPress={() =>
-                      LocalNotification(
-                        item.startTime,
-                        item.event_name,
-                        item.event_description,
-                        item.event_image,
-                        ""
-                      )
-                    }
                   >
                     <Text
                       style={{

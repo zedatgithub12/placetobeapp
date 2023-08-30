@@ -29,7 +29,7 @@ const Connection = {
   assets: "images/",
   organizer: "organizer", //updated
 
-  notification: "notification",
+  notification: "fetchNotifications/",
   OrganizerFollowCounter: "organizer-followers/",
   organizerEvents: "organizer-event/",
   organizerUpcomings: "organizer-upcoming-event/",

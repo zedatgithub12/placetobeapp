@@ -26,9 +26,8 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Animatable from "react-native-animatable";
 import * as Linking from "expo-linking";
-import p2bavatar from "../../assets/images/p2bavatar.png";
+import p2bavatar from "../../assets/images/avatar.png";
 import ProfileShimmer from "./Skeletons/profilepage";
 import { useTheme } from "@react-navigation/native";
 import { Typography } from "../../themes/typography";
@@ -197,7 +196,6 @@ function Profile({ navigation }) {
   };
 
   const getUserInfo = async () => {
-    setLoading(true);
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -217,7 +215,7 @@ function Profile({ navigation }) {
       .then((response) => {
         if (response.success) {
           var userInfo = response.data;
-
+          setLoading(false);
           setUserData({
             ...userData,
             userId: userInfo.id,
@@ -231,8 +229,6 @@ function Profile({ navigation }) {
           });
 
           setDetailInfo(userInfo);
-          setImage(Connection.url + Connection.assets + userInfo.profile);
-          setLoading(false);
         } else {
           setLoading(false);
         }
@@ -252,6 +248,7 @@ function Profile({ navigation }) {
       setConnection(networkState.isConnected);
     };
     InternetConnection();
+    getUserInfo();
 
     const subscription = NetInfo.addEventListener(async (state) => {
       setConnection(state.isConnected);
@@ -262,22 +259,20 @@ function Profile({ navigation }) {
   }, [retry]);
 
   useEffect(() => {
-    getUserInfo();
-
     (async () => {
       const gallerStatus =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       setHasGalleryPermission(gallerStatus.status === "granted");
     })();
 
-    // setTimeout(() => {
-    //   if (loading) {
-    //     getUserInfo();
-    //   }
-    // }, 5000);
     return () => {};
   }, []);
 
+  useEffect(() => {
+    setImage(Connection.url + Connection.assets + userData.userProfile);
+
+    return () => {};
+  }, [image, userData.userProfile]);
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.background.darker }}>
       {connection ? (
@@ -297,7 +292,7 @@ function Profile({ navigation }) {
                 style={styles.profilePicker}
               >
                 <Avatar.Image
-                  source={image ? { uri: image } : p2bavatar}
+                  source={userData.userProfile ? { uri: image } : p2bavatar}
                   size={80}
                   style={styles.profileImage}
                   onPress={() => setModalVisible(true)}
@@ -345,6 +340,19 @@ function Profile({ navigation }) {
                     }}
                   >
                     {Nameformatter(userData.firstName, userData.middleName)}
+                  </Text>
+                </View>
+
+                <View style={{ alignSelf: "center", alignItems: "center" }}>
+                  <Text
+                    style={{
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.headingthree,
+                      fontWeight: Typography.weight.Boldtwo,
+                      paddingHorizontal: 6,
+                    }}
+                  >
+                    {userData.userEmail}
                   </Text>
                 </View>
 

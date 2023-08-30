@@ -10,7 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import Constants from "../../constants/Constants";
+import { showToast } from "../../Utils/Toast";
 import { Ionicons, MaterialIcons } from "react-native-vector-icons";
 import { AuthContext } from "../../Components/context";
 import {
@@ -18,20 +18,25 @@ import {
   statusCodes,
 } from "@react-native-google-signin/google-signin";
 import { Caption } from "react-native-paper";
+
+import Constants from "../../constants/Constants";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import { showToast } from "../../Utils/Toast";
 import Connection from "../../api";
+import getUserDeviceToken from "../../Utils/getUserDeviceToken";
 
 WebBrowser.maybeCompleteAuthSession();
 LogBox.ignoreLogs(["EventEmitter.removeListener"]);
 
 export default function Signin({ navigation }) {
   // login userInput
-  const { SignIn } = React.useContext(AuthContext);
+  const { SignIn, GoogleAuth } = React.useContext(AuthContext);
+
   const loginState = (userId, userToken, userEmail, password, profile) => {
     SignIn(userId, userToken, userEmail, password, profile);
   };
+  const [loading, setLoading] = useState(false);
+  const [googleLoader, setGoogleLoader] = useState(false);
 
   const [data, setData] = React.useState({
     email: "",
@@ -46,7 +51,7 @@ export default function Signin({ navigation }) {
     messageType: "",
     googleSubmitting: false,
   });
-  // onchange username this function is triggered
+
   const textInputChange = (val) => {
     if (val.length != 0) {
       setData({
@@ -62,7 +67,6 @@ export default function Signin({ navigation }) {
       });
     }
   };
-  //on password change this function is triggered
 
   const handlePasswordChange = (val) => {
     setData({
@@ -70,6 +74,7 @@ export default function Signin({ navigation }) {
       password: val,
     });
   };
+
   const updateSecureTextEntry = () => {
     setData({
       ...data,
@@ -77,13 +82,15 @@ export default function Signin({ navigation }) {
     });
   };
 
-  // manual sign in function
+  const retrieveToken = async () => {
+    const token = await getUserDeviceToken();
+    return token;
+  };
 
-  const [loading, setLoading] = useState(false);
-
-  const ManualSignin = () => {
+  const ManualSignin = async () => {
     var Email = data.email;
     var password = data.password;
+    const token = await retrieveToken();
 
     if (data.email == 0) {
       setData({
@@ -108,6 +115,7 @@ export default function Signin({ navigation }) {
       var Data = {
         email: Email,
         password: password,
+        device_token: token,
       };
       fetch(InserAPIURL, {
         method: "POST",
@@ -167,22 +175,18 @@ export default function Signin({ navigation }) {
   //google signin will go here
   /******************************************** */
 
-  const { GoogleAuth } = React.useContext(AuthContext);
-
   const googleSignUp = (id, token, email, googleId, profile) => {
     GoogleAuth(id, token, email, googleId, profile);
   };
 
-  const [accessToken, setAccessToken] = useState(); //access token state initialisation
-  const [googleLoader, setGoogleLoader] = useState(false);
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId:
-      "799616009286-ck594ue3589h93vq4hlqcsmrg71uuekd.apps.googleusercontent.com",
-    iosClientId:
-      "799616009286-e19bod10s4h9i6nj8pblrb3haraj4olk.apps.googleusercontent.com",
-    androidClientId:
-      "799616009286-d8ci42svjmd21h4im7ulas5ajh8qs481.apps.googleusercontent.com",
-  });
+  // const [request, response, promptAsync] = Google.useAuthRequest({
+  //   expoClientId:
+  //     "799616009286-ck594ue3589h93vq4hlqcsmrg71uuekd.apps.googleusercontent.com",
+  //   iosClientId:
+  //     "799616009286-e19bod10s4h9i6nj8pblrb3haraj4olk.apps.googleusercontent.com",
+  //   androidClientId:
+  //     "799616009286-d8ci42svjmd21h4im7ulas5ajh8qs481.apps.googleusercontent.com",
+  // });
 
   // const GoogleSignInBtn = async () => {
   //   setGoogleLoader(true);
@@ -265,20 +269,13 @@ export default function Signin({ navigation }) {
   //   return () => {};
   // });
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId:
-        "903368065253-alo3tolafl6mh1ripn83484rdmv58e0t.apps.googleusercontent.com",
-      offlineAccess: true,
-    });
-  }, []);
-
   const handleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
+      const d_token = await retrieveToken();
 
-      console.log("User Info:", {userInfo});
+      console.log("User Info:", { userInfo });
       // You can now use the userInfo object to authenticate the user in your backend
       var ApiUrl = Connection.url + Connection.googleSignUp;
       var headers = {
@@ -286,24 +283,13 @@ export default function Signin({ navigation }) {
         "Content-Type": "application/json",
       };
 
-      //generate random Text to be stored alongside with user info
-      const rand = () => {
-        return Math.random().toString(36).substring(2);
-      };
-      const token = () => {
-        return rand() + rand();
-      };
-
-      var category = "Entertainment";
-      //dat to be sent to server
       var Data = {
         id: user.id,
         email: user.email,
         name: user.name,
         fatherName: user.familyName,
         kidName: user.givenName,
-        token: token(),
-        category: category,
+        device_token: d_token,
       };
 
       fetch(ApiUrl, {
@@ -352,6 +338,14 @@ export default function Signin({ navigation }) {
       }
     }
   };
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        "903368065253-alo3tolafl6mh1ripn83484rdmv58e0t.apps.googleusercontent.com",
+      offlineAccess: true,
+    });
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

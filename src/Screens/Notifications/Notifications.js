@@ -17,69 +17,90 @@ import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
 import NotLoggedIn from "../../handlers/auth";
 import NoConnection from "../../handlers/connection";
-import NoticeShimmer from "../../Components/Notifications/Skeleton/NoticeShimmer";
-import Slider from "../../Components/Slider";
+import { useTheme } from "@react-navigation/native";
+import NotificationSkeleton from "./skeleton";
+import P2bModal from "../../ui-components/p2bmodal";
+
 const Notifications = ({ navigation }) => {
-  // state from context from Context Hook
   const { userStatus } = useContext(AuthContext);
   const logged = userStatus.logged;
 
+  const { theme } = useTheme();
+
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
-  const [notification, setNotification] = useState();
+  const [notification, setNotification] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [textContent, setTextContent] = useState({
+    title: "",
+    description: "",
+  });
 
-  // refresh the list of notifications
-  const RefreshList = async () => {
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  // Fetch & render notification when component get mounted
+  const FetchNotifications = async () => {
     let id = await AsyncStorage.getItem("userId");
-    setRefreshing(true);
-    setLoading(true);
-    let isApiSubscribed = true;
-    var ApiUrl = Connection.url + Connection.notification;
 
-    var userIdentity = {
-      userId: id,
-    };
+    var ApiUrl = Connection.url + Connection.notification + id;
+
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
     };
 
     fetch(ApiUrl, {
-      method: "POST",
-      body: JSON.stringify(userIdentity),
+      method: "GET",
+      headers: headers,
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.success) {
+          setNotification(response.data);
+          setLoading(false);
+        } else {
+          setNotification([]);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+    return () => {
+      // cancel the subscription
+      isApiSubscribed = false;
+    };
+  };
+
+  // refresh the list of notifications
+  const RefreshList = async () => {
+    let id = await AsyncStorage.getItem("userId");
+    setRefreshing(true);
+    setLoading(true);
+    var ApiUrl = Connection.url + Connection.notification + id;
+
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    fetch(ApiUrl, {
+      method: "GET",
       headers: headers,
     })
       .then((response) => response.json()) //check response type of the API
       .then((response) => {
-        var message = response[0].message;
-
-        if (isApiSubscribed) {
-          // handle success
-          const filter = (data) => {
-            return data !== null;
-          };
-          if (message === "succeed") {
-            var result = response[0].Notification;
-            var notice = result.filter(filter);
-            var sorted = notice.sort(notice.event_id);
-            setNotification(sorted);
-            setRefreshing(false);
-            setLoading(false);
-          } else if (message === "no event") {
-            setNotification([]);
-            setRefreshing(false);
-            setLoading(false);
-          } else if ((message = "follow organizers")) {
-            setNotification(notice);
-            setRefreshing(false);
-            setLoading(false);
-          } else {
-            setNotification(notification);
-            setLoading(false);
-            setRefreshing(false);
-          }
+        if (response.success) {
+          setNotification(response.data);
+          setRefreshing(false);
+          setLoading(false);
+        } else {
+          setLoading(false);
+          setRefreshing(false);
         }
       })
       .catch(() => {
@@ -92,18 +113,49 @@ const Notifications = ({ navigation }) => {
     };
   };
 
+  //render notification timestamp
+
+  const Timestamp = (time) => {
+    const createdDate = new Date(time);
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    };
+    const formattedTimestamp = createdDate.toLocaleString("en-US", options);
+    return formattedTimestamp;
+  };
+
   // render flatlist item
   const renderNotice = ({ item }) => (
     <Notice
-      Event_Id={item.event_id}
-      organizerName={item.event_organizer}
-      noticeTitle={item.event_name}
-      date={item.addedDate}
-      onPressNotice={() =>
-        navigation.navigate("EventDetail", { id: item.event_id })
-      }
+      noticeTitle={item.notification_title}
+      about={item.notification_content}
+      date={item.created_at}
+      time={Timestamp(item.created_at)}
+      onPressNotice={() => OpenNotification(item)}
     />
   );
+
+  const OpenNotification = (item) => {
+    if (item.notification_content_type === "event") {
+      navigation.navigate("EventDetail", { id: item.id });
+    } else {
+      OpenBottomSheet(item);
+    }
+  };
+
+  const OpenBottomSheet = (item) => {
+    setTextContent({
+      ...textContent,
+      title: item.notification_title,
+      description: item.notification_content,
+    });
+    setIsModalVisible(true);
+  };
+
   useEffect(() => {
     const InternetConnection = async () => {
       const networkState = await NetInfo.fetch();
@@ -122,38 +174,24 @@ const Notifications = ({ navigation }) => {
   //handle the work to be done when network is available
   useEffect(() => {
     if (connection) {
-      RefreshList();
+      FetchNotifications();
     }
-
     return () => {};
   }, [connection]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={[styles.container, { backgroundColor: theme.background.darker }]}
+    >
       {logged ? (
         connection ? (
           loading ? (
-            <View>
-              <View>
-                <NoticeShimmer />
-                <NoticeShimmer />
-                <NoticeShimmer />
-                <NoticeShimmer />
-                <NoticeShimmer />
-              </View>
-
-              <View>
-                <NoticeShimmer />
-                <NoticeShimmer />
-                <NoticeShimmer />
-                <NoticeShimmer />
-              </View>
-            </View>
+            <NotificationSkeleton />
           ) : (
             <FlatList
               data={notification}
               renderItem={renderNotice}
-              keyExtractor={(item) => item.event_id}
+              keyExtractor={(item) => item.id}
               onRefresh={RefreshList}
               refreshing={refreshing}
               ListEmptyComponent={
@@ -166,13 +204,6 @@ const Notifications = ({ navigation }) => {
                   <Text>You have no notification yet!</Text>
                 </View>
               }
-              ListFooterComponent={() => (
-                <View style={styles.listEnd}>
-                  <HelperText>
-                    Notifications from organizers you followed.
-                  </HelperText>
-                </View>
-              )}
             />
           )
         ) : (
@@ -187,16 +218,27 @@ const Notifications = ({ navigation }) => {
           signIn={() => navigation.navigate("SignIn")}
         />
       )}
+
+      <P2bModal
+        visible={isModalVisible}
+        toggleModal={() => toggleModal()}
+        title={textContent.title}
+      >
+        <View>
+          <Text style={styles.textContents}>{textContent.description}</Text>
+        </View>
+      </P2bModal>
     </View>
   );
 };
 const styles = StyleSheet.create({
+  container: { flex: 1 },
   noNoticeContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Constants.background,
-    height: Dimensions.get("screen").height / 1.5,
+    height: Dimensions.get("screen").height / 1.2,
   },
   noNoticeImage: {
     width: "85%",
@@ -207,17 +249,16 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
     color: Constants.Secondary,
-
     alignSelf: "center",
     justifyContent: "center",
   },
-  listEnd: {
-    padding: 20,
-    backgroundColor: Constants.transparentPrimary,
-    marginTop: 5,
-    margin: 5,
-    borderRadius: Constants.tinybox,
-    marginBottom: 62,
+  textContents: {
+    fontSize: Constants.headingthree,
+    color: Constants.Inverse,
+    alignSelf: "center",
+    textAlign: "justify",
+    paddingHorizontal: 6,
+    lineHeight: 22,
   },
 });
 

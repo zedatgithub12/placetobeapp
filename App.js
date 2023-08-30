@@ -8,10 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import {
-  NavigationContainer,
-  NavigationContainerRef,
-} from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import NetInfo from "@react-native-community/netinfo";
 import * as Animatable from "react-native-animatable";
@@ -23,6 +20,7 @@ import SlideUp from "./src/Components/Ads/slideup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "./src/store/store";
 import Constants from "./src/constants/Constants";
+import getUserDeviceToken from "./src/Utils/getUserDeviceToken";
 
 import { theme } from "./src/themes";
 import { Caption } from "react-native-paper";
@@ -74,10 +72,6 @@ export default function App() {
   const [showSlideAds, setShowSlideAds] = useState(false);
   const [slideupAds, setSlideupAds] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(0);
-
-  //a constant which store a state of event field input datas
-  // the information collected from all input field will be store here
-  // the state is going to be updated inside the context function which trigger the value from the component
   const [eventInfo, setEventInfo] = useState({
     featuredImage: "",
     eventTitle: "",
@@ -148,10 +142,6 @@ export default function App() {
     initialLoginState
   );
 
-  // notification bagde context state
-
-  // a useContext hook values which going to be used through the app component
-  // the context value is named authContext
   const authContext = React.useMemo(() => ({
     // this function retrive user information from async storage
     // and assign it to variable corressponding to its name
@@ -412,7 +402,6 @@ export default function App() {
   const handleDeepLink = async (url) => {
     const { path } = Linking.parse(url);
     const pathSegments = path.split("/");
-
     if (pathSegments[0] === "event") {
       const eventId = pathSegments[1];
       navigate("EventDetail", { id: eventId });

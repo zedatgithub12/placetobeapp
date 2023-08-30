@@ -7,17 +7,17 @@ const NoticeSlice = createSlice({
   },
   reducers: {
     noticeObject: (state, action) => {
-      const find = state.notices.find((event) => event.event_id === item.event_id);
+      const find = state.notices.find((event) => event.id === item.id);
 
-      if(!find){
-      state.notices.push({
-        ...action.payload,
-      });
+      if (!find) {
+        state.notices.push({
+          ...action.payload,
+        });
       }
     },
     remove: (state, action) => {
       state.notices = state.notices.filter(
-        (item) => item.event_id !== action.payload
+        (item) => item.id !== action.payload
       );
     },
   },
