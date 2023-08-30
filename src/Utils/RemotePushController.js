@@ -57,8 +57,6 @@ const RemotePushController = () => {
   const sendTokenToServer = async (token, deviceOS) => {
     const device_token = await AsyncStorage.getItem("device-token");
     const device_OS = await AsyncStorage.getItem("device-os");
-    // Make a network request to send the token and deviceOS to your server
-    console.log("Sending Token to Server:", token, deviceOS);
   };
 
   return null; // or you can return a component if needed

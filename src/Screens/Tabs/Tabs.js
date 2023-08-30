@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Constants from "../../constants/Constants";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../Home/HomeScreen";
@@ -7,16 +7,19 @@ import {
   Feather,
   Ionicons,
   MaterialCommunityIcons,
-  SimpleLineIcons,
 } from "react-native-vector-icons";
-import EventSubmission from "../Event/SubmitEvent";
 import Notifications from "../Notifications/Notifications";
-import Events from "../Event/Events";
 import UserTickets from "../Tickets/userTickets";
 import Bookmarks from "../Others/Bookmarks";
+import { useSelector } from "react-redux";
+import { NotificationsTab } from "./components/Notification";
+
 const Tab = createBottomTabNavigator();
 
 function TabNav({ navigation }) {
+  const notificationcount = useSelector(
+    (state) => state.counts.notificationCount
+  );
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -96,7 +99,11 @@ function TabNav({ navigation }) {
           },
           headerTintColor: Constants.Inverse,
           tabBarIcon: ({ focused, color }) => (
-            <Ionicons name="notifications-outline" size={22} color={color} />
+            <NotificationsTab
+              focused={focused}
+              color={color}
+              notificationCount={3}
+            />
           ),
           tabBarActiveTintColor: Constants.primary,
           tabBarInactiveTintColor: Constants.Inverse,

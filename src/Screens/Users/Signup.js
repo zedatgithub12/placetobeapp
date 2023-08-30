@@ -19,6 +19,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { AuthContext } from "../../Components/context";
 import { Caption } from "react-native-paper";
+import getUserDeviceToken from "../../Utils/getUserDeviceToken";
 
 WebBrowser.maybeCompleteAuthSession();
 LogBox.ignoreLogs(["EventEmitter.removeListener"]);
@@ -49,6 +50,7 @@ function SuccessModal({ visible, children, navigation }) {
 export default function SignUp({ navigation }) {
   const { GoogleAuth } = React.useContext(AuthContext);
   const [visible, setVisible] = React.useState(false);
+  const [loader, setLoader] = useState(false);
 
   const [data, setData] = React.useState({
     mail: "",
@@ -73,10 +75,12 @@ export default function SignUp({ navigation }) {
     isFieldEmpty: true,
   });
 
-  const emailAddress = (val) => {
-    //email address validator
-    // var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+  const retrieveToken = async () => {
+    const token = await getUserDeviceToken();
+    return token;
+  };
 
+  const emailAddress = (val) => {
     if (val.trim().length >= 8) {
       setData({
         ...data,
@@ -162,9 +166,9 @@ export default function SignUp({ navigation }) {
     });
   };
 
-  //activity indicator to be shown while the user login
-  const [loader, setLoader] = useState(false);
-  const InsertRecord = () => {
+  const handleRegistration = async () => {
+    const token = await retrieveToken();
+
     var Email = data.mail;
     var User = data.user;
     var passwords = data.password;
@@ -206,24 +210,12 @@ export default function SignUp({ navigation }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       };
-      //generate random Text to be stored alongside with user info
-      const rand = () => {
-        return Math.random().toString(36).substring(2);
-      };
-      const token = () => {
-        return rand() + rand();
-      };
-
-      // default category place holder
-
-      var category = "Entertainment";
 
       var Data = {
         email: Email,
         user: User,
         passwords: passwords,
-        category: category,
-        token: token(),
+        device_token: token,
       };
 
       // featch function
@@ -274,6 +266,7 @@ export default function SignUp({ navigation }) {
 
   //google signin will go here
   const GoogleSignUp = async () => {
+    const token = await retrieveToken();
     setFeathedInfo(true);
     let userInfoResponse = await fetch(
       "https://www.googleapis.com/userinfo/v2/me",
@@ -288,27 +281,13 @@ export default function SignUp({ navigation }) {
         "Content-Type": "application/json",
       };
 
-      //generate random Text to be stored alongside with user info
-      const rand = () => {
-        return Math.random().toString(36).substring(2);
-      };
-      const token = () => {
-        return rand() + rand();
-      };
-
-      // default category place holder
-
-      var category = "Entertainment";
-
-      //dat to be sent to server
       var Data = {
         id: data.id,
         email: data.email,
         name: data.name,
         fatherName: data.family_name,
         kidName: data.given_name,
-        token: token(),
-        category: category,
+        device_token: token,
       };
 
       fetch(ApiUrl, {
@@ -485,14 +464,12 @@ export default function SignUp({ navigation }) {
               name="eye-off-outline"
               size={22}
               color={Constants.Secondary}
-              style={styles.showpassword}
             />
           ) : (
             <Ionicons
               name="eye-outline"
               size={22}
               color={Constants.Secondary}
-              style={styles.showpassword}
             />
           )}
         </TouchableOpacity>
@@ -502,7 +479,10 @@ export default function SignUp({ navigation }) {
           <Text style={styles.errorTxt}>{data.confirm_error}</Text>
         </View>
       )}
-      <TouchableOpacity style={styles.signupbtn} onPress={() => InsertRecord()}>
+      <TouchableOpacity
+        style={styles.signupbtn}
+        onPress={() => handleRegistration()}
+      >
         {loader ? (
           <ActivityIndicator size="small" color={Constants.Faded} />
         ) : (

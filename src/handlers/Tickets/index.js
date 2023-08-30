@@ -31,12 +31,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   noTicketImage: {
-    width: "85%",
-    height: 200,
+    width: "100%",
+    height: 300,
     borderRadius: 10,
   },
   prompttxt: {
-    fontSize: Constants.headingtwo,
+    fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
     marginTop: 10,
     color: Constants.Inverse,

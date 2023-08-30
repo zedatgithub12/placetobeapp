@@ -298,3 +298,22 @@ export const TicketColor = (iconname) => {
   }
   return Color;
 };
+
+export function HashEventId(eventId) {
+  let hashedId = "";
+
+  for (let i = 0; i < eventId.length; i++) {
+    hashedId += eventId.charCodeAt(i).toString(16);
+  }
+  return hashedId;
+}
+
+export function ParseHashedId(hashedId) {
+  let eventId = "";
+
+  for (let i = 0; i < hashedId.length; i += 2) {
+    eventId += String.fromCharCode(parseInt(hashedId.substr(i, 2), 16));
+  }
+
+  return eventId;
+}

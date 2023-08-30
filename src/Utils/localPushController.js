@@ -4,9 +4,9 @@ import * as Linking from "expo-linking";
 
 PushNotification.configure({
   onNotification: function (notify) {
-    if (notify.data.type == "events") {
+    if (notify.data.type == "event") {
       // Linking.openURL("com.afromina.placetobe://event-detail/" + notify.data.id);
-      Linking.openURL('http://www.p2b-ethiopia.com/eventdetail/'+notify.data.id);
+      Linking.openURL("http://www.p2b-ethiopia.com/event/" + notify.data.id);
     }
   },
   popInitialNotification: true,

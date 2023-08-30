@@ -46,7 +46,6 @@ const Constants = {
   Bold: "900",
   Boldtwo: "600",
 
-  //Icons Color
 
   bottomTabIcon: "#909090",
   // buttons color
