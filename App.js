@@ -13,13 +13,14 @@ import * as Linking from "expo-linking";
 import NetInfo from "@react-native-community/netinfo";
 import * as Animatable from "react-native-animatable";
 import Geolocation from "@react-native-community/geolocation";
-import RemotePushController from "./src/Utils/RemotePushController";
 import Routes from "./src/routes";
 import PopupAds from "./src/Components/Ads/popup";
 import SlideUp from "./src/Components/Ads/slideup";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "./src/store/store";
 import Constants from "./src/constants/Constants";
+import messaging from "@react-native-firebase/messaging";
+import PushNotification, { Importance } from "react-native-push-notification";
 
 import { theme } from "./src/themes";
 import { Caption } from "react-native-paper";
@@ -33,33 +34,68 @@ import { showToast } from "./src/Utils/Toast";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
-
-export const Connectivity = () => {
-  const [connection, setConnection] = useState(false);
-  useEffect(() => {
-    const InternetConnection = async () => {
-      try {
-        const networkState = await NetInfo.fetch();
-        setConnection(networkState.isConnected);
-      } catch (error) {
-        showToast("Problem indentifying your network state");
-      }
-    };
-    InternetConnection();
-
-    const subscription = NetInfo.addEventListener(async (state) => {
-      setConnection(state.isConnected);
-    });
-    return () => {};
-  }, []);
-  return connection;
-};
-
 const navigationRef = React.createRef();
-
 export function navigate(name, params) {
   navigationRef.current?.navigate(name, params);
 }
+
+PushNotification.configure({
+  appId: Constants.notificationappid,
+  apiKey: Constants.notificationapikey,
+  senderId: Constants.notificationsenderid,
+
+  popInitialNotification: true,
+  requestPermissions: true,
+  permissions: {
+    alert: true,
+    badge: true,
+    sound: true,
+  },
+
+  onNotification: function (notification) {
+    // Handle onPress event when the notification is tapped
+
+    if (notification.userInteraction) {
+      const parseData = notification.data;
+      if (parseData.url) {
+        var url = parseData.url;
+        const { path } = Linking.parse(url);
+        const pathSegments = path.split("/");
+        if (pathSegments[0] === "event") {
+          const eventId = pathSegments[1];
+          navigate("EventDetail", { id: eventId });
+        }
+      }
+    }
+  },
+});
+
+export const LocalNotification = (time, title, message, picture, userInfo) => {
+  PushNotification.localNotification({
+    channelId: "channel-id",
+    channelName: "My channel",
+    title: title,
+    ticker: "Ticker",
+    message: message,
+    subText: time,
+    when: time,
+    picture: picture,
+    userInfo: userInfo,
+    autoCancel: true,
+    playSound: true,
+    soundName: "default",
+    importance: 10,
+    vibrate: true,
+    vibration: 400,
+    color: Constants.primary,
+    onlyAlertOnce: false,
+
+    largeIcon: "ic_launcher",
+    largeIconUrl: picture,
+    bigLargeIcon: "ic_launcher",
+    bigLargeIconUrl: picture,
+  });
+};
 
 export default function App() {
   const initialLoginState = {
@@ -71,6 +107,8 @@ export default function App() {
   const [showSlideAds, setShowSlideAds] = useState(false);
   const [slideupAds, setSlideupAds] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(0);
+  const [connectionState, setConnectionState] = useState(false);
+  const [retry, setRetry] = useState();
   const [eventInfo, setEventInfo] = useState({
     featuredImage: "",
     eventTitle: "",
@@ -363,9 +401,6 @@ export default function App() {
     ticketid: selectedTicket,
   }));
 
-  const [connectionState, setConnectionState] = useState(false);
-  const [retry, setRetry] = useState();
-
   const Referesh = () => {
     setRetry(!retry);
   };
@@ -419,14 +454,16 @@ export default function App() {
     Linking.addEventListener("url", handleUrl);
   };
 
+  // handles deep linking
   useEffect(() => {
     setupDeepLinking();
 
     return () => {
-      Linking.removeEventListener("url", handleUrl);
+      // Linking.removeEventListener("url", handleUrl);
     };
   }, []);
 
+  // handles connection
   useEffect(() => {
     setTimeout(async () => {
       try {
@@ -453,7 +490,7 @@ export default function App() {
     return () => {};
   }, [retry]);
 
-  // fetchs popUp ad fetching
+  // handles fetchs popUp ad fetching
   useEffect(() => {
     const PopupAd = setTimeout(() => {
       handlePopupAd("popUp");
@@ -461,12 +498,64 @@ export default function App() {
     return () => clearTimeout(PopupAd);
   }, []);
 
-  // fetchs slideUp ad fetching
+  // handles fetchs slideUp ad fetching
   useEffect(() => {
     const SlideUpAd = setTimeout(() => {
       handleSlideupAd("slideUp");
     }, 40000);
     return () => clearTimeout(SlideUpAd);
+  }, []);
+
+  //handles push notification
+  useEffect(() => {
+    messaging().requestPermission();
+
+    const handleForegroundNotification = async (remoteMessage) => {
+      if (remoteMessage.data) {
+        var time = remoteMessage.sentTime;
+        var title = remoteMessage.notification.title;
+        var message = remoteMessage.notification.body;
+        var picture = remoteMessage.notification.image;
+        var userInfo = remoteMessage.data;
+        LocalNotification(time, title, message, picture, userInfo);
+      }
+    };
+
+    const handleBackgroundNotification = async (remoteMessage) => {
+      if (remoteMessage?.data) {
+        const data = remoteMessage.data;
+        var url = data.url;
+        handleUrl({ url });
+      }
+    };
+
+    const handleNotificationClick = async (remoteMessage) => {
+      if (remoteMessage?.data) {
+        const data = remoteMessage.data;
+        var url = data.url;
+        handleUrl({ url });
+      }
+    };
+
+    const backgroundMessageHandler = async (remoteMessage) => {
+      if (remoteMessage) {
+        // you can write a code that will be executed when the receives notification on the background
+      }
+    };
+
+    // Handle foreground push notifications
+    messaging().onMessage(handleForegroundNotification);
+
+    // Handle background push notifications
+    messaging().getInitialNotification().then(handleBackgroundNotification);
+
+    // Handle notification click event
+    messaging().onNotificationOpenedApp(handleNotificationClick);
+
+    // Set the background message handler
+    messaging().setBackgroundMessageHandler(backgroundMessageHandler);
+
+    return () => {};
   }, []);
 
   //activity indicator which is going to be shown and the opening of app
@@ -502,7 +591,6 @@ export default function App() {
               fallback={
                 <View style={styles.loader}>
                   <ActivityIndicator color={Constants.primary} size="large" />
-                  <RemotePushController />
                 </View>
               }
             >

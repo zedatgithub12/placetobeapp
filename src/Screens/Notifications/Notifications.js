@@ -49,6 +49,12 @@ const Notifications = ({ navigation }) => {
     dispatch(incrementNotificationCount(counts));
   };
 
+  const NewNotificationCount = async (data) => {
+    const unseen = data.filter((notice) => notice.status === null);
+    const counts = unseen.length;
+    dispatch(incrementNotificationCount(counts));
+  };
+
   // Fetch & render notification when component get mounted
   const FetchNotifications = async () => {
     let id = await AsyncStorage.getItem("userId");
@@ -68,7 +74,7 @@ const Notifications = ({ navigation }) => {
       .then((response) => {
         if (response.success) {
           setNotification(response.data);
-          handleNewNotification();
+          NewNotificationCount(response.data);
           setLoading(false);
         } else {
           setLoading(false);
@@ -99,7 +105,7 @@ const Notifications = ({ navigation }) => {
       .then((response) => {
         if (response.success) {
           setNotification(response.data);
-
+          handleNewNotification();
           setRefreshing(false);
           setLoading(false);
         } else {

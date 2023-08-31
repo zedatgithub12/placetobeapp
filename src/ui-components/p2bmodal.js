@@ -28,7 +28,8 @@ const P2bModal = ({ visible, toggleModal, title, children }) => {
         style={[
           styles.bottomsheet,
           {
-            minHeight: Dimensions.get("screen").width,
+            minHeight: Dimensions.get("screen").height / 4,
+            maxHeight: Dimensions.get("screen").height / 1.6,
           },
         ]}
       >
@@ -67,7 +68,7 @@ const P2bModal = ({ visible, toggleModal, title, children }) => {
           </TouchableOpacity>
         </View>
 
-        <ScrollView>{children}</ScrollView>
+        <ScrollView style={{ paddingVertical: 12 }}>{children}</ScrollView>
       </Animatable.View>
     </Modal>
   );
