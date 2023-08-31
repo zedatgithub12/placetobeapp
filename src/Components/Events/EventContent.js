@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableNativeFeedback,
-} from "react-native";
-import { Caption, HelperText } from "react-native-paper";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import {
   MaterialCommunityIcons,
   FontAwesome,

@@ -1,17 +1,39 @@
+import React from "react";
 import PushNotification, { Importance } from "react-native-push-notification";
 import Constants from "../constants/Constants";
 import * as Linking from "expo-linking";
 
 PushNotification.configure({
-  onNotification: function (notify) {
-    if (notify.data.type == "event") {
-      // Linking.openURL("com.afromina.placetobe://event-detail/" + notify.data.id);
-      Linking.openURL("http://www.p2b-ethiopia.com/event/" + notify.data.id);
-    }
-  },
+  appId: Constants.notificationappid,
+  apiKey: Constants.notificationapikey,
+  senderId: Constants.notificationsenderid,
+
   popInitialNotification: true,
   requestPermissions: true,
+  permissions: {
+    alert: true,
+    badge: true,
+    sound: true,
+  },
+
+  onNotification: function (notification) {
+    // Handle onPress event when the notification is tapped
+
+    if (notification.userInteraction) {
+      const parseData = notification.data;
+      if (parseData.url) {
+        var url = parseData.url;
+        const { path } = Linking.parse(url);
+        const pathSegments = path.split("/");
+        if (pathSegments[0] === "event") {
+          const eventId = pathSegments[1];
+          // navigate("EventDetail", { id: eventId });
+        }
+      }
+    }
+  },
 });
+
 PushNotification.createChannel({
   channelId: "channel-id", // (required)
   channelName: "My channel", // (required)

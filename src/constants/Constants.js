@@ -46,7 +46,6 @@ const Constants = {
   Bold: "900",
   Boldtwo: "600",
 
-
   bottomTabIcon: "#909090",
   // buttons color
   primary: "#ffbb00",
@@ -71,5 +70,9 @@ const Constants = {
   terms: "https://placetobeethiopia.com/terms-agreement",
   refunding_policy: "https://placetobeethiopia.com/refunding-terms",
   privacy_policy: "https://placetobeethiopia.com/privacy-policy",
+
+  notificationsenderid: "903368065253",
+  notificationapikey: "1:903368065253:web:02a1bf1ada3ecaf673140c",
+  notificationappid: "local-mediator-334011",
 };
 export default Constants;
