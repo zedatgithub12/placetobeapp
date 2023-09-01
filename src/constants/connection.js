@@ -12,7 +12,7 @@ const Connection = {
   updateUserInfo: "update/",
   ChangePassword: "changepassword/",
 
-  //event related api's
+  //event related api'sConnection
   events: "events",
   AddEvent: "add-event",
   TodayEvents: "today-events",

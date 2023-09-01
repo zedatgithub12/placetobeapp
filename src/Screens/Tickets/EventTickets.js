@@ -41,11 +41,7 @@ const EventTickets = ({ navigation, route }) => {
   const [selectedTicket, setSelectedTicket] = useState();
   const [active, setActiveIndex] = useState();
   const [disable, setDisable] = useState(false);
-  const [event, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const width = Dimensions.get("screen").width;
-  const height = Dimensions.get("screen").height;
 
   const handlechange = (index) => {
     const newItem = tickets[index];
@@ -76,7 +72,6 @@ const EventTickets = ({ navigation, route }) => {
       .then((response) => {
         if (response.success) {
           setTickets(response.data);
-          setEvents(response.Events);
           setLoading(false);
         } else {
           setLoading(false);
