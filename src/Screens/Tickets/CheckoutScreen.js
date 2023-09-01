@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -10,12 +11,10 @@ import {
   Linking,
   ScrollView,
 } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import Constants from "../../constants/Constants";
-import { Divider, HelperText, Checkbox, IconButton } from "react-native-paper";
+import { Divider, Checkbox } from "react-native-paper";
 import Connection from "../../constants/connection";
-import TicketDetail from "./TicketDetail";
 
 import { useTheme } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,6 +28,7 @@ import { P2bAnimatedBtn } from "../../ui-components/Button";
 import { Typography } from "../../themes/typography";
 import Gateways from "./components/payment";
 import { PaymentGateways } from "../../data/PaymentGateways";
+import { showToast } from "../../Utils/Toast";
 
 function CheckoutScreen({ route }) {
   const { pass } = route.params;
@@ -41,7 +41,9 @@ function CheckoutScreen({ route }) {
   const ticketData = useSelector((state) => state.timer.ticketData);
 
   const [selection, setSelection] = useState(null);
-  const [agent, setAgent] = useState();
+  const [gateway, setGateway] = useState();
+  const [isChecked, setIsChecked] = useState(false);
+  const [paymentloader, setPaymentLoader] = useState(false);
   const [contactInfo, setContactInfo] = useState({
     fullname: "",
     nameBorder: Constants.Secondary,
@@ -53,8 +55,6 @@ function CheckoutScreen({ route }) {
     phoneErrorMessage: "",
     phoneError: false,
   });
-
-  const [isChecked, setIsChecked] = useState(false);
 
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
@@ -79,8 +79,10 @@ function CheckoutScreen({ route }) {
   const ChooseGateway = (gateway) => {
     if (selection === gateway.name) {
       setSelection(null);
+      setGateway(null);
     } else {
       setSelection(gateway.name);
+      setGateway(gateway.name);
     }
   };
 
@@ -123,6 +125,20 @@ function CheckoutScreen({ route }) {
         phoneErrorMessage: "Please enter your Phone Number",
         phoneError: true,
       });
+    } else if (contactInfo.phone.charAt(0) != 0) {
+      setContactInfo({
+        ...contactInfo,
+        phoneBorder: Constants.red,
+        phoneErrorMessage: "The phone number must start with 09 or 07",
+        phoneError: true,
+      });
+    } else if (contactInfo.phone.length > 10 || contactInfo.phone.length < 10) {
+      setContactInfo({
+        ...contactInfo,
+        phoneBorder: Constants.red,
+        phoneErrorMessage: "The phone number is combination of 10 digits",
+        phoneError: true,
+      });
     } else {
       setContactInfo({
         ...contactInfo,
@@ -133,7 +149,7 @@ function CheckoutScreen({ route }) {
         phoneErrorMessage: "",
         phoneError: false,
       });
-
+      setPaymentLoader(true);
       // we call backend from here
 
       var ApiUrl = Connection.url + Connection.Payment;
@@ -145,15 +161,14 @@ function CheckoutScreen({ route }) {
       var Data = {
         id: pass.id,
         userId: pass.userId,
-        eventId: pass.eventId,
-        username: contactInfo.fullname,
-        phone: contactInfo.phone,
-
+        eventId: pass.event_id,
         eventName: pass.event_name,
         type: pass.tickettype,
-        eachprice: pass.currentprice,
         quantity: pass.amount,
-        agent: agent,
+        eachprice: pass.currentprice,
+        gateway: gateway,
+        username: contactInfo.fullname,
+        phone: contactInfo.phone,
       };
 
       fetch(ApiUrl, {
@@ -163,16 +178,18 @@ function CheckoutScreen({ route }) {
       })
         .then((response) => response.json())
         .then((response) => {
-          message = response[0].message;
-
-          if (message === "succeed") {
-            alert("succeed");
+          if (response.success) {
+            Linking.openURL(response.data);
+            setPaymentLoader(false);
           } else {
-            alert("Some Problems");
+            setPaymentLoader(false);
+            // showToast(response.message);
+            console.log(response.message);
           }
         })
         .catch((error) => {
           console.log("in checkout screen" + error);
+          setPaymentLoader(false);
         });
     }
   };
@@ -200,7 +217,10 @@ function CheckoutScreen({ route }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background.faded }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
         <Divider style={{ backgroundColor: theme.primary[600] }} />
 
         <View style={styles.leftCheckout}>
@@ -261,26 +281,36 @@ function CheckoutScreen({ route }) {
             </Text>
           </View>
         </View>
-
+        <Text
+          style={{
+            marginLeft: 24,
+            marginTop: 16,
+            marginBottom: 5,
+            padding: 0,
+            fontWeight: Constants.Boldtwo,
+            fontSize: Typography.size.headingtwo,
+            color: theme.dark.main,
+          }}
+        >
+          Contact Informations
+        </Text>
         <View>
           <Text
             style={{
-              marginLeft: 24,
-              marginTop: 16,
-              marginBottom: -5,
-              padding: 0,
+              marginLeft: 28,
+              marginTop: 10,
               fontWeight: Constants.Boldtwo,
-              color: Constants.Secondary,
+              fontSize: Typography.size.textSize,
+              color: theme.dark.main,
             }}
           >
-            Contact Informations
+            Full name
           </Text>
-
-          <View style={styles.fullnameContainer}>
+          <View style={styles.fieldContainer}>
             <TextInput
               placeholder="Full name"
               style={[
-                styles.pricefield,
+                styles.inputField,
                 { borderColor: contactInfo.nameBorder },
               ]}
               value={contactInfo.fullname}
@@ -292,23 +322,35 @@ function CheckoutScreen({ route }) {
           )}
         </View>
 
-        <View style={styles.phonefieldContainer}>
-          <Text style={styles.code}>+251</Text>
-          <TextInput
-            placeholder="Phone"
-            keyboardType="phone-pad"
-            style={[
-              styles.phonefield,
-              { borderColor: contactInfo.phoneBorder },
-            ]}
-            value={contactInfo.phone}
-            onChangeText={(phone) => Phone(phone)}
-          />
-        </View>
+        <View>
+          <Text
+            style={{
+              marginLeft: 28,
+              marginTop: 4,
+              fontWeight: Constants.Boldtwo,
+              fontSize: Typography.size.textSize,
+              color: theme.dark.main,
+            }}
+          >
+            Phone
+          </Text>
 
-        {contactInfo.phoneError && (
-          <Text style={styles.error}>{contactInfo.phoneErrorMessage}</Text>
-        )}
+          <View style={styles.fieldContainer}>
+            <TextInput
+              placeholder="09********"
+              keyboardType="phone-pad"
+              style={[
+                styles.inputField,
+                { borderColor: contactInfo.phoneBorder },
+              ]}
+              value={contactInfo.phone}
+              onChangeText={(phone) => Phone(phone)}
+            />
+          </View>
+          {contactInfo.phoneError && (
+            <Text style={styles.error}>{contactInfo.phoneErrorMessage}</Text>
+          )}
+        </View>
 
         <Divider style={{ marginTop: 15 }} />
 
@@ -354,7 +396,7 @@ function CheckoutScreen({ route }) {
           title={`Pay${" with " + selection}`}
           animation="zoomIn"
           duration={8}
-          isSubmitting={false}
+          isSubmitting={paymentloader}
           onPress={() => Pay()}
         />
       )}
@@ -446,18 +488,20 @@ const styles = StyleSheet.create({
     width: 50,
   },
 
-  fullnameContainer: {
-    margin: 10,
+  fieldContainer: {
+    marginHorizontal: 10,
+    marginBottom: 8,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
-  pricefield: {
+
+  inputField: {
     width: "94%",
     borderRadius: Constants.tinybox,
     margin: 4,
     marginRight: 0,
-    padding: 6,
+    padding: 10,
     paddingLeft: 16,
     borderWidth: 0.5,
     borderColor: Constants.Secondary,
@@ -465,40 +509,6 @@ const styles = StyleSheet.create({
     fontSize: Constants.headingthree,
   },
 
-  TextField: {
-    margin: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  phonefieldContainer: {
-    margin: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  code: {
-    textAlign: "center",
-    padding: 10,
-    color: Constants.Inverse,
-    fontWeight: Constants.Boldtwo,
-    fontSize: Constants.headingthree,
-    borderWidth: 0.5,
-    borderColor: Constants.Secondary,
-    borderRadius: Constants.tinybox,
-  },
-  phonefield: {
-    width: "78%",
-    borderRadius: Constants.tinybox,
-    margin: 4,
-    marginRight: 0,
-    padding: 6,
-    paddingLeft: 16,
-    borderWidth: 0.5,
-    borderColor: Constants.Secondary,
-    fontWeight: Constants.Boldtwo,
-    fontSize: Constants.headingthree,
-  },
   error: {
     color: Constants.red,
     fontSize: Constants.textSize,
