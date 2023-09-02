@@ -157,6 +157,18 @@ export const StatusText = (textColor) => {
       StatusColor = "#0075FF";
       break;
 
+    case "active":
+      StatusColor = "#007500";
+      break;
+
+    case "used":
+      StatusColor = "#787878";
+      break;
+
+    case "cancelled":
+      StatusColor = "#ff3d4d";
+      break;
+
     case 2:
       StatusColor = "#ff3d4d";
       break;

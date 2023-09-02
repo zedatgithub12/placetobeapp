@@ -200,7 +200,7 @@ const UserTickets = ({ navigation }) => {
       price={item.price}
       iconName={TicketName(item.tickettype)}
       iconColor={TicketColor(item.tickettype)}
-      status={Status(item.status)}
+      status={item.status}
       textColor={StatusText(item.status)}
       onPress={() => navigation.navigate("BoughtDetail", { ...item })}
     />
@@ -234,6 +234,7 @@ const UserTickets = ({ navigation }) => {
               keyExtractor={(item) => item.id}
               onRefresh={Refresh}
               refreshing={refreshing}
+              numColumns={2}
               ListEmptyComponent={
                 <NoTicket
                   title=" You didn't buy ticket yet!"
@@ -260,6 +261,7 @@ const UserTickets = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 4,
   },
   containertwo: {
     alignSelf: "center",

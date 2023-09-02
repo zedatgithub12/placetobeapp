@@ -338,7 +338,6 @@ const Routes = ({ navigation }) => {
           },
           headerTintColor: theme.dark.main,
           headerShadowVisible: false,
-          headerRight: () => <Timer />,
         }}
       />
 

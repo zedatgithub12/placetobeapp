@@ -35,11 +35,6 @@ function CheckoutScreen({ route }) {
   const TicketInfo = pass;
   const { theme } = useTheme();
 
-  const dispatch = useDispatch();
-  const timerRunning = useSelector((state) => state.timer.timerRunning);
-  const remainingTime = useSelector((state) => state.timer.remainingTime);
-  const ticketData = useSelector((state) => state.timer.ticketData);
-
   const [selection, setSelection] = useState(null);
   const [gateway, setGateway] = useState();
   const [isChecked, setIsChecked] = useState(false);
@@ -88,7 +83,6 @@ function CheckoutScreen({ route }) {
 
   const Pay = () => {
     var regName = /^[a-zA-Z]+ [a-zA-Z]+$/;
-    var message;
     if (contactInfo.fullname.length == 0) {
       setContactInfo({
         ...contactInfo,
@@ -183,37 +177,35 @@ function CheckoutScreen({ route }) {
             setPaymentLoader(false);
           } else {
             setPaymentLoader(false);
-            // showToast(response.message);
-            console.log(response.message);
+            showToast(response.message);
           }
         })
         .catch((error) => {
-          console.log("in checkout screen" + error);
           setPaymentLoader(false);
         });
     }
   };
-  const start = () => {
-    const ticket = {
-      id: pass.id,
-      userId: pass.userId,
-      quantity: pass.amount,
-    };
+  // const start = () => {
+  //   const ticket = {
+  //     id: pass.id,
+  //     userId: pass.userId,
+  //     quantity: pass.amount,
+  //   };
 
-    dispatch(startTimer(ticket));
-  };
+  //   dispatch(startTimer(ticket));
+  // };
 
-  //on component mount
-  useEffect(() => {
-    if (
-      !ticketData ||
-      ticketData.id !== TicketInfo.id ||
-      ticketData.quantity !== TicketInfo.amount
-    ) {
-      start();
-    }
-    return () => {};
-  }, [TicketInfo]);
+  // //on component mount
+  // useEffect(() => {
+  //   if (
+  //     !ticketData ||
+  //     ticketData.id !== TicketInfo.id ||
+  //     ticketData.quantity !== TicketInfo.amount
+  //   ) {
+  //     start();
+  //   }
+  //   return () => {};
+  // }, [TicketInfo]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background.faded }}>
