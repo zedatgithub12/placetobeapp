@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
   container: {
     width: Dimensions.get("screen").width / 2.1,
     height: 160,
+
     justifyContent: "space-between",
     borderRadius: Constants.medium,
     borderTopRightRadius: 0,
@@ -134,6 +135,7 @@ const styles = StyleSheet.create({
   statusstyl: {
     justifyContent: "flex-end",
     fontSize: Constants.textSize,
+    textTransform: "capitalize",
   },
 });
 

@@ -17,7 +17,7 @@ const Notice = ({
   status,
   onPressNotice,
 }) => {
-  var icon = type === "event" ? "time" : "notifications-outline";
+  var icon = type === "event" ? "calendar-outline" : "notifications-outline";
   const { theme } = useTheme();
   return (
     <TouchableNativeFeedback
@@ -38,8 +38,16 @@ const Notice = ({
         ]}
       >
         <View style={styles.notbellContainer}>
-          {status == null && (
-            <Badge size={8} style={{ backgroundColor: theme.primary[600] }} />
+          {status === null && (
+            <Badge
+              size={10}
+              style={{
+                backgroundColor: theme.primary[600],
+                position: "absolute",
+                top: 2,
+                right: 1,
+              }}
+            />
           )}
           <Ionicons name={icon} size={22} color={iconColor} />
         </View>

@@ -131,12 +131,15 @@ const BoughtDetail = ({ navigation, route }) => {
           </Text>
           <View style={styles.status}>
             <Text
-              style={[styles.statustxt, { color: StatusText(item.status) }]}
+              style={[
+                styles.statustxt,
+                { color: StatusText(item.status), textTransform: "capitalize" },
+              ]}
             >
               {item.status == 2 && (
                 <MaterialCommunityIcons name="check-circle" size={13} />
               )}
-              {Status(item.status)}
+              {item.status}
             </Text>
           </View>
         </View>
