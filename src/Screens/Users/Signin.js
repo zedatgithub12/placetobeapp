@@ -126,7 +126,7 @@ export default function Signin({ navigation }) {
         .then((response) => {
           if (response.success) {
             var userId = JSON.stringify(response.data.id);
-            var userToken = response.access_token;
+            var userToken = response.device_token;
             var userEmail = response.data.email;
             var profile = response.data.profile;
             var username = response.data.username;
@@ -271,11 +271,11 @@ export default function Signin({ navigation }) {
 
   const handleSignIn = async () => {
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const { user } = await GoogleSignin.signIn();
       const d_token = await retrieveToken();
 
-      console.log("User Info:", { userInfo });
+      console.log("User Info:", { user });
       // You can now use the userInfo object to authenticate the user in your backend
       var ApiUrl = Connection.url + Connection.googleSignUp;
       var headers = {
@@ -304,7 +304,7 @@ export default function Signin({ navigation }) {
             var user = response.data;
             googleSignUp(
               user.id,
-              user.authentication_key,
+              user.device_token,
               user.email,
               user.google_Id,
               user.profile
@@ -330,11 +330,12 @@ export default function Signin({ navigation }) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log("User Cancelled the Login Flow");
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log("Signin in progress");
+        showToast("Signin in progress");
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         console.log("Play Services Not Available or Outdated");
+        showToast("Play Services Not Available or Outdated");
       } else {
-        console.log("Some other error occurred:", error.message);
+        showToast("Some error occurred");
       }
     }
   };
@@ -342,8 +343,9 @@ export default function Signin({ navigation }) {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-        "903368065253-alo3tolafl6mh1ripn83484rdmv58e0t.apps.googleusercontent.com",
+        "903368065253-g8k9n3vv8594b7erho9rem4ajqbu9um6.apps.googleusercontent.com",
       offlineAccess: true,
+      forceCodeForRefreshToken: true,
     });
   }, []);
 

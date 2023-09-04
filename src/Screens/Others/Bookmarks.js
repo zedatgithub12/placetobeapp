@@ -6,6 +6,7 @@ import { Title, Paragraph } from "react-native-paper";
 import SavedEvent from "../../Reducer/BookmarkedEvent";
 import { remove } from "../../Reducer/saveSlice";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
+import NotFound from "../../handlers/NotFound";
 
 function Bookmarks({ navigation }) {
   const { items } = useSelector((state) => state.cart);
@@ -67,7 +68,7 @@ function Bookmarks({ navigation }) {
     var eventPrice;
     var free = "Free";
     var currency = " ETB";
-    if (price != 0) {
+    if (price != null) {
       eventPrice = price + currency;
     } else {
       eventPrice = free;
@@ -109,23 +110,11 @@ function Bookmarks({ navigation }) {
               })}
             </View>
           ) : (
-            <View style={styles.noBookmarkContainer}>
-              <Image
-                source={require("../../assets/images/bookmark.png")}
-                style={styles.noBookmarkImage}
-                resizeMode="contain"
-              />
-              <Title style={styles.prompttxt}>No Bookmarks</Title>
-              <Paragraph>Your bookmarked event will appear here.</Paragraph>
-              <TouchableOpacity
-                //this is a button which redirect user to today event listing in the home page
-                style={styles.eventsBtn}
-                activeOpacity={0.7}
-                onPress={() => navigation.navigate("Home")}
-              >
-                <Text style={styles.eventstxt}>Events</Text>
-              </TouchableOpacity>
-            </View>
+            <NotFound
+              image={require("../../assets/images/nobookmark.png")}
+              title="No Bookmarks"
+              helperText="bookmarked event will be listed here! "
+            />
           )}
         </View>
       ) : (
