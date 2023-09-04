@@ -52,7 +52,7 @@ const Notifications = ({ navigation }) => {
   const NewNotificationCount = async (data) => {
     const unseen = data.filter((notice) => notice.status === null);
     const counts = unseen.length;
-    dispatch(incrementNotificationCount(counts));
+    logged && dispatch(incrementNotificationCount(counts));
   };
 
   // Fetch & render notification when component get mounted

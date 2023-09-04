@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "903368065253-porafk4ovu7mjoqa90ff5o4c5ffddmne.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.afromina.placetobe",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
           "client_id": "903368065253-g8k9n3vv8594b7erho9rem4ajqbu9um6.apps.googleusercontent.com",
           "client_type": 3
         }

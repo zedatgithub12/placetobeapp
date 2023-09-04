@@ -43,6 +43,7 @@ import NativeAdsOne from "../../Components/Ads/nativeAd1";
 import HeaderAds from "../../Components/Ads/headerAds";
 import { fetchAds, UserInteraction } from "../../Utils/Ads";
 import Statuses from "../../Components/Categories/statusFiltering";
+import NotFound from "../../handlers/NotFound";
 
 function Home({ navigation, ...props }) {
   const { theme } = useTheme();
@@ -354,9 +355,11 @@ function Home({ navigation, ...props }) {
                   <Loader size="large" />
                 </View>
               ) : filteredEvent.length == 0 ? (
-                <View>
-                  <Text>No Event</Text>
-                </View>
+                <NotFound
+                  image={require("../../assets/images/noevent.png")}
+                  helperText="No event found"
+                  title=""
+                />
               ) : (
                 filteredEvent.map((item, index) => (
                   <Events
