@@ -7,7 +7,6 @@ import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
 import NotLoggedIn from "../../handlers/auth";
 import NoTicket from "../../handlers/Tickets";
-import NetInfo from "@react-native-community/netinfo";
 import NoConnection from "../../handlers/connection";
 import TicketListing from "../../Components/Tickets/TicketsListing";
 import { Status, StatusText } from "../../Utils/functions";
@@ -237,8 +236,8 @@ const UserTickets = ({ navigation }) => {
               numColumns={2}
               ListEmptyComponent={
                 <NoTicket
-                  title=" You didn't buy ticket yet!"
-                  helperText="Once you bought a ticket, it will be listed here!"
+                  title="Purchased Tickets"
+                  helperText="Purchased tickets are listed here!"
                 />
               }
             />

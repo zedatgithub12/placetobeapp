@@ -20,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import store from "./src/store/store";
 import Constants from "./src/constants/Constants";
 import messaging from "@react-native-firebase/messaging";
-import PushNotification, { Importance } from "react-native-push-notification";
+import PushNotification from "react-native-push-notification";
 
 import { theme } from "./src/themes";
 import { Caption } from "react-native-paper";
@@ -30,7 +30,6 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import { fetchAds } from "./src/Utils/Ads";
-import { showToast } from "./src/Utils/Toast";
 
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
@@ -54,7 +53,6 @@ PushNotification.configure({
 
   onNotification: function (notification) {
     // Handle onPress event when the notification is tapped
-
     if (notification.userInteraction) {
       const parseData = notification.data;
       if (parseData.url) {

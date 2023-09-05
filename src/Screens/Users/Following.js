@@ -13,6 +13,7 @@ import { HelperText } from "react-native-paper";
 import Listing from "../../Components/userList";
 import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
+import Loader from "../../ui-components/ActivityIndicator";
 
 // create a component
 const Following = ({ navigation }) => {
@@ -92,9 +93,7 @@ const Following = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <View style={{ paddingTop: 20 }}>
-          <ActivityIndicator size="large" color={Constants.Inverse} />
-        </View>
+        <Loader size="small" />
       ) : (
         <>
           <View style={styles.topContent}>
@@ -111,13 +110,13 @@ const Following = ({ navigation }) => {
             ListEmptyComponent={
               <View style={styles.noContainer}>
                 <Image
-                  source={require("../../assets/images/followers.png")}
+                  source={require("../../assets/images/followings.png")}
                   resizeMode="contain"
                   style={styles.notFound}
                 />
                 <Text style={styles.emptyMessageStyle}>No Followings!</Text>
                 <HelperText style={{ alignSelf: "center" }}>
-                  You have no following yet!
+                  Follow some organizer to stay updated
                 </HelperText>
               </View>
             }
@@ -161,14 +160,14 @@ const styles = StyleSheet.create({
     borderRadius: Constants.medium,
   },
   notFound: {
-    width: "85%",
-    height: 200,
+    width: "100%",
+    height: 300,
     borderRadius: 10,
   },
   emptyMessageStyle: {
     fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
-    color: Constants.Secondary,
+    color: Constants.Inverse,
 
     alignSelf: "center",
     justifyContent: "center",

@@ -56,7 +56,7 @@ const RefundingRequest = () => {
           setSold(ticket);
           setLoading(false);
         } else {
-          showToast("Retry later");
+          showToast("Refund made for active ticket only");
           setLoading(false);
         }
       })
@@ -195,8 +195,8 @@ const RefundingRequest = () => {
           </>
         ) : (
           <NoTicket
-            title="You don't have upcoming event tickets"
-            helpertext=""
+            title=""
+            helperText="You cannot issue refund for this ticket"
           />
         )
       ) : (

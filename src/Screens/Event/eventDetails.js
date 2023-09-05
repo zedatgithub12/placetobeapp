@@ -36,11 +36,12 @@ import { useTheme } from "@react-navigation/native";
 import Rating from "../../Components/Events/Rating";
 import RelatedEvent from "../../Components/Events/related";
 import { Typography } from "../../themes/typography";
-import { LocalNotification } from "../../Utils/localPushController";
 import { DateFormater, TimeFormater } from "../../Utils/functions";
 import Connection from "../../api";
 import galleryImage from "../../assets/images/galleryImage.png";
 import { showToast } from "../../Utils/Toast";
+import NotFound from "../../handlers/NotFound";
+import FailedToFetch from "../../handlers/unresolved/fetching";
 
 const EventDetails = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -57,6 +58,7 @@ const EventDetails = ({ route, navigation }) => {
   const [rating, setRating] = useState();
   const [numberOfRatings, setNumberOfRatings] = useState();
   const [loading, setLoading] = useState(true);
+  const [fetchingFailed, setFetchingFailed] = useState(false);
   const [ratingVisible, setRatingVisible] = useState(false);
   const [currentRating, setCurrentRating] = useState(0);
   const [ratingDetails, setRatingDetails] = useState([]);
@@ -260,10 +262,12 @@ const EventDetails = ({ route, navigation }) => {
           checkCoords(event);
         } else {
           setLoading(false);
+          setFetchingFailed(true);
         }
       })
       .catch((error) => {
         setLoading(false);
+        setFetchingFailed(true);
       });
 
     return () => {
@@ -423,6 +427,13 @@ const EventDetails = ({ route, navigation }) => {
         <View>
           <DetailShimmer />
         </View>
+      ) : fetchingFailed ? (
+        <FailedToFetch
+          image={require("../../assets/images/loading.png")}
+          title=""
+          helperText="Failed to load event details"
+          onPress={() => FeatchEvent()}
+        />
       ) : (
         <ScrollView
           scrollEventThrottle={16}
