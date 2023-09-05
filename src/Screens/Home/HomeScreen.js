@@ -357,7 +357,7 @@ function Home({ navigation, ...props }) {
               ) : filteredEvent.length == 0 ? (
                 <NotFound
                   image={require("../../assets/images/noevent.png")}
-                  helperText="No event found"
+                  helperText={`No ${status} Event `}
                   title=""
                 />
               ) : (

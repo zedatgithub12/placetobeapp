@@ -54,7 +54,7 @@ const About = () => {
             <Ionicons
               name="call"
               size={20}
-              color={Constants.Success}
+              color={Constants.Inverse}
               style={styles.callIcon}
             />
           </View>
@@ -70,7 +70,7 @@ const About = () => {
             <Ionicons
               name="call"
               size={20}
-              color={Constants.Success}
+              color={Constants.Inverse}
               style={styles.callIcon}
             />
           </View>
@@ -85,7 +85,7 @@ const About = () => {
           <Ionicons
             name="mail"
             size={22}
-            color={Constants.lightPurple}
+            color={Constants.Inverse}
             style={styles.callIcon}
           />
         </View>
@@ -95,7 +95,7 @@ const About = () => {
       </View>
 
       <View style={styles.bottomSection}>
-        <Caption>Version 1.0.0</Caption>
+        <Caption>Version 1.0.1</Caption>
         <View style={styles.developer}>
           <Text style={styles.developedBy}>Powered By: </Text>
           <TouchableOpacity
@@ -117,7 +117,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logobackground: {
-    backgroundColor: Constants.background,
     borderRadius: Constants.borderRad,
     marginTop: 18,
   },
@@ -131,17 +130,16 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     padding: 8,
     textAlign: "center",
-    lineHeight: 18,
+    lineHeight: 22,
     fontFamily: Constants.fontFam,
     fontSize: Constants.headingtwo,
-    color: Constants.Secondary,
-    marginTop: 22,
+    color: Constants.Inverse,
   },
   contactTitle: {
     fontFamily: Constants.fontFam,
     fontWeight: Constants.Bold,
-    fontSize: Constants.headingone,
-    color: Constants.purple,
+    fontSize: Constants.headingtwo,
+    color: Constants.Inverse,
     paddingTop: 15,
   },
   phoneContainer: {
@@ -177,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
 
     borderWidth: 0.5,
-    borderColor: Constants.lightPurple,
+    borderColor: Constants.Secondary,
   },
   phoneIcon: {
     alignItems: "center",
@@ -187,7 +185,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
 
     borderWidth: 0.5,
-    borderColor: Constants.Success,
+    borderColor: Constants.Secondary,
   },
 
   bottomSection: {

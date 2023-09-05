@@ -13,16 +13,16 @@ import {
 } from "react-native";
 import Constants from "../../constants/Constants";
 import { Ionicons, MaterialIcons } from "react-native-vector-icons";
-import Connection from "../../constants/connection";
+import Connection from "../../api";
 import * as Animatable from "react-native-animatable";
-import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
 import { AuthContext } from "../../Components/context";
 import { Caption } from "react-native-paper";
 import getUserDeviceToken from "../../Utils/getUserDeviceToken";
-
-WebBrowser.maybeCompleteAuthSession();
-LogBox.ignoreLogs(["EventEmitter.removeListener"]);
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+import Loader from "../../ui-components/ActivityIndicator";
 
 function SuccessModal({ visible, children, navigation }) {
   const [showModal, setShowModal] = React.useState(visible);
@@ -51,6 +51,7 @@ export default function SignUp({ navigation }) {
   const { GoogleAuth } = React.useContext(AuthContext);
   const [visible, setVisible] = React.useState(false);
   const [loader, setLoader] = useState(false);
+  const [googleLoader, setGoogleLoader] = useState(false);
 
   const [data, setData] = React.useState({
     mail: "",
@@ -191,7 +192,7 @@ export default function SignUp({ navigation }) {
         ...data,
         email_error: "please provide your email address",
       });
-    } else if (passwords.length < 8) {
+    } else if (passwords.length < 6) {
       setData({
         ...data,
         password_error: "please write something overhere!",
@@ -249,32 +250,20 @@ export default function SignUp({ navigation }) {
   //google sign up will take place below
   /******************************************** */
 
-  const googleSignUp = (id, token, email, googleId) => {
-    GoogleAuth(id, token, email, googleId);
+  const googleSignUp = (id, token, email, googleId, profile) => {
+    GoogleAuth(id, token, email, googleId, profile);
   };
 
-  const [accessToken, setAccessToken] = useState();
-  const [featchedInfo, setFeathedInfo] = useState(false);
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId:
-      "799616009286-ck594ue3589h93vq4hlqcsmrg71uuekd.apps.googleusercontent.com",
-    iosClientId:
-      "799616009286-e19bod10s4h9i6nj8pblrb3haraj4olk.apps.googleusercontent.com",
-    androidClientId:
-      "799616009286-d8ci42svjmd21h4im7ulas5ajh8qs481.apps.googleusercontent.com",
-  });
+  const handleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      const { user } = await GoogleSignin.signIn();
+      const d_token = await retrieveToken();
+      setGoogleLoader(true);
 
-  //google signin will go here
-  const GoogleSignUp = async () => {
-    const token = await retrieveToken();
-    setFeathedInfo(true);
-    let userInfoResponse = await fetch(
-      "https://www.googleapis.com/userinfo/v2/me",
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
-    );
-    userInfoResponse.json().then((data) => {
+      // You can now use the userInfo object to authenticate the user in your backend
       var ApiUrl = Connection.url + Connection.googleSignUp;
       var headers = {
         Accept: "application/json",
@@ -282,12 +271,12 @@ export default function SignUp({ navigation }) {
       };
 
       var Data = {
-        id: data.id,
-        email: data.email,
-        name: data.name,
-        fatherName: data.family_name,
-        kidName: data.given_name,
-        device_token: token,
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        fatherName: user.familyName,
+        kidName: user.givenName,
+        device_token: d_token,
       };
 
       fetch(ApiUrl, {
@@ -297,38 +286,50 @@ export default function SignUp({ navigation }) {
       })
         .then((response) => response.json()) //check response type of the API
         .then((response) => {
-          let resp = response[0];
-
-          if (resp.message === "successfully Registered") {
-            var userInfo = response[0].user[0];
+          if (response.success) {
+            var user = response.data;
+            var userid = JSON.stringify(user.id);
             googleSignUp(
-              userInfo.userId,
-              userInfo.authentication_key,
-              userInfo.email,
-              userInfo.google_Id
+              userid,
+              user.device_token,
+              user.email,
+              user.google_Id,
+              user.profile
             );
+            setGoogleLoader(false);
             navigation.navigate("TabNav");
           } else {
             setData({
               ...data,
               check_textInputChange: false,
               isFieldEmpty: false,
-              emptyField: response[0].message,
+              emptyField: response.message,
             });
+            setGoogleLoader(false);
           }
         })
-        .catch((error) => {});
-    });
+        .catch((error) => {
+          setGoogleLoader(false);
+          showToast("Error continuing with Google");
+        });
+    } catch (error) {
+      if (error.code === statusCodes.IN_PROGRESS) {
+        showToast("Signin in progress");
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        showToast("Play Services Not Available or Outdated");
+      } else {
+        showToast("Some error occurred");
+      }
+    }
   };
 
   useEffect(() => {
-    if (response?.type === "success") {
-      GoogleSignUp();
-      setAccessToken(response.authentication.accessToken);
-    }
-
-    return () => {};
-  });
+    GoogleSignin.configure({
+      webClientId:
+        "903368065253-g8k9n3vv8594b7erho9rem4ajqbu9um6.apps.googleusercontent.com",
+      forceCodeForRefreshToken: true,
+    });
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container} nestedScrollEnabled>
@@ -404,7 +405,7 @@ export default function SignUp({ navigation }) {
         <MaterialIcons name="person" size={24} color={Constants.primary} />
         <TextInput
           style={styles.emailAddress}
-          placeholder="Username Or Organizer name"
+          placeholder="Username"
           onChangeText={(val) => username(val)}
         />
       </View>
@@ -491,10 +492,7 @@ export default function SignUp({ navigation }) {
       </TouchableOpacity>
       <Text style={{ marginTop: 8 }}>Or</Text>
 
-      <TouchableOpacity
-        onPress={accessToken ? GoogleSignUp : () => promptAsync()}
-        style={styles.google}
-      >
+      <TouchableOpacity onPress={() => handleSignIn()} style={styles.google}>
         <Image
           source={require("../../assets/images/google.png")}
           style={{ width: 25, height: 25 }}
@@ -506,8 +504,8 @@ export default function SignUp({ navigation }) {
             alignItems: "center",
           }}
         >
-          {featchedInfo ? (
-            <ActivityIndicator size="small" color={Constants.primary} />
+          {googleLoader ? (
+            <Loader size="small" />
           ) : (
             <Text style={styles.signbtntxt}>Continue With Google</Text>
           )}

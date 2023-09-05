@@ -126,7 +126,7 @@ export default function Signin({ navigation }) {
         .then((response) => {
           if (response.success) {
             var userId = JSON.stringify(response.data.id);
-            var userToken = response.device_token;
+            var userToken = response.data.device_token;
             var userEmail = response.data.email;
             var profile = response.data.profile;
             var username = response.data.username;
@@ -179,103 +179,15 @@ export default function Signin({ navigation }) {
     GoogleAuth(id, token, email, googleId, profile);
   };
 
-  // const [request, response, promptAsync] = Google.useAuthRequest({
-  //   expoClientId:
-  //     "799616009286-ck594ue3589h93vq4hlqcsmrg71uuekd.apps.googleusercontent.com",
-  //   iosClientId:
-  //     "799616009286-e19bod10s4h9i6nj8pblrb3haraj4olk.apps.googleusercontent.com",
-  //   androidClientId:
-  //     "799616009286-d8ci42svjmd21h4im7ulas5ajh8qs481.apps.googleusercontent.com",
-  // });
-
-  // const GoogleSignInBtn = async () => {
-  //   setGoogleLoader(true);
-  //   let userInfoResponse = await fetch(
-  //     "https://www.googleapis.com/userinfo/v2/me",
-  //     {
-  //       headers: { Authorization: `Bearer ${accessToken}` },
-  //     }
-  //   );
-  //   userInfoResponse.json().then((data) => {
-  //     var ApiUrl = Connection.url + Connection.googleSignUp;
-  //     var headers = {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //     };
-
-  //     //generate random Text to be stored alongside with user info
-  //     const rand = () => {
-  //       return Math.random().toString(36).substring(2);
-  //     };
-  //     const token = () => {
-  //       return rand() + rand();
-  //     };
-
-  //     var category = "Entertainment";
-  //     //dat to be sent to server
-  //     var Data = {
-  //       id: data.id,
-  //       email: data.email,
-  //       name: data.name,
-  //       fatherName: data.family_name,
-  //       kidName: data.given_name,
-  //       token: token(),
-  //       category: category,
-  //     };
-
-  //     fetch(ApiUrl, {
-  //       method: "POST",
-  //       headers: headers,
-  //       body: JSON.stringify(Data),
-  //     })
-  //       .then((response) => response.json()) //check response type of the API
-  //       .then((response) => {
-  //         console.log(response);
-  //         if (response.success) {
-  //           var userInfo = response.data;
-  //           googleSignUp(
-  //             userInfo.id,
-  //             userInfo.authentication_key,
-  //             userInfo.email,
-  //             userInfo.google_Id,
-  //             userInfo.profile
-  //           );
-  //           setGoogleLoader(false);
-  //           navigation.navigate("TabNav");
-  //         } else {
-  //           setData({
-  //             ...data,
-  //             check_textInputChange: false,
-  //             isFieldEmpty: false,
-  //             emptyField: response.message,
-  //           });
-  //           setGoogleLoader(false);
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         setGoogleLoader(false);
-  //         showToast("Error continuing with Google");
-  //         console.log(error);
-  //       });
-  //   });
-  // };
-
-  // useEffect(() => {
-  //   if (response?.type === "success") {
-  //     setAccessToken(response.authentication.accessToken);
-  //     GoogleSignInBtn();
-  //   }
-
-  //   return () => {};
-  // });
-
   const handleSignIn = async () => {
     try {
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
       const { user } = await GoogleSignin.signIn();
       const d_token = await retrieveToken();
+      setGoogleLoader(true);
 
-      console.log("User Info:", { user });
       // You can now use the userInfo object to authenticate the user in your backend
       var ApiUrl = Connection.url + Connection.googleSignUp;
       var headers = {
@@ -299,11 +211,11 @@ export default function Signin({ navigation }) {
       })
         .then((response) => response.json()) //check response type of the API
         .then((response) => {
-          console.log(response);
           if (response.success) {
             var user = response.data;
+            var userid = JSON.stringify(user.id);
             googleSignUp(
-              user.id,
+              userid,
               user.device_token,
               user.email,
               user.google_Id,
@@ -324,15 +236,11 @@ export default function Signin({ navigation }) {
         .catch((error) => {
           setGoogleLoader(false);
           showToast("Error continuing with Google");
-          console.log(error);
         });
     } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log("User Cancelled the Login Flow");
-      } else if (error.code === statusCodes.IN_PROGRESS) {
+      if (error.code === statusCodes.IN_PROGRESS) {
         showToast("Signin in progress");
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.log("Play Services Not Available or Outdated");
         showToast("Play Services Not Available or Outdated");
       } else {
         showToast("Some error occurred");
@@ -344,7 +252,6 @@ export default function Signin({ navigation }) {
     GoogleSignin.configure({
       webClientId:
         "903368065253-g8k9n3vv8594b7erho9rem4ajqbu9um6.apps.googleusercontent.com",
-      offlineAccess: true,
       forceCodeForRefreshToken: true,
     });
   }, []);

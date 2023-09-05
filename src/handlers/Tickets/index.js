@@ -25,14 +25,14 @@ const styles = StyleSheet.create({
   noTicketContainer: {
     flex: 1,
     width: "80%",
-    height: Dimensions.get("screen").height / 1.6,
+    height: Dimensions.get("screen").height / 1.8,
     alignItems: "center",
     alignSelf: "center",
     justifyContent: "center",
   },
   noTicketImage: {
     width: "100%",
-    height: 300,
+    height: 240,
     borderRadius: 10,
   },
   prompttxt: {
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
     fontWeight: Constants.Bold,
     marginTop: 10,
     color: Constants.Inverse,
+    alignContent: "center",
   },
 });
 

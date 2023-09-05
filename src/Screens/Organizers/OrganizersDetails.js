@@ -53,7 +53,9 @@ const OrganizersDetail = ({ route, navigation }) => {
 
   const [connection, setConnection] = useState(true);
   const [retry, setRetry] = useState(false);
-
+  const logo = organizerInfo.business_logo
+    ? organizerInfo.business_logo
+    : "businesslogo.png";
   // state of organizer followers
   const followCounter = async () => {
     const controller = new AbortController();
@@ -303,7 +305,7 @@ const OrganizersDetail = ({ route, navigation }) => {
               />
             </TouchableOpacity>
             <Image
-              source={{ uri: featuredImageUri + organizerInfo.business_logo }} //featured image source
+              source={{ uri: featuredImageUri + logo }} //featured image source
               resizeMode="contain"
               style={styles.modalImage} //featured image styles
             />
@@ -335,7 +337,7 @@ const OrganizersDetail = ({ route, navigation }) => {
                 <Image
                   //Featured Image of the event
                   source={{
-                    uri: featuredImageUri + organizerInfo.business_logo,
+                    uri: featuredImageUri + logo,
                   }} //featured image source
                   resizeMode="cover"
                   style={styles.image} //featured image styles
@@ -355,7 +357,7 @@ const OrganizersDetail = ({ route, navigation }) => {
                 >
                   <Image
                     source={{
-                      uri: featuredImageUri + organizerInfo.business_logo,
+                      uri: featuredImageUri + logo,
                     }} //featured image source
                     resizeMode="cover"
                     style={styles.profileImage} //featured image styles

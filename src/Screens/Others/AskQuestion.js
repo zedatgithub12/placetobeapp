@@ -251,6 +251,7 @@ const Questions = () => {
 
 const styles = StyleSheet.create({
   mainContainer: {
+    flex: 1,
     alignItems: "center",
     backgroundColor: Constants.background,
   },
@@ -336,7 +337,7 @@ const styles = StyleSheet.create({
   buttonStyle: {
     width: "88%",
     borderRadius: Constants.tiny,
-    backgroundColor: Constants.purple,
+    backgroundColor: Constants.primary,
     paddingVertical: 12,
     paddingHorizontal: 10,
     justifyContent: "center",
@@ -344,7 +345,7 @@ const styles = StyleSheet.create({
     marginVertical: 30,
   },
   buttonText: {
-    color: Constants.background,
+    color: Constants.Inverse,
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Boldtwo,
   },
