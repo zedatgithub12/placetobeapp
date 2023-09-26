@@ -34,6 +34,7 @@ import { fetchAds } from "./src/Utils/Ads";
 Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
 const navigationRef = React.createRef();
+
 export function navigate(name, params) {
   navigationRef.current?.navigate(name, params);
 }
@@ -430,7 +431,9 @@ export default function App() {
       setShowSlideAds(false);
     }
   };
-
+  const handleSlideUpAdclose = () => {
+    setShowSlideAds(false);
+  };
   const handleDeepLink = async (url) => {
     const { path } = Linking.parse(url);
     const pathSegments = path.split("/");
@@ -500,7 +503,7 @@ export default function App() {
   useEffect(() => {
     const SlideUpAd = setTimeout(() => {
       handleSlideupAd("slideUp");
-    }, 40000);
+    }, 30000);
     return () => clearTimeout(SlideUpAd);
   }, []);
 
@@ -618,13 +621,13 @@ export default function App() {
                 </View>
               )}
 
-              {showPopUpAds && popupAdsData[0] && (
+              {showPopUpAds && (
                 <PopupAds showModal={showPopUpAds} ad={popupAdsData} />
               )}
 
-              {showSlideAds && slideupAds[0] && (
+              {showSlideAds && (
                 <SlideUp
-                  onClose={() => setShowSlideAds(false)}
+                  onClose={() => handleSlideUpAdclose()}
                   ad={slideupAds}
                 />
               )}

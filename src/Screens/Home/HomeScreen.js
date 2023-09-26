@@ -3,13 +3,10 @@ import {
   StatusBar,
   View,
   StyleSheet,
-  Text,
   TouchableOpacity,
   Image,
   Dimensions,
   ScrollView,
-  FlatList,
-  Linking,
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,23 +19,18 @@ import Categories from "../../Components/Categories/CategoryListing";
 import Category from "../../data/Category";
 import EventStatus from "../../data/eventStatus";
 import Events from "../../Components/Events/Events";
-import Listing from "../../Components/Events/Skeleton/ListShimmer";
-import { LocalNotification } from "../../Utils/localPushController";
 import Slider from "../../Components/Slider";
 import NoConnection from "../../handlers/connection";
 import { useTheme } from "@react-navigation/native";
 import Loader from "../../ui-components/ActivityIndicator";
-import { Divider, HelperText } from "react-native-paper";
+import { Divider } from "react-native-paper";
 import {
   DateFormater,
   TimeFormater,
   CategoryColor,
   EntranceFee,
   getCurrentDate,
-  formattedDate,
 } from "../../Utils/functions";
-import EventCounter from "./components/counter";
-import Preferences from "../../preferences";
 import NativeAdsOne from "../../Components/Ads/nativeAd1";
 import HeaderAds from "../../Components/Ads/headerAds";
 import { fetchAds, UserInteraction } from "../../Utils/Ads";
@@ -57,7 +49,6 @@ function Home({ navigation, ...props }) {
   const [status, setStatus] = useState("Featured");
 
   const [events, setEvents] = useState([]);
-  const [eventShimmer, setEventShimmer] = useState(true);
   const [filteredEvent, setFilteredEvent] = useState([]);
 
   const [showBannerAds, setShowBannerAds] = useState(false);
@@ -226,6 +217,11 @@ function Home({ navigation, ...props }) {
     }
   };
 
+  const handleUserAction = (reaction) => {
+    setShowCardAd(false);
+    UserInteraction(AdsInfo, reaction);
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.background.darker }]}
@@ -295,7 +291,7 @@ function Home({ navigation, ...props }) {
               showsVerticalScrollIndicator={false}
               stickyHeaderIndices={[3]}
             >
-              {showBannerAds && bannerAds && <Slider ad={bannerAds} />}
+              {showBannerAds && <Slider ad={bannerAds} />}
 
               <View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -380,16 +376,15 @@ function Home({ navigation, ...props }) {
                 ))
               )}
 
-              {showCardAd && AdsInfo[0] && (
+              {showCardAd && (
                 <View
                   style={{
                     paddingTop: 20,
                   }}
                 >
                   <NativeAdsOne
-                    showAds={true}
                     ad={AdsInfo}
-                    hideCard={() => setShowCardAd(false)}
+                    hideCard={() => handleUserAction("closed")}
                   />
                 </View>
               )}

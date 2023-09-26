@@ -184,7 +184,7 @@ const Questions = () => {
         <Text style={styles.labels}> Enter Your Mobile (optional) </Text>
         <TextInput
           style={styles.inputStyle}
-          placeholder="+2519********"
+          placeholder="+251*********"
           value={phone}
           onChangeText={(phone) => setPhone(phone)}
         />
