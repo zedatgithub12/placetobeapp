@@ -130,7 +130,8 @@ function CheckoutScreen({ route }) {
       setContactInfo({
         ...contactInfo,
         phoneBorder: Constants.red,
-        phoneErrorMessage: "The phone number is combination of 10 digits",
+        phoneErrorMessage:
+          "The phone number must be a combination of 10 digits",
         phoneError: true,
       });
     } else {

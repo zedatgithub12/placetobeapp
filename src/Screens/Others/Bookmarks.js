@@ -134,39 +134,9 @@ function Bookmarks({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
     backgroundColor: Constants.Faded,
   },
-  noBookmarkContainer: {
-    flex: 1,
-    width: "80%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  noBookmarkImage: {
-    width: "85%",
-    height: 200,
-    borderRadius: 10,
-  },
-  prompttxt: {
-    fontSize: Constants.primaryHeading,
-    fontWeight: Constants.Bold,
-    marginTop: 10,
-  },
-  eventsBtn: {
-    width: "60%",
-    padding: 8,
-    paddingHorizontal: 35,
-    borderRadius: Constants.mediumbox,
-    backgroundColor: Constants.primary,
-    margin: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  eventstxt: {
-    fontSize: Constants.headingone,
-    fontWeight: Constants.Bold,
-  },
+
   savedCount: {
     alignSelf: "flex-end",
     textAlign: "center",

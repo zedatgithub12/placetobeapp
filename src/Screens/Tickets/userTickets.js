@@ -236,7 +236,7 @@ const UserTickets = ({ navigation }) => {
               numColumns={2}
               ListEmptyComponent={
                 <NoTicket
-                  title="Purchased Tickets"
+                  title="No Purchased Ticket"
                   helperText="Purchased tickets are listed here!"
                 />
               }

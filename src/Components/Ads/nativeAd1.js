@@ -17,7 +17,7 @@ import { UserInteraction } from "../../Utils/Ads";
 
 // create a native ads component to be shown inside homescreen
 const NativeAdsOne = ({ ad, hideCard }) => {
-  const Ad = ad[0] ? ad[0] : [];
+  const Ad = ad ? ad[0] : [];
   const { theme } = useTheme();
   const featuredImageUri = Connection.url + Connection.assets;
 
@@ -30,16 +30,16 @@ const NativeAdsOne = ({ ad, hideCard }) => {
     }
   };
   return (
-    <Pressable onPress={hideCard}>
+    <Pressable onPress={() => handleUserAction("clicked")}>
       <View style={styles.container}>
         <TouchableOpacity
-          onPress={() => handleUserAction("closed")}
+          onPress={hideCard}
           style={[
             styles.closeButton,
             {
               height: 32,
               width: 32,
-              backgroundColor: theme.background.faded,
+              padding: 3,
               zIndex: 2,
             },
           ]}
@@ -49,13 +49,17 @@ const NativeAdsOne = ({ ad, hideCard }) => {
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
+              alignSelf: "center",
               zIndex: 1,
+              backgroundColor: theme.background.faded,
+              borderRadius: 13,
+              padding: 3,
             }}
           >
             <MaterialCommunityIcons
               name="close"
-              size={22}
-              style={{ zIndex: 2 }}
+              size={18}
+              style={{ color: "#555", zIndex: 2 }}
             />
           </View>
         </TouchableOpacity>
@@ -161,6 +165,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "center",
     position: "relative",
+    marginBottom: 16,
   },
   closeButton: {
     position: "absolute",

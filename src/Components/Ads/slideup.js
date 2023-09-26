@@ -19,7 +19,7 @@ import { UserInteraction } from "../../Utils/Ads";
 
 // slideup ads component
 const SlideUp = ({ onClose, ad }) => {
-  const Ad = ad[0] ? ad[0] : [];
+  const Ad = ad ? ad[0] : [];
   const { theme } = useTheme();
   const featuredImageUri = Connection.url + Connection.assets;
 
@@ -32,83 +32,85 @@ const SlideUp = ({ onClose, ad }) => {
     }
   };
   return (
-    <Pressable
-      onPress={() => handleUserAction("clicked")}
-      style={{ position: "relative" }}
-    >
-      <Animatable.View
-        animation="slideInRight"
-        style={[styles.container, { backgroundColor: theme.background.main }]}
+    ad && (
+      <Pressable
+        onPress={() => handleUserAction("clicked")}
+        style={{ position: "relative" }}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingHorizontal: 4,
-          }}
+        <Animatable.View
+          animation="slideInRight"
+          style={[styles.container, { backgroundColor: theme.background.main }]}
         >
-          <Image
-            source={{
-              uri: featuredImageUri + Ad.ad_creative,
-            }}
+          <View
             style={{
-              width: Dimensions.get("screen").width / 5,
-              height: 59,
-              borderTopLeftRadius: 4,
-              borderBottomLeftRadius: 4,
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 4,
             }}
-          />
-
-          <View>
-            <Text
-              style={[
-                styles.title,
-                {
-                  paddingHorizontal: 8,
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.headingtwo,
-                  fontWeight: Typography.weight.bold,
-                  color: theme.dark.main,
-                },
-              ]}
-            >
-              {Ad.ad_heading}
-            </Text>
-            <Text
-              style={[
-                styles.content,
-                {
-                  paddingHorizontal: 8,
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.textSize,
-                  fontWeight: Typography.weight.medium,
-
-                  color: theme.dark.main,
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {Ad.ad_description}
-            </Text>
-            <Text
-              style={{
-                paddingHorizontal: 8,
-                fontFamily: Typography.family,
-                fontSize: Typography.size.headingthree,
-                fontWeight: Typography.weight.medium,
-                color: theme.buttons.main,
+          >
+            <Image
+              source={{
+                uri: featuredImageUri + Ad.ad_creative,
               }}
-            >
-              {Ad.ad_button_label}
-            </Text>
-          </View>
-        </View>
+              style={{
+                width: Dimensions.get("screen").width / 5,
+                height: 59,
+                borderTopLeftRadius: 4,
+                borderBottomLeftRadius: 4,
+              }}
+            />
 
-        <TouchableOpacity onPress={onClose} style={[styles.closeButton]}>
-          <MaterialCommunityIcons name="close" size={20} />
-        </TouchableOpacity>
-      </Animatable.View>
-    </Pressable>
+            <View>
+              <Text
+                style={[
+                  styles.title,
+                  {
+                    paddingHorizontal: 8,
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.headingtwo,
+                    fontWeight: Typography.weight.bold,
+                    color: theme.dark.main,
+                  },
+                ]}
+              >
+                {Ad.ad_heading}
+              </Text>
+              <Text
+                style={[
+                  styles.content,
+                  {
+                    paddingHorizontal: 8,
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.textSize,
+                    fontWeight: Typography.weight.medium,
+
+                    color: theme.dark.main,
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {Ad.ad_description}
+              </Text>
+              <Text
+                style={{
+                  paddingHorizontal: 8,
+                  fontFamily: Typography.family,
+                  fontSize: Typography.size.headingthree,
+                  fontWeight: Typography.weight.medium,
+                  color: theme.buttons.main,
+                }}
+              >
+                {Ad.ad_button_label}
+              </Text>
+            </View>
+          </View>
+
+          <TouchableOpacity onPress={onClose} style={[styles.closeButton]}>
+            <MaterialCommunityIcons name="close" size={20} color="#444" />
+          </TouchableOpacity>
+        </Animatable.View>
+      </Pressable>
+    )
   );
 };
 

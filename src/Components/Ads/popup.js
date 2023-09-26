@@ -20,7 +20,7 @@ import Connection from "../../api";
 
 // create a pop up modal
 const PopupAds = ({ showModal, ad }) => {
-  const Ad = ad[0];
+  const Ad = ad ? ad[0] : [];
   const [modalVisible, setModalVisible] = useState(showModal);
   const { theme } = useTheme();
   const featuredImageUri = Connection.url + Connection.assets;
@@ -36,110 +36,112 @@ const PopupAds = ({ showModal, ad }) => {
   };
 
   return (
-    <Modal
-      visible={modalVisible}
-      animationType="fade"
-      transparent={true}
-      onRequestClose={() => handleUserAction("closed")}
-    >
-      <Animatable.View style={styles.container} animation="bounceIn">
-        <View
-          style={{
-            width: Dimensions.get("screen").width / 1.2,
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => handleUserAction("closed")}
-            style={[
-              styles.closeButton,
-              { backgroundColor: theme.background.faded },
-            ]}
-          >
-            <MaterialCommunityIcons name="close" size={20} />
-          </TouchableOpacity>
-        </View>
-
-        <View
-          style={{
-            width: Dimensions.get("screen").width / 1.2,
-            height: Dimensions.get("screen").height / 2.2,
-          }}
-        >
-          <Pressable onPress={() => handleUserAction("clicked")}>
-            <Image
-              source={{
-                uri: featuredImageUri + Ad.ad_creative,
-              }}
-              style={{
-                width: Dimensions.get("screen").width / 1.2,
-                height: 160,
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
-              }}
-            />
-          </Pressable>
+    ad && (
+      <Modal
+        visible={modalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => handleUserAction("closed")}
+      >
+        <Animatable.View style={styles.container} animation="bounceIn">
           <View
-            style={[
-              styles.bodyContent,
-              { backgroundColor: theme.background.main },
-            ]}
+            style={{
+              width: Dimensions.get("screen").width / 1.2,
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => handleUserAction("closed")}
+              style={[
+                styles.closeButton,
+                { backgroundColor: theme.background.faded },
+              ]}
+            >
+              <MaterialCommunityIcons name="close" size={20} />
+            </TouchableOpacity>
+          </View>
+
+          <View
+            style={{
+              width: Dimensions.get("screen").width / 1.2,
+              height: Dimensions.get("screen").height / 2.2,
+            }}
           >
             <Pressable onPress={() => handleUserAction("clicked")}>
-              <Text
-                style={[
-                  styles.title,
-                  {
-                    paddingHorizontal: 4,
-                    fontFamily: Typography.family,
-                    fontSize: Typography.size.headingone,
-                    fontWeight: Typography.weight.bold,
-                    color: theme.dark.main,
-                  },
-                ]}
+              <Image
+                source={{
+                  uri: featuredImageUri + Ad.ad_creative,
+                }}
+                style={{
+                  width: Dimensions.get("screen").width / 1.2,
+                  height: 160,
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12,
+                }}
+              />
+            </Pressable>
+            <View
+              style={[
+                styles.bodyContent,
+                { backgroundColor: theme.background.main },
+              ]}
+            >
+              <Pressable onPress={() => handleUserAction("clicked")}>
+                <Text
+                  style={[
+                    styles.title,
+                    {
+                      paddingHorizontal: 4,
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.headingone,
+                      fontWeight: Typography.weight.bold,
+                      color: theme.dark.main,
+                    },
+                  ]}
+                >
+                  {Ad.ad_heading}
+                </Text>
+                <Text
+                  style={[
+                    styles.content,
+                    {
+                      padding: 4,
+                      fontFamily: Typography.family,
+                      fontSize: Typography.size.headingthree,
+                      fontWeight: Typography.weight.regular,
+                      lineHeight: 20,
+                      color: theme.dark[800],
+                    },
+                  ]}
+                >
+                  {Ad.ad_description}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleUserAction("conversion")}
+                style={{ margin: 8, marginLeft: 4, justifyContent: "flex-end" }}
               >
-                {Ad.ad_heading}
-              </Text>
-              <Text
-                style={[
-                  styles.content,
-                  {
+                <Text
+                  style={{
                     padding: 4,
                     fontFamily: Typography.family,
-                    fontSize: Typography.size.headingthree,
-                    fontWeight: Typography.weight.regular,
+                    fontSize: Typography.size.headingtwo,
+                    fontWeight: Typography.weight.medium,
                     lineHeight: 20,
-                    color: theme.dark[800],
-                  },
-                ]}
-              >
-                {Ad.ad_description}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => handleUserAction("conversion")}
-              style={{ margin: 8, marginLeft: 4, justifyContent: "flex-end" }}
-            >
-              <Text
-                style={{
-                  padding: 4,
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.headingtwo,
-                  fontWeight: Typography.weight.medium,
-                  lineHeight: 20,
-                  color: theme.buttons.main,
-                }}
-              >
-                {Ad.ad_button_label}
-              </Text>
-            </Pressable>
+                    color: theme.buttons.main,
+                  }}
+                >
+                  {Ad.ad_button_label}
+                </Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
-      </Animatable.View>
-    </Modal>
+        </Animatable.View>
+      </Modal>
+    )
   );
 };
 
