@@ -31,7 +31,6 @@ import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import { fetchAds } from "./src/Utils/Ads";
 
-Geolocation.getCurrentPosition((info) => info.coords.latitude);
 const persistor = persistStore(store);
 const navigationRef = React.createRef();
 

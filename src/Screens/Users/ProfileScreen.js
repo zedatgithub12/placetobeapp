@@ -94,7 +94,7 @@ function Profile({ navigation }) {
         uploadImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.log("Error: ", error);
+      console.log("Error: ", error.message);
     }
 
     setTimeout(() => {
@@ -272,7 +272,7 @@ function Profile({ navigation }) {
     setImage(Connection.url + Connection.assets + userData.userProfile);
 
     return () => {};
-  }, [image, userData.userProfile]);
+  }, [userData.userProfile]);
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.background.darker }}>
       {connection ? (
@@ -292,7 +292,7 @@ function Profile({ navigation }) {
                 style={styles.profilePicker}
               >
                 <Avatar.Image
-                  source={userData.userProfile ? { uri: image } : p2bavatar}
+                  source={image ? { uri: image } : p2bavatar}
                   size={80}
                   style={styles.profileImage}
                   onPress={() => setModalVisible(true)}

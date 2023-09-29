@@ -307,10 +307,9 @@ function Home({ navigation, ...props }) {
                           : theme.background.main
                       }
                       color={
-                        active === item.name
-                          ? Constants.background
-                          : Constants.Inverse
+                        active === item.name ? Constants.background : item.color
                       }
+                      textColor={item.color}
                       onPress={() => handleCategoryClick(item.name)}
                     />
                   ))}

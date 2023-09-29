@@ -98,6 +98,7 @@ const SearchEvent = ({ navigation }) => {
       ...inputs.submitBtn,
       submitBtn: false,
     });
+    setFilteredEvent(search);
   };
 
   const toggleModal = () => {
@@ -305,7 +306,7 @@ const SearchEvent = ({ navigation }) => {
       if (category !== "All") {
         isMatch = isMatch && event.category === category;
       }
-      if (priceRange !== [0, 2000]) {
+      if (priceRange != [0, 2000]) {
         isMatch =
           isMatch &&
           event.event_entrance_fee >= priceRange[0] &&
@@ -342,6 +343,7 @@ const SearchEvent = ({ navigation }) => {
           <TextInput
             //a text input which enables user to search for specific data they are looking for
             placeholder="Search..."
+            keyboardType="web-search"
             style={styles.SearchField}
             value={searchInput}
             onChangeText={(text) => updateSearchKey(text)}
@@ -765,12 +767,12 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   SearchField: {
-    marginLeft: 10,
-    minWidth: "50%",
+    paddingLeft: 10,
+    paddingRight: 30,
+    width: Dimensions.get("screen").width / 1.8,
   },
   submitSearch: {
-    backgroundColor: Constants.Inverse,
-    color: Constants.background,
+    backgroundColor: Constants.background,
     borderRadius: 10,
     padding: 3,
     alignItems: "center",
@@ -779,32 +781,16 @@ const styles = StyleSheet.create({
     width: 38,
   },
   submitIcon: {
-    color: Constants.primary,
+    color: Constants.Inverse,
   },
-  categoryList: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 5,
-    padding: 5,
-    paddingHorizontal: 20,
-    margin: 5,
-    borderRadius: Constants.borderRad,
-    shadowColor: Constants.background,
-  },
+
   clearButton: {
+    position: "absolute",
+    top: 7,
+    right: 7,
     padding: 5,
   },
-  //Category name
-  catName: {
-    fontFamily: Constants.fontFam,
-    fontWeight: Constants.Bold,
-    color: Constants.background,
-  },
-  //category flatlist styling
-  catFlatlist: {
-    position: "relative",
-  },
+
   filteredEventList: {},
 
   noResultContainer: {

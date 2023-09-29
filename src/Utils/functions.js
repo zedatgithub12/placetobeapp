@@ -329,3 +329,29 @@ export function ParseHashedId(hashedId) {
 
   return eventId;
 }
+
+//conditiional status filter
+//primary used in organizer detail screen
+export const renderStatus = (startingDate, endingDate) => {
+  var currentStatus;
+  var Happening = "Happening";
+  var Upcoming = "Upcoming";
+  var Passed = "Passed";
+
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, "0");
+  var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  var yyyy = today.getFullYear();
+
+  today = yyyy + "-" + mm + "-" + dd;
+
+  if (startingDate == today || (startingDate < today && endingDate >= today)) {
+    currentStatus = Happening;
+  } else if (startingDate > today) {
+    currentStatus = Upcoming;
+  } else {
+    currentStatus = Passed;
+  }
+
+  return currentStatus;
+};

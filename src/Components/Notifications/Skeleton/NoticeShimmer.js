@@ -1,5 +1,5 @@
 //import liraries
-import React, { Component } from "react";
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 import Constants from "../../../constants/Constants";
@@ -7,9 +7,7 @@ import Constants from "../../../constants/Constants";
 const NoticeShimmer = () => {
   return (
     <SkeletonPlaceholder>
-      <View
-        style={styles.innerContainers}
-      >
+      <View style={styles.innerContainers}>
         <View style={styles.noticeIcon} />
 
         <View style={styles.noticeContentContainer}>
@@ -28,21 +26,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
-   
   },
   noticeIcon: {
     width: 50,
     height: 50,
     borderRadius: 23,
     marginLeft: 5,
-    justifyContent:"center"
+    justifyContent: "center",
   },
   noticeContentContainer: {
     width: "90%",
     height: 70,
     padding: 10,
-    paddingTop:2,
-    justifyContent:"center"
+    paddingTop: 2,
+    justifyContent: "center",
   },
   organizer: {
     width: "90%",
