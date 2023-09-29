@@ -2,6 +2,21 @@ import { Platform } from "react-native";
 import Connection from "../../api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import getUserDeviceToken from "../getUserDeviceToken";
+import Geolocation from "@react-native-community/geolocation";
+
+const getLocation = async () => {
+  return new Promise((resolve, reject) => {
+    Geolocation.getCurrentPosition(
+      (info) => {
+        const { latitude, longitude } = info.coords;
+        resolve({ latitude, longitude });
+      },
+      (error) => {
+        reject(error);
+      }
+    );
+  });
+};
 
 const retrieveToken = async () => {
   const token = await getUserDeviceToken();
@@ -42,6 +57,8 @@ export const UserInteraction = async (ad, interaction) => {
   var userId = await AsyncStorage.getItem("userId");
   const deviceType = Platform.OS;
 
+  const location = await getLocation();
+
   var ApiUrl = Connection.url + Connection.adViewed;
 
   const headers = {
@@ -56,8 +73,8 @@ export const UserInteraction = async (ad, interaction) => {
     ad_viewer_device: deviceType,
     ad_viewer_action: interaction,
     device_token: token,
-    // latitude: latitude,
-    // longitude: longitude,
+    latitude: location.latitude ? location.latitude : null,
+    longitude: location.longitude ? location.longitude : null,
   };
 
   fetch(ApiUrl, {

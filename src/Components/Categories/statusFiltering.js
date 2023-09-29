@@ -7,21 +7,24 @@ import { Ionicons } from "react-native-vector-icons";
 
 const Statuses = ({ category, check, background, color, border, onPress }) => {
   return (
-    <TouchableNativeFeedback
-      activeOpacity={0.8}
-      onPress={onPress}
-      style={{ borderRadius: 6 }}
-    >
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: background, borderColor: border },
-        ]}
-      >
-        <Text style={[styles.categoryText, { color: color }]}>{category}</Text>
-        {check && <Ionicons name="checkmark-circle" size={14} color="#fff" />}
-      </View>
-    </TouchableNativeFeedback>
+    <View style={{ borderRadius: 10, overflow: "hidden" }}>
+      <TouchableNativeFeedback onPress={onPress}>
+        <View
+          style={[
+            styles.container,
+            {
+              backgroundColor: background,
+              borderColor: border,
+              overflow: "hidden",
+            },
+          ]}
+        >
+          <Text style={[styles.categoryText, { color: color }]}>
+            {category}
+          </Text>
+        </View>
+      </TouchableNativeFeedback>
+    </View>
   );
 };
 
@@ -31,7 +34,7 @@ const styles = StyleSheet.create({
     minWidth: 110,
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     marginVertical: 8,
     marginHorizontal: 5,

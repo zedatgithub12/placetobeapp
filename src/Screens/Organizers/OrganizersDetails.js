@@ -19,18 +19,18 @@ import {
   MaterialCommunityIcons,
 } from "react-native-vector-icons";
 import OrganizerEvents from "./components/events";
-import { Caption, Divider, IconButton } from "react-native-paper";
+import { Caption, Divider, IconButton, Paragraph } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import call from "react-native-phone-call";
 import { AuthContext } from "../../Components/context";
 import { useTheme } from "@react-navigation/native";
 import { Typography } from "../../themes/typography";
-import { formatNumber } from "../../Utils/functions";
+import { formatNumber, renderStatus } from "../../Utils/functions";
 import Connection from "../../api";
 import Loader from "../../ui-components/ActivityIndicator";
 import NetInfo from "@react-native-community/netinfo";
 import NoConnection from "../../handlers/connection";
-import { showToast } from "../../Utils/Toast";
+import OrganizerSkeleton from "./components/skeleton";
 
 // Organizer detail page
 const OrganizersDetail = ({ route, navigation }) => {
@@ -40,28 +40,74 @@ const OrganizersDetail = ({ route, navigation }) => {
 
   const { userStatus } = React.useContext(AuthContext);
   const logged = userStatus.logged;
-  var featuredImageUri = Connection.url + Connection.assets;
 
   const [modalVisible, setModalVisible] = useState(false);
   const [count, setCount] = useState(0);
   const [subscription, setSubscription] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState([]);
+  const [connection, setConnection] = useState(true);
+  const [retry, setRetry] = useState(false);
+  const [provided, setProvided] = useState(false);
+  const [website, setWebsite] = useState(false);
   const [follow, setFollow] = useState({
     subscription: "Follow",
     btnDisabled: false,
     ButtonColor: Constants.primary,
   });
 
-  const [connection, setConnection] = useState(true);
-  const [retry, setRetry] = useState(false);
+  const featuredImageUri = Connection.url + Connection.assets;
   const logo = organizerInfo.business_logo
     ? organizerInfo.business_logo
     : "businesslogo.png";
-  // state of organizer followers
-  const followCounter = async () => {
+
+  //fetch events organized by event organizer
+  const handleFetchingEvents = async () => {
     const controller = new AbortController();
     const signal = controller.signal;
+
+    var organizerId = organizerInfo.id;
+    var ApiUrl = Connection.url + Connection.organizerEvents + organizerId;
+
+    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    fetch(ApiUrl, {
+      method: "GET",
+      headers: headers,
+      signal: signal,
+    })
+      .then((response) => response.json()) //check response type of the API
+      .then((response) => {
+        if (response.success) {
+          var orgEvents = response.data;
+          setEvents(orgEvents);
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  };
+
+  // state of organizer followers
+  const followCounter = async () => {
+    setLoading(true);
+    const controller = new AbortController();
+    const signal = controller.signal;
+    var userid = await AsyncStorage.getItem("userId");
     var APIUrl =
-      Connection.url + Connection.OrganizerFollowCounter + organizerInfo.id;
+      Connection.url +
+      Connection.OrganizerFollowCounter +
+      organizerInfo.id +
+      `?userid=${userid}`;
+
     var headers = {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -75,11 +121,19 @@ const OrganizersDetail = ({ route, navigation }) => {
       .then((response) => {
         if (response.success) {
           var followers = response.data;
+
           setCount(followers);
+          setFollow({
+            ...follow,
+            subscription: response.subscription,
+            btnDisabled: true,
+          });
+          setLoading(false);
         }
       })
       .catch((error) => {
         // showToast("Unable to fetch followers");
+        setLoading(false);
       });
 
     return () => {
@@ -146,9 +200,6 @@ const OrganizersDetail = ({ route, navigation }) => {
     };
   };
 
-  // does organizer have provided phone
-  const [provided, setProvided] = useState(false);
-  const [website, setWebsite] = useState(false);
   //make call to organizer
   const MakeCall = () => {
     const args = {
@@ -158,41 +209,6 @@ const OrganizersDetail = ({ route, navigation }) => {
     };
 
     call(args);
-  };
-
-  // shimmer effect state
-  const [loading, setLoading] = useState(true);
-  //event flatlist related code
-  const [events, setEvents] = useState([]);
-  const [message, setMessage] = useState();
-  const [notFound, setNotFound] = useState(false);
-
-  //conditiional status filter
-  const renderStatus = (startingDate, endingDate) => {
-    var currentStatus;
-    var Happening = "Happening";
-    var Upcoming = "Upcoming";
-    var Passed = "Passed";
-
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, "0");
-    var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-    var yyyy = today.getFullYear();
-
-    today = yyyy + "-" + mm + "-" + dd;
-
-    if (
-      startingDate == today ||
-      (startingDate < today && endingDate >= today)
-    ) {
-      currentStatus = Happening;
-    } else if (startingDate > today) {
-      currentStatus = Upcoming;
-    } else {
-      currentStatus = Passed;
-    }
-
-    return currentStatus;
   };
 
   const retryConnection = () => {
@@ -213,47 +229,6 @@ const OrganizersDetail = ({ route, navigation }) => {
     }, 3000); // 3000 milliseconds = 3 seconds
 
     const subscription = NetInfo.addEventListener(handleNetworkChange);
-  };
-
-  const handleFetchingEvents = async () => {
-    setLoading(true);
-
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    var organizerId = organizerInfo.id;
-    var ApiUrl = Connection.url + Connection.organizerEvents + organizerId;
-
-    //The event happening today is fetched on the useEffect function called which is componentDidMuount in class component
-    var headers = {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    };
-
-    fetch(ApiUrl, {
-      method: "GET",
-      headers: headers,
-      signal: signal,
-    })
-      .then((response) => response.json()) //check response type of the API
-      .then((response) => {
-        if (response.success) {
-          var orgEvents = response.data;
-          setEvents(orgEvents);
-          setNotFound(false);
-          setLoading(false);
-        } else {
-          setMessage("Event will be listed here.");
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        setLoading(false);
-      });
-
-    return () => {
-      controller.abort();
-    };
   };
 
   useEffect(() => {
@@ -314,12 +289,13 @@ const OrganizersDetail = ({ route, navigation }) => {
       </Modal>
       {Connection ? (
         loading ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <Loader size="large" />
-          </View>
+          <OrganizerSkeleton />
         ) : (
+          // <View
+          //   style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          // >
+          //   <Loader size="large" />
+          // </View>
           <>
             <View
               style={{
@@ -539,9 +515,9 @@ const OrganizersDetail = ({ route, navigation }) => {
                     {subscription ? (
                       <ActivityIndicator size="small" color={theme.dark.main} />
                     ) : (
-                      <Text numberOfLines={1} style={[styles.btnText]}>
+                      <Paragraph numberOfLines={1} style={[styles.btnText]}>
                         {follow.subscription}
-                      </Text>
+                      </Paragraph>
                     )}
                   </TouchableOpacity>
                 )}
@@ -549,11 +525,11 @@ const OrganizersDetail = ({ route, navigation }) => {
                 {provided && (
                   <IconButton
                     style={{
-                      backgroundColor: theme.success[100],
+                      backgroundColor: theme.dark[100],
                     }}
                     icon="phone"
-                    color={theme.success[500]}
-                    size={26}
+                    color={theme.dark[800]}
+                    size={24}
                     onPress={() => MakeCall()}
                   />
                 )}
@@ -658,10 +634,10 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   followBtn: {
+    width: Dimensions.get("screen").width / 3.6,
     alignItems: "center",
-    padding: 10,
-    paddingHorizontal: 40,
-    borderRadius: 50,
+    padding: 8,
+    borderRadius: 4,
     margin: 10,
   },
   callBtn: {
@@ -676,19 +652,7 @@ const styles = StyleSheet.create({
   btnText: {
     fontSize: Constants.headingtwo,
     fontWeight: Constants.Bold,
-    fontFamily: Constants.fontFam,
     color: Constants.Inverse,
-  },
-  callText: {
-    fontSize: Constants.headingthree,
-    fontWeight: Constants.Boldtwo,
-    fontFamily: Constants.fontFam,
-    color: Constants.primary,
-  },
-  notFound: {
-    width: "85%",
-    height: 200,
-    borderRadius: 10,
   },
 
   imageContainer: {

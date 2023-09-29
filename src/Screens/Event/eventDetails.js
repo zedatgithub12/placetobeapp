@@ -65,7 +65,7 @@ const EventDetails = ({ route, navigation }) => {
   const [userRated, setUserRated] = useState(false);
   const [relatedEvents, setRelatedEvent] = useState([]);
   const [exist, setExist] = useState(false); // the state of ticket existance
-  const [mapOpen, setMapOpen] = useState(true);
+  const [mapOpen, setMapOpen] = useState(false);
   const [userInfo, setUserInfo] = useState([]);
   const [read, setRead] = useState(5);
   const [readMorebtn, setReadMorebtn] = useState(false);
@@ -275,7 +275,7 @@ const EventDetails = ({ route, navigation }) => {
     };
   };
 
-  const FetchUserRating = async () => {
+  const FetchAdditionalInfo = async () => {
     const userid = await AsyncStorage.getItem("userId");
 
     if (userid) {
@@ -409,7 +409,7 @@ const EventDetails = ({ route, navigation }) => {
 
   useEffect(() => {
     FeatchEvent();
-    FetchUserRating();
+    FetchAdditionalInfo();
     bookmarked();
 
     return () => {};
@@ -430,8 +430,8 @@ const EventDetails = ({ route, navigation }) => {
       ) : fetchingFailed ? (
         <FailedToFetch
           image={require("../../assets/images/loading.png")}
-          title=""
-          helperText="Failed to load event details"
+          title="Failed to fetch event details"
+          helperText=""
           onPress={() => FeatchEvent()}
         />
       ) : (
@@ -507,24 +507,6 @@ const EventDetails = ({ route, navigation }) => {
                 <AntDesign name="sharealt" size={18} style={styles.shareIcon} />
               </TouchableOpacity>
 
-              {item.contact_phone && (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={[
-                    styles.bookmarkButton,
-                    { backgroundColor: theme.background.main },
-                  ]}
-                  onPress={() => MakeCall(item.contact_phone)}
-                >
-                  <Feather
-                    name="phone"
-                    size={18}
-                    color={theme.dark.main}
-                    style={styles.bookmarkIcon}
-                  />
-                </TouchableOpacity>
-              )}
-
               {item.redirectUrl && (
                 <TouchableOpacity
                   onPress={() => openLink(item.redirectUrl)}
@@ -545,18 +527,12 @@ const EventDetails = ({ route, navigation }) => {
             </View>
           </View>
 
-          {item.cancelled === "1" && (
+          {item.cancelled == 1 && (
             <Animatable.View
               animation="slideInDown"
               style={styles.eventGotCancelled}
             >
-              <MaterialCommunityIcons
-                name="cancel"
-                size={18}
-                color={Constants.Danger}
-                style={{ marginLeft: 6 }}
-              />
-              <Text style={styles.cancelledText}>Cancelled Event</Text>
+              <Text style={styles.cancelledText}>Cancelled event</Text>
             </Animatable.View>
           )}
 
@@ -766,7 +742,6 @@ const EventDetails = ({ route, navigation }) => {
                     loadingBackgroundColor={Constants.Faded}
                     loadingIndicatorColor={Constants.primary}
                     tintColor={Constants.primary}
-                    showsUserLocation={true}
                     scrollEnabled={false}
                     style={styles.map}
                     initialRegion={{
@@ -780,9 +755,14 @@ const EventDetails = ({ route, navigation }) => {
                           ? item.address_longitude
                           : 38.6957437
                       ),
-                      latitudeDelta: 0.0922,
-                      longitudeDelta: 0.0421,
+                      latitudeDelta: 1.0922,
+                      longitudeDelta: 1.0421,
                     }}
+                    zoomEnabled={true}
+                    zoomControlEnabled
+                    zoomTapEnabled
+                    minZoomLevel={14}
+                    maxZoomLevel={26}
                   >
                     <Marker
                       coordinate={{
@@ -1047,15 +1027,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    top: 0,
-    right: 7,
-    backgroundColor: Constants.lightRed,
+    top: 5,
+    left: 5,
+    backgroundColor: Constants.background,
     padding: 8,
-    borderTopEndRadius: Constants.borderRad,
+    borderTopStartRadius: 6,
+    borderBottomEndRadius: 16,
   },
   cancelledText: {
     color: Constants.red,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     fontSize: Constants.headingthree,
     fontStyle: "italic",
     marginHorizontal: 5,

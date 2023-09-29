@@ -3,7 +3,7 @@ const Category = [
     id: "13",
     type: "all",
     name: "All",
-    color: "#292b2c",
+    color: "#e29000",
     icon: "dots-grid",
   },
 
