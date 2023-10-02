@@ -268,6 +268,7 @@ const Notifications = ({ navigation }) => {
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
+
   useEffect(() => {
     const InternetConnection = async () => {
       const networkState = await NetInfo.fetch();
@@ -370,7 +371,6 @@ const styles = StyleSheet.create({
   textContents: {
     fontSize: Constants.headingthree,
     color: Constants.Inverse,
-    alignSelf: "center",
     textAlign: "justify",
     paddingHorizontal: 6,
     lineHeight: 22,

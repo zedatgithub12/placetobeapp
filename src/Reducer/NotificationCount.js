@@ -1,11 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
+const initialtime = new Date().toLocaleTimeString("en-US", { hour12: false });
 
 const initialState = {
   notificationCount: 0,
+  checkedat: initialtime,
 };
 
 const NotificationCountSlice = createSlice({
-  name: "notification_count",
+  name: "notifications",
   initialState,
   reducers: {
     incrementNotificationCount: (state, action) => {

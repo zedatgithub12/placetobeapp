@@ -12,7 +12,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import NetInfo from "@react-native-community/netinfo";
 import * as Animatable from "react-native-animatable";
-import Geolocation from "@react-native-community/geolocation";
 import Routes from "./src/routes";
 import PopupAds from "./src/Components/Ads/popup";
 import SlideUp from "./src/Components/Ads/slideup";
@@ -125,6 +124,7 @@ export default function App() {
     redirectLink: "",
     imageStatus: false,
   });
+
   const [user, setUser] = useState({
     userId: "",
     userTokens: "",
@@ -172,6 +172,7 @@ export default function App() {
         };
     }
   };
+
   const [loginState, dispatch] = React.useReducer(
     loginReducer,
     initialLoginState
@@ -430,17 +431,21 @@ export default function App() {
       setShowSlideAds(false);
     }
   };
+
   const handleSlideUpAdclose = () => {
     setShowSlideAds(false);
   };
+
   const handleDeepLink = async (url) => {
     const { path } = Linking.parse(url);
     const pathSegments = path.split("/");
+
     if (pathSegments[0] === "event") {
       const eventId = pathSegments[1];
       navigate("EventDetail", { id: eventId });
     }
   };
+
   const handleUrl = async ({ url }) => {
     await handleDeepLink(url);
   };

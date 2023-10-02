@@ -262,14 +262,29 @@ function Profile({ navigation }) {
     (async () => {
       const gallerStatus =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
-      setHasGalleryPermission(gallerStatus.status === "granted");
+      if (gallerStatus.status === "granted") {
+        setHasGalleryPermission(gallerStatus.status === "granted");
+      } else if (gallerStatus.status === "denied") {
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      }
     })();
 
     return () => {};
   }, []);
 
   useEffect(() => {
-    setImage(Connection.url + Connection.assets + userData.userProfile);
+    setTimeout(() => {
+      const handleProfile = async () => {
+        const fetchprofile = async () => {
+          const profile =
+            Connection.url + Connection.assets + userData.userProfile;
+          return profile;
+        };
+        const userprofile = await fetchprofile();
+        setImage(userprofile);
+      };
+      handleProfile();
+    }, 500);
 
     return () => {};
   }, [userData.userProfile]);
