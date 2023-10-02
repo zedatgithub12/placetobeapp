@@ -33,9 +33,11 @@ const Connection = {
   organizer: "organizer", //updated
   singleBusiness: "singleBusiness",
 
+  //notification end points
   notification: "notification",
   getNotification: "fetchNotifications/",
   notified: "notified-users",
+  newNotifications: "newNotifications",
 
   OrganizerFollowCounter: "organizer-followers/",
   organizerEvents: "organizer-event/",

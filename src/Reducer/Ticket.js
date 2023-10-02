@@ -10,7 +10,7 @@ const ticketSlice = createSlice({
 
   reducers: {
     addTicket: (state, action) => {
-  {state.tickets =action.payload}
+  {state.tickets = action.payload}
       
     },
     getTicketTotal: (state, action) => {

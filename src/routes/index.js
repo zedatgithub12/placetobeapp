@@ -6,29 +6,20 @@ import { View } from "react-native";
 import EventDetails from "../Screens/Event/eventDetails";
 import SearchEvent from "../Screens/Event/SearchEvent";
 import YourEvents from "../Screens/Event/YourEvents";
-import UpdateEvent from "../Screens/Event/UpdateEvent";
-import UpdateSucceed from "../Screens/Event/UpdateSucceed";
-import YoursDetail from "../Screens/Event/YourEventDetails";
-
-// gallery screens import
-import GallerDetail from "../Screens/Gallery/GalleryDetail";
 
 // Notification screens import
 import Notifications from "../Screens/Notifications/Notifications";
 
 // Organizers screens import
 import OrganizersDetail from "../Screens/Organizers/OrganizersDetails";
+
 // Tabs screens import
 import TabNav from "../Screens/Tabs/Tabs";
 // Tickets screens import
-import AddTicket from "../Screens/Tickets/AddTicket";
-import AddingTicketSucceed from "../Screens/Tickets/AddingTicketSucceed";
 import EventTickets from "../Screens/Tickets/EventTickets";
-import TicketDetail from "../Screens/Tickets/TicketDetail";
-import Tickets from "../Screens/Tickets/OrganizerTickets.js/MyTickets";
-import UpdateTicket from "../Screens/Tickets/UpdateTicket";
 import CheckoutScreen from "../Screens/Tickets/CheckoutScreen";
 import BoughtDetail from "../Screens/Tickets/BoughtTicketDetail";
+
 // Users screens import
 import Signin from "../Screens/Users/Signin";
 import SignUp from "../Screens/Users/Signup";
@@ -42,7 +33,6 @@ import UserDetails from "../Screens/Users/UserDetails";
 import Bookmarks from "../Screens/Others/Bookmarks";
 import Questions from "../Screens/Others/AskQuestion";
 import About from "../Screens/Others/About";
-import Filter from "../Screens/Others/Filter";
 import RefundingRequest from "../Screens/Refunding";
 //import Organizers from "./Screens/Organizers";
 
@@ -50,9 +40,7 @@ import RefundingRequest from "../Screens/Refunding";
 import Constants from "../constants/Constants";
 import { Menu, IconButton, Divider } from "react-native-paper";
 import { useTheme } from "@react-navigation/native";
-import { Typography } from "../themes/typography";
 import { Linking } from "react-native";
-import Timer from "./Timer";
 
 /********************************* ROUTES SCREEN ****************************** */
 
@@ -137,26 +125,13 @@ const Routes = ({ navigation }) => {
       />
 
       <Stack.Screen
-        name="GalleryDetail"
-        component={GallerDetail}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
         name="Eventcat"
         component={SearchEvent}
         options={{
           headerShown: false,
         }}
       />
-      <Stack.Screen
-        name="Filter"
-        component={Filter}
-        options={{
-          headerShown: false,
-        }}
-      />
+
       <Stack.Screen
         name="yourEvents"
         component={YourEvents}
@@ -164,13 +139,7 @@ const Routes = ({ navigation }) => {
           headerShown: false,
         }}
       />
-      <Stack.Screen
-        name="YoursDetail"
-        component={YoursDetail}
-        options={{
-          headerShown: false,
-        }}
-      />
+
       <Stack.Screen
         name="Organizer Detail"
         component={OrganizersDetail}
@@ -228,90 +197,6 @@ const Routes = ({ navigation }) => {
           },
           headerTintColor: theme.dark.main,
           headerShadowVisible: false,
-        }}
-      />
-      <Stack.Screen
-        name="Add Ticket"
-        component={AddTicket}
-        options={{
-          headerStyle: {
-            backgroundColor: Constants.primary,
-          },
-          headerTintColor: theme.dark.main,
-          headerShadowVisible: false,
-        }}
-      />
-
-      <Stack.Screen
-        name="Ticket Added"
-        component={AddingTicketSucceed}
-        options={{
-          headerStyle: {
-            backgroundColor: Constants.primary,
-          },
-          headerTintColor: theme.dark.main,
-          headerShadowVisible: false,
-        }}
-      />
-      <Stack.Screen
-        name="Ticket Detail"
-        component={TicketDetail}
-        options={{
-          headerStyle: {
-            backgroundColor: Constants.primary,
-          },
-          headerTintColor: theme.dark.main,
-          headerShadowVisible: false,
-        }}
-      />
-
-      <Stack.Screen
-        name="My Tickets"
-        component={Tickets}
-        options={{
-          headerStyle: {
-            backgroundColor: Constants.primary,
-          },
-          headerTintColor: theme.dark.main,
-          headerShadowVisible: false,
-        }}
-      />
-
-      <Stack.Screen
-        name="Update Ticket"
-        component={UpdateTicket}
-        options={{
-          headerStyle: {
-            backgroundColor: Constants.primary,
-          },
-          headerTintColor: theme.dark.main,
-          headerShadowVisible: false,
-        }}
-      />
-      <Stack.Screen
-        name="Update Event"
-        component={UpdateEvent}
-        options={{
-          title: "Update",
-          headerStyle: {
-            backgroundColor: Constants.primary,
-          },
-          headerTintColor: theme.dark.main,
-          headerShadowVisible: false,
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="Update Succeed"
-        component={UpdateSucceed}
-        options={{
-          title: "Updated",
-          headerStyle: {
-            backgroundColor: Constants.primary,
-          },
-          headerTintColor: theme.dark.main,
-          headerShadowVisible: false,
-          headerShown: false,
         }}
       />
 
