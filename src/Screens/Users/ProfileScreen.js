@@ -284,7 +284,7 @@ function Profile({ navigation }) {
         setImage(userprofile);
       };
       handleProfile();
-    }, 500);
+    }, 100);
 
     return () => {};
   }, [userData.userProfile]);

@@ -1,11 +1,12 @@
 const Connection = {
-  url: "http://192.168.100.3:8000/api/",
+  // url: "http://192.168.100.3:8000/api/",
+  url: "https://backend.placetobeethiopia.com/api/", //remote backend api endpoints
   signUp: "signup",
   signIn: "signin",
   googleSignUp: "continue-with-google",
   googleSignIn: "signin-with-google",
-  profile: "profile/", // need closer look
-  changeprofile: "changeprofile/", // need closer look
+  profile: "profile/", 
+  changeprofile: "changeprofile/", 
   userInfo: "user-info/",
   MetaData: "meta-info/",
   updateUserInfo: "update/",
@@ -30,7 +31,7 @@ const Connection = {
   assets: "images/",
 
   //business api end points
-  organizer: "organizer", //updated
+  organizer: "organizer", 
   singleBusiness: "singleBusiness",
 
   //notification end points
@@ -44,7 +45,7 @@ const Connection = {
   organizerUpcomings: "organizer-upcoming-event/",
   createfeedback: "create-feedback",
   forgotPassword: "forgotPassword",
-  status: "status", //*********** need pilot */
+  status: "status", 
   Images: "Images",
   appInfo: "appinfo",
 

@@ -1,5 +1,5 @@
 //import liraries
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import React, { useContext, useEffect, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { AuthContext } from "../../Components/context";
@@ -9,10 +9,10 @@ import NotLoggedIn from "../../handlers/auth";
 import NoTicket from "../../handlers/Tickets";
 import NoConnection from "../../handlers/connection";
 import TicketListing from "../../Components/Tickets/TicketsListing";
-import { Status, StatusText } from "../../Utils/functions";
+import { StatusText, TicketColor, TicketName } from "../../Utils/functions";
 import Loader from "../../ui-components/ActivityIndicator";
-import Internet from "../../connection";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
 /********************************** User Tickets Listing Screen ************************** */
 
 const UserTickets = ({ navigation }) => {
@@ -23,11 +23,12 @@ const UserTickets = ({ navigation }) => {
   const [sold, setSold] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [Loading, setLoading] = useState(true);
+
   const FeatchTicket = async () => {
     const controller = new AbortController();
     const signal = controller.signal;
 
-    var userId = await AsyncStorage.getItem("userId");
+    const userId = await AsyncStorage.getItem("userId");
     setLoading(true);
 
     var APIUrl = Connection.url + Connection.boughtTickets + userId;
@@ -44,8 +45,7 @@ const UserTickets = ({ navigation }) => {
       .then((reponse) => reponse.json())
       .then((response) => {
         if (response.success) {
-          var ticket = response.data;
-          setSold(ticket);
+          setSold(response.data);
           setLoading(false);
         } else {
           setLoading(false);
@@ -62,9 +62,6 @@ const UserTickets = ({ navigation }) => {
 
   // refresh the listing
   const Refresh = async () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
     var userId = await AsyncStorage.getItem("userId");
     setRefreshing(true);
 
@@ -77,7 +74,6 @@ const UserTickets = ({ navigation }) => {
     await fetch(APIUrl, {
       method: "GET",
       headers: headers,
-      signal: signal,
     })
       .then((reponse) => reponse.json())
       .then((response) => {
@@ -92,102 +88,6 @@ const UserTickets = ({ navigation }) => {
       .catch((error) => {
         setRefreshing(false);
       });
-
-    return () => {
-      controller.abort();
-    };
-  };
-
-  //
-  const TicketName = (iconname) => {
-    var name;
-    switch (iconname) {
-      case "Early Bird":
-        name = "bird";
-        break;
-
-      case "Regular":
-        name = "ticket";
-        break;
-
-      case "VIP":
-        name = "star-outline";
-        break;
-
-      case "VVIP":
-        name = "star-shooting-outline";
-        break;
-
-      case "Student":
-        name = "book-education-outline";
-        break;
-
-      case "Kids":
-        name = "baby-face-outline";
-        break;
-
-      case "Adult":
-        name = "face-man";
-        break;
-
-      case "Member":
-        name = "account-group-outline";
-        break;
-
-      default:
-        name = "ticket";
-    }
-    return name;
-  };
-
-  //ticket icon color
-  const TicketColor = (iconname) => {
-    var Color;
-
-    switch (iconname) {
-      case "Early Bird":
-        Color = "#ff24da";
-        break;
-
-      case "Regular":
-        Color = "#00a2ff";
-
-        break;
-
-      case "VIP":
-        Color = "#ffc800";
-
-        break;
-
-      case "VVIP":
-        Color = "#ffb300";
-
-        break;
-
-      case "Student":
-        Color = "#00c4de";
-
-        break;
-
-      case "Kids":
-        Color = "#ff3686";
-
-        break;
-
-      case "Adult":
-        Color = "#ff551c";
-
-        break;
-
-      case "Member":
-        Color = "#5fcc41";
-
-        break;
-
-      default:
-        Color = "#ffbb00";
-    }
-    return Color;
   };
 
   // render ticket listing
@@ -205,6 +105,22 @@ const UserTickets = ({ navigation }) => {
     />
   );
 
+  //handle network state change
+  useEffect(() => {
+    const InternetConnection = async () => {
+      const networkState = await NetInfo.fetch();
+      setConnection(networkState.isConnected);
+    };
+    InternetConnection();
+
+    const subscription = NetInfo.addEventListener(async (state) => {
+      setConnection(state.isConnected);
+    });
+    return () => {
+      subscription();
+    };
+  }, [retry]);
+
   //handle the work to be done when network is available
   useEffect(() => {
     if (connection) {
@@ -216,7 +132,7 @@ const UserTickets = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {logged ? (
-        Internet ? (
+        connection ? (
           Loading ? (
             <View
               style={{

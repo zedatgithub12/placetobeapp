@@ -8,7 +8,7 @@ import Constants from "../../constants/Constants";
 /**************************** User not Logged in handler ************************ */
 const NotLoggedIn = ({ ...props }) => {
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center",  }}>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
       <View style={styles.notLogedPrompt}>
         <FontAwesome5
           name="info-circle"
@@ -34,7 +34,7 @@ const NotLoggedIn = ({ ...props }) => {
             activeOpacity={0.7}
             style={styles.LoginBtn}
           >
-            <Text style={styles.loginbtnTxt}>Login</Text>
+            <Text style={styles.loginbtnTxt}>Sign in</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -54,10 +54,9 @@ const styles = StyleSheet.create({
     elevation: 6,
     padding: 15,
     shadowColor: Constants.transparentPrimary,
-    
   },
   prompttxt: {
-    fontSize: Constants.primaryHeading,
+    fontSize: Constants.headingone,
     fontWeight: Constants.Bold,
     marginTop: 10,
     color: Constants.Inverse,
@@ -92,12 +91,12 @@ const styles = StyleSheet.create({
   },
   btnTxt: {
     fontSize: Constants.headingthree,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     color: Constants.Secondary,
   },
   loginbtnTxt: {
     fontSize: Constants.headingthree,
-    fontWeight: Constants.Bold,
+    fontWeight: Constants.Boldtwo,
     color: Constants.Inverse,
   },
 });

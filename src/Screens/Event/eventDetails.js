@@ -918,7 +918,7 @@ const EventDetails = ({ route, navigation }) => {
           )}
         </ScrollView>
       )}
-      {!loading && exist && (
+      {!loading && exist && item.cancelled != 1 && (
         <Animatable.View
           animation="fadeInUpBig"
           style={[styles.ticketBtnContainer]}

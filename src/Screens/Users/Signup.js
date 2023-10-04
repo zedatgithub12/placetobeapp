@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
-  LogBox,
   ScrollView,
 } from "react-native";
 import Constants from "../../constants/Constants";
@@ -22,7 +21,6 @@ import {
   GoogleSignin,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
-import Loader from "../../ui-components/ActivityIndicator";
 
 function SuccessModal({ visible, children, navigation }) {
   const [showModal, setShowModal] = React.useState(visible);
@@ -505,7 +503,7 @@ export default function SignUp({ navigation }) {
           }}
         >
           {googleLoader ? (
-            <Loader size="small" />
+            <ActivityIndicator size="small" color={Constants.Inverse} />
           ) : (
             <Text style={styles.signbtntxt}>Continue With Google</Text>
           )}

@@ -296,7 +296,10 @@ const Notifications = ({ navigation }) => {
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.background.darker, paddingBottom: 50 },
+        {
+          backgroundColor: theme.background.darker,
+          paddingBottom: logged ? 50 : 0,
+        },
       ]}
     >
       {logged ? (
