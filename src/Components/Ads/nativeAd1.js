@@ -30,7 +30,7 @@ const NativeAdsOne = ({ ad, hideCard }) => {
     }
   };
   return (
-    <Pressable onPress={() => handleUserAction("clicked")}>
+
       <View style={styles.container}>
         <TouchableOpacity
           onPress={hideCard}
@@ -58,7 +58,7 @@ const NativeAdsOne = ({ ad, hideCard }) => {
           >
             <MaterialCommunityIcons
               name="close"
-              size={18}
+              size={20}
               style={{ color: "#555", zIndex: 2 }}
             />
           </View>
@@ -153,7 +153,7 @@ const NativeAdsOne = ({ ad, hideCard }) => {
           </View>
         </View>
       </View>
-    </Pressable>
+   
   );
 };
 

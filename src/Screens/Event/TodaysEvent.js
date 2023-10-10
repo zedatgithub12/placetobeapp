@@ -13,6 +13,12 @@ import Connection from "../../constants/connection";
 import Constants from "../../constants/Constants";
 import { HelperText } from "react-native-paper";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
+import {
+  CategoryColor,
+  DateFormater,
+  EntranceFee,
+  TimeFormater,
+} from "../../Utils/functions";
 
 const TodaysEvents = ({ navigation }) => {
   const [events, setEvents] = useState([]);
@@ -22,111 +28,6 @@ const TodaysEvents = ({ navigation }) => {
   const [refStatus, setRefStatus] = React.useState("Refreshed"); //toast message to be shown when user pull to refresh the page
   const [loading, setLoading] = useState(false);
 
-  /********************************************************** */
-  //date function which perform date format conversion and return the suitable format for frontend
-  /********************************************************** */
-  const DateFun = (startingDate) => {
-    var date = new Date(startingDate);
-    let day = date.getDay();
-    let month = date.getMonth();
-    let happeningDay = date.getDate();
-
-    // return weekname
-    var weekday = new Array(7);
-    weekday[1] = "Mon, ";
-    weekday[2] = "Tue, ";
-    weekday[3] = "Wed, ";
-    weekday[4] = "Thu, ";
-    weekday[5] = "Fri, ";
-    weekday[6] = "Sat, ";
-    weekday[0] = "Sun, ";
-
-    //an array of month name
-    var monthName = new Array(12);
-    monthName[1] = "Jan";
-    monthName[2] = "Feb";
-    monthName[3] = "Mar";
-    monthName[4] = "Apr";
-    monthName[5] = "May";
-    monthName[6] = "Jun";
-    monthName[7] = "Jul";
-    monthName[8] = "Aug";
-    monthName[9] = "Sep";
-    monthName[10] = "Oct";
-    monthName[11] = "Nov";
-    monthName[12] = "Dec";
-
-    return weekday[day] + monthName[month + 1] + " " + happeningDay;
-  };
-  const TimeFun = (eventTime) => {
-    var time = eventTime;
-    var result = time.slice(0, 2);
-    var minute = time.slice(3, 5);
-    var globalTime;
-    var postMeridian;
-    var separator = ":";
-    if (result > 12) {
-      postMeridian = result - 12;
-      globalTime = "PM";
-    } else {
-      postMeridian = result;
-      globalTime = "AM";
-    }
-
-    return postMeridian + separator + minute + " " + globalTime;
-  };
-  const EntranceFee = (price) => {
-    var eventPrice;
-    var free = "Free";
-    var currency = " ETB";
-    if (price != 0) {
-      eventPrice = price + currency;
-    } else {
-      eventPrice = free;
-    }
-    return eventPrice;
-  };
-  // events category color
-  const CategoryColor = (category) => {
-    var color;
-    switch (category) {
-      case "Entertainment":
-        color = "#007bc2";
-        break;
-      case "Travelling":
-        color = "#0c790c";
-        break;
-
-      case "Cinema & Theater":
-        color = "#00e8e0";
-        break;
-
-      case "Community":
-        color = "#F96666";
-        break;
-      case "Trade Fairs & Expo":
-        color = "#f57a00";
-        break;
-      case "Nightlife":
-        color = "#472D2D";
-        break;
-      case "Professional":
-        color = "#2c2e27";
-        break;
-      case "Shopping":
-        color = "#9306c2";
-        break;
-      case "Sport":
-        color = "#ff0571";
-        break;
-      case "Others":
-        color = "#e8b200";
-        break;
-      default:
-        color = "#ffbb00";
-    }
-    return color;
-  };
   // render item in flatlist format
   const renderItem = ({ item }) => (
     <Events
@@ -134,8 +35,8 @@ const TodaysEvents = ({ navigation }) => {
       org_id={item.userId}
       FeaturedImage={item.event_image}
       title={item.event_name}
-      date={DateFun(item.start_date)}
-      time={TimeFun(item.start_time)}
+      date={DateFormater(item.start_date)}
+      time={TimeFormater(item.start_time)}
       venue={item.event_address}
       category={CategoryColor(item.category)}
       Price={EntranceFee(item.event_entrance_fee)}
@@ -220,34 +121,7 @@ const TodaysEvents = ({ navigation }) => {
       }}
     >
       {loading ? (
-        <FlatList
-          // List of events in extracted from database in the form JSON data
-          data={events}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          onRefresh={RefreshList}
-          refreshing={refreshing}
-          nestedScrollEnabled
-          initialNumToRender={2} // Reduce initial render amount
-          maxToRenderPerBatch={1} // Reduce number in each render batch
-          updateCellsBatchingPeriod={100} // Increase time between renders
-          windowSize={7} // Reduce the window size
-          ListEmptyComponent={
-            <View style={styles.container}>
-              <Image
-                source={require("../../assets/images/NotFound.png")}
-                resizeMode="contain"
-                style={styles.notFound}
-              />
-              <Text style={styles.emptyMessageStyle}>
-                We don't have event for today!
-              </Text>
-              <HelperText style={{ alignSelf: "center" }}>
-                Check events of the week
-              </HelperText>
-            </View>
-          }
-        />
+        events.map((item) => renderItem(item))
       ) : (
         <View>
           <Listing />

@@ -91,17 +91,22 @@ const SlideUp = ({ onClose, ad }) => {
               >
                 {Ad.ad_description}
               </Text>
-              <Text
-                style={{
-                  paddingHorizontal: 8,
-                  fontFamily: Typography.family,
-                  fontSize: Typography.size.headingthree,
-                  fontWeight: Typography.weight.medium,
-                  color: theme.buttons.main,
-                }}
+              <TouchableOpacity
+                activeOpacity={0.6}
+                onPress={() => handleUserAction("clicked")}
               >
-                {Ad.ad_button_label}
-              </Text>
+                <Text
+                  style={{
+                    paddingHorizontal: 8,
+                    fontFamily: Typography.family,
+                    fontSize: Typography.size.headingthree,
+                    fontWeight: Typography.weight.medium,
+                    color: theme.buttons.main,
+                  }}
+                >
+                  {Ad.ad_button_label}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -126,6 +131,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 1,
     borderRadius: 6,
     zIndex: 0,
+    padding: 1,
   },
   closeButton: {
     position: "absolute",

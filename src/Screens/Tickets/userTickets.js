@@ -3,7 +3,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { AuthContext } from "../../Components/context";
-import Connection from "../../constants/connection";
+import Connection from "../../api";
 import Constants from "../../constants/Constants";
 import NotLoggedIn from "../../handlers/auth";
 import NoTicket from "../../handlers/Tickets";
@@ -13,6 +13,7 @@ import { StatusText, TicketColor, TicketName } from "../../Utils/functions";
 import Loader from "../../ui-components/ActivityIndicator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
+
 /********************************** User Tickets Listing Screen ************************** */
 
 const UserTickets = ({ navigation }) => {
@@ -37,7 +38,7 @@ const UserTickets = ({ navigation }) => {
       "Content-Type": "application/json",
     };
 
-    await fetch(APIUrl, {
+    fetch(APIUrl, {
       method: "GET",
       headers: headers,
       signal: signal,

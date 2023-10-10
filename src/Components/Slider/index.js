@@ -9,13 +9,13 @@ import {
   Pressable,
   Linking,
 } from "react-native";
-import Connection from "../../constants/connection";
 import { UserInteraction } from "../../Utils/Ads";
+import Connection from "../../api";
 
 // slider a component
 const Slider = ({ ad }) => {
   const Banners = ad;
-  const featuredImageUri = Connection.url + Connection.assets;
+  var featuredImageUri = Connection.url + Connection.assets;
 
   const handleUserAction = (reaction, banner) => {
     if (reaction === "clicked") {

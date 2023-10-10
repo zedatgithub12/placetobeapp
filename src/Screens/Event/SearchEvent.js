@@ -21,7 +21,6 @@ import {
 } from "react-native-vector-icons";
 import Constants from "../../constants/Constants";
 import Events from "../../Components/Events/Events";
-import Connection from "../../constants/connection";
 import Listing from "../../Components/Events/Skeleton/ListShimmer";
 import { useTheme } from "@react-navigation/native";
 import Modal from "react-native-modal";
@@ -39,6 +38,7 @@ import P2bMenu from "../../ui-components/menu";
 import { EventType } from "../../data/eventType";
 import { EventCategory } from "../../data/eventCategory";
 import Loader from "../../ui-components/ActivityIndicator";
+import Connection from "../../api";
 
 const SearchEvent = ({ navigation }) => {
   const { theme } = useTheme();

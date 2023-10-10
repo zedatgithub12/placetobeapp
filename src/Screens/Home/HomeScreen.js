@@ -36,10 +36,12 @@ import HeaderAds from "../../Components/Ads/headerAds";
 import { fetchAds, UserInteraction } from "../../Utils/Ads";
 import Statuses from "../../Components/Categories/statusFiltering";
 import NotFound from "../../handlers/NotFound";
+import MyTabs from "../Tabs/TopTab";
 
 function Home({ navigation, ...props }) {
   const { theme } = useTheme();
   const { userStatus, userInfoFunction } = React.useContext(AuthContext);
+  const logged = userStatus.logged;
 
   const [loading, setLoading] = useState(true);
   const [connection, setConnection] = useState(true);
@@ -162,21 +164,6 @@ function Home({ navigation, ...props }) {
       setShowCardAd(false);
     }
   };
-  //handle component mounting event
-  useEffect(() => {
-    fetchEvent();
-    return () => {};
-  }, [Api]);
-  //handle component mounting event
-  useEffect(() => {
-    userInfoFunction();
-    userProfile();
-    handleBannerAds("banner");
-    handleNativeCardAds("nativeCard");
-    return () => {};
-  }, [logged]);
-
-  const logged = userStatus.logged;
 
   const handleCategoryClick = (categoryname) => {
     if (categoryname === active) {
@@ -185,19 +172,6 @@ function Home({ navigation, ...props }) {
       setActive(categoryname);
     }
   };
-
-  useEffect(() => {
-    const filteredData = events.filter((event) => {
-      let isMatch = true;
-      if (active !== "All") {
-        isMatch = isMatch && event.category === active;
-      }
-      return isMatch;
-    });
-    setFilteredEvent(filteredData);
-
-    return () => {};
-  }, [active, events]);
 
   const handleStatusClick = (type, category) => {
     if (category !== status) {
@@ -221,6 +195,42 @@ function Home({ navigation, ...props }) {
     setShowCardAd(false);
     UserInteraction(AdsInfo, reaction);
   };
+
+  useEffect(() => {
+    const filteredData = events.filter((event) => {
+      let isMatch = true;
+      if (active !== "All") {
+        isMatch = isMatch && event.category === active;
+      }
+      return isMatch;
+    });
+    setFilteredEvent(filteredData);
+
+    return () => {};
+  }, [active, events]);
+
+  //handle component mounting event
+  useEffect(() => {
+    fetchEvent();
+    return () => {};
+  }, [Api]);
+
+  useEffect(() => {
+    userInfoFunction();
+    userProfile();
+
+    return () => {};
+  }, [logged]);
+
+  //handle component mounting event
+  useEffect(() => {
+    setTimeout(() => {
+      handleBannerAds("banner");
+      handleNativeCardAds("nativeCard");
+    }, 30000);
+
+    return () => {};
+  }, []);
 
   return (
     <SafeAreaView
@@ -375,6 +385,7 @@ function Home({ navigation, ...props }) {
                 ))
               )}
 
+              {/* <MyTabs /> */}
               {showCardAd && (
                 <View
                   style={{

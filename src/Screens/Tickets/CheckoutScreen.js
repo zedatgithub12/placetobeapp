@@ -14,7 +14,6 @@ import {
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import Constants from "../../constants/Constants";
 import { Divider, Checkbox } from "react-native-paper";
-import Connection from "../../constants/connection";
 
 import { useTheme } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,6 +28,7 @@ import { Typography } from "../../themes/typography";
 import Gateways from "./components/payment";
 import { PaymentGateways } from "../../data/PaymentGateways";
 import { showToast } from "../../Utils/Toast";
+import Connection from "../../api";
 
 function CheckoutScreen({ route }) {
   const { pass } = route.params;

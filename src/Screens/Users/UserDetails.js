@@ -13,16 +13,16 @@ import {
   ActivityIndicator,
   Dimensions,
 } from "react-native";
-import { Caption, Divider, HelperText } from "react-native-paper";
+import { Divider } from "react-native-paper";
 import Constants from "../../constants/Constants";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { AntDesign, Ionicons } from "react-native-vector-icons";
 import { RadioButton } from "react-native-paper";
 import Category from "../../data/Category";
-import Connection from "../../constants/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { showToast } from "../../Utils/Toast";
 import { useTheme } from "@react-navigation/native";
+import Connection from "../../api";
 
 // create account setting component
 const UserDetails = ({ route, navigation }) => {

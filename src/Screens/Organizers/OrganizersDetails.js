@@ -56,7 +56,7 @@ const OrganizersDetail = ({ route, navigation }) => {
     ButtonColor: Constants.primary,
   });
 
-  const featuredImageUri = Connection.url + Connection.assets;
+  var featuredImageUri = Connection.url + Connection.assets;
   const logo = organizerInfo.business_logo
     ? organizerInfo.business_logo
     : "businesslogo.png";

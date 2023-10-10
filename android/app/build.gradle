@@ -87,25 +87,24 @@ android {
         applicationId 'com.afromina.placetobe'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0.1"
+        versionCode 4
+        versionName "Second Version"
 
         buildConfigField("boolean", "REACT_NATIVE_UNSTABLE_USE_RUNTIME_SCHEDULER_ALWAYS", (findProperty("reactNative.unstable_useRuntimeSchedulerAlways") ?: true).toString())
     }
     signingConfigs {
-        // debug {
-        //     storeFile file('debug.keystore')
-        //     storePassword 'android'
-        //     keyAlias 'androiddebugkey'
-        //     keyPassword 'android'
-        // }
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
         release {
-           if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
-        storeFile file(MYAPP_RELEASE_STORE_FILE)
-        storePassword MYAPP_RELEASE_STORE_PASSWORD
-        keyAlias MYAPP_RELEASE_KEY_ALIAS
-        keyPassword MYAPP_RELEASE_KEY_PASSWORD
-    }
+          
+            storeFile file('keystore.jks')
+            storePassword 'placetobekeystore'
+            keyAlias 'key1'
+            keyPassword 'placetobekeystore'
         }
     }
     buildTypes {

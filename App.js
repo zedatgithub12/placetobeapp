@@ -499,7 +499,7 @@ export default function App() {
   useEffect(() => {
     const PopupAd = setTimeout(() => {
       handlePopupAd("popUp");
-    }, 3000);
+    }, 10000);
     return () => clearTimeout(PopupAd);
   }, []);
 
@@ -507,7 +507,7 @@ export default function App() {
   useEffect(() => {
     const SlideUpAd = setTimeout(() => {
       handleSlideupAd("slideUp");
-    }, 30000);
+    }, 80000);
     return () => clearTimeout(SlideUpAd);
   }, []);
 

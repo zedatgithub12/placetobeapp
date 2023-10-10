@@ -8,18 +8,11 @@ import {
   Image,
   Alert,
   Pressable,
-  ToastAndroid,
   Dimensions,
   Linking,
 } from "react-native";
 
-import {
-  Ionicons,
-  MaterialCommunityIcons,
-  Feather,
-  SimpleLineIcons,
-  AntDesign,
-} from "react-native-vector-icons";
+import { Ionicons, Feather, AntDesign } from "react-native-vector-icons";
 import Constants from "../../constants/Constants";
 import DetailContent from "../../Components/Events/EventContent";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -40,7 +33,6 @@ import { DateFormater, TimeFormater } from "../../Utils/functions";
 import Connection from "../../api";
 import galleryImage from "../../assets/images/galleryImage.png";
 import { showToast } from "../../Utils/Toast";
-import NotFound from "../../handlers/NotFound";
 import FailedToFetch from "../../handlers/unresolved/fetching";
 
 const EventDetails = ({ route, navigation }) => {
@@ -405,6 +397,14 @@ const EventDetails = ({ route, navigation }) => {
 
   const openRelatedEvent = (eventid) => {
     navigation.push("EventDetail", { id: eventid });
+  };
+
+  const BuyTicket = (event) => {
+    if (logged) {
+      navigation.navigate("TicketScreen", { item });
+    } else {
+      SignInAlert("Buy Ticket", "SignIn first to buy ticket");
+    }
   };
 
   useEffect(() => {
@@ -925,7 +925,7 @@ const EventDetails = ({ route, navigation }) => {
         >
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => navigation.navigate("TicketScreen", { item })}
+            onPress={() => BuyTicket(item)}
             style={styles.buyticketbtn}
           >
             <Text style={styles.ticketTxt}> Buy Ticket</Text>

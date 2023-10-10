@@ -11,9 +11,8 @@ import {
   FontAwesome5,
   MaterialCommunityIcons,
 } from "react-native-vector-icons";
-import Connection from "../../constants/connection";
-import { HelperText } from "react-native-paper";
 import { useTheme } from "@react-navigation/native";
+import Connection from "../../api";
 
 const Events = ({
   title,
@@ -26,7 +25,7 @@ const Events = ({
   onPress,
 }) => {
   const { theme } = useTheme();
-  const featuredImageUri = Connection.url + Connection.assets;
+  var featuredImageUri = Connection.url + Connection.assets;
   return (
     <TouchableNativeFeedback onPress={onPress} style={styles.lists}>
       <View style={[styles.EventContainer, { borderRightColor: category }]}>
